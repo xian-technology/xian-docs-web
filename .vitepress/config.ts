@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  base: '/xian-docs-web/',
+  base: '/',
   title: 'Xian Documentation',
   description: 'Official documentation for Xian Technology',
   themeConfig: {
