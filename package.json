@@ -1,0 +1,14 @@
+{
+  "name": "xian-docs-web",
+  "version": "1.0.0",
+  "description": "Official documentation for Xian",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "vitepress": "^2.0.0-alpha.16"
+  }
+}
