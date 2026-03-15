@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/xian-docs-web/',
   title: 'Xian Documentation',
-  description: 'Official documentation for Xian',
+  description: 'Official documentation for Xian Technology',
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },

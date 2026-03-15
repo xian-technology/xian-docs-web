@@ -1,7 +1,7 @@
 {
   "name": "xian-docs-web",
   "version": "1.0.0",
-  "description": "Official documentation for Xian",
+  "description": "Official documentation for Xian Technology",
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
