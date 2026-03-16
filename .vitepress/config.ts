@@ -6,7 +6,7 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }]
   ],
   title: 'Xian Documentation',
-  description: 'Official documentation for Xian Technology',
+  description: 'Official Xian Technology documentation',
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },

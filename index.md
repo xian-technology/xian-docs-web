@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Xian
   text: Documentation
-  tagline: Official documentation for Xian Technology
+  tagline: Official Xian Technology documentation
   actions:
     - theme: brand
       text: Get Started
