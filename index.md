@@ -8,16 +8,18 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/
+      link: /getting-started/
     - theme: alt
       text: View on GitHub
       link: https://github.com/xian-technology/xian-docs-web
 
 features:
-  - title: Easy to Use
-    details: Get up and running quickly with comprehensive guides and examples.
+  - title: Python Smart Contracts
+    details: Write smart contracts in pure, idiomatic Python — no transpilers, no custom DSLs.
+  - title: CometBFT Consensus
+    details: Byzantine fault-tolerant consensus with instant finality, built on proven technology.
+  - title: Rich Tooling
+    details: SDKs, playground, linter, VS Code extension, and AI-powered development tools.
   - title: Open Source
-    details: Built by the community, for the community.
-  - title: Modern Stack
-    details: Leveraging the latest technologies for a seamless experience.
+    details: Free and open-source technology stack, ready to run on-premises or in the cloud.
 ---
