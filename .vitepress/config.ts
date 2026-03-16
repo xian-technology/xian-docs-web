@@ -2,6 +2,9 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   base: '/',
+  head: [
+    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }]
+  ],
   title: 'Xian Documentation',
   description: 'Official documentation for Xian Technology',
   themeConfig: {
