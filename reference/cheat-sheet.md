@@ -1,181 +1,113 @@
 # Cheat Sheet
 
-Quick reference for Xian smart contract development.
+Quick reference for current Xian contract development.
 
-## State Declarations
+## State Primitives
 
 ```python
-# Single value
 owner = Variable()
-counter = Variable(default_value=0)
-typed_var = Variable(t=str)
-
-# Key-value mapping
 balances = Hash(default_value=0)
 metadata = Hash()
 
-# Read-only access to another contract's state
-foreign_bal = ForeignHash(foreign_contract="currency", foreign_name="balances")
-foreign_owner = ForeignVariable(foreign_contract="currency", foreign_name="owner")
+foreign_owner = ForeignVariable(
+    foreign_contract="currency",
+    foreign_name="owner",
+)
 
-# Event declaration
-Transfer = LogEvent(
+foreign_balances = ForeignHash(
+    foreign_contract="currency",
+    foreign_name="balances",
+)
+```
+
+## Events
+
+```python
+TransferEvent = LogEvent(
     event="Transfer",
-    params={"from": {"type": str, "idx": True}, "to": {"type": str, "idx": True}, "amount": {"type": (int, float)}},
+    params={
+        "from": {"type": str, "idx": True},
+        "to": {"type": str, "idx": True},
+        "amount": {"type": (int, float, decimal)},
+    },
 )
 ```
 
 ## Decorators
 
 ```python
-@construct      # Runs once on deployment
+@construct
 def seed():
     owner.set(ctx.caller)
 
-@export         # Public function (callable by txs and other contracts)
+@export
 def transfer(to: str, amount: float):
     pass
 
-def helper():   # Private function (only callable within this contract)
+def helper():
     pass
 ```
 
-## Context Variables
+## Export Signature Types
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `ctx.caller` | `str` | Immediate caller (user address or contract name) |
-| `ctx.signer` | `str` | Original transaction signer (never changes in call chain) |
-| `ctx.this` | `str` | Name of the currently executing contract |
-| `ctx.owner` | `str` or `None` | Owner of the current contract |
-| `ctx.entry` | `tuple` | `(contract, function)` of the transaction entry point |
-
-## Environment Variables
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `now` | `Datetime` | Block timestamp (deterministic) |
-| `block_num` | `int` | Current block height |
-| `block_hash` | `str` | Current block hash |
-| `chain_id` | `str` | Network chain identifier |
-
-## Variable Operations
-
-```python
-owner.set("alice")          # Write
-value = owner.get()         # Read (returns None or default_value if unset)
-```
-
-## Hash Operations
-
-```python
-balances["alice"] = 100         # Write single key
-bal = balances["alice"]         # Read single key
-balances["alice"] += 50         # Augmented assignment
-
-balances["alice", "bob"] = 10   # Multi-dimensional key (up to 16 dimensions)
-val = balances["alice", "bob"]  # Read multi-dimensional
-
-all_vals = balances.all()           # Get all values
-all_alice = balances.all("alice")   # Get all values with prefix
-pairs = balances._items()           # Get key-value dict
-balances.clear()                    # Delete all entries
-balances.clear("alice")             # Delete entries with prefix
-```
-
-## Imports
-
-```python
-# Static import (resolved at submission time)
-import currency
-currency.transfer(amount=100, to="bob")
-
-# Dynamic import (resolved at runtime)
-import importlib
-token = importlib.import_module("con_my_token")
-token.transfer(amount=100, to="bob")
-
-# Interface enforcement
-importlib.enforce_interface(token, [
-    importlib.Func("transfer", args=("amount", "to")),
-    importlib.Var("balances", Hash),
-])
-
-# Check contract owner
-owner = importlib.owner_of("con_my_token")
-```
-
-## Allowed Type Annotations
-
-For `@export` function arguments:
+Allowed for exported arguments and exported return annotations:
 
 ```python
 str, int, float, bool, dict, list, Any
 datetime.datetime, datetime.timedelta
 ```
 
-## Allowed Builtins
+## Context
 
-```
-abs     all      any      ascii    bin      bool     bytearray  bytes
-chr     dict     divmod   filter   float    format   frozenset  hex
-int     isinstance  issubclass  len   list     map      max        min
-oct     ord      pow      range    reversed round    set        sorted
-str     sum      tuple    zip      Exception  True    False      None
-```
+| Name | Meaning |
+|------|---------|
+| `ctx.caller` | immediate caller |
+| `ctx.signer` | original transaction signer |
+| `ctx.this` | current contract name |
+| `ctx.owner` | current contract owner |
+| `ctx.entry` | `(contract, function)` entry point |
 
-## Forbidden Patterns
+## Environment Values
 
-| Pattern | Alternative |
-|---------|-------------|
-| `class` | Use module-level functions and Hash/Variable |
-| `try/except` | Use `assert` for error handling |
-| `lambda` | Use named functions |
-| `async/await` | Not supported |
-| `yield` / generators | Use list comprehensions |
-| `with` statements | Not supported |
-| Nested functions | Define all functions at top level |
-| `from X import Y` | Use `import X` then `X.Y` |
-| Standard library | Use Xian runtime modules only |
+| Name | Meaning |
+|------|---------|
+| `now` | deterministic block time |
+| `block_num` | current block height |
+| `block_hash` | current block hash |
+| `chain_id` | network id |
 
-## Events
+## Imports
 
 ```python
-# Declare
-Transfer = LogEvent(
-    event="Transfer",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float)},
-    },
-)
-
-# Emit
-Transfer({"from": ctx.caller, "to": "bob", "amount": 100})
+import currency
+import hashlib
+import datetime
+import random
+import importlib
+import crypto
+import decimal
 ```
 
-## Testing
+Do not use `from x import y`.
+
+## Read / Write Patterns
 
 ```python
-from contracting.client import ContractingClient
+owner.set("alice")
+current_owner = owner.get()
 
-client = ContractingClient()
-client.flush()
+balances["alice"] = 100
+balances["alice", "con_dex"] = 25
 
-# Submit contract
-client.submit(my_contract_func, name="con_test")
+bal = balances["alice"]
+allowance = balances["alice", "con_dex"]
+```
 
-# Get handle and call functions
-contract = client.get_contract("con_test")
-contract.transfer(to="alice", amount=100)
+Client-side direct inspection:
 
-# Read/write state directly
-client.get_var("con_test", "balances", arguments=["alice"])
-client.set_var("con_test", "balances", arguments=["alice"], value=9999)
-
-# Change signer
-client.signer = "alice"
+```python
+client.get_var("con_token", "balances", arguments=["alice"])
+client.set_var("con_token", "balances", arguments=["alice"], value=500)
 ```
 
 ## Common Assertions
@@ -186,3 +118,34 @@ assert balances[ctx.caller] >= amount, "Insufficient balance"
 assert ctx.caller == owner.get(), "Only owner"
 assert ctx.caller == ctx.signer, "Direct calls only"
 ```
+
+## Common Token Surface
+
+```python
+@export
+def transfer(amount: float, to: str):
+    ...
+
+@export
+def approve(amount: float, to: str):
+    ...
+
+@export
+def transfer_from(amount: float, to: str, main_account: str):
+    ...
+
+@export
+def balance_of(address: str) -> float:
+    ...
+```
+
+## Disallowed Patterns
+
+- classes
+- nested functions
+- `try/except`
+- `lambda`
+- `async`
+- generators / `yield`
+- stdlib imports
+- names starting or ending with `_`

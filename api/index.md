@@ -1,37 +1,29 @@
 # APIs & Interfaces
 
-Xian provides several ways to interact with the network: a REST API served by the dashboard, ABCI query paths for direct state access, and WebSocket subscriptions for real-time events.
+Xian currently exposes several read and interaction surfaces. They are not all
+equivalent.
 
-## Access Methods
+## Main Surfaces
 
-| Method | Use Case | Endpoint |
-|--------|----------|----------|
-| [REST API](/api/rest) | Node status, blocks, transactions, contract inspection | `http://node:8080/api/...` |
-| [ABCI Queries](/api/rest#abci-query-paths) | State reads, nonce lookups, contract metadata | `http://node:8080/api/abci_query/...` |
-| [Dry Runs](/api/dry-runs) | Simulate transactions without state changes | `http://node:8080/api/abci_query/simulate_tx/...` |
+| Surface | Purpose |
+|---------|---------|
+| CometBFT RPC | canonical node RPC for tx broadcast, blocks, ABCI query |
+| Dashboard REST | optional convenience API on top of CometBFT RPC |
+| Dashboard WebSocket | optional real-time observer/subscription layer |
+| GraphQL / BDS | optional indexed read layer when the BDS stack is running |
+
+## Which One To Use
+
+- use **CometBFT RPC** and **ABCI query** for canonical low-level access
+- use the **dashboard REST/WebSocket** service for explorer/operator UX
+- use **GraphQL** only when the optional BDS stack is enabled
 
 ## Quick Examples
 
-### Check node status
-
-```
+```text
+GET http://localhost:26657/status
 GET http://localhost:8080/api/status
-```
-
-### Read a contract's state
-
-```
-GET http://localhost:8080/api/abci_query/get/currency.balances:alice
-```
-
-### Get a contract's source code
-
-```
 GET http://localhost:8080/api/contract/currency
-```
-
-### Simulate a transaction
-
-```
-GET http://localhost:8080/api/abci_query/simulate_tx/{hex_encoded_payload}
+GET http://localhost:8080/api/abci_query/get/currency.balances:alice
+GET http://localhost:8080/api/abci_query/simulate_tx/<hex_payload>
 ```

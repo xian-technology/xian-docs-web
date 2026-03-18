@@ -1,108 +1,112 @@
 # Valid Code & Restrictions
 
-Xian contracts run in a restricted Python sandbox. This page lists exactly what's allowed and what's forbidden.
+Xian contracts are ordinary Python syntax inside a restricted execution model.
+The linter enforces that restricted subset before code is accepted.
 
 ## Allowed Syntax
 
 | Feature | Example | Notes |
 |---------|---------|-------|
-| Variables | `x = 1` | |
-| Arithmetic | `+`, `-`, `*`, `/`, `//`, `%`, `**` | |
-| Comparisons | `==`, `!=`, `<`, `>`, `<=`, `>=`, `is`, `is not`, `in`, `not in` | |
-| Boolean logic | `and`, `or`, `not` | |
-| If/elif/else | `if x > 0:` | |
-| For loops | `for i in range(10):` | |
-| While loops | `while x > 0:` | |
-| Functions | `def f():` | Only at top level (no nesting) |
-| Return | `return value` | |
-| Assert | `assert x > 0, "msg"` | Primary error handling mechanism |
-| Pass | `pass` | |
-| Collections | `list`, `dict`, `set`, `tuple` | |
-| List comprehensions | `[x for x in items]` | |
-| Subscript/slice | `items[0]`, `items[1:3]` | |
-| Augmented assign | `x += 1`, `x -= 1` | |
-| Global | `global x` | |
-| Imports | `import contract_name` | Module-level only, no stdlib |
-| Starred | `*args` | In function calls |
+| assignment | `x = 1` | |
+| arithmetic | `+`, `-`, `*`, `/`, `//`, `%`, `**` | |
+| comparisons | `==`, `!=`, `<`, `>`, `<=`, `>=`, `in`, `not in`, `is`, `is not` | |
+| boolean logic | `and`, `or`, `not` | |
+| `if` / `elif` / `else` | `if x > 0:` | |
+| `for` / `while` | loops | metered like everything else |
+| functions | `def f():` | top-level only |
+| `return` | `return value` | |
+| `assert` | `assert ok, "message"` | main validation pattern |
+| collections | `list`, `dict`, `set`, `tuple` | |
+| list comprehensions | `[x for x in items]` | generator expressions are not allowed |
+| subscripts / slices | `x[0]`, `x[1:3]` | |
+| imports | `import currency`, `import hashlib` | module-level only |
 
 ## Forbidden Syntax
 
 | Feature | Error Code | Why |
 |---------|------------|-----|
-| Classes | E006 | No OOP — use module-level functions |
-| Try/except | E001 | Determinism — use `assert` instead |
-| With statements | E001 | No context managers |
-| Lambda | E001 | No anonymous functions |
-| Yield / generators | E001 | No generator patterns |
-| Async / await | E007 | No asynchronous code |
-| Nested functions | E019 | No closures or inner functions |
-| `from X import Y` | E004 | Use `import X` instead |
-| Nested imports | E003 | Imports only at module level |
-| Underscore names | E002 | `_x`, `x_`, `__x__` all forbidden |
-| Multiple decorators | E010 | Max one per function |
-| Nonlocal | E001 | No scope manipulation |
-| MatMult (`@`) | E001 | Operator not allowed |
-| Generator expressions | E001 | Use list comprehensions instead |
+| `try/except`, `with`, `lambda`, `yield`, `yield from`, `nonlocal`, `@` | `E001` | blocked syntax in the sandbox |
+| names starting or ending with `_` | `E002` | blocks Python internals / escape paths |
+| import inside a function | `E003` | imports must be explicit and module-level |
+| `from x import y` | `E004` | use `import x` then `x.y` |
+| stdlib module import | `E005` | only deployed contracts and runtime modules are allowed |
+| class definitions | `E006` | contracts are module/function based |
+| async functions | `E007` | no async execution in contracts |
+| invalid decorators | `E008` | only `@export` and `@construct` |
+| multiple constructors | `E009` | only one constructor allowed |
+| multiple decorators on one function | `E010` | single-decorator model |
+| forbidden ORM kwargs | `E011` | runtime owns those names |
+| tuple unpacking of ORM declarations | `E012` | storage declarations must be explicit |
+| no `@export` function present | `E013` | contract needs a public API |
+| forbidden builtin or reserved name | `E014` | unsafe builtins and reserved identifiers are blocked |
+| exported arg shadows ORM name | `E015` | avoids confusing state collisions |
+| invalid argument annotation | `E016` | exported args must use allowed types |
+| missing export annotation | `E017` | exported args must be typed |
+| invalid export return annotation | `E018` | export returns may only use allowed types |
+| nested function definition | `E019` | avoids closures and hidden state |
+| parse error | `E020` | ordinary syntax error |
 
 ## Allowed Builtins
 
-These Python builtins are available in contracts:
+The current builtin allowlist is intentionally small:
 
-```
-abs     all      any      ascii    bin      bool     bytearray  bytes
-chr     dict     divmod   filter   float    format   frozenset  hex
-int     isinstance  issubclass  len   list     map      max        min
-oct     ord      pow      range    reversed round    set        sorted
-str     sum      tuple    zip      Exception  True    False      None
+```text
+Exception False None True abs all any ascii bin bool bytearray bytes chr
+dict divmod filter float format frozenset hex int isinstance issubclass len
+list map max min oct ord pow range reversed round set sorted str sum tuple zip
 ```
 
-## Forbidden Builtins
+Everything else is treated as forbidden.
 
-Everything not in the allowed list is blocked, including:
+## Allowed Export Signature Annotations
 
-```
-eval    exec     open     input    print    compile   __import__
-globals  locals   vars    dir      getattr  setattr   delattr
-type    object   super   property staticmethod classmethod
-memoryview  breakpoint  exit    quit    help     copyright  license
-```
-
-Attempting to use any of these raises linter error E014.
-
-## Allowed Type Annotations
-
-For `@export` function arguments:
+The same allowlist applies to exported arguments and exported return
+annotations:
 
 ```python
 str, int, float, bool, dict, list, Any
 datetime.datetime, datetime.timedelta
 ```
 
-Any other type annotation raises linter error E016. Missing annotations raise E017. Return type annotations raise E018.
+Examples:
 
-## Linter Error Reference
+```python
+@export
+def balance_of(address: str) -> float:
+    return balances[address]
 
-| Code | Description |
-|------|-------------|
-| E001 | Illegal syntax type (try, with, lambda, yield, etc.) |
-| E002 | Name starts or ends with underscore |
-| E003 | Import inside function body |
-| E004 | `from ... import` not allowed |
-| E005 | Stdlib module import (os, sys, etc.) |
-| E006 | Class definition |
-| E007 | Async function |
-| E008 | Invalid decorator (not `export` or `construct`) |
-| E009 | Multiple `@construct` decorators |
-| E010 | Multiple decorators on one function |
-| E011 | Passing `contract=` or `name=` to ORM constructor |
-| E012 | Tuple unpacking on ORM assignment |
-| E013 | No `@export` function found |
-| E014 | Forbidden builtin or reserved name |
-| E015 | Function argument shadows ORM variable name |
-| E016 | Invalid type annotation |
-| E017 | Missing type annotation on `@export` argument |
-| E018 | Return type annotation on `@export` function |
-| E019 | Nested function definition |
-| E020 | Syntax error |
+@export
+def stream_window(stream_id: str) -> dict:
+    return {
+        "begins": streams[stream_id, "begins"],
+        "closes": streams[stream_id, "closes"],
+    }
+```
 
-Each error includes the exact line and column number for IDE integration.
+Invalid annotations still fail:
+
+```python
+@export
+def bad(value: Decimal):
+    return value
+```
+
+## Import Rules
+
+Allowed imports fall into two buckets:
+
+- deployed contracts, for example `import currency`
+- runtime-provided modules such as `hashlib`, `datetime`, `random`,
+  `importlib`, `crypto`, and `decimal`
+
+The Python standard library is not generally available to contracts.
+
+## Practical Guidance
+
+When in doubt:
+
+- keep contract code flat and explicit
+- use `assert` instead of exception handling
+- keep all imports at module scope
+- prefer simple data structures
+- test the contract locally with `ContractingClient`

@@ -1,17 +1,19 @@
-# Imports & Interfaces
+# Imports Overview
 
-Xian contracts can call other deployed contracts. There are two mechanisms: static imports (resolved at submission time) and dynamic imports (resolved at runtime). An interface system lets you verify that a contract implements the functions you expect.
+Contracts can depend on other deployed contracts.
 
-## Import Methods
+## Two Patterns
 
-| Method | Syntax | Resolved | Use Case |
-|--------|--------|----------|----------|
-| [Static import](/smart-contracts/imports/importing-contracts) | `import currency` | Submission time | Known contracts with fixed names |
-| [Dynamic import](/smart-contracts/imports/dynamic-imports) | `importlib.import_module("name")` | Runtime | Contract name passed as argument |
-| [Interface check](/smart-contracts/imports/interface-patterns) | `importlib.enforce_interface()` | Runtime | Validate a contract's shape before calling it |
+- static import: `import currency`
+- dynamic import: `importlib.import_module("con_example")`
 
-## Quick Links
+## Important Restriction
 
-- [Importing Contracts](/smart-contracts/imports/importing-contracts) -- static imports, calling functions, how the module loader works
-- [Dynamic Imports](/smart-contracts/imports/dynamic-imports) -- loading contracts by name at runtime with `importlib`
-- [Interface Patterns](/smart-contracts/imports/interface-patterns) -- enforcing that a contract exposes the functions and variables you need
+This is contract import resolution, not Python package importing. Imports are
+resolved against deployed contracts in state.
+
+## Related Tools
+
+- `importlib.import_module(...)`
+- `importlib.enforce_interface(...)`
+- `importlib.owner_of(...)`

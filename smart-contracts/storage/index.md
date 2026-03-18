@@ -1,33 +1,29 @@
-# Storage
+# Storage Overview
 
-Xian contracts store data on-chain using two primitives: **Variable** (single value) and **Hash** (key-value mapping). Both persist across transactions and are the only way to maintain state.
+Xian contract state is exposed through four ORM-style primitives:
 
-## Overview
+- `Variable`
+- `Hash`
+- `ForeignVariable`
+- `ForeignHash`
 
-| Type | Use Case | Example |
-|------|----------|---------|
-| [Variable](/smart-contracts/storage/variables) | Single value (owner, total supply, config) | `owner = Variable()` |
-| [Hash](/smart-contracts/storage/hashes) | Key-value map (balances, approvals, metadata) | `balances = Hash(default_value=0)` |
-| [ForeignVariable](/smart-contracts/storage/foreign) | Read another contract's Variable | `foreign_owner = ForeignVariable(...)` |
-| [ForeignHash](/smart-contracts/storage/foreign) | Read another contract's Hash | `foreign_balances = ForeignHash(...)` |
+All of them ultimately map to deterministic key-value storage in LMDB.
 
-## Storage Costs
+## What to Use
 
-Every read and write costs stamps:
+| Primitive | Use |
+|-----------|-----|
+| `Variable` | one stored value |
+| `Hash` | keyed or multi-dimensional data |
+| `ForeignVariable` | read another contract's variable |
+| `ForeignHash` | read another contract's hash |
 
-| Operation | Cost |
-|-----------|------|
-| Read | 1 stamp per byte (key + value) |
-| Write | 25 stamps per byte (key + value) |
+## Key Facts
 
-The maximum write capacity per transaction is **128 KB**.
+- `Variable` uses `.set()` and `.get()`
+- `Hash` uses index syntax like `balances["alice"]`
+- hash keys can be multi-dimensional
+- foreign storage is read-only by design
+- values are encoded deterministically for consensus safety
 
-## Key Format
-
-Internally, storage keys follow the pattern `contract.variable:key1:key2`. For example:
-
-- `currency.balances:alice` — Alice's balance on the currency contract
-- `con_dex.pairs:TAU:ETH` — The TAU/ETH pair on a DEX contract
-- `con_nft.owner` — The owner Variable on an NFT contract
-
-You don't construct these keys manually — the ORM handles it. But understanding the format helps when querying state via the API.
+Use the pages in this section for the exact behavior of each primitive.

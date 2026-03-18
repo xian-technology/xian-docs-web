@@ -1,125 +1,107 @@
 # Architecture Overview
 
-Xian is built from four main components that work together to provide a Python-based smart contract blockchain.
+The current Xian stack is split into a small set of focused repositories and a
+runtime topology built around CometBFT plus Python services.
 
-## Components
+## Core Repositories
 
-| Component | Role | Language |
-|-----------|------|----------|
-| **xian-contracting** | Smart contract execution engine | Python |
-| **xian-abci** | ABCI application (connects contracts to consensus) | Python |
-| **CometBFT** | Byzantine Fault Tolerant consensus engine | Go |
-| **xian-py** | Client SDK for building and signing transactions | Python |
+| Repo | Role |
+|------|------|
+| `xian-contracting` | deterministic contract runtime, linter, storage, metering |
+| `xian-abci` | ABCI application, query layer, node services, optional dashboard |
+| `xian-configs` | canonical network manifests, contracts, and bundled assets |
+| `xian-stack` | Docker images, Compose topology, localnet, runtime backend |
+| `xian-cli` | operator control plane for keys, network join/create, node lifecycle |
+| `xian-py` | external Python SDK |
 
-## How They Connect
+Related but non-core tooling:
 
-```
-                        +-------------------+
-                        |   Your App / SDK  |
-                        |    (xian-py)      |
-                        +--------+----------+
-                                 |
-                           JSON-RPC / REST
-                                 |
-                        +--------v----------+
-                        |    CometBFT       |
-                        |   (Consensus)     |
-                        |                   |
-                        |  - P2P networking |
-                        |  - Block ordering |
-                        |  - BFT voting     |
-                        +--------+----------+
-                                 |
-                            ABCI Socket
-                       (protobuf over TCP)
-                                 |
-                        +--------v----------+
-                        |    xian-abci      |
-                        | (ABCI Application)|
-                        |                   |
-                        |  - CHECK_TX       |
-                        |  - FINALIZE_BLOCK |
-                        |  - COMMIT         |
-                        |  - QUERY          |
-                        +--------+----------+
-                                 |
-                          Python function calls
-                                 |
-                        +--------v----------+
-                        | xian-contracting  |
-                        | (Contract Engine) |
-                        |                   |
-                        |  - Sandbox        |
-                        |  - Metering       |
-                        |  - ORM (Hash/Var) |
-                        |  - Linter         |
-                        +--------+----------+
-                                 |
-                              LMDB
-                         (State Storage)
+- `xian-linter` for standalone linting service mode
+- `xian-docs-web` for documentation
+
+## Runtime Layers
+
+```text
+applications / wallets / automation
+            |
+         xian-py
+            |
+     CometBFT RPC / dashboard API
+            |
+        CometBFT
+            |
+            | ABCI
+            v
+         xian-abci
+            |
+            v
+     xian-contracting + LMDB
 ```
 
-## xian-contracting
+## Where Each Repo Fits
 
-The contract execution engine. It provides:
+### xian-contracting
 
-- **Sandbox** -- a restricted Python environment that forbids I/O, classes, closures, and unsafe builtins
-- **Metering** -- per-instruction cost tracking via `sys.monitoring`, ensuring deterministic stamp accounting
-- **ORM** -- `Variable`, `Hash`, `ForeignVariable`, `ForeignHash` for persistent state
-- **Linter** -- static analysis that rejects invalid code before deployment
-- **Module loader** -- resolves `import` statements to deployed contracts, not the Python standard library
+Owns:
 
-Contracts are plain Python source code submitted as strings. The engine compiles, validates, meters, and executes them.
+- sandboxed Python execution
+- stamp metering
+- contract linter
+- LMDB-backed state driver
+- local testing surface via `ContractingClient`
 
-## xian-abci
+### xian-abci
 
-The bridge between CometBFT and the contract engine. It implements the ABCI (Application BlockChain Interface) protocol:
+Owns:
 
-| ABCI Method | Purpose |
-|-------------|---------|
-| `CHECK_TX` | Validates transactions before they enter the mempool (signature, nonce, balance) |
-| `FINALIZE_BLOCK` | Executes all transactions in a finalized block sequentially |
-| `COMMIT` | Writes state changes to LMDB and returns the app_hash |
-| `QUERY` | Handles read-only state queries (balance lookups, contract inspection) |
+- `CHECK_TX`, `FINALIZE_BLOCK`, `COMMIT`, `QUERY`
+- transaction validation and nonce logic
+- event conversion into standard ABCI events
+- dry-run simulation
+- optional dashboard and WebSocket observer service
 
-The ABCI app also manages:
-- Stamp deduction (converting stamps to TAU charges)
-- Event collection and formatting for CometBFT indexing
-- Nonce tracking to prevent replay attacks
-- The dashboard HTTP/WebSocket server for API access
+### xian-configs
 
-## CometBFT
+Owns canonical network assets:
 
-CometBFT (formerly Tendermint) is the consensus engine. It handles:
+- `networks/<name>/manifest.json`
+- genesis bundles
+- canonical contract sources used by networks
 
-- **P2P networking** -- gossip protocol for broadcasting transactions and blocks between validators
-- **Block proposal** -- round-robin block proposers select transactions from the mempool
-- **BFT consensus** -- 2/3+ validator agreement on block contents and ordering
-- **Instant finality** -- once a block is committed, it is final (no reorganizations)
+### xian-stack
 
-CometBFT communicates with the ABCI app over a local TCP socket using Protocol Buffers. It is agnostic to the application logic -- it only cares about block ordering and validator agreement.
+Owns runtime packaging and topology:
 
-## xian-py
+- immutable node images
+- Compose files
+- integrated and fidelity localnet modes
+- runtime defaults and resource limits
 
-The Python SDK for interacting with Xian from client applications:
+### xian-cli
 
-- **Wallet management** -- create wallets, derive from mnemonics (HD wallets), sign transactions
-- **Transaction building** -- construct, sign, and broadcast transactions
-- **State queries** -- read contract state, check balances, inspect contracts
-- **Contract submission** -- deploy new contracts to the network
-- **Dry runs** -- simulate transactions without state changes
+Owns operator workflows:
 
-See [xian-py](/tools/xian-py) for the full SDK reference.
+- validator key generation
+- `network create` and `network join`
+- node profiles and manifest resolution
+- `node init`, `start`, `stop`, `status`, `doctor`
 
-## Data Flow: A Transaction
+### xian-py
 
-1. **xian-py** builds a transaction payload and signs it with Ed25519
-2. The signed transaction is sent to **CometBFT** via JSON-RPC
-3. CometBFT passes it to the **ABCI app** for `CHECK_TX` validation
-4. If valid, the transaction enters the mempool and waits for consensus
-5. CometBFT proposes a block containing the transaction; validators vote
-6. On 2/3+ agreement, the block is finalized
-7. `FINALIZE_BLOCK` calls the **ABCI app**, which calls **xian-contracting** to execute each transaction
-8. State changes are written to **LMDB** during `COMMIT`
-9. The `app_hash` is returned to CometBFT for the next block header
-10. Events are indexed and pushed to WebSocket subscribers
+Owns the external client-facing SDK:
+
+- wallets
+- transaction construction/signing
+- read/query helpers
+- sync and async API surfaces
+
+## Optional Runtime Services
+
+The stack also supports optional services that are outside the deterministic
+consensus path:
+
+- dashboard HTTP/WebSocket service
+- BDS/Postgres/PostGraphile read stack
+
+Those services improve observability and query ergonomics, but validators do
+not depend on them for consensus.

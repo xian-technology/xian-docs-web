@@ -1,102 +1,118 @@
 # Functions
 
-Xian contracts support three kinds of functions: exported (public), constructor, and private.
+Xian contracts use three function categories:
 
-## Exported Functions (`@export`)
+- exported functions with `@export`
+- one optional constructor with `@construct`
+- undecorated private helpers
 
-Exported functions are the contract's public API. They can be called by transactions or by other contracts.
+## Exported Functions
+
+Exported functions define the external contract API.
 
 ```python
 @export
 def transfer(to: str, amount: float):
+    assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount
     balances[to] += amount
 ```
 
-### Type Annotations
+### Argument Annotations
 
-All arguments to `@export` functions **must** have type annotations. This is enforced by the linter.
-
-Allowed types:
-- `str`, `int`, `float`, `bool`
-- `dict`, `list`
-- `datetime.datetime`, `datetime.timedelta`
-- `Any` (accepts anything)
+Every exported argument must be annotated:
 
 ```python
 @export
 def create_order(item: str, quantity: int, price: float, metadata: dict):
-    pass
+    orders[item] = {
+        "quantity": quantity,
+        "price": price,
+        "metadata": metadata,
+    }
 ```
 
-Return type annotations are **not allowed**:
+Allowed annotation types:
+
+- `str`
+- `int`
+- `float`
+- `bool`
+- `dict`
+- `list`
+- `Any`
+- `datetime.datetime`
+- `datetime.timedelta`
+
+### Return Annotations
+
+Return values are allowed, and exported functions may also use return type
+annotations when the annotation is one of the same whitelisted types.
 
 ```python
-# BAD — linter error E018
 @export
-def get_balance(addr: str) -> float:
-    return balances[addr]
+def balance_of(address: str) -> float:
+    return balances[address]
+```
 
-# GOOD
+Invalid return annotations still fail linting:
+
+```python
+# BAD: custom types are not allowed in export signatures
 @export
-def get_balance(addr: str):
-    return balances[addr]
+def balance_of(address: str) -> Decimal:
+    return balances[address]
 ```
 
 ### Return Values
 
-Functions can return values. The return value is included in the transaction result but is not stored on-chain.
+Returned values are included in the execution result. They are not persisted
+unless you also write them to state.
 
 ```python
 @export
-def get_balance(addr: str):
-    return balances[addr]
+def owner_of_contract() -> str:
+    return owner.get()
 ```
 
-## Constructor (`@construct`)
+## Constructor
 
-Runs exactly once when the contract is deployed. Use it to initialize state.
+The constructor runs once when the contract is submitted:
 
 ```python
 @construct
-def seed(initial_supply: int):
-    balances[ctx.caller] = initial_supply
-    total_supply.set(initial_supply)
+def seed(initial_supply=1_000_000):
     owner.set(ctx.caller)
+    balances[ctx.caller] = initial_supply
 ```
 
-- Only one `@construct` per contract
-- Constructor arguments are passed during contract submission
-- Constructor arguments do not require type annotations
-- After execution, the constructor is renamed internally and becomes uncallable
+Use the constructor for:
 
-## Private Functions
+- initial balances
+- metadata defaults
+- owner/operator assignment
+- one-time configuration
 
-Functions without a decorator are private. They are only callable from within the same contract.
+## Private Helpers
+
+Private helpers are internal utilities:
 
 ```python
-def calculate_fee(amount):
-    """Private — only callable within this contract."""
-    return amount * 0.01
+def ensure_positive(amount):
+    assert amount > 0, "Amount must be positive"
 
 @export
-def transfer_with_fee(to: str, amount: float):
-    fee = calculate_fee(amount)
-    balances[ctx.caller] -= (amount + fee)
-    balances[to] += amount
-    balances["treasury"] += fee
+def approve(amount: float, to: str):
+    ensure_positive(amount)
+    balances[ctx.caller, to] = amount
 ```
 
-Private functions:
-- Do not require type annotations
-- Are name-mangled with a `__` prefix (e.g., `calculate_fee` becomes `__calculate_fee`)
-- Cannot be called from other contracts or external transactions
-- Cannot be nested inside other functions (linter error E019)
+They are not callable through transactions or by other contracts.
 
 ## Assertions
 
-Use `assert` for input validation and access control. A failed assertion reverts all state changes and consumes stamps.
+`assert` is the normal validation mechanism:
 
 ```python
 @export
@@ -106,19 +122,23 @@ def withdraw(amount: float):
     balances[ctx.caller] -= amount
 ```
 
-The assert message is returned in the transaction result for debugging.
+Failed assertions:
 
-## Forbidden Patterns
+- abort execution
+- roll back writes and events from that transaction
+- still consume stamps up to the failure point
 
-The following are not allowed in any function:
+## Disallowed Function Patterns
 
-- **Nested functions** — no `def` inside `def`
-- **Lambda expressions** — no `lambda`
-- **Classes** — no `class`
-- **Try/except** — no exception handling (use `assert` instead)
-- **Async/await** — no async functions
-- **Yield/generators** — no `yield` or generator expressions
-- **With statements** — no context managers
-- **Closures** — no capturing variables from outer scopes
+The function body still has to obey the language restrictions:
 
-See [Valid Code](/smart-contracts/valid-code) for the complete list.
+- no nested functions
+- no classes
+- no `try/except`
+- no `lambda`
+- no `async`
+- no generators or `yield`
+- no context managers
+
+See [Valid Code & Restrictions](/smart-contracts/valid-code) for the full
+linting surface.

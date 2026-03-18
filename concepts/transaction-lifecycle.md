@@ -57,11 +57,10 @@ Every transaction on Xian follows a defined path from creation to finalization. 
 Using the Python SDK (`xian-py`), construct a transaction payload:
 
 ```python
-from xian_py.wallet import Wallet
-from xian_py.xian import Xian
+from xian_py import Wallet, Xian
 
 wallet = Wallet()
-xian = Xian("http://localhost:26657", "xian-testnet-1", wallet)
+xian = Xian("http://localhost:26657", "xian-testnet-1", wallet=wallet)
 
 result = xian.send_tx(
     contract="currency",

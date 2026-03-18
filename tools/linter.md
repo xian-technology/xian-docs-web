@@ -1,22 +1,21 @@
 # Linter
 
-The Xian linter performs static analysis on contract source code to catch invalid syntax, forbidden patterns, and security issues before deployment. Code that fails the linter cannot be submitted to the network.
+Xian has two related linting surfaces:
 
-## Two Ways to Use the Linter
+- the core contract linter in `xian-contracting`
+- the optional standalone `xian-linter` HTTP service
 
-### 1. Built into xian-contracting
+Both ultimately enforce the same contract-language rules.
 
-The linter is included in the `xian-contracting` package. Use it programmatically:
+## Using The Core Linter
+
+Use `contracting.compilation.linter.Linter` when you are already inside Python:
 
 ```python
 from contracting.compilation.linter import Linter
 
 source = """
 balances = Hash(default_value=0)
-
-@construct
-def seed():
-    balances[ctx.caller] = 1_000_000
 
 @export
 def transfer(to: str, amount: float):
@@ -26,150 +25,118 @@ def transfer(to: str, amount: float):
 """
 
 linter = Linter()
-errors = linter.check(source)
+errors = linter.check(source) or []
 
-if errors:
-    for error in errors:
-        print(f"Line {error['line']}, Col {error['col']}: [{error['code']}] {error['message']}")
-else:
-    print("No errors found")
+for error in errors:
+    print(error.code.value, error.line, error.col, error.message)
 ```
 
-### 2. Standalone xian-linter Service
+The core linter returns structured `LintError` objects with:
 
-The `xian-linter` package provides a standalone HTTP service for linting:
+- `code`
+- `message`
+- `line`
+- `col`
+- `end_line`
+- `end_col`
+
+## Using The Standalone HTTP Service
+
+Install the server extras:
 
 ```bash
-pip install xian-linter
-xian-linter  # starts on port 5000 by default
+pip install "xian-linter[server]"
 ```
 
-Send contract source code via POST:
+Start the service:
 
 ```bash
-curl -X POST http://localhost:5000/lint \
-  -H "Content-Type: application/json" \
-  -d '{"code": "import os\n\n@export\ndef hack():\n    os.system(\"rm -rf /\")"}'
+xian-linter
 ```
 
-Response:
+The default listen address is `http://localhost:8000`.
+
+## HTTP Endpoints
+
+The service accepts raw, base64, or gzip request bodies:
+
+- `POST /lint`
+- `POST /lint_base64`
+- `POST /lint_gzip`
+
+### Raw Source Example
+
+```bash
+curl -X POST http://localhost:8000/lint \
+  -H "Content-Type: text/plain" \
+  --data-binary $'import os\n\n@export\ndef hack():\n    os.system("rm -rf /")'
+```
+
+### Base64 Example
+
+```bash
+base64 < contract.py > contract.py.b64
+curl -X POST http://localhost:8000/lint_base64 --data-binary @contract.py.b64
+```
+
+### Gzip Example
+
+```bash
+gzip -c contract.py > contract.py.gz
+curl -X POST http://localhost:8000/lint_gzip \
+  -H "Content-Type: application/gzip" \
+  --data-binary @contract.py.gz
+```
+
+## Response Shape
+
+The HTTP service returns:
 
 ```json
 {
-    "errors": [
-        {
-            "code": "E005",
-            "message": "Import of stdlib module 'os' is not allowed",
-            "line": 1,
-            "col": 0
-        }
-    ],
-    "valid": false
+  "success": false,
+  "errors": [
+    {
+      "code": "E005",
+      "message": "Cannot import stdlib module 'os'",
+      "severity": "error",
+      "position": {
+        "line": 1,
+        "col": 0,
+        "end_line": 1,
+        "end_col": 9
+      }
+    }
+  ]
 }
 ```
 
-A clean contract returns:
-
-```json
-{
-    "errors": [],
-    "valid": true
-}
-```
+`xian-linter` may also include PyFlakes warnings with code `W001`.
 
 ## Error Codes
 
-| Code | Description | Example |
-|------|-------------|---------|
-| E001 | Illegal syntax type | `try/except`, `with`, `lambda`, `yield`, `nonlocal` |
-| E002 | Name starts or ends with underscore | `_private`, `name_`, `__dunder__` |
-| E003 | Import inside function body | `def f(): import x` |
-| E004 | `from ... import` not allowed | `from currency import transfer` |
-| E005 | Standard library module import | `import os`, `import sys`, `import json` |
-| E006 | Class definition | `class Token:` |
-| E007 | Async function | `async def fetch():` |
-| E008 | Invalid decorator | `@something` (only `@export` and `@construct` allowed) |
-| E009 | Multiple `@construct` decorators | Two functions with `@construct` |
-| E010 | Multiple decorators on one function | `@export` + `@construct` on same function |
-| E011 | Passing `contract=` or `name=` to ORM constructor | `Hash(contract="x", name="y")` |
-| E012 | Tuple unpacking on ORM assignment | `a, b = Hash(), Hash()` |
-| E013 | No `@export` function found | Contract has no public API |
-| E014 | Forbidden builtin or reserved name | `eval()`, `exec()`, `rt` |
-| E015 | Function argument shadows ORM variable name | `def f(balances: int):` when `balances = Hash()` exists |
-| E016 | Invalid type annotation | `def f(x: MyClass):` |
-| E017 | Missing type annotation on `@export` argument | `def transfer(to, amount):` |
-| E018 | Return type annotation on `@export` function | `def f(x: int) -> int:` |
-| E019 | Nested function definition | `def outer(): def inner():` |
-| E020 | Syntax error | Invalid Python syntax |
+| Code | Meaning |
+|------|---------|
+| `E001` | illegal syntax form |
+| `E002` | name starts or ends with underscore |
+| `E003` | import inside a function |
+| `E004` | `from x import y` used |
+| `E005` | stdlib import attempted |
+| `E006` | class definition |
+| `E007` | async function |
+| `E008` | invalid decorator |
+| `E009` | multiple constructors |
+| `E010` | multiple decorators on one function |
+| `E011` | forbidden ORM kwarg |
+| `E012` | tuple unpacking for ORM declarations |
+| `E013` | no exported function |
+| `E014` | forbidden builtin or reserved name |
+| `E015` | exported arg shadows ORM name |
+| `E016` | invalid exported argument annotation |
+| `E017` | missing exported argument annotation |
+| `E018` | invalid exported return annotation |
+| `E019` | nested function |
+| `E020` | syntax error |
 
-## Structured Error Output
-
-Each error is a dictionary with precise position information:
-
-```python
-{
-    "code": "E005",
-    "message": "Import of stdlib module 'os' is not allowed",
-    "line": 1,
-    "col": 0
-}
-```
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `code` | `str` | Error code (E001-E020) |
-| `message` | `str` | Human-readable description |
-| `line` | `int` | Line number (1-based) |
-| `col` | `int` | Column number (0-based) |
-
-## Example: Multiple Errors
-
-```python
-source = """
-import os
-
-class Token:
-    pass
-
-def _private():
-    pass
-
-@export
-def transfer(to, amount):
-    try:
-        pass
-    except:
-        pass
-"""
-
-linter = Linter()
-errors = linter.check(source)
-```
-
-Output:
-
-```
-Line 1, Col 0: [E005] Import of stdlib module 'os' is not allowed
-Line 3, Col 0: [E006] Class definition not allowed
-Line 6, Col 0: [E002] Name '_private' starts with underscore
-Line 10, Col 0: [E017] Missing type annotation on @export argument 'to'
-Line 10, Col 0: [E017] Missing type annotation on @export argument 'amount'
-Line 11, Col 4: [E001] Try/except not allowed
-```
-
-## Integration with Testing
-
-Run the linter as part of your test suite to catch errors early:
-
-```python
-import unittest
-from contracting.compilation.linter import Linter
-
-
-class TestContractLinting(unittest.TestCase):
-    def test_contract_passes_linter(self):
-        source = open("my_contract.py").read()
-        linter = Linter()
-        errors = linter.check(source)
-        self.assertEqual(errors, [], f"Linter errors: {errors}")
-```
+See [Valid Code & Restrictions](/smart-contracts/valid-code) for the current
+language surface.

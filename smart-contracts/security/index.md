@@ -1,16 +1,19 @@
 # Security
 
-Writing secure smart contracts requires understanding the execution model, the context system, and common attack patterns. This section covers the patterns you need and the mistakes to avoid.
+Secure Xian contracts come from simple control flow, explicit authorization,
+careful cross-contract boundaries, and thorough local testing.
 
-## Key Principles
+## Core Principles
 
-1. **Always validate the caller** -- use `ctx.caller` and `ctx.signer` to control who can execute sensitive operations
-2. **Validate all inputs** -- never trust that arguments are positive, non-zero, or within expected ranges
-3. **Understand ctx.caller vs ctx.signer** -- they differ when contracts call other contracts
-4. **Minimize state writes** -- keep your contract's surface area small
-5. **Test thoroughly** -- use `ContractingClient` to simulate every edge case
+1. authenticate the immediate caller, not just the original signer
+2. validate every numeric and address input
+3. update local state before external contract calls when possible
+4. avoid hidden complexity and dynamic behavior
+5. treat every exported function as public and adversarially callable
 
 ## Quick Links
 
-- [Access Control Patterns](/smart-contracts/security/access-control) -- owner-only, caller restrictions, allowances, multi-sig
-- [Common Pitfalls](/smart-contracts/security/pitfalls) -- mistakes that lead to vulnerabilities
+- [Access Control Patterns](/smart-contracts/security/access-control)
+- [Common Pitfalls](/smart-contracts/security/pitfalls)
+- [Upgradeability Patterns](/smart-contracts/security/upgradeability)
+- [Audit Checklist](/smart-contracts/security/audit-checklist)

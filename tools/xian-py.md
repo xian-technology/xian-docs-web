@@ -1,246 +1,192 @@
 # xian-py
 
-`xian-py` is the official Python SDK for interacting with the Xian blockchain. It handles wallet management, transaction building and signing, state queries, and contract deployment.
+`xian-py` is the external Python SDK for talking to a Xian node.
 
 ## Installation
+
+Base install:
 
 ```bash
 pip install xian-py
 ```
 
-## Wallet Management
+Optional extras:
 
-### Creating a New Wallet
-
-```python
-from xian_py.wallet import Wallet
-
-# Generate a new random wallet
-wallet = Wallet()
-
-print(wallet.public_key)   # Ed25519 public key (hex string)
-print(wallet.private_key)  # Ed25519 private key (hex string)
+```bash
+pip install "xian-py[hd]"   # mnemonic / HD wallet support
+pip install "xian-py[eth]"  # Ethereum wallet helpers
 ```
 
-### Restoring from Private Key
+## Public API
+
+The intended top-level imports are:
 
 ```python
-from xian_py.wallet import Wallet
+from xian_py import Wallet, Xian, XianAsync, XianException, run_sync, to_contract_time
+```
 
+`HDWallet` and `EthereumWallet` live in `xian_py.wallet`; they are optional
+helpers, not part of the small top-level API.
+
+## Wallets
+
+### Basic Wallet
+
+```python
+from xian_py import Wallet
+
+wallet = Wallet()
+print(wallet.public_key)
+print(wallet.private_key)
+```
+
+Restore from an existing private key:
+
+```python
 wallet = Wallet(private_key="your_private_key_hex")
 ```
 
-### HD Wallet with Mnemonic
-
-For BIP-39 mnemonic-based key derivation:
+### HD Wallet
 
 ```python
 from xian_py.wallet import HDWallet
 
-# Generate a new HD wallet with a mnemonic
-hd_wallet = HDWallet()
-print(hd_wallet.mnemonic)     # 24-word mnemonic phrase
-print(hd_wallet.public_key)   # derived public key
-print(hd_wallet.private_key)  # derived private key
-
-# Restore from mnemonic
-hd_wallet = HDWallet(mnemonic="your twenty four word mnemonic phrase ...")
+wallet = HDWallet()
+print(wallet.mnemonic_str)
+child = wallet.get_wallet([0, 0])
+print(child.public_key)
 ```
 
-## Xian Client
+HD wallet support requires `xian-py[hd]`.
 
-The `Xian` class is the main interface for interacting with a node:
+## Synchronous Client
 
 ```python
-from xian_py.wallet import Wallet
-from xian_py.xian import Xian
+from xian_py import Wallet, Xian
 
-wallet = Wallet(private_key="your_private_key_hex")
-xian = Xian(
-    node_url="http://localhost:26657",
-    chain_id="xian-testnet-1",
-    wallet=wallet,
-)
+wallet = Wallet()
+client = Xian("http://127.0.0.1:26657", wallet=wallet)
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `node_url` | `str` | CometBFT RPC endpoint |
-| `chain_id` | `str` | Network chain identifier |
-| `wallet` | `Wallet` | Wallet for signing transactions |
+Constructor parameters:
 
-## Methods
+- `node_url`
+- optional `chain_id`
+- optional `wallet`
 
-### send()
+If `chain_id` is omitted, the client fetches it from the node.
 
-Send TAU (the native currency) to an address:
+## Async Client
 
 ```python
-result = xian.send(
-    amount=100,
-    to="recipient_public_key_hex",
-    stamps=50000,
-)
+import asyncio
+from xian_py import Wallet, XianAsync
+
+async def main():
+    wallet = Wallet()
+    async with XianAsync("http://127.0.0.1:26657", wallet=wallet) as client:
+        return await client.get_balance(wallet.public_key)
+
+asyncio.run(main())
 ```
 
-### send_tx()
+Use `XianAsync` directly inside async code. The sync wrapper intentionally
+raises if you call it from an already-running event loop.
 
-Send a general transaction to any contract function:
+## Common Methods
+
+### get_balance
 
 ```python
-result = xian.send_tx(
+balance = client.get_balance(address=wallet.public_key)
+balance = client.get_balance(contract="currency")
+```
+
+### get_state
+
+`get_state` takes the contract name, variable name, and zero or more key parts:
+
+```python
+value = client.get_state("currency", "balances", wallet.public_key)
+allowance = client.get_state("currency", "balances", wallet.public_key, "con_dex")
+```
+
+### get_contract
+
+```python
+source = client.get_contract("currency")
+clean_source = client.get_contract("currency", clean=True)
+```
+
+### send_tx
+
+```python
+result = client.send_tx(
     contract="currency",
     function="transfer",
-    kwargs={"amount": 100, "to": "recipient_address"},
-    stamps=50000,
+    kwargs={"amount": 100, "to": "recipient_public_key"},
+    stamps=50_000,
 )
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `contract` | `str` | Target contract name |
-| `function` | `str` | Exported function to call |
-| `kwargs` | `dict` | Keyword arguments for the function |
-| `stamps` | `int` | Maximum stamps to spend |
+### send
 
-### submit_contract()
+`send` is a convenience wrapper for token transfers:
 
-Deploy a new contract to the network:
+```python
+result = client.send(
+    amount=100,
+    to_address="recipient_public_key",
+    token="currency",
+    stamps=50_000,
+)
+```
+
+### approve
+
+`approve` is a convenience wrapper that approves another contract to spend a
+token on behalf of the wallet:
+
+```python
+result = client.approve(
+    contract="con_dex",
+    token="currency",
+    amount=1_000,
+)
+```
+
+### get_approved_amount
+
+```python
+amount = client.get_approved_amount("con_dex", token="currency")
+```
+
+### simulate
+
+```python
+result = client.simulate(
+    contract="currency",
+    function="transfer",
+    kwargs={"amount": 100, "to": "recipient_public_key"},
+)
+
+print(result["status"])
+print(result["stamps_used"])
+print(result["state"])
+```
+
+The dry-run result currently comes from the node simulator and uses:
+
+- `status`
+- `stamps_used`
+- `state`
+- `result`
+- `payload`
+
+### submit_contract
 
 ```python
 code = """
-balances = Hash(default_value=0)
-
-@construct
-def seed():
-    balances[ctx.caller] = 1_000_000
-
-@export
-def transfer(to: str, amount: float):
-    assert amount > 0, "Amount must be positive"
-    assert balances[ctx.caller] >= amount, "Insufficient balance"
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-"""
-
-result = xian.submit_contract(
-    name="con_my_token",
-    code=code,
-    stamps=500000,
-)
-```
-
-### get_balance()
-
-Get the TAU balance for an address:
-
-```python
-balance = xian.get_balance(address="public_key_hex")
-print(balance)  # e.g., 1000.0
-```
-
-### get_state()
-
-Read a state value by its full key:
-
-```python
-value = xian.get_state(
-    contract="currency",
-    variable="balances",
-    arguments=["alice"],
-)
-print(value)  # e.g., 500
-```
-
-### get_contract()
-
-Retrieve the source code of a deployed contract:
-
-```python
-source = xian.get_contract(name="currency")
-print(source)
-```
-
-### approve()
-
-Approve another address or contract to spend TAU on your behalf:
-
-```python
-result = xian.approve(
-    amount=1000,
-    to="con_dex",
-    stamps=50000,
-)
-```
-
-### simulate()
-
-Simulate a transaction without committing state changes:
-
-```python
-result = xian.simulate(
-    contract="currency",
-    function="transfer",
-    kwargs={"amount": 100, "to": "recipient_address"},
-)
-
-print(f"Stamps needed: {result['stamps_used']}")
-print(f"Success: {result['status_code'] == 0}")
-```
-
-## Complete Example
-
-A full workflow: create a wallet, connect to the network, check balance, and send a transaction:
-
-```python
-from xian_py.wallet import Wallet
-from xian_py.xian import Xian
-
-# Create or restore a wallet
-wallet = Wallet(private_key="your_64_char_hex_private_key")
-
-# Connect to a node
-xian = Xian(
-    node_url="http://localhost:26657",
-    chain_id="xian-testnet-1",
-    wallet=wallet,
-)
-
-# Check balance
-balance = xian.get_balance(address=wallet.public_key)
-print(f"Balance: {balance} TAU")
-
-# Simulate a transfer first
-sim = xian.simulate(
-    contract="currency",
-    function="transfer",
-    kwargs={"amount": 50, "to": "recipient_public_key"},
-)
-print(f"Estimated stamps: {sim['stamps_used']}")
-
-if sim["status_code"] == 0:
-    # Execute the real transaction with a safety margin
-    result = xian.send_tx(
-        contract="currency",
-        function="transfer",
-        kwargs={"amount": 50, "to": "recipient_public_key"},
-        stamps=sim["stamps_used"] + 1000,
-    )
-    print(f"Transaction hash: {result['hash']}")
-else:
-    print(f"Transaction would fail: {sim['result']}")
-```
-
-## Deploying a Contract
-
-```python
-from xian_py.wallet import Wallet
-from xian_py.xian import Xian
-
-wallet = Wallet(private_key="your_private_key")
-xian = Xian("http://localhost:26657", "xian-testnet-1", wallet)
-
-contract_code = """
 counter = Variable()
 
 @construct
@@ -248,28 +194,26 @@ def seed():
     counter.set(0)
 
 @export
-def increment():
+def increment() -> int:
     counter.set(counter.get() + 1)
-    return counter.get()
-
-@export
-def get_count():
     return counter.get()
 """
 
-result = xian.submit_contract(
+result = client.submit_contract(
     name="con_counter",
-    code=contract_code,
-    stamps=500000,
-)
-
-print(f"Deployed: {result['hash']}")
-
-# Now call the contract
-result = xian.send_tx(
-    contract="con_counter",
-    function="increment",
-    kwargs={},
-    stamps=50000,
+    code=code,
+    args={},
+    stamps=500_000,
 )
 ```
+
+## Other Helpers
+
+Also available:
+
+- `get_tx(tx_hash)`
+- `get_nodes()`
+- `get_genesis()`
+- `get_chain_id()`
+
+See the repo README for package-level development and compatibility notes.

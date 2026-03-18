@@ -1,64 +1,93 @@
 # Contract Structure
 
-A Xian smart contract is a single Python file with three sections: state declarations, an optional constructor, and one or more exported functions.
+A Xian contract is a single Python module. The normal pattern is:
 
-## Module-Level State
+1. module-level declarations
+2. an optional `@construct` function
+3. one or more `@export` functions
+4. private helper functions
 
-State variables are declared at the top of the file. They persist on-chain between transactions.
+## Module-Level Declarations
+
+Persistent state and events are declared at module scope:
 
 ```python
 balances = Hash(default_value=0)
 owner = Variable()
 metadata = Hash()
+
+TransferEvent = LogEvent(
+    event="Transfer",
+    params={
+        "from": {"type": str, "idx": True},
+        "to": {"type": str, "idx": True},
+        "amount": {"type": (int, float, decimal)},
+    },
+)
 ```
 
-These are the only statements allowed at module level (besides imports). You cannot put logic, loops, or function calls at the top level — only `Variable()`, `Hash()`, `ForeignVariable()`, `ForeignHash()`, `LogEvent()` declarations and `import` statements.
+Module scope is also where contract imports and runtime-stdlib imports live:
 
-See [Storage](/smart-contracts/storage/) for details on each type.
+```python
+import currency
+import hashlib
+import datetime
+```
+
+Do not put executable setup logic at module scope. Initialization belongs in
+`@construct`.
 
 ## Constructor
 
-The `@construct` decorator marks a function that runs **once** when the contract is deployed. It is never callable again.
+The `@construct` function runs once at submission time.
 
 ```python
 @construct
-def seed():
+def seed(initial_supply: int = 1_000_000):
     owner.set(ctx.caller)
-    balances[ctx.caller] = 1_000_000
-    metadata["name"] = "My Token"
+    balances[ctx.caller] = initial_supply
 ```
 
-Rules:
-- Only **one** `@construct` function per contract
-- The function name can be anything (it gets renamed internally)
-- Arguments are passed via `constructor_args` during submission
-- No type annotations required on constructor arguments
+Current rules:
+
+- only one constructor is allowed
+- constructor parameters do not need annotations
+- the constructor is not callable after deployment
+- constructor work is metered and must stay deterministic
 
 ## Exported Functions
 
-The `@export` decorator makes a function callable from outside the contract — by users submitting transactions or by other contracts.
+`@export` defines the public API of the contract.
 
 ```python
 @export
 def transfer(to: str, amount: float):
-    sender = ctx.caller
-    assert balances[sender] >= amount, "Insufficient balance"
-    balances[sender] -= amount
+    assert amount > 0, "Amount must be positive"
+    assert balances[ctx.caller] >= amount, "Insufficient balance"
+    balances[ctx.caller] -= amount
     balances[to] += amount
 ```
 
-Rules:
-- At least **one** `@export` function is required per contract
-- All arguments **must** have type annotations
-- Return type annotations are **not allowed**
-- Allowed annotation types: `str`, `int`, `float`, `bool`, `dict`, `list`, `Any`, `datetime.datetime`, `datetime.timedelta`
+Current rules:
 
-## Private Functions
+- a contract must expose at least one `@export`
+- every exported argument must have a whitelisted annotation
+- exported return annotations are allowed when they use a whitelisted type
+- only one decorator is allowed per function
 
-Any function without a decorator is private — it can only be called from within the same contract.
+Whitelisted annotation types are:
 
 ```python
-def calculate_fee(amount):
+str, int, float, bool, dict, list, Any
+datetime.datetime, datetime.timedelta
+```
+
+## Private Helpers
+
+Functions without decorators are private to the contract module:
+
+```python
+def calculate_fee(amount: float) -> float:
     return amount * 0.01
 
 @export
@@ -66,32 +95,28 @@ def transfer_with_fee(to: str, amount: float):
     fee = calculate_fee(amount)
     balances[ctx.caller] -= amount
     balances[to] += amount - fee
-    balances["fee_pool"] += fee
 ```
 
-Private functions:
-- Are automatically name-mangled with a `__` prefix internally
-- Cannot be called by external transactions or other contracts
-- Do **not** require type annotations
-- Cannot be nested (no functions inside functions)
+Private helpers:
 
-## Imports
-
-Contracts can import other deployed contracts:
-
-```python
-import currency
-
-@export
-def buy_item(item_id: str, price: float):
-    currency.transfer(to=ctx.this, amount=price)
-    items[item_id] = ctx.caller
-```
-
-See [Imports](/smart-contracts/imports/) for details. Standard library modules (`import os`, `import sys`, etc.) are not allowed — only deployed contracts and the [standard library](/smart-contracts/stdlib/) modules provided by the runtime.
+- can be called only inside the same contract
+- do not need annotations
+- must still obey the same sandbox rules
+- cannot be nested inside another function
 
 ## Naming Rules
 
-- Names starting or ending with `_` (underscore) are **forbidden** — this prevents access to Python internals like `__class__`, `__globals__`, etc.
-- Contract names submitted by users must start with `con_`, be lowercase, and not exceed 64 characters
-- The identifier `rt` is reserved and cannot be used
+The linter rejects names that start or end with `_`:
+
+- `_private`
+- `name_`
+- `__dunder__`
+
+That rule exists to block Python internals and avoid sandbox escapes.
+
+Other important naming rules:
+
+- deployed contract names must start with `con_` unless they are seeded system
+  contracts
+- deployed contract names must be lowercase
+- the special identifier `rt` is reserved

@@ -1,144 +1,49 @@
 # Hashes & Multihashes
 
-A `Hash` is a key-value mapping that persists on-chain. Use it for collections like balances, approvals, or any data indexed by one or more keys.
+`Hash` stores keyed state.
 
 ## Declaration
 
 ```python
 balances = Hash(default_value=0)
 metadata = Hash()
-approvals = Hash(default_value=0)
 ```
 
-### With Default Value
+## Basic Access
 
 ```python
-balances = Hash(default_value=0)
+balances["alice"] = 100
+balance = balances["alice"]
 ```
-
-Reading a key that was never set returns `default_value` instead of `None`.
-
-## Single-Key Access
-
-```python
-@export
-def transfer(to: str, amount: float):
-    sender = ctx.caller
-    assert balances[sender] >= amount, "Insufficient"
-    balances[sender] -= amount
-    balances[to] += amount
-```
-
-Use bracket notation like a Python dict. Augmented assignment (`+=`, `-=`) works.
 
 ## Multi-Dimensional Keys
 
-Hashes support up to **16 dimensions** by passing tuple keys:
+Hashes support tuple keys:
 
 ```python
-# Two dimensions: approvals[owner, spender]
-approvals = Hash(default_value=0)
-
-@export
-def approve(spender: str, amount: float):
-    approvals[ctx.caller, spender] = amount
-
-@export
-def allowance(owner: str, spender: str):
-    return approvals[owner, spender]
+allowances["alice", "dex"] = 500
+amount = allowances["alice", "dex"]
 ```
 
-Three dimensions:
+The runtime currently allows up to 16 key dimensions.
+
+## Collection Helpers
 
 ```python
-# inventory[player, zone, item_type]
-inventory = Hash(default_value=0)
-
-@export
-def add_item(zone: str, item: str, qty: int):
-    inventory[ctx.caller, zone, item] += qty
-```
-
-### Key Constraints
-
-- Maximum **16** dimensions (keys in the tuple)
-- Maximum **1024 bytes** per key (total encoded length)
-- Keys cannot contain `:` or `.` characters (reserved for internal encoding)
-- Slices (`hash[1:3]`) are not supported
-- The `in` operator (`key in hash`) is not supported — check the value directly
-
-## Iterating Over Entries
-
-### `all(*args)` — Get All Values
-
-```python
-# Get all balances
-all_values = balances.all()
-
-# Get all approvals for a specific owner
-owner_approvals = approvals.all("alice")
-```
-
-For multi-dimensional hashes, pass prefix keys to filter. `all("alice")` returns all values where the first key is `"alice"`.
-
-### `_items(*args)` — Get Key-Value Pairs
-
-```python
-# Get all key-value pairs
-pairs = balances._items()
-# Returns: {"alice": 100, "bob": 200}
-
-# With prefix filter
-alice_items = approvals._items("alice")
-# Returns: {"alice:bob": 50, "alice:carol": 100}
-```
-
-### `clear(*args)` — Delete Entries
-
-```python
-# Delete all entries
+balances.all()
+balances.all("alice")
+balances._items()
 balances.clear()
-
-# Delete entries with prefix
-approvals.clear("alice")  # Remove all of Alice's approvals
+balances.clear("alice")
 ```
 
-## Type Handling
+## Key Rules
 
-- `float` and `Decimal` values are automatically converted to `ContractingDecimal` on read
-- `list` and `dict` values return defensive copies (modifying the returned value doesn't change the stored value)
+- keys are converted to strings
+- `.` and `:` are not allowed inside key parts
+- slices are not allowed
+- oversized keys are rejected
 
-```python
-@export
-def modify_list():
-    data["items"] = [1, 2, 3]
+## When to Use
 
-    items = data["items"]   # returns a copy
-    items.append(4)         # modifies the copy only
-
-    data["items"] = items   # must write back explicitly
-```
-
-## Example: Full Token Contract
-
-```python
-balances = Hash(default_value=0)
-metadata = Hash()
-
-@construct
-def seed():
-    balances[ctx.caller] = 1_000_000
-    metadata["name"] = "My Token"
-    metadata["symbol"] = "MTK"
-
-@export
-def transfer(to: str, amount: float):
-    assert amount > 0, "Amount must be positive"
-    assert balances[ctx.caller] >= amount, "Insufficient balance"
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-
-@export
-def balance_of(account: str):
-    return balances[account]
-```
+Use `Hash` for mappings, registries, ledgers, and sparse structured state.

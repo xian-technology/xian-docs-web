@@ -251,7 +251,7 @@ Changes who is "signing" the transaction. This affects `ctx.caller` and `ctx.sig
 
 ## Next Steps
 
-- [Creating a Token](/tutorials/creating-a-token) -- build a full LST-001 fungible token
+- [Creating a Token](/tutorials/creating-a-token) -- build a full XSC-0001 fungible token
 - [Contract Structure](/smart-contracts/contract-structure) -- deeper dive into contract anatomy
 - [Storage](/smart-contracts/storage/) -- learn about Hash, Variable, and Foreign state access
 - [Testing](/smart-contracts/testing/) -- advanced testing patterns
