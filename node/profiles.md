@@ -21,6 +21,8 @@ They are written as JSON and validated on read. The current schema is explicit:
   "home": null,
   "pruning_enabled": false,
   "blocks_to_keep": 100000,
+  "block_policy_mode": "on_demand",
+  "block_policy_interval": "0s",
   "dashboard_enabled": false,
   "dashboard_host": "127.0.0.1",
   "dashboard_port": 8080
@@ -35,6 +37,8 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `stack_dir` | explicit `xian-stack` checkout used by the runtime backend |
 | `service_node` | enables the integrated BDS path |
 | `home` | explicit CometBFT home override |
+| `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
+| `block_policy_interval` | interval used for idle/periodic block policies |
 | `dashboard_*` | optional runtime dashboard settings |
 
 ## How Profiles Are Created
@@ -51,3 +55,6 @@ or by `network create` when bootstrapping a fresh local network.
 
 Profiles are intentionally node-local. Network-wide defaults belong in the
 manifest; node-specific overrides belong in the profile.
+
+The block policy only changes whether chain time advances while the chain is
+idle. Contract `now` still comes from the finalized consensus block timestamp.

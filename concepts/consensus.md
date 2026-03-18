@@ -24,6 +24,16 @@ behind it:
 Once a block is committed by the validator set, it is final. Xian does not use
 probabilistic reorg-style finality.
 
+## Block Time
+
+Contract time comes from the finalized block timestamp agreed by consensus.
+That means:
+
+- `now` in contracts is chain time, not local validator clock time
+- every transaction in the same block sees the same `now`
+- different block-production policies only change whether time advances during
+  idle periods
+
 ## Version Discipline
 
 Consensus depends on validators producing the same application state. In Xian,

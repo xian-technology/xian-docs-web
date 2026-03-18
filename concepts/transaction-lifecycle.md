@@ -110,6 +110,9 @@ Valid transactions sit in the mempool until a block proposer includes them in a 
 
 CometBFT runs Byzantine Fault Tolerant consensus. Once 2/3+ of validators agree on the block contents and order, the block is finalized.
 
+The block header also fixes the timestamp that contracts will see as `now`
+during execution of that block.
+
 ### 10-14. FINALIZE_BLOCK (Execution)
 
 Each transaction in the block is executed sequentially:
@@ -118,7 +121,9 @@ Each transaction in the block is executed sequentially:
 2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs
 3. **Metering** -- `sys.monitoring` tracks every Python instruction and charges compute units
 4. **Storage operations** -- reads and writes are charged per byte (1 stamp/byte read, 25 stamps/byte write)
-5. **Completion or failure**:
+5. **Block time injection** -- all transactions in the block observe the same
+   consensus timestamp as `now`
+6. **Completion or failure**:
    - **Success** -- state changes are buffered for commit, stamps consumed are recorded
    - **Failure** (assertion, out of stamps, runtime error) -- state changes are rolled back, stamps are still charged
 

@@ -28,15 +28,20 @@ Contracts run in a restricted Python sandbox. The following are forbidden:
 
 This eliminates the most common sources of non-determinism in Python programs.
 
-### Instruction Metering with sys.monitoring
+### Deterministic Metering with `sys.monitoring`
 
-Xian uses Python's `sys.monitoring` API to count and cost every bytecode instruction during contract execution. This provides:
+Xian uses Python's `sys.monitoring` API, but the current meter is not a Python
+callback on every executed opcode.
 
-- Per-instruction cost tracking (each opcode has a fixed cost in compute units)
-- A hard limit on total instructions (800,000 opcodes per transaction)
-- Deterministic stamp accounting across all validators
+Instead, Xian:
 
-The metering engine hooks into the Python interpreter at the bytecode level. It does **not** modify the Python source or use a custom interpreter -- it instruments the standard CPython VM.
+- registers only contract code objects
+- precomputes a deterministic bytecode-cost bucket for each executable source
+  line
+- charges that bucket when the interpreter reports execution of that line
+
+This preserves deterministic accounting while keeping validator performance
+practical on adversarial or very large loops.
 
 ### No Syscalls in the Hot Path
 
@@ -88,7 +93,18 @@ The `random` module available in contracts is seeded from block data (block hash
 
 ### Deterministic Time
 
-The `now` variable in contracts is the block timestamp agreed upon by consensus. It is not the local system time. All validators see the same `now` for every transaction in the same block.
+The `now` variable in contracts is the finalized block timestamp agreed upon by
+consensus. It is not local system time. All validators see the same `now` for
+every transaction in the same block.
+
+The active block policy changes whether chain time advances during idle
+periods:
+
+- `on_demand`: no idle empty blocks
+- `idle_interval`: an empty block after a configured idle period
+- `periodic`: scheduled empty blocks remain enabled
+
+That policy affects time progression, not determinism.
 
 ## What Happens If Determinism Breaks
 
@@ -114,6 +130,6 @@ Common causes of divergence in practice:
 | File/network I/O | Sandbox forbids all I/O |
 | Dictionary ordering | Python 3.7+ guarantees insertion order |
 | Memory allocation | Checked at boundary, not per-instruction |
-| Instruction counting | `sys.monitoring` with integer cost arithmetic |
+| Instruction counting | deterministic line-based bytecode buckets with integer cost arithmetic |
 | Python version differences | All validators must run the same CPython version |
 | JSON serialization | Compact format, fixed type markers, no whitespace |

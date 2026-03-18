@@ -121,6 +121,7 @@ export default defineConfig({
             { text: 'Overview', link: '/concepts/' },
             { text: 'Transaction Lifecycle', link: '/concepts/transaction-lifecycle' },
             { text: 'Consensus & Finality', link: '/concepts/consensus' },
+            { text: 'Time & Block Policy', link: '/concepts/time-and-blocks' },
             { text: 'The ABCI Layer', link: '/concepts/abci' },
             { text: 'State Model', link: '/concepts/state-model' },
             { text: 'Stamps & Metering', link: '/concepts/stamps' },
