@@ -95,7 +95,7 @@ Current numeric policy:
 - up to `61` whole digits
 - up to `30` fractional digits
 - extra fractional digits are truncated toward zero
-- values outside the supported range are clamped to the supported min/max
+- values outside the supported range raise an overflow error and abort execution
 
 This range is already wider than Ethereum-style `18` decimal token precision.
 

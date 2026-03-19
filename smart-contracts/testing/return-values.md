@@ -127,6 +127,7 @@ Current decimal policy:
 - up to `61` whole digits
 - up to `30` fractional digits
 - extra fractional digits are truncated toward zero
+- values outside the supported range raise an overflow error
 
 ## Handling Failures
 

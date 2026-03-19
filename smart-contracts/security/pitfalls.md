@@ -122,6 +122,7 @@ Current policy:
 - `61` whole digits
 - `30` fractional digits
 - extra fractional digits are truncated toward zero
+- values outside the supported range raise an overflow error
 
 Use `float` for normal user-facing decimal amounts. Use `int` when the value is
 conceptually integral.
