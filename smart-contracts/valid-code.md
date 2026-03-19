@@ -68,6 +68,10 @@ str, int, float, bool, dict, list, Any
 datetime.datetime, datetime.timedelta
 ```
 
+In Xian, `float` in an export signature means a deterministic decimal-backed
+value at runtime. Use `float` for user-facing decimal amounts, not Python
+`Decimal`.
+
 Examples:
 
 ```python

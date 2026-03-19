@@ -45,6 +45,10 @@ Allowed annotation types:
 - `datetime.datetime`
 - `datetime.timedelta`
 
+`float` is the normal annotation for decimal-backed numeric values in Xian.
+Although the annotation says `float`, contract execution uses deterministic
+`ContractingDecimal` values under the hood.
+
 ### Return Annotations
 
 Return values are allowed, and exported functions may also use return type
@@ -65,6 +69,9 @@ def balance_of(address: str) -> Decimal:
     return balances[address]
 ```
 
+Use `-> float` for user-facing decimal amounts. Do not annotate exported
+signatures with Python `Decimal`.
+
 ### Return Values
 
 Returned values are included in the execution result. They are not persisted
@@ -75,6 +82,9 @@ unless you also write them to state.
 def owner_of_contract() -> str:
     return owner.get()
 ```
+
+If a function returns a decimal-backed value, the caller receives a
+`ContractingDecimal` result object.
 
 ## Constructor
 

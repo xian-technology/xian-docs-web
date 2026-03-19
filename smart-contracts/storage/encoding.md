@@ -17,6 +17,12 @@ The encoder has explicit markers for:
 Consensus depends on every validator encoding the same value into the same byte
 representation.
 
+For numeric values, this means:
+
+- contract `float` values are stored as `ContractingDecimal`
+- decimal values are encoded with the `__fixed__` marker
+- the same numeric value always produces the same stored representation
+
 ## Practical Advice
 
 - keep values JSON-like where possible

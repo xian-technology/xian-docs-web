@@ -110,7 +110,9 @@ class TestReturnValues(unittest.TestCase):
 
 ## Numeric Return Types
 
-Values stored as `float` or `Decimal` are returned as `ContractingDecimal` objects. These compare equal to Python floats and ints but carry full decimal precision:
+Decimal-backed values are returned as `ContractingDecimal` objects. In normal
+contract code, these usually come from values annotated or written with `float`
+syntax:
 
 ```python
 balance = contract.balance_of(address="sys")
@@ -119,6 +121,12 @@ assert balance == 1000
 assert balance >= 500
 assert float(balance) == 1000.0
 ```
+
+Current decimal policy:
+
+- up to `61` whole digits
+- up to `30` fractional digits
+- extra fractional digits are truncated toward zero
 
 ## Handling Failures
 

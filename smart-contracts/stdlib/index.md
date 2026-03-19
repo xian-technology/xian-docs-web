@@ -16,6 +16,12 @@ contract environment.
 
 These are runtime-provided globals. They are not general-purpose Python imports.
 
+The `decimal` runtime is the bridge behind Xian's deterministic numeric model.
+Most contracts should still use normal `float` syntax in function signatures and
+literals. The runtime converts those values into `ContractingDecimal` so users
+can write readable decimal code without dealing with binary floating-point
+behavior.
+
 ## Design Goal
 
 The standard library surface exists only where Xian can provide deterministic,

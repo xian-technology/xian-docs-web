@@ -41,14 +41,18 @@ The most common objection to Python for blockchain is non-determinism. Xian addr
 
 | Concern | Solution |
 |---------|----------|
-| Floating-point rounding | `ContractingDecimal` for all numeric values |
+| Floating-point rounding | decimal-backed numeric execution for contract `float` values |
 | System time dependency | `now` is the consensus block timestamp |
 | Random number generation | Seeded from block hash (deterministic across validators) |
 | File and network I/O | Completely forbidden in the sandbox |
 | Dictionary ordering | Guaranteed since Python 3.7 |
 | Standard library side effects | All stdlib imports forbidden; only Xian runtime modules available |
 
-The metering engine uses `sys.monitoring` to track every bytecode instruction, ensuring identical execution and cost accounting across all validators.
+The metering engine uses `sys.monitoring`, but it does not call back into
+Python on every opcode. Instead, it precomputes deterministic bytecode-cost
+buckets for each executable source line and charges those buckets on line
+execution. That keeps accounting deterministic without collapsing validator
+performance on large or adversarial loops.
 
 ## Sandboxed Execution
 

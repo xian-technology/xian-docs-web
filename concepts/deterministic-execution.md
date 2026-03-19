@@ -71,12 +71,33 @@ stamps_used = (raw_cost // 1000) + 5  # integer division, no float
 
 ### Decimal Arithmetic for Contract Values
 
-All `float` values in contracts are stored and computed as `ContractingDecimal` (arbitrary-precision decimal). This prevents the classic floating-point issue:
+Xian contract code uses normal Python `float` syntax in signatures and literals,
+but the runtime executes those values as `ContractingDecimal`, not as binary
+IEEE 754 floats.
+
+That means:
+
+- `amount: float` is the normal way to declare decimal-backed values in
+  contracts
+- a literal like `0.1` is preserved from source and compiled into a decimal
+  runtime value
+- values are stored and encoded deterministically as fixed decimal values
+
+This prevents the classic binary floating-point issue:
 
 ```python
 # Standard Python: 0.1 + 0.2 = 0.30000000000000004
-# Xian contracts:  0.1 + 0.2 = 0.3 (exact)
+# Xian contracts:  0.1 + 0.2 = 0.3
 ```
+
+Current numeric policy:
+
+- up to `61` whole digits
+- up to `30` fractional digits
+- extra fractional digits are truncated toward zero
+- values outside the supported range are clamped to the supported min/max
+
+This range is already wider than Ethereum-style `18` decimal token precision.
 
 ### Deterministic JSON Encoding
 
@@ -84,7 +105,8 @@ State values are serialized to JSON with deterministic properties:
 
 - Dictionary key order is preserved (guaranteed since Python 3.7)
 - No whitespace variation (compact format with `separators=(",", ":")`)
-- Special types (`Decimal`, `Datetime`, `bytes`) use fixed marker formats
+- Special types (`ContractingDecimal`, `Datetime`, `bytes`) use fixed marker
+  formats
 - The same value always produces the same byte string
 
 ### Deterministic Random

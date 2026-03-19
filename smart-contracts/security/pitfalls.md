@@ -96,26 +96,35 @@ def add_item(item: str):
 
 This applies to any mutable value (`list`, `dict`) stored in a `Hash` or `Variable`.
 
-## 5. Integer Overflow
+## 5. Numeric Semantics
 
-Python integers have arbitrary precision, but mixing integers with floating-point arithmetic can lose precision. Use `Decimal` types through the contracting runtime for financial calculations:
+Xian contract code uses `float` syntax, but it does not execute those values as
+ordinary Python binary floats. The compiler preserves float literals from the
+source code, and the runtime executes them as `ContractingDecimal`.
+
+That means this is fine and deterministic in Xian:
 
 ```python
-# BAD -- float precision issues
 @export
 def calculate(amount: float):
-    result = amount * 0.1 + amount * 0.2
-    # May not equal amount * 0.3 due to float rounding
-
-# GOOD -- the runtime stores floats as ContractingDecimal
-# which preserves precision. Stick to the Hash/Variable system:
-@export
-def calculate(amount: float):
-    balances[ctx.caller] -= amount
-    # The -= operation uses ContractingDecimal internally
+    return amount * 0.1 + amount * 0.2
 ```
 
-All `float` values stored in `Hash` or `Variable` are automatically converted to `ContractingDecimal`, which provides exact decimal arithmetic.
+The real pitfalls are different:
+
+- do not assume unlimited decimal range
+- do not assume more than the supported fractional precision
+- do not compare against values that rely on extra digits beyond the supported
+  scale
+
+Current policy:
+
+- `61` whole digits
+- `30` fractional digits
+- extra fractional digits are truncated toward zero
+
+Use `float` for normal user-facing decimal amounts. Use `int` when the value is
+conceptually integral.
 
 ## 6. Random is Not Truly Random
 
