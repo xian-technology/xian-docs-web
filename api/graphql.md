@@ -22,6 +22,9 @@ paths exposed by the validator when BDS is enabled.
 
 Like BDS itself, GraphQL is eventually consistent with the latest finalized
 block rather than part of the consensus hot path.
+Finalized BDS payloads are also written to a local spool before they are
+indexed, so a node can replay and recover its indexed data after restarts or
+temporary database outages.
 
 ## What It Is Not
 

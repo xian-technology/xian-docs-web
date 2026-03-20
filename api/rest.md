@@ -78,6 +78,9 @@ These indexed reads are eventually consistent. The validator finalizes the
 block first, then the BDS worker persists the indexed payload asynchronously.
 So raw `/get/...` reads reflect current state immediately, while BDS-backed
 history/index queries may lag briefly behind the latest committed block.
+To make this resilient, the node writes finalized BDS payloads to a local
+spool before the worker persists them to Postgres. If the node or database
+restarts, BDS replays that spool on startup and catches the index back up.
 
 Current BDS-backed ABCI query paths include:
 
