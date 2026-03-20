@@ -119,9 +119,11 @@ Current catch-up behavior:
 - if BDS was enabled and finalized blocks were spooled locally, the node can
   recover and catch up from that local spool after restarts or temporary DB
   downtime
-- this is not yet a full historical reindex path for a node that never had BDS
-  enabled in the first place
-- a full backfill/reindex flow still needs to be added separately
+- for full historical backfill, use `xian-bds-reindex` against local or remote
+  CometBFT RPC
+- if the local node has already pruned away the required block history, local
+  reindex is no longer enough and an archival RPC source or imported BDS
+  snapshot is needed
 
 Use the raw node paths for authoritative current state:
 

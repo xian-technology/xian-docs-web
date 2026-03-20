@@ -69,6 +69,38 @@ Use the node's ABCI query surface for canonical reads:
 Use GraphQL only when you want a convenience query layer over the BDS
 database.
 
+## BDS Catch-Up and Reindex
+
+If BDS is enabled and the node already wrote finalized payloads to its local
+spool, the worker replays that spool automatically after restart or temporary
+database downtime.
+
+For full historical backfill, use:
+
+```bash
+uv run xian-bds-reindex
+```
+
+Useful options:
+
+```bash
+uv run xian-bds-reindex --start-height 1000
+uv run xian-bds-reindex --end-height 5000
+uv run xian-bds-reindex --rpc-url http://127.0.0.1:26657
+uv run xian-bds-reindex --reset
+```
+
+What this needs:
+
+- local or remote CometBFT RPC access
+- retained block history for the heights you want to index
+
+If the local node has already pruned away the required history, local reindex
+cannot reconstruct it. In that case the practical options are:
+
+- reindex from an archival RPC source
+- import a BDS/Postgres snapshot from another node
+
 ## Multi-Node Testing
 
 Local multi-node consensus testing lives in `xian-stack` localnet:
