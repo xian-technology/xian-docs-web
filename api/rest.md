@@ -74,6 +74,11 @@ When BDS is enabled, additional query paths are available under the same ABCI
 query surface. These are still node queries, but backed by the optional BDS
 index instead of the raw current-state driver.
 
+These indexed reads are eventually consistent. The validator finalizes the
+block first, then the BDS worker persists the indexed payload asynchronously.
+So raw `/get/...` reads reflect current state immediately, while BDS-backed
+history/index queries may lag briefly behind the latest committed block.
+
 Current BDS-backed ABCI query paths include:
 
 ```text

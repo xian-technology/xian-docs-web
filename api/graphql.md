@@ -20,6 +20,9 @@ GraphQL is therefore a convenience layer over BDS, not the authoritative read
 contract. The authoritative indexed node-facing surface is still the ABCI query
 paths exposed by the validator when BDS is enabled.
 
+Like BDS itself, GraphQL is eventually consistent with the latest finalized
+block rather than part of the consensus hot path.
+
 ## What It Is Not
 
 - it is not part of the deterministic consensus path
