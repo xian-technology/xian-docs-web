@@ -85,6 +85,8 @@ restarts, BDS replays that spool on startup and catches the index back up.
 Current BDS-backed ABCI query paths include:
 
 ```text
+GET /api/abci_query/bds_status
+GET /api/abci_query/bds_spool/limit=50/offset=0
 GET /api/abci_query/blocks/limit=50/offset=0
 GET /api/abci_query/block/123
 GET /api/abci_query/block_by_hash/<hash>
@@ -104,6 +106,22 @@ GET /api/abci_query/state_patches_for_block/123
 GET /api/abci_query/state_patch/<hash>
 GET /api/abci_query/state_changes_for_patch/<hash>
 ```
+
+Operator-oriented BDS inspection:
+
+- `/bds_status` reports worker state, queue depth, spool size, indexed head,
+  and lag relative to the node's current block height.
+- `/bds_spool` lists the currently pending spooled block payloads waiting to be
+  indexed into Postgres.
+
+Current catch-up behavior:
+
+- if BDS was enabled and finalized blocks were spooled locally, the node can
+  recover and catch up from that local spool after restarts or temporary DB
+  downtime
+- this is not yet a full historical reindex path for a node that never had BDS
+  enabled in the first place
+- a full backfill/reindex flow still needs to be added separately
 
 Use the raw node paths for authoritative current state:
 

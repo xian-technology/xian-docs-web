@@ -63,6 +63,8 @@ Use the node's ABCI query surface for canonical reads:
   `/simulate_tx/...`
 - BDS-backed indexed/history reads like `/blocks/...`, `/tx/...`,
   `/events/...`, and `/state_history/...` when BDS is enabled
+- BDS operator reads like `/bds_status` and `/bds_spool/...` to inspect queue,
+  spool, and indexed-head health
 
 Use GraphQL only when you want a convenience query layer over the BDS
 database.

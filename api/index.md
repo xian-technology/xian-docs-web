@@ -27,5 +27,7 @@ GET http://localhost:26657/status
 GET http://localhost:8080/api/status
 GET http://localhost:8080/api/contract/currency
 GET http://localhost:8080/api/abci_query/get/currency.balances:alice
+GET http://localhost:8080/api/abci_query/bds_status
+GET http://localhost:8080/api/abci_query/bds_spool/limit=20/offset=0
 GET http://localhost:8080/api/abci_query/simulate_tx/<hex_payload>
 ```
