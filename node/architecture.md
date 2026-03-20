@@ -47,7 +47,9 @@ orchestrated deployment.
 
 - Dashboard and explorer: separate HTTP/WebSocket service backed by CometBFT
   RPC
-- BDS + GraphQL: optional Postgres and PostGraphile services for indexed data
+- BDS: optional indexed storage queried through additional ABCI query paths on
+  the node
+- GraphQL: optional PostGraphile layer over the BDS Postgres database
 
 These are not part of the deterministic execution path.
 
@@ -60,5 +62,5 @@ Consensus-sensitive behavior lives in `xian-abci` and `xian-contracting`:
 - state storage and app-hash generation
 - instruction metering and linter rules
 
-Runtime services such as Compose, dashboard, GraphQL, and supervisor choice do
-not change consensus semantics.
+Runtime services such as Compose, dashboard, BDS, GraphQL, and supervisor
+choice do not change consensus semantics.

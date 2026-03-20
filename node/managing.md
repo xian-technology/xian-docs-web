@@ -55,8 +55,17 @@ Optional services:
 - dashboard: port `8080` by default
 - GraphQL/PostGraphile: port `5000` when BDS is enabled
 
-Use the dashboard for chain inspection and WebSocket subscriptions. Use
-GraphQL only when the indexed BDS path is running.
+Use the dashboard for chain inspection and WebSocket subscriptions.
+
+Use the node's ABCI query surface for canonical reads:
+
+- raw current-state reads like `/get/...`, `/contract/...`, and
+  `/simulate_tx/...`
+- BDS-backed indexed/history reads like `/blocks/...`, `/tx/...`,
+  `/events/...`, and `/state_history/...` when BDS is enabled
+
+Use GraphQL only when you want a convenience query layer over the BDS
+database.
 
 ## Multi-Node Testing
 

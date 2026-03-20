@@ -10,13 +10,15 @@ equivalent.
 | CometBFT RPC | canonical node RPC for tx broadcast, blocks, ABCI query |
 | Dashboard REST | optional convenience API on top of CometBFT RPC |
 | Dashboard WebSocket | optional real-time observer/subscription layer |
-| GraphQL / BDS | optional indexed read layer when the BDS stack is running |
+| BDS-backed ABCI query | optional indexed/history query layer on the node itself |
+| GraphQL / PostGraphile | optional convenience layer over the BDS database |
 
 ## Which One To Use
 
 - use **CometBFT RPC** and **ABCI query** for canonical low-level access
+- use **BDS-backed ABCI query** for indexed/history reads when BDS is enabled
 - use the **dashboard REST/WebSocket** service for explorer/operator UX
-- use **GraphQL** only when the optional BDS stack is enabled
+- use **GraphQL** only as an optional convenience layer when the BDS stack is enabled
 
 ## Quick Examples
 
