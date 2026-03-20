@@ -17,6 +17,7 @@ http://<dashboard-host>:8080
 - `GET /api/net_info`
 - `GET /api/validators`
 - `GET /api/consensus`
+- `GET /api/monitoring`
 
 ### Blocks / Transactions
 
@@ -68,7 +69,23 @@ GET /api/abci_query/contract/currency
 GET /api/abci_query/contract_methods/currency
 GET /api/abci_query/contract_vars/currency
 GET /api/abci_query/simulate_tx/<hex_payload>
+GET /api/abci_query/perf_status
 ```
+
+## Monitoring Summary
+
+```text
+GET /api/monitoring
+```
+
+This route backs the dashboard's operator cards. It aggregates:
+
+- the node's decoded `/perf_status` ABCI query
+- the node's decoded `/bds_status` ABCI query when BDS is enabled
+- CometBFT `unconfirmed_txs`
+
+Use it for explorer/operator UX. For canonical reads, keep using CometBFT RPC
+and direct ABCI query paths.
 
 When BDS is enabled, additional query paths are available under the same ABCI
 query surface. These are still node queries, but backed by the optional BDS
@@ -87,6 +104,7 @@ Current BDS-backed ABCI query paths include:
 ```text
 GET /api/abci_query/bds_status
 GET /api/abci_query/bds_spool/limit=50/offset=0
+GET /api/abci_query/perf_status
 GET /api/abci_query/blocks/limit=50/offset=0
 GET /api/abci_query/block/123
 GET /api/abci_query/block_by_hash/<hash>
@@ -114,6 +132,8 @@ Operator-oriented BDS inspection:
   and warning/error alerts.
 - `/bds_spool` lists the currently pending spooled block payloads waiting to be
   indexed into Postgres.
+- `/perf_status` reports the node's current execution/performance snapshot,
+  including recent block timing and tracer metadata.
 
 Current catch-up behavior:
 
@@ -135,4 +155,5 @@ GET /api/abci_query/contract_methods/<name>
 GET /api/abci_query/contract_vars/<name>
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/simulate_tx/<hex_payload>
+GET /api/abci_query/perf_status
 ```

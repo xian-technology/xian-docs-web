@@ -75,7 +75,10 @@ Common ports in the current stack:
 | `26656` | CometBFT P2P |
 | `26657` | CometBFT RPC |
 | `26660` | Prometheus metrics |
+| `9108` | Xian Prometheus metrics |
 | `8080` | optional dashboard |
+| `9090` | optional Prometheus |
+| `3000` | optional Grafana |
 | `5000` | optional GraphQL / PostGraphile in BDS mode |
 
 ## Dashboard Settings
@@ -90,3 +93,34 @@ settings:
 When enabled, `xian node start` passes those values to the `xian-stack`
 backend, which starts the separate dashboard service alongside the node
 runtime.
+
+## Xian Metrics Settings
+
+Xian's own Prometheus endpoint is configured inside the rendered
+`config.toml` under `[xian]`, separate from CometBFT's built-in
+instrumentation block.
+
+Current keys:
+
+- `metrics_enabled`
+- `metrics_host`
+- `metrics_port`
+- `metrics_bds_refresh_seconds`
+
+In the Docker stack, the runtime binds the Xian metrics server inside the
+container and publishes it to the host separately from CometBFT's `26660`
+metrics endpoint.
+
+## Stack Performance Snapshot Settings
+
+The containerized `xian-stack` runtime enables Xian performance snapshots by
+default so the dashboard and `/perf_status` can show recent execution timing.
+
+Current stack-level environment knobs:
+
+- `XIAN_PERF_ENABLED`
+- `XIAN_PERF_RECENT_BLOCKS`
+
+These are runtime environment settings, not CometBFT config keys. They control
+whether the node writes recent execution snapshots under the CometBFT home and
+how many completed blocks are retained there for inspection.

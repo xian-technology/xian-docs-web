@@ -47,6 +47,8 @@ orchestrated deployment.
 
 - Dashboard and explorer: separate HTTP/WebSocket service backed by CometBFT
   RPC
+- Monitoring: optional Prometheus/Grafana stack plus the Xian app metrics
+  endpoint
 - BDS: optional indexed storage queried through additional ABCI query paths on
   the node
 - GraphQL: optional PostGraphile layer over the BDS Postgres database

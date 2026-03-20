@@ -55,14 +55,57 @@ python3 ./scripts/backend.py storage-report
 make storage-report
 ```
 
+## Monitoring Layers
+
+Use the monitoring surfaces in this order:
+
+- CometBFT RPC and raw ABCI query for canonical low-level reads
+- Xian Prometheus metrics plus CometBFT metrics for alerting and time-series
+  monitoring
+- dashboard REST/WebSocket for operator UX and exploration
+- BDS-backed ABCI query for indexed/history reads
+- GraphQL/PostGraphile only as an optional convenience layer over BDS
+
 ## Dashboard and GraphQL
 
 Optional services:
 
 - dashboard: port `8080` by default
+- Xian Prometheus metrics: port `9108` by default
+- Prometheus: port `9090` by default
+- Grafana: port `3000` by default
 - GraphQL/PostGraphile: port `5000` when BDS is enabled
 
 Use the dashboard for chain inspection and WebSocket subscriptions.
+
+Use Prometheus and Grafana for remote monitoring, alerting, and retention.
+
+From `xian-stack`:
+
+```bash
+make monitoring-up
+make monitoring-down
+make monitoring-bds-up
+make monitoring-bds-down
+make monitoring-fidelity-up
+make monitoring-fidelity-down
+```
+
+What gets scraped:
+
+- CometBFT metrics on `:26660`
+- Xian metrics on `:9108`
+
+In the Docker stack, Xian performance snapshots are enabled by default so the
+dashboard can show recent execution timing without additional setup. Override
+that with `XIAN_PERF_ENABLED=0` if you explicitly want to disable the
+`/perf_status` snapshot path.
+
+What the dashboard adds without duplicating the main node cards:
+
+- execution health from `/perf_status`
+- mempool pressure from `unconfirmed_txs`
+- BDS lag, queue, spool, and alerts from `/bds_status`
 
 Use the node's ABCI query surface for canonical reads:
 
@@ -72,6 +115,8 @@ Use the node's ABCI query surface for canonical reads:
   `/events/...`, and `/state_history/...` when BDS is enabled
 - BDS operator reads like `/bds_status` and `/bds_spool/...` to inspect queue,
   spool, and indexed-head health
+- performance reads like `/perf_status` to inspect recent block timing and
+  tracer metadata
 
 Use GraphQL only when you want a convenience query layer over the BDS
 database.
