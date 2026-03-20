@@ -82,6 +82,24 @@ If BDS is enabled and the node already wrote finalized payloads to its local
 spool, the worker replays that spool automatically after restart or temporary
 database downtime.
 
+For explicit offline spool maintenance:
+
+```bash
+uv run xian-bds-spool compact --offline
+uv run xian-bds-spool drain --offline
+```
+
+What these are for:
+
+- `compact`: remove stale spool files that are already covered by the indexed
+  BDS head
+- `drain`: persist the currently pending local spool into Postgres on an
+  existing BDS database
+
+Use `drain` when BDS was temporarily unavailable but the local spool still has
+the missing finalized blocks. Do not use it as a cold-bootstrap replacement for
+historical indexing.
+
 For full historical backfill, use:
 
 ```bash
@@ -106,7 +124,30 @@ If the local node has already pruned away the required history, local reindex
 cannot reconstruct it. In that case the practical options are:
 
 - reindex from an archival RPC source
-- import a BDS/Postgres snapshot from another node
+- import a BDS snapshot from another node
+
+## BDS Snapshot Export and Import
+
+For faster bootstrap, migration, or recovery, BDS can now be exported and
+imported separately from the live chain state:
+
+```bash
+uv run xian-bds-snapshot export --output-path ./xian-bds-snapshot.tar.gz
+uv run xian-bds-snapshot import --input-path ./xian-bds-snapshot.tar.gz
+```
+
+Recommended use:
+
+- export from a healthy indexed node
+- import into a stopped node before bringing BDS online
+- let the local spool replay or `xian-bds-reindex` fill any remaining gap after
+  the imported indexed height
+
+Snapshot import is the best path when:
+
+- BDS is being enabled for the first time on a large network
+- the local node is pruned and cannot rebuild full history from its own RPC
+- you want a faster bootstrap than replaying the whole chain from scratch
 
 ## Storage and Retention
 
