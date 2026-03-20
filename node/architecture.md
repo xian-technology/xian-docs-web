@@ -50,6 +50,8 @@ orchestrated deployment.
 - BDS: optional indexed storage queried through additional ABCI query paths on
   the node
 - GraphQL: optional PostGraphile layer over the BDS Postgres database
+- Host-backed storage growth comes from chain data, Xian state, the BDS spool,
+  and Postgres volumes rather than mutable growth inside a container image
 
 These are not part of the deterministic execution path.
 

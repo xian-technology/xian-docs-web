@@ -48,6 +48,13 @@ For BDS-enabled integrated runs:
 python3 ./scripts/backend.py start --service-node
 ```
 
+Host-side storage inspection from `xian-stack`:
+
+```bash
+python3 ./scripts/backend.py storage-report
+make storage-report
+```
+
 ## Dashboard and GraphQL
 
 Optional services:
@@ -100,6 +107,35 @@ cannot reconstruct it. In that case the practical options are:
 
 - reindex from an archival RPC source
 - import a BDS/Postgres snapshot from another node
+
+## Storage and Retention
+
+Docker images themselves are immutable layers. The thing that grows during node
+operation is host-side storage:
+
+- CometBFT data under `.cometbft`
+- Xian state under `.cometbft/xian`
+- the local BDS spool under `.cometbft/xian/bds-spool`
+- Postgres data under `.bds.db`
+- Docker build cache, image layers, writable layers, and container logs
+
+Use the stack storage report to inspect the Xian-specific paths:
+
+```bash
+python3 ./scripts/backend.py storage-report
+```
+
+Use `/bds_status` to inspect the BDS worker, indexed head, spool size, and
+low-disk alerts.
+
+Operational guidance:
+
+- on pruned nodes, local BDS reindex only works for heights the node still
+  retains
+- on archival nodes, local BDS reindex can rebuild the full index directly from
+  RPC
+- if neither local history nor spool is sufficient, use an archival RPC source
+  or import a BDS snapshot from another node
 
 ## Multi-Node Testing
 

@@ -110,7 +110,8 @@ GET /api/abci_query/state_changes_for_patch/<hash>
 Operator-oriented BDS inspection:
 
 - `/bds_status` reports worker state, queue depth, spool size, indexed head,
-  and lag relative to the node's current block height.
+  lag relative to the node's current block height, filesystem storage metrics,
+  and warning/error alerts.
 - `/bds_spool` lists the currently pending spooled block payloads waiting to be
   indexed into Postgres.
 
