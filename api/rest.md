@@ -26,6 +26,12 @@ http://<dashboard-host>:8080
 - `GET /api/tx/{hash}`
 - `GET /api/unconfirmed_txs`
 
+For transaction lookups, the original submitted transaction and the execution
+result are separate:
+
+- `result.tx` is the submitted transaction input
+- `result.tx_result.data` is Xian's decoded execution output
+
 ### Contracts / ABCI
 
 - `GET /api/contract/{name}`

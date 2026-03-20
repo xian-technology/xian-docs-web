@@ -216,4 +216,11 @@ Also available:
 - `get_genesis()`
 - `get_chain_id()`
 
+`get_tx(tx_hash)` now exposes the two important pieces separately:
+
+- `result.tx` is the original submitted transaction
+- `result.tx_result.data` is the decoded execution output
+- for convenience, `xian-py` also surfaces these as top-level `transaction` and
+  `execution` fields on the returned dictionary
+
 See the repo README for package-level development and compatibility notes.
