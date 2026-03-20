@@ -16,6 +16,10 @@ The current implementation uses PostGraphile over the BDS Postgres database. It
 is useful for indexed, exploratory queries that are awkward through raw ABCI
 queries.
 
+GraphQL is therefore a convenience layer over BDS, not the authoritative read
+contract. The authoritative indexed node-facing surface is still the ABCI query
+paths exposed by the validator when BDS is enabled.
+
 ## What It Is Not
 
 - it is not part of the deterministic consensus path

@@ -70,5 +70,40 @@ GET /api/abci_query/contract_vars/currency
 GET /api/abci_query/simulate_tx/<hex_payload>
 ```
 
-When BDS is enabled, additional query paths may be available under the same
-ABCI query surface, such as indexed state/history helpers.
+When BDS is enabled, additional query paths are available under the same ABCI
+query surface. These are still node queries, but backed by the optional BDS
+index instead of the raw current-state driver.
+
+Current BDS-backed ABCI query paths include:
+
+```text
+GET /api/abci_query/blocks/limit=50/offset=0
+GET /api/abci_query/block/123
+GET /api/abci_query/block_by_hash/<hash>
+GET /api/abci_query/tx/<hash>
+GET /api/abci_query/txs_for_block/123
+GET /api/abci_query/txs_by_sender/<address>/limit=50/offset=0
+GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
+GET /api/abci_query/events_for_tx/<hash>
+GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
+GET /api/abci_query/state/<prefix>/limit=50/offset=0
+GET /api/abci_query/state_history/<key>/limit=50/offset=0
+GET /api/abci_query/state_for_tx/<hash>
+GET /api/abci_query/state_for_block/123
+GET /api/abci_query/contracts/limit=50/offset=0
+GET /api/abci_query/state_patches
+GET /api/abci_query/state_patches_for_block/123
+GET /api/abci_query/state_patch/<hash>
+GET /api/abci_query/state_changes_for_patch/<hash>
+```
+
+Use the raw node paths for authoritative current state:
+
+```text
+GET /api/abci_query/get/<state_key>
+GET /api/abci_query/contract/<name>
+GET /api/abci_query/contract_methods/<name>
+GET /api/abci_query/contract_vars/<name>
+GET /api/abci_query/get_next_nonce/<address>
+GET /api/abci_query/simulate_tx/<hex_payload>
+```
