@@ -19,7 +19,7 @@ Every transaction on Xian follows a defined path from creation to finalization. 
       |  4. Validate signature
       |  5. Verify chain_id matches
       |  6. Check nonce ordering
-      |  7. Verify sender has enough TAU for stamps
+      |  7. Verify sender has enough XIAN for stamps
       v
   Mempool
       |
@@ -34,7 +34,7 @@ Every transaction on Xian follows a defined path from creation to finalization. 
       |  10. Execute contract function in sandbox
       |  11. Meter every instruction (stamps)
       |  12. Apply state changes (or rollback on failure)
-      |  13. Deduct stamps from sender's TAU balance
+      |  13. Deduct stamps from sender's XIAN balance
       |  14. Collect events emitted by the contract
       v
   Commit
@@ -98,7 +98,7 @@ Before entering the mempool, the transaction passes through validation:
 1. **Signature verification** -- the Ed25519 signature must be valid for the payload and sender's public key
 2. **Chain ID check** -- the transaction's chain_id must match the network
 3. **Nonce check** -- the nonce must be the next expected value for this sender
-4. **Balance check** -- the sender must have enough TAU to cover the requested stamp limit
+4. **Balance check** -- the sender must have enough XIAN to cover the requested stamp limit
 
 If any check fails, the transaction is rejected and never enters the mempool.
 

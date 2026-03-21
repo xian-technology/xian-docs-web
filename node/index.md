@@ -8,7 +8,7 @@ the maintained repos:
 - `xian-stack` owns the Docker images, Compose topology, backend lifecycle
   script, localnet, and optional dashboard/BDS services.
 - `xian-abci` owns the deterministic node process, config rendering primitives,
-  and CometBFT-facing behavior.
+  CometBFT-facing behavior, and application snapshot serving/loading.
 - `xian-configs` owns canonical network bundles and contract presets.
 
 ## Recommended Flow

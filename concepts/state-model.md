@@ -17,7 +17,7 @@ Examples:
 | `currency.balances["alice"]` | `currency.balances:alice` |
 | `currency.balances["alice", "bob"]` | `currency.balances:alice:bob` |
 | `con_nft.owner` (Variable) | `con_nft.owner` |
-| `con_dex.pairs["TAU", "ETH"]` | `con_dex.pairs:TAU:ETH` |
+| `con_dex.pairs["XIAN", "ETH"]` | `con_dex.pairs:XIAN:ETH` |
 | `con_game.metadata["name"]` | `con_game.metadata:name` |
 
 The `.` separates the contract name from the variable name. The `:` separates key dimensions. You never construct these keys manually in contract code -- the ORM (`Hash`, `Variable`) handles it. But knowing the format is useful when querying state via the API.

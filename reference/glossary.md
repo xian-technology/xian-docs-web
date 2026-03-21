@@ -57,11 +57,11 @@ Object-Relational Mapping. In Xian, refers to the `Variable`, `Hash`, `ForeignVa
 The original signer of a transaction, available as `ctx.signer`. This value never changes in a call chain -- even when contract A calls contract B, `ctx.signer` remains the address of the user who submitted the transaction.
 
 ### Stamps
-The unit of computation cost on Xian, analogous to gas on Ethereum. Every operation (instruction execution, storage read, storage write) costs stamps. Stamps are purchased with TAU at a rate of 20 stamps per TAU.
+The unit of computation cost on Xian, analogous to gas on Ethereum. Every operation (instruction execution, storage read, storage write) costs stamps. Stamps are purchased with XIAN at a rate of 20 stamps per XIAN.
 
 ## T
 
-### TAU
+### XIAN
 The native currency of the Xian network. Used to pay for stamps (transaction fees), for transfers between addresses, and for staking.
 
 ### Transaction
@@ -70,7 +70,7 @@ A signed message that instructs the network to execute a contract function with 
 ## V
 
 ### Validator
-A node that participates in consensus. Validators propose blocks, vote on block validity, and execute transactions. Validators must stake TAU and run the same software version.
+A node that participates in consensus. Validators propose blocks, vote on block validity, and execute transactions. Validators must stake XIAN and run the same software version.
 
 ### Variable
 A single-value storage primitive that persists on-chain. Declared with `Variable()` or `Variable(default_value=0)`. Use `.set(value)` and `.get()` to write and read.

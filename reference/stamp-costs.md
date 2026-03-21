@@ -16,7 +16,7 @@ Byte count includes both the encoded key (e.g., `currency.balances:alice`) and t
 | Item | Value |
 |------|-------|
 | Base transaction cost | 5 stamps |
-| Stamp-to-TAU conversion | 20 stamps = 1 TAU |
+| Stamp-to-XIAN conversion | 20 stamps = 1 XIAN |
 
 ## Limits
 
@@ -104,11 +104,11 @@ def transfer(to: str, amount: float):
 | Batch cross-contract calls | Reduces function call overhead |
 | Avoid storing large strings or lists | Every byte costs 25 stamps to write |
 
-## TAU Cost Examples
+## XIAN Cost Examples
 
-At 20 stamps per TAU:
+At 20 stamps per XIAN:
 
-| Operation | Stamps | TAU Cost |
+| Operation | Stamps | XIAN Cost |
 |-----------|--------|----------|
 | Simple read | ~15 | ~0.75 |
 | Single write | ~600 | ~30 |

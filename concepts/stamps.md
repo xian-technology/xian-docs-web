@@ -4,7 +4,7 @@ Stamps are Xian's unit of computation, analogous to gas on Ethereum. Every opera
 
 ## How Stamps Work
 
-When you submit a transaction, you specify a stamp limit (the maximum stamps you are willing to spend). The contract executes, and the actual stamps consumed are deducted from your TAU balance.
+When you submit a transaction, you specify a stamp limit (the maximum stamps you are willing to spend). The contract executes, and the actual stamps consumed are deducted from your XIAN balance.
 
 - If the contract completes within the stamp limit, you pay only the stamps actually used.
 - If the contract exceeds the stamp limit, execution halts, all state changes are rolled back, and you pay the full stamp limit.
@@ -15,7 +15,7 @@ When you submit a transaction, you specify a stamp limit (the maximum stamps you
 |----------|-------|-------------|
 | `READ_COST_PER_BYTE` | 1 | Stamps charged per byte when reading from storage |
 | `WRITE_COST_PER_BYTE` | 25 | Stamps charged per byte when writing to storage |
-| `STAMPS_PER_TAU` | 20 | Number of stamps purchased by 1 TAU |
+| `STAMPS_PER_T` | 20 | Number of stamps purchased by 1 XIAN. `T` stands for the native token. |
 | Base transaction cost | 5 | Flat stamp cost added to every transaction |
 
 ## The Stamp Formula
@@ -48,18 +48,18 @@ The byte count includes both the key and the value.
 
 If any limit is exceeded, the transaction fails and all state changes are reverted. The stamps consumed up to the failure point are still charged.
 
-## Converting Stamps to TAU
+## Converting Stamps to XIAN
 
-Stamps are purchased with TAU, the native currency:
+Stamps are purchased with XIAN, the native currency:
 
 ```
-TAU cost = stamps_used / STAMPS_PER_TAU
-TAU cost = stamps_used / 20
+XIAN cost = stamps_used / STAMPS_PER_T
+XIAN cost = stamps_used / 20
 ```
 
 Examples:
 
-| Stamps Used | TAU Cost |
+| Stamps Used | XIAN Cost |
 |-------------|----------|
 | 100 | 5.0 |
 | 1,000 | 50.0 |

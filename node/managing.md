@@ -171,6 +171,75 @@ cannot reconstruct it. In that case the practical options are:
 - reindex from an archival RPC source
 - import a BDS snapshot from another node
 
+## Chain State Snapshots
+
+Application-state snapshots are separate from BDS snapshots.
+
+Use them when you want CometBFT state sync or a clean local application-state
+archive:
+
+```bash
+uv run xian-state-snapshot list
+uv run xian-state-snapshot export
+uv run xian-state-snapshot export --output-path ./xian-state-snapshot.tar.gz
+uv run xian-state-snapshot import --input-path ./xian-state-snapshot.tar.gz
+```
+
+What these snapshots contain:
+
+- latest Xian application height and app hash
+- contract state
+- nonce state
+
+What they do not contain:
+
+- full CometBFT `data/` history
+- BDS/Postgres data
+
+Use `snapshot_url` restore when you already have a full prepared node-home
+archive.
+
+Use `xian-state-snapshot` plus CometBFT state sync when you want protocol-level
+application snapshot bootstrap.
+
+To consume peer-served application snapshots through state sync, configure the
+node with trusted RPC servers and trust metadata:
+
+```bash
+uv run xian-configure-node \
+  --moniker validator-1 \
+  --validator-privkey <hex> \
+  --copy-genesis \
+  --statesync-enable \
+  --statesync-rpc-server http://rpc-1.example:26657 \
+  --statesync-rpc-server http://rpc-2.example:26657 \
+  --statesync-trust-height 123456 \
+  --statesync-trust-hash <trusted-block-hash>
+```
+
+Current model:
+
+- snapshot export is manual
+- snapshot serving/loading is implemented through the ABCI snapshot lifecycle
+- imported snapshots are stored locally so the node can serve them afterward
+
+## Pruning
+
+Current pruning is block-history pruning through `retain_height`.
+
+What this means operationally:
+
+- the current LMDB application state remains available
+- historical local replay/reindex depends on retained block history
+- pruned nodes are fine for normal operation but not ideal as archival sources
+
+If you enable pruning and later need historical rebuilds beyond the retained
+window, use:
+
+- an archival RPC source
+- a full-home snapshot
+- or a BDS snapshot / reindex workflow, depending on what data you need
+
 ## BDS Snapshot Export and Import
 
 For faster bootstrap, migration, or recovery, BDS can now be exported and

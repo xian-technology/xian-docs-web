@@ -24,6 +24,7 @@ They carry network-wide defaults such as:
 - `genesis_source`
 - `snapshot_url`
 - `seed_nodes`
+- `tracer_mode`
 
 Canonical manifests also live in `xian-configs/networks/<name>/manifest.json`.
 
@@ -44,6 +45,7 @@ They carry node-local intent such as:
 - snapshot override
 - service-node mode
 - pruning settings
+- optional state-sync settings
 - optional dashboard settings
 
 See [Node Profiles](/node/profiles) for the exact shape.
@@ -65,6 +67,12 @@ The rendered home contains:
 - `config/priv_validator_key.json`
 - `config/node_key.json`
 - `data/priv_validator_state.json`
+
+Relevant current configuration sections:
+
+- `[statesync]` for CometBFT state sync
+- `[xian]` for Xian runtime features like tracing, metrics, pruning, and
+  parallel execution
 
 ## Ports
 
@@ -93,6 +101,60 @@ settings:
 When enabled, `xian node start` passes those values to the `xian-stack`
 backend, which starts the separate dashboard service alongside the node
 runtime.
+
+## Snapshot Settings
+
+There are two different snapshot concepts in the current stack:
+
+- `snapshot_url`: operator bootstrap by restoring a prepared node-home archive
+- `[statesync]`: protocol-level CometBFT state sync using Xian application
+  snapshots
+
+These are not the same mechanism.
+
+`snapshot_url` is used by the node-init / restore workflow and replaces local
+`data/` and `xian/` directories from an archive.
+
+`[statesync]` is used by CometBFT when syncing from trusted peers that serve
+application snapshots through the ABCI snapshot lifecycle.
+
+Current state-sync keys in `config.toml`:
+
+- `statesync.enable`
+- `statesync.rpc_servers`
+- `statesync.trust_height`
+- `statesync.trust_hash`
+- `statesync.trust_period`
+
+When state sync is enabled, the current `xian-abci` tooling requires:
+
+- at least two trusted RPC servers
+- a trusted height greater than zero
+- the matching trusted block hash
+
+Use the dedicated snapshot tool to manage local application snapshots:
+
+```bash
+uv run xian-state-snapshot list
+uv run xian-state-snapshot export
+uv run xian-state-snapshot import --input-path ./xian-state-snapshot.tar.gz
+```
+
+These application snapshots are the snapshots served through CometBFT state
+sync.
+
+## Pruning Settings
+
+Pruning in the current stack is block-history pruning, not a separate
+application-state pruning mode.
+
+Relevant keys:
+
+- `xian.pruning_enabled`
+- `xian.blocks_to_keep`
+
+When enabled, Xian returns `retain_height` to CometBFT on commit so old block
+history can be dropped. The latest LMDB application state remains intact.
 
 ## Xian Metrics Settings
 

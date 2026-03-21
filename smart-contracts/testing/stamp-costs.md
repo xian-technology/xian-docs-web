@@ -36,7 +36,7 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 |----------|-------|-------------|
 | `READ_COST_PER_BYTE` | 1 | Stamps per byte for storage reads |
 | `WRITE_COST_PER_BYTE` | 25 | Stamps per byte for storage writes |
-| `STAMPS_PER_TAU` | 20 | How many stamps one TAU buys |
+| `STAMPS_PER_T` | 20 | How many stamps one XIAN buys. `T` stands for the native token. |
 | Max stamps per tx | 6,500,000 | Hard ceiling per transaction |
 | Max call count | 800,000 | Maximum Python opcode calls per transaction |
 
