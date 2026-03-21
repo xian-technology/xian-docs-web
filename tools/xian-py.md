@@ -22,7 +22,18 @@ pip install "xian-py[eth]"  # Ethereum wallet helpers
 The intended top-level imports are:
 
 ```python
-from xian_py import Wallet, Xian, XianAsync, XianException, run_sync, to_contract_time
+from xian_py import (
+    Wallet,
+    Xian,
+    XianAsync,
+    XianException,
+    TransactionReceipt,
+    TransactionSubmission,
+    PerformanceStatus,
+    BdsStatus,
+    run_sync,
+    to_contract_time,
+)
 ```
 
 `HDWallet` and `EthereumWallet` live in `xian_py.wallet`; they are optional
@@ -146,6 +157,17 @@ Returned fields now distinguish the lifecycle:
 - `response`
 - `receipt`
 
+The return type is `TransactionSubmission`, so these values are available as
+attributes:
+
+```python
+result = client.send_tx(...)
+print(result.submitted)
+print(result.accepted)
+print(result.tx_hash)
+print(result.receipt)
+```
+
 If `stamps` is omitted, the SDK simulates the transaction first and adds a
 small configurable headroom to the estimated stamp usage before submission.
 
@@ -240,12 +262,40 @@ Also available:
 - `get_nodes()`
 - `get_genesis()`
 - `get_chain_id()`
+- `get_perf_status()`
+- `get_bds_status()`
+- `list_blocks(limit=..., offset=...)`
+- `get_block(height)`
+- `get_block_by_hash(block_hash)`
+- `get_indexed_tx(tx_hash)`
+- `list_txs_for_block(block_ref)`
+- `list_txs_by_sender(sender, limit=..., offset=...)`
+- `list_txs_by_contract(contract, limit=..., offset=...)`
+- `get_events_for_tx(tx_hash)`
+- `list_events(contract, event, limit=..., offset=...)`
+- `get_state_history(key, limit=..., offset=...)`
+- `get_state_for_tx(tx_hash)`
+- `get_state_for_block(block_ref)`
 
-`get_tx(tx_hash)` now exposes the two important pieces separately:
+`get_tx(tx_hash)` and `wait_for_tx(tx_hash)` now return a `TransactionReceipt`
+that exposes the two important pieces separately:
 
 - `result.tx` is the original submitted transaction
 - `result.tx_result.data` is the decoded execution output
-- for convenience, `xian-py` also surfaces these as top-level `transaction` and
-  `execution` fields on the returned dictionary
+- for convenience, `xian-py` also surfaces these as typed attributes:
+  `receipt.transaction` and `receipt.execution`
+
+## Structured Errors
+
+The SDK now exposes more precise error classes:
+
+- `TransportError`
+- `RpcError`
+- `AbciError`
+- `SimulationError`
+- `TransactionError`
+- `TxTimeoutError`
+
+All of them inherit from `XianException`.
 
 See the repo README for package-level development and compatibility notes.
