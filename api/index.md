@@ -22,6 +22,14 @@ equivalent.
 - use the **dashboard REST/WebSocket** service for explorer/operator UX
 - use **GraphQL** only as an optional convenience layer when the BDS stack is enabled
 
+Keep the read contract split clear:
+
+- raw ABCI query is authoritative for current state
+- BDS-backed ABCI query is the indexed/history layer and may lag briefly while
+  catch-up is running
+- GraphQL/PostGraphile sits on top of BDS and inherits that eventual
+  consistency
+
 ## Quick Examples
 
 ```text

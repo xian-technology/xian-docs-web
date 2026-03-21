@@ -182,7 +182,22 @@ ws.onmessage = (msg) => {
 
 ### Via Block Data Service (BDS)
 
-If BDS is enabled, events are stored in a PostgreSQL table with JSONB columns and GIN indexes for advanced queries:
+If BDS is enabled, events become available through the node's indexed ABCI
+query paths and, optionally, GraphQL. Those indexed reads are eventually
+consistent with the latest finalized block because BDS ingests blocks
+asynchronously after finalization.
+
+Typical public query paths include:
+
+```text
+GET /api/abci_query/events/currency/Transfer/limit=50/offset=0
+GET /api/abci_query/events_for_tx/<tx_hash>
+```
+
+Under the hood, BDS stores events in PostgreSQL with JSONB payloads and a GIN
+index on indexed event data, which is what makes those richer filtered reads
+possible. Direct SQL is an implementation detail and operator tool, not the
+primary public API:
 
 ```sql
 SELECT * FROM events

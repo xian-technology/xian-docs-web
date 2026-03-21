@@ -43,7 +43,9 @@ Xian currently supports two runtime topologies in `xian-stack`:
 - `fidelity`: separate `xian-abci` and `CometBFT` containers, closer to an
   orchestrated production layout
 
-The dashboard is optional in both cases and runs as its own service.
+The dashboard is optional in both cases and runs as its own service. BDS and
+GraphQL are optional indexed-read services on top of the node, not part of the
+deterministic validator path.
 
 ## What This Section Covers
 
@@ -53,4 +55,6 @@ The dashboard is optional in both cases and runs as its own service.
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
 - [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`
 - [Starting, Stopping & Monitoring](/node/managing): the operational commands
+- [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,
+  reindex, and snapshot import/export workflows
 - [Validators](/node/validators): validator-specific setup and expectations

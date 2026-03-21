@@ -35,7 +35,7 @@ They are written as JSON and validated on read. The current schema is explicit:
 |------|---------|
 | `validator_key_ref` | path to `validator_key_info.json` or `priv_validator_key.json` |
 | `stack_dir` | explicit `xian-stack` checkout used by the runtime backend |
-| `service_node` | enables the integrated BDS path |
+| `service_node` | enables the optional indexed-service stack used for BDS-backed reads |
 | `home` | explicit CometBFT home override |
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |

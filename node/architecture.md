@@ -49,13 +49,16 @@ orchestrated deployment.
   RPC
 - Monitoring: optional Prometheus/Grafana stack plus the Xian app metrics
   endpoint
-- BDS: optional indexed storage queried through additional ABCI query paths on
-  the node
-- GraphQL: optional PostGraphile layer over the BDS Postgres database
+- BDS: optional indexed storage layer with asynchronous block ingestion,
+  automatic catch-up from CometBFT RPC, and replay/reindex tooling
+- GraphQL: optional PostGraphile layer over the BDS Postgres database for
+  convenience queries only
 - Host-backed storage growth comes from chain data, Xian state, the BDS spool,
   and Postgres volumes rather than mutable growth inside a container image
 
-These are not part of the deterministic execution path.
+These are not part of the deterministic execution path. The validator remains
+authoritative for current-state reads through raw ABCI query, while BDS-backed
+reads are indexed and eventually consistent.
 
 ## Deterministic Boundary
 

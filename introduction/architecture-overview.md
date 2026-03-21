@@ -101,7 +101,9 @@ The stack also supports optional services that are outside the deterministic
 consensus path:
 
 - dashboard HTTP/WebSocket service
-- BDS/Postgres/PostGraphile read stack
+- BDS indexed read stack with Postgres storage, automatic catch-up, and local
+  replay/reindex tooling
+- optional GraphQL/PostGraphile convenience layer over that BDS database
 
 Those services improve observability and query ergonomics, but validators do
 not depend on them for consensus.

@@ -48,7 +48,10 @@ Effects:
 Optional services can also fail independently:
 
 - dashboard unavailable
+- BDS disabled, catching up, or unavailable for indexed/history reads
 - GraphQL unavailable because BDS is not running
 - RPC or WebSocket connection failures
 
-Those are operational errors, not consensus errors.
+Those are operational errors, not consensus errors. Raw current-state ABCI
+queries can still be healthy even when BDS-backed indexed reads are degraded or
+catching up.
