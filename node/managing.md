@@ -123,9 +123,23 @@ database.
 
 ## BDS Catch-Up and Reindex
 
-If BDS is enabled and the node already wrote finalized payloads to its local
-spool, the worker replays that spool automatically after restart or temporary
-database downtime.
+When BDS is enabled, the validator finalizes blocks first and BDS indexes them
+asynchronously. Live finalized blocks are buffered in memory and persisted in
+strict contiguous block order.
+
+If BDS sees a gap, it catches up from CometBFT RPC automatically while newer
+live blocks keep arriving.
+
+Example:
+
+- indexed head is `100`
+- live block `102` arrives before `101` was indexed
+- BDS keeps `102` pending
+- the catch-up worker fetches `101` from RPC
+- BDS writes `101`, then `102`
+
+So yes: BDS can receive new block data and simultaneously retrieve missed data.
+It just never persists them out of order.
 
 For explicit offline spool maintenance:
 

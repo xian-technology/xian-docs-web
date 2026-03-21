@@ -95,9 +95,21 @@ These indexed reads are eventually consistent. The validator finalizes the
 block first, then the BDS worker persists the indexed payload asynchronously.
 So raw `/get/...` reads reflect current state immediately, while BDS-backed
 history/index queries may lag briefly behind the latest committed block.
-To make this resilient, the node writes finalized BDS payloads to a local
-spool before the worker persists them to Postgres. If the node or database
-restarts, BDS replays that spool on startup and catches the index back up.
+To make this resilient without keeping disk I/O in the validator hot path,
+BDS now keeps newly finalized blocks in an in-memory pending buffer and
+persists them in strict contiguous height order. If the indexed head is
+missing a height, BDS fetches the missing blocks from local CometBFT RPC in
+the background while newer live blocks remain pending.
+
+That means BDS can safely receive new block data while it is still catching up:
+
+- if live block `N+2` arrives while `N+1` is missing, `N+2` stays pending
+- the catch-up worker fetches and builds `N+1`
+- BDS persists `N+1`, then `N+2`, preserving a single canonical chain order
+
+The local spool is still available for offline maintenance, snapshot import,
+and explicit recovery workflows, but it is no longer the primary live-path
+durability mechanism.
 
 Current BDS-backed ABCI query paths include:
 
@@ -130,16 +142,19 @@ Operator-oriented BDS inspection:
 - `/bds_status` reports worker state, queue depth, spool size, indexed head,
   lag relative to the node's current block height, filesystem storage metrics,
   and warning/error alerts.
-- `/bds_spool` lists the currently pending spooled block payloads waiting to be
-  indexed into Postgres.
+- `/bds_spool` lists the block payloads currently present on the local spool
+  for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,
   including recent block timing and tracer metadata.
 
 Current catch-up behavior:
 
-- if BDS was enabled and finalized blocks were spooled locally, the node can
-  recover and catch up from that local spool after restarts or temporary DB
-  downtime
+- during live operation, BDS keeps new finalized blocks pending in memory and
+  backfills any missing heights from local CometBFT RPC automatically
+- if the node or database restarts, BDS resumes from the indexed head and
+  continues catch-up from local or remote CometBFT RPC
+- the local spool remains useful for explicit offline recovery and imported
+  payloads, but it is not required for ordinary live catch-up
 - for full historical backfill, use `xian-bds-reindex` against local or remote
   CometBFT RPC
 - if the local node has already pruned away the required block history, local
