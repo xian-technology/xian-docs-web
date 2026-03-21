@@ -126,8 +126,28 @@ result = client.send_tx(
     function="transfer",
     kwargs={"amount": 100, "to": "recipient_public_key"},
     stamps=50_000,
+    mode="checktx",
+    wait_for_tx=True,
 )
 ```
+
+Transaction broadcast modes are explicit:
+
+- `"async"`: submit to the node and return immediately
+- `"checktx"`: wait for mempool admission / `CheckTx`
+- `"commit"`: use CometBFT `broadcast_tx_commit`
+
+Returned fields now distinguish the lifecycle:
+
+- `submitted`
+- `accepted`
+- `finalized`
+- `tx_hash`
+- `response`
+- `receipt`
+
+If `stamps` is omitted, the SDK simulates the transaction first and adds a
+small configurable headroom to the estimated stamp usage before submission.
 
 ### send
 
@@ -138,7 +158,8 @@ result = client.send(
     amount=100,
     to_address="recipient_public_key",
     token="currency",
-    stamps=50_000,
+    mode="checktx",
+    wait_for_tx=True,
 )
 ```
 
@@ -152,6 +173,7 @@ result = client.approve(
     contract="con_dex",
     token="currency",
     amount=1_000,
+    mode="checktx",
 )
 ```
 
@@ -212,6 +234,9 @@ result = client.submit_contract(
 Also available:
 
 - `get_tx(tx_hash)`
+- `wait_for_tx(tx_hash)`
+- `refresh_nonce()`
+- `estimate_stamps(contract, function, kwargs)`
 - `get_nodes()`
 - `get_genesis()`
 - `get_chain_id()`
