@@ -76,7 +76,8 @@ HD wallet support requires `xian-py[hd]`.
 from xian_py import Wallet, Xian
 
 wallet = Wallet()
-client = Xian("http://127.0.0.1:26657", wallet=wallet)
+with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
+    balance = client.get_balance(wallet.public_key)
 ```
 
 Constructor parameters:
@@ -86,6 +87,10 @@ Constructor parameters:
 - optional `wallet`
 
 If `chain_id` is omitted, the client fetches it from the node.
+
+`Xian` keeps a persistent background event loop and HTTP session for the life of
+the client. Prefer using it as a context manager or calling `close()` when you
+are done.
 
 ## Async Client
 
