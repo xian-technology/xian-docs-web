@@ -1,12 +1,13 @@
 # SDKs & Tools
 
-Xian provides a set of developer tools for building, testing, and deploying smart contracts.
+Xian provides a set of developer tools for building, testing, deploying, and
+integrating programmable decentralized networks and applications.
 
 ## Core Tools
 
 | Tool | Purpose |
 |------|---------|
-| [xian-py](/tools/xian-py) | Python SDK for wallets, transactions, and state queries |
+| [xian-py](/tools/xian-py) | Python SDK for applications, services, wallets, transactions, and state queries |
 | [Linter](/tools/linter) | Static analysis to catch invalid code before deployment |
 
 ## Quick Start

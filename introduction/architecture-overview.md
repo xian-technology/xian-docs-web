@@ -1,7 +1,11 @@
 # Architecture Overview
 
 The current Xian stack is split into a small set of focused repositories and a
-runtime topology built around CometBFT plus Python services.
+runtime topology built around CometBFT plus Python-heavy services.
+
+The important framing is that Xian is not only a contract runtime. It is a
+full decentralized application platform with contract execution, node runtime,
+SDKs, deployment tooling, indexed reads, and monitoring surfaces.
 
 ## Core Repositories
 
@@ -22,7 +26,7 @@ Related but non-core tooling:
 ## Runtime Layers
 
 ```text
-applications / wallets / automation
+applications / services / wallets / automation
             |
          xian-py
             |
@@ -107,3 +111,6 @@ consensus path:
 
 Those services improve observability and query ergonomics, but validators do
 not depend on them for consensus.
+
+This is part of the product thesis: Xian should be usable like a real software
+tool, not only as a bare execution engine.

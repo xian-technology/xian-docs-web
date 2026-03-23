@@ -1,6 +1,7 @@
 # xian-py
 
-`xian-py` is the external Python SDK for talking to a Xian node.
+`xian-py` is the external Python SDK for talking to a Xian node from
+applications, services, wallets, and automation workflows.
 
 ## Installation
 

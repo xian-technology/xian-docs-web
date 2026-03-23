@@ -1,17 +1,30 @@
 # What is Xian?
 
-Xian is a blockchain platform where smart contracts are written in Python. It combines the accessibility of the world's most popular programming language with the security guarantees of a Byzantine Fault Tolerant consensus engine.
+Xian is a Python-first decentralized application platform for building
+programmable networks, simple but powerful smart contracts, and software-friendly
+integration layers around them.
 
-If you can write Python, you can write smart contracts on Xian -- no new language to learn, no compilation step, no Solidity, no Rust.
+It should be thought of as decentralized infrastructure that can be used like a
+tool: run an application-specific network, expose programmable shared state,
+and integrate it with normal backend systems without adopting a highly
+specialized contract stack.
 
 ## Key Features
 
-- **Python smart contracts** -- a restricted, sandboxed subset of Python that enforces security and determinism
-- **CometBFT consensus** -- proven BFT consensus engine with instant finality
-- **Metered execution** -- every instruction costs stamps (gas), preventing abuse
-- **On-chain state** -- persistent storage via `Variable` and `Hash` primitives
-- **Cross-contract calls** -- contracts can import and call other deployed contracts
-- **Event system** -- contracts emit structured events for real-time subscriptions
+- **Python-friendly smart contracts** -- a restricted, deterministic subset of
+  Python that is easier to learn and audit than most contract-specific
+  languages
+- **Programmable decentralized networks** -- compose networks and runtime
+  policies around your application instead of treating the chain as a fixed
+  black box
+- **Software-friendly integration** -- SDKs, indexed reads, monitoring,
+  snapshots, and deployment tooling help Xian fit into real applications and
+  operations workflows
+- **Deterministic execution** -- metered execution, stable context values, and
+  restricted runtime rules keep contract behavior predictable across validators
+- **Structured state and events** -- persistent state, cross-contract calls,
+  and event emission support real application backends, observers, and
+  automation
 
 ## Learn More
 

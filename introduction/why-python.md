@@ -1,15 +1,19 @@
 # Why Python for Smart Contracts?
 
-Most blockchain platforms require developers to learn a new language -- Solidity, Move, Ink!, Cairo. Xian takes a different approach: smart contracts are written in Python, the most widely used programming language in the world.
+Most blockchain platforms require developers to learn a specialized contract
+language or a highly specialized tooling stack. Xian takes a different
+approach: contracts are written in Python so ordinary software teams can use
+decentralized infrastructure without first becoming language specialists.
 
 ## Accessibility
 
-Python is the most popular programming language by many measures (TIOBE, Stack Overflow surveys, GitHub usage). Choosing Python as the smart contract language means:
+Choosing Python as the contract language means:
 
 - **No new language to learn** -- if you already know Python, you can start writing contracts immediately
 - **Massive developer pool** -- millions of Python developers can onboard without a learning curve
 - **Rich ecosystem of knowledge** -- tutorials, books, courses, and community support already exist
 - **Familiar tooling** -- use your existing IDE, linter, and test framework
+- **Lower integration friction** -- contract logic can be understood and tested by the same teams that already build the surrounding application and backend systems
 
 ## Readability
 
@@ -28,12 +32,16 @@ Compare this to equivalent logic in Solidity, Rust, or assembly-like languages. 
 
 ## Rapid Development
 
-Python's dynamic nature and concise syntax enable fast iteration:
+Python's concise syntax and familiar tooling enable fast iteration:
 
 - **No compilation step** -- contracts are submitted as source code and compiled on-chain
 - **No ABI generation** -- function signatures are extracted directly from Python source
 - **Interactive testing** -- `ContractingClient` provides a REPL-like experience for testing contracts locally
 - **Quick feedback loops** -- write, test, and deploy in minutes, not hours
+
+For Xian, this matters because the goal is not only “write contracts faster.”
+The goal is to make decentralized application infrastructure easier to
+understand, integrate, and operate for normal engineering teams.
 
 ## Deterministic Execution
 
@@ -73,12 +81,13 @@ Python is not the fastest language. Here is an honest assessment of the tradeoff
 
 ### Slower Than Compiled Languages
 
-Python is interpreted and slower than compiled languages like Rust, Go, or C++. However:
+Python is interpreted and slower than compiled languages like Rust, Go, or C++.
+However, Xian is not trying to win by being the fastest chain:
 
-- **Blockchain workloads are I/O-bound, not CPU-bound** -- most of a transaction's cost is storage reads and writes, not computation
-- **Metering limits total computation** -- the 800,000 opcode limit prevents expensive computation regardless of language speed
-- **Block time is consensus-bound** -- validator agreement (typically 1-5 seconds) dominates block time, not execution speed
-- **Sufficient for real-world contracts** -- token transfers, DEX swaps, NFT mints, and governance votes are not computationally intensive
+- **Many real workloads are state- and coordination-heavy** -- storage, validation, and network coordination often matter more than raw compute speed
+- **Metering limits total computation** -- deterministic stamp limits cap expensive work regardless of language speed
+- **Operational clarity matters** -- easier contracts and easier tooling can be more valuable than squeezing out another benchmark win
+- **The product goal is usability** -- Xian is intended to be a flexible programmable backend, not a throughput-first chain
 
 ### Restricted Subset
 
@@ -93,8 +102,14 @@ This means some Python patterns you are accustomed to are not available. The res
 
 ### Interpreter Version Lock
 
-All validators must run the same CPython version to ensure identical bytecode compilation and instruction counting. This means the network upgrades Python versions through coordinated governance, not independently.
+All validators must run the same CPython version to ensure identical bytecode
+compilation and instruction counting. This means the network upgrades Python
+versions through coordinated governance, not independently.
 
 ## The Bottom Line
 
-Xian chooses developer accessibility and code readability over raw performance. For the vast majority of blockchain use cases -- tokens, DeFi, NFTs, governance, games -- Python's performance is more than sufficient, and the developer experience advantages are substantial.
+Xian chooses developer accessibility, simple but powerful contracts, and
+software-friendly integration over raw performance positioning. The point is not
+to be the fastest chain; the point is to be the easiest useful programmable
+decentralized backend for teams that value clarity, flexibility, and ordinary
+software ergonomics.
