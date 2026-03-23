@@ -28,6 +28,7 @@ from xian_py import (
     Xian,
     XianAsync,
     XianException,
+    NodeStatus,
     TransactionReceipt,
     TransactionSubmission,
     PerformanceStatus,
@@ -268,6 +269,7 @@ Also available:
 - `get_nodes()`
 - `get_genesis()`
 - `get_chain_id()`
+- `get_node_status()`
 - `get_perf_status()`
 - `get_bds_status()`
 - `list_blocks(limit=..., offset=...)`
@@ -278,10 +280,12 @@ Also available:
 - `list_txs_by_sender(sender, limit=..., offset=...)`
 - `list_txs_by_contract(contract, limit=..., offset=...)`
 - `get_events_for_tx(tx_hash)`
-- `list_events(contract, event, limit=..., offset=...)`
+- `list_events(contract, event, limit=..., offset=..., after_id=...)`
 - `get_state_history(key, limit=..., offset=...)`
 - `get_state_for_tx(tx_hash)`
 - `get_state_for_block(block_ref)`
+- `watch_blocks(start_height=..., poll_interval_seconds=...)`
+- `watch_events(contract, event, after_id=..., limit=..., poll_interval_seconds=...)`
 
 `get_tx(tx_hash)` and `wait_for_tx(tx_hash)` now return a `TransactionReceipt`
 that exposes the two important pieces separately:
@@ -290,6 +294,42 @@ that exposes the two important pieces separately:
 - `result.tx_result.data` is the decoded execution output
 - for convenience, `xian-py` also surfaces these as typed attributes:
   `receipt.transaction` and `receipt.execution`
+
+## Watching Blocks And Events
+
+`xian-py` now includes polling-based watcher helpers for long-running
+application processes.
+
+### watch_blocks
+
+`watch_blocks` uses raw node RPC and does not require BDS:
+
+```python
+async for block in client.watch_blocks(start_height=101):
+    print(block.height, block.tx_count)
+```
+
+If `start_height` is omitted, the watcher begins at the next block after the
+current node head. Persist the last seen height if you want resumable block
+consumers.
+
+### watch_events
+
+`watch_events` uses the indexed BDS event surface and a stable event cursor:
+
+```python
+async for event in client.watch_events(
+    "currency",
+    "Transfer",
+    after_id=500,
+):
+    print(event.id, event.tx_hash, event.data)
+```
+
+Resume by storing the last seen event `id` and passing it back as `after_id`.
+
+Event watching requires BDS to be enabled on the node because the event stream
+comes from indexed reads rather than direct raw state queries.
 
 ## Structured Errors
 

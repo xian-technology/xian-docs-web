@@ -126,6 +126,7 @@ GET /api/abci_query/txs_by_sender/<address>/limit=50/offset=0
 GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
+GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
 GET /api/abci_query/state/<prefix>/limit=50/offset=0
 GET /api/abci_query/state_history/<key>/limit=50/offset=0
 GET /api/abci_query/state_for_tx/<hash>
@@ -146,6 +147,14 @@ Operator-oriented BDS inspection:
   for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,
   including recent block timing and tracer metadata.
+
+Cursor-based event consumption:
+
+- `/events/<contract>/<event>/limit=.../after_id=...` returns events with
+  strictly larger BDS event IDs in ascending order.
+- Use `after_id` for resumable consumers and long-running watchers.
+- The older `offset` form is still useful for ad hoc browsing, but `after_id`
+  is the better shape for application event consumers.
 
 Current catch-up behavior:
 
