@@ -24,8 +24,16 @@ The intended top-level imports are:
 
 ```python
 from xian_py import (
+    AsyncContractClient,
+    AsyncEventClient,
+    AsyncStateKeyClient,
+    AsyncTokenClient,
+    ContractClient,
+    EventClient,
     RetryPolicy,
+    StateKeyClient,
     SubmissionConfig,
+    TokenClient,
     TransportConfig,
     Wallet,
     WatcherConfig,
@@ -374,6 +382,73 @@ comes from indexed reads rather than direct raw state queries.
 
 The default watcher batch size and poll interval come from
 `XianClientConfig.watcher`.
+
+## Application Helper Clients
+
+`xian-py` now includes thin helper clients that reduce repetitive application
+boilerplate without hiding the underlying network model.
+
+Available factories:
+
+- `client.contract("name")`
+- `client.token("currency")`
+- `client.events("contract", "EventName")`
+- `client.state_key("contract", "variable", *keys)`
+
+These work on both `Xian` and `XianAsync`.
+
+### Contract Client
+
+```python
+ledger = client.contract("con_ledger")
+
+await ledger.send("add_entry", account="alice", amount=5)
+balance = await ledger.get_state("balances", "alice")
+history = await ledger.state_key("balances", "alice").history(limit=20)
+```
+
+The contract client keeps the contract name fixed and lets you focus on the
+function call or state path you actually care about.
+
+### Token Client
+
+```python
+currency = client.token()
+
+balance = await currency.balance_of()
+await currency.transfer("bob", 10)
+await currency.approve("con_dex", amount=100)
+```
+
+The token client is just a thin layer over the existing currency-style helper
+methods, but it keeps the token contract fixed and provides a cleaner
+application-facing shape.
+
+### Event Client
+
+```python
+transfers = client.events("currency", "Transfer")
+recent = transfers.list(after_id=500, limit=50)
+```
+
+You can also watch from the same fixed event source:
+
+```python
+async for transfer in transfers.watch(after_id=500):
+    print(transfer.data)
+```
+
+### State Key Client
+
+```python
+balance_key = client.state_key("currency", "balances", "alice")
+
+current = balance_key.get()
+history = balance_key.history(limit=20)
+```
+
+This is useful when an application works with one exact state key repeatedly
+and wants both the current value and the indexed history view.
 
 ## Structured Errors
 

@@ -48,6 +48,25 @@ What was documented:
 - read-side retry policy and its boundaries
 - watcher defaults coming from `XianClientConfig.watcher`
 
+### 2026-03-24: SDK Application Helper Slice
+
+Repos changed:
+
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+
+What was documented:
+
+- higher-level helper clients for contract, token, event, and exact state-key
+  access
+- the intended “thin wrapper” role of those helpers
+- practical examples for application-style usage
+
 ## Next Docs Slice
 
 When the next SDK slice lands, update:
