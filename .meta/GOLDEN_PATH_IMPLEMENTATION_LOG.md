@@ -29,6 +29,25 @@ What was documented:
 - the BDS REST/ABCI event surface now documents the `after_id` path for
   resumable consumers
 
+### 2026-03-23: SDK Config And Retry Slice
+
+Repos changed:
+
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+
+What was documented:
+
+- explicit SDK config types for transport, retry, submission, and watcher
+  defaults
+- read-side retry policy and its boundaries
+- watcher defaults coming from `XianClientConfig.watcher`
+
 ## Next Docs Slice
 
 When the next SDK slice lands, update:

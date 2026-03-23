@@ -24,9 +24,14 @@ The intended top-level imports are:
 
 ```python
 from xian_py import (
+    RetryPolicy,
+    SubmissionConfig,
+    TransportConfig,
     Wallet,
+    WatcherConfig,
     Xian,
     XianAsync,
+    XianClientConfig,
     XianException,
     NodeStatus,
     TransactionReceipt,
@@ -93,6 +98,36 @@ If `chain_id` is omitted, the client fetches it from the node.
 `Xian` keeps a persistent background event loop and HTTP session for the life of
 the client. Prefer using it as a context manager or calling `close()` when you
 are done.
+
+## Client Configuration
+
+The SDK now exposes explicit config types for transport, retry, submission, and
+watcher defaults:
+
+```python
+from xian_py import (
+    RetryPolicy,
+    SubmissionConfig,
+    TransportConfig,
+    WatcherConfig,
+    Xian,
+    XianClientConfig,
+)
+
+config = XianClientConfig(
+    transport=TransportConfig(total_timeout_seconds=20.0),
+    retry=RetryPolicy(max_attempts=3, initial_delay_seconds=0.25),
+    submission=SubmissionConfig(wait_for_tx=True),
+    watcher=WatcherConfig(poll_interval_seconds=0.5, batch_limit=200),
+)
+
+with Xian("http://127.0.0.1:26657", config=config) as client:
+    status = client.get_node_status()
+```
+
+Retry policy applies only to read-side operations such as status queries,
+ABCI reads, tx lookup, and watcher polling. Transaction broadcasts are not
+retried automatically.
 
 ## Async Client
 
@@ -177,6 +212,10 @@ print(result.receipt)
 
 If `stamps` is omitted, the SDK simulates the transaction first and adds a
 small configurable headroom to the estimated stamp usage before submission.
+
+You can set default submission behavior once through
+`XianClientConfig.submission` instead of repeating the same options on every
+call.
 
 ### send
 
@@ -313,6 +352,8 @@ If `start_height` is omitted, the watcher begins at the next block after the
 current node head. Persist the last seen height if you want resumable block
 consumers.
 
+The default poll interval comes from `XianClientConfig.watcher`.
+
 ### watch_events
 
 `watch_events` uses the indexed BDS event surface and a stable event cursor:
@@ -330,6 +371,9 @@ Resume by storing the last seen event `id` and passing it back as `after_id`.
 
 Event watching requires BDS to be enabled on the node because the event stream
 comes from indexed reads rather than direct raw state queries.
+
+The default watcher batch size and poll interval come from
+`XianClientConfig.watcher`.
 
 ## Structured Errors
 
