@@ -450,6 +450,62 @@ history = balance_key.history(limit=20)
 This is useful when an application works with one exact state key repeatedly
 and wants both the current value and the indexed history view.
 
+## Service Integration Examples
+
+The `xian-py` repo now includes application-facing examples under
+`examples/` that show how the SDK fits into ordinary backend workflows.
+
+### FastAPI Service
+
+`examples/fastapi_service.py` shows an async API service shape with:
+
+- shared `XianAsync` lifecycle management
+- typed node health reads
+- token balance reads
+- indexed transfer reads
+- token transfer submission
+
+Typical run:
+
+```bash
+uv run uvicorn examples.fastapi_service:app --reload --app-dir .
+```
+
+This example expects normal app dependencies such as `fastapi` and `uvicorn`;
+they are intentionally not part of the base `xian-py` package install.
+
+### Event Worker
+
+`examples/event_worker.py` shows a resumable background worker that:
+
+- watches indexed BDS events
+- stores the last seen `after_id` cursor locally
+- resumes cleanly after restart
+
+Typical run:
+
+```bash
+uv run python examples/event_worker.py
+```
+
+### Admin / Automation Job
+
+`examples/admin_job.py` shows a synchronous operator-facing automation task
+that reads:
+
+- node health
+- peer count
+- performance status
+- optional BDS lag
+
+and exits nonzero when a configured threshold is violated.
+
+Typical run:
+
+```bash
+uv run python examples/admin_job.py
+```
+
 ## Structured Errors
 
 The SDK now exposes more precise error classes:

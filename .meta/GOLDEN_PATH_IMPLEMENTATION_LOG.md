@@ -67,6 +67,29 @@ What was documented:
 - the intended “thin wrapper” role of those helpers
 - practical examples for application-style usage
 
+### 2026-03-24: SDK Service Integration Example Slice
+
+Repos changed:
+
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+
+What was documented:
+
+- the repo-level integration examples for:
+  - an async FastAPI service
+  - a resumable event worker
+  - a synchronous admin / automation job
+- how those examples fit the golden path as ordinary backend integration
+  patterns
+- the expectation that framework dependencies for the FastAPI example stay out
+  of the base SDK install
+
 ## Next Docs Slice
 
 When the next SDK slice lands, update:
