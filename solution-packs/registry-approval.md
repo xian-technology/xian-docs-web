@@ -117,6 +117,7 @@ Use the admin job from `xian-py`:
 
 ```bash
 cd ~/xian/xian-py
+uv sync --group dev --extra app
 export XIAN_NODE_URL=http://127.0.0.1:26657
 export XIAN_CHAIN_ID=xian-registry-local-1
 export XIAN_WALLET_PRIVATE_KEY=<private-key-hex>
@@ -129,9 +130,14 @@ The admin job:
 - deploys `con_registry_approval` if it does not exist yet
 - links the registry to the approval contract
 - optionally adds additional signers from `XIAN_REGISTRY_SIGNERS`
+- funds those configured signers with native balance by default so they can pay
+  for approval transactions in the reference flow
 - optionally updates the threshold from `XIAN_REGISTRY_THRESHOLD`
 - optionally submits an initial upsert proposal when `XIAN_REGISTRY_RECORD_ID`
   is set
+
+Set `XIAN_REGISTRY_SIGNER_FUND_AMOUNT=0` if you want to disable the automatic
+signer top-up behavior.
 
 ### 3. Run The API Service
 
@@ -162,6 +168,9 @@ The important split is:
   authoritative contract reads
 - `projection/*`, `records`, `proposals`, and `activity/*` expose the local
   projected workflow views
+
+The service now uses decoded readonly `call(...)` helpers for authoritative
+contract hydration instead of returning raw simulation envelopes.
 
 ### 4. Run The Projector Worker
 
@@ -215,6 +224,14 @@ Those routes demonstrate the intended division of labor:
 - indexed events trigger projection updates
 - authoritative contract reads hydrate the projection
 - the API serves both on-chain reads and application-oriented workflow views
+
+This exact shape was validated live against an indexed local node:
+
+- founder submits the initial proposal
+- a second funded signer approves it through the API
+- the projector applies `ProposalApproved`, `RecordUpserted`, and
+  `ProposalExecuted`
+- `records`, `proposals`, and `activity` views all match the on-chain state
 
 ## Remote Operator Story
 

@@ -240,6 +240,32 @@ What was documented:
   authoritative chain reads, BDS indexed events, a resumable projection, and a
   thin API service running on top of the SDK helper layer
 
+### 2026-03-24: Registry / Approval Live Validation Follow-Up
+
+Repos changed:
+
+- `xian-abci`
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+- `solution-packs/registry-approval.md`
+
+What was documented:
+
+- `xian-py` now exposes `call(...)` for decoded readonly contract hydration
+  instead of forcing application code to unpack raw simulation envelopes
+- the registry reference app now documents the live-validated pattern:
+  indexed events as triggers, authoritative contract reads as hydration, and a
+  local SQLite projection for operator-facing views
+- the registry bootstrap flow now funds configured approvers by default so
+  multi-signer approvals work in the documented local/reference path
+- the stack now treats boolean ABCI state reads as first-class values instead
+  of implicitly mislabeling them as integers
+
 What was documented:
 
 - `xian-deploy` now mirrors the local health/recovery model with remote

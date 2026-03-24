@@ -281,6 +281,22 @@ The dry-run result currently comes from the node simulator and uses:
 - `result`
 - `payload`
 
+### call
+
+Use `call` when you want the decoded readonly contract return value instead of
+the raw simulation envelope:
+
+```python
+proposal = client.call(
+    "con_registry_approval",
+    "get_proposal",
+    {"proposal_id": 1},
+)
+```
+
+`call` runs through the same readonly simulation path, but it unwraps the
+successful return value and raises if the readonly execution itself fails.
+
 ### submit_contract
 
 ```python
@@ -409,6 +425,9 @@ history = await ledger.state_key("balances", "alice").history(limit=20)
 
 The contract client keeps the contract name fixed and lets you focus on the
 function call or state path you actually care about.
+
+It also exposes `call(...)` for authoritative readonly hydration when the
+contract returns structured objects.
 
 ### Token Client
 
@@ -554,7 +573,8 @@ This is the first example set that demonstrates the full backend pattern:
 deeper reference-app slice:
 
 - `admin_job.py`: deploy `con_registry_records` and `con_registry_approval`,
-  configure signers, and submit an initial proposal
+  configure signers, top up approvers with native balance for the reference
+  flow, and submit an initial proposal
 - `api_service.py`: combine authoritative proposal/record reads with projected
   workflow views for pending approvals and audit activity
 - `projector_worker.py`: rebuild a local SQLite workflow projection from
@@ -574,7 +594,7 @@ uv run python examples/registry_approval/projector_worker.py
 This is the second example set that demonstrates the deeper backend pattern:
 
 - indexed events as workflow triggers
-- authoritative contract reads as hydration
+- authoritative decoded readonly contract calls as hydration
 - a local projected read model for application-oriented approval queries
 
 ### Workflow Backend Pack Examples
