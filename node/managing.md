@@ -40,6 +40,7 @@ uv run xian node health validator-1
 - backend state as `healthy`, `degraded`, or `stopped`
 - RPC reachability and current sync detail
 - CometBFT and Xian metrics reachability
+- BDS queue, spool, lag, and database status when `service_node` is enabled
 - optional dashboard / Prometheus / Grafana reachability when enabled
 - optional disk-pressure checks through the local `xian-stack` storage report
 - rendered state-sync readiness from `config.toml`
@@ -53,6 +54,8 @@ prints the expected entrypoints for:
 - ABCI query
 - CometBFT metrics
 - Xian metrics
+- BDS status and spool ABCI query URLs when `service_node` is enabled
+- GraphQL when `service_node` is enabled
 - dashboard and dashboard status when enabled
 - Prometheus and Grafana when monitoring is enabled
 
@@ -92,6 +95,8 @@ For BDS-enabled integrated runs:
 
 ```bash
 python3 ./scripts/backend.py start --service-node --monitoring
+python3 ./scripts/backend.py endpoints --service-node --monitoring
+python3 ./scripts/backend.py health --service-node --monitoring --no-check-disk
 ```
 
 Host-side storage inspection from `xian-stack`:

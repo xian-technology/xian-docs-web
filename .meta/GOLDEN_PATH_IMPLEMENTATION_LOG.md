@@ -181,6 +181,30 @@ What was documented:
 - health now includes runtime probes, disk pressure, state-sync readiness, and
   effective snapshot bootstrap visibility
 
+### 2026-03-24: Template Monitoring Posture And BDS Health Slice
+
+Repos changed:
+
+- `xian-configs`
+- `xian-cli`
+- `xian-stack`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/configuration.md`
+- `node/profiles.md`
+- `node/managing.md`
+
+What was documented:
+
+- canonical templates now declare explicit `operator_profile` and
+  `monitoring_profile` intent
+- node profiles now retain that template intent for later operator commands
+- service-node health now includes BDS queue, spool, lag, and database status
+- service-node endpoint discovery now includes BDS query URLs and GraphQL
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

@@ -37,6 +37,12 @@ xian-configs/templates/<name>.json
 They are reusable defaults for `xian network create --template ...` and
 `xian network join --template ...`, not live network manifests.
 
+Canonical templates also declare:
+
+- `operator_profile`: the intended operator posture for the template
+- `monitoring_profile`: whether monitoring should stay off, run as a local
+  stack, or be treated as a service-node concern
+
 ## Node Profiles
 
 Node profiles are operator-local JSON files stored by default at:
