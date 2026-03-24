@@ -18,6 +18,7 @@ Every pack should explain:
 
 - [Credits Ledger Pack](/solution-packs/credits-ledger)
 - [Registry / Approval Pack](/solution-packs/registry-approval)
+- [Workflow Backend Pack](/solution-packs/workflow-backend)
 
 ## Intended Progression
 

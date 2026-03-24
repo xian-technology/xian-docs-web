@@ -462,6 +462,10 @@ concrete credits-ledger backend pattern.
 It also includes `examples/registry_approval/`, which turns the same SDK
 primitives into a shared registry with proposal and approval flow.
 
+It also includes `examples/workflow_backend/`, which turns the SDK into a
+job-style workflow backend with a service/write path and an event-driven
+worker.
+
 ### FastAPI Service
 
 `examples/fastapi_service.py` shows an async API service shape with:
@@ -549,6 +553,24 @@ Typical runs:
 uv run python examples/registry_approval/admin_job.py
 uv run uvicorn examples.registry_approval.api_service:app --reload --app-dir .
 uv run python examples/registry_approval/event_worker.py
+```
+
+### Workflow Backend Pack Examples
+
+`examples/workflow_backend/` adds the third reference pack:
+
+- `admin_job.py`: deploy `con_job_workflow`, add workers, and optionally
+  submit an initial workflow item
+- `api_service.py`: read workflow items and submit or cancel them
+- `event_worker.py`: claim submitted items and complete or fail them while
+  also monitoring the resulting workflow events
+
+Typical runs:
+
+```bash
+uv run python examples/workflow_backend/admin_job.py
+uv run uvicorn examples.workflow_backend.api_service:app --reload --app-dir .
+uv run python examples/workflow_backend/event_worker.py
 ```
 
 ## Structured Errors

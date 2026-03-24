@@ -277,6 +277,29 @@ What was documented:
 - the recommended local `single-node-indexed` and remote `consortium-3`
   operator paths for this pack
 
+### 2026-03-24: Workflow Backend Pack Slice
+
+Repos changed:
+
+- `xian-meta`
+- `xian-configs`
+- `xian-py`
+- `xian-docs-web`
+
+Docs updated:
+
+- `solution-packs/index.md`
+- `solution-packs/workflow-backend.md`
+- `tools/xian-py.md`
+
+What was documented:
+
+- the third reference solution pack built around a job-style workflow backend
+- the reusable workflow contract in `xian-configs`
+- the pack-specific SDK examples in `xian-py`
+- the recommended local `single-node-indexed` and remote `embedded-backend`
+  operator paths for this pack
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

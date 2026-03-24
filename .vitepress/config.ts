@@ -190,7 +190,8 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/solution-packs/' },
             { text: 'Credits Ledger Pack', link: '/solution-packs/credits-ledger' },
-            { text: 'Registry / Approval Pack', link: '/solution-packs/registry-approval' }
+            { text: 'Registry / Approval Pack', link: '/solution-packs/registry-approval' },
+            { text: 'Workflow Backend Pack', link: '/solution-packs/workflow-backend' }
           ]
         }
       ],
