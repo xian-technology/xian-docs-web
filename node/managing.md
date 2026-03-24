@@ -60,6 +60,11 @@ prints the expected entrypoints for:
 - dashboard and dashboard status when enabled
 - Prometheus and Grafana when monitoring is enabled
 
+For stack-managed nodes, the endpoint catalog reflects the actual published
+Docker host ports of the running services when they differ from the profile
+defaults. That matters for localnet and validation workspaces that remap ports
+to avoid collisions.
+
 `doctor` is the broader workspace and node-health preflight:
 
 ```bash

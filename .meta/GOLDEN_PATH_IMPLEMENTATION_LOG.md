@@ -450,6 +450,26 @@ What was documented:
 - the processor worker, projector worker, projection database path, and the
   richer API routes for queue summaries, items, and workflow activity
 
+### 2026-03-24: Validation Cleanup And Endpoint Introspection Slice
+
+Repos changed:
+
+- `xian-stack`
+- `xian-abci`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/managing.md`
+
+What was documented:
+
+- stack-backed endpoint discovery now reflects the actual published Docker host
+  ports of the running services when they differ from profile defaults
+- this matters for localnet and validation workspaces that intentionally remap
+  ports to avoid collisions while keeping the same node-profile shape
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:
