@@ -459,6 +459,9 @@ It also now includes the first solution-pack example set under
 `examples/credits_ledger/`, which turns the generic SDK primitives into a
 concrete credits-ledger backend pattern.
 
+It also includes `examples/registry_approval/`, which turns the same SDK
+primitives into a shared registry with proposal and approval flow.
+
 ### FastAPI Service
 
 `examples/fastapi_service.py` shows an async API service shape with:
@@ -527,6 +530,25 @@ Typical runs:
 uv run python examples/credits_ledger/admin_job.py
 uv run uvicorn examples.credits_ledger.api_service:app --reload --app-dir .
 uv run python examples/credits_ledger/event_worker.py
+```
+
+### Registry / Approval Pack Examples
+
+`examples/registry_approval/` adds the second reference pack:
+
+- `admin_job.py`: deploy `con_registry_records` and `con_registry_approval`,
+  configure signers, and submit an initial proposal
+- `api_service.py`: read records and proposals and submit proposal/approval
+  transactions
+- `event_worker.py`: consume proposal and registry events with resumable
+  cursors
+
+Typical runs:
+
+```bash
+uv run python examples/registry_approval/admin_job.py
+uv run uvicorn examples.registry_approval.api_service:app --reload --app-dir .
+uv run python examples/registry_approval/event_worker.py
 ```
 
 ## Structured Errors

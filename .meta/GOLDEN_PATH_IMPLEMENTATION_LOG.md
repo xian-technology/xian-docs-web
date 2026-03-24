@@ -253,6 +253,30 @@ What was documented:
 - the reusable contract asset in `xian-configs` and the pack-specific SDK
   examples in `xian-py`
 
+### 2026-03-24: Registry / Approval Pack Slice
+
+Repos changed:
+
+- `xian-meta`
+- `xian-configs`
+- `xian-py`
+- `xian-docs-web`
+
+Docs updated:
+
+- `solution-packs/index.md`
+- `solution-packs/registry-approval.md`
+- `tools/xian-py.md`
+
+What was documented:
+
+- the second reference solution pack built around shared registry state and
+  approval flow
+- the reusable registry and approval contracts in `xian-configs`
+- the pack-specific SDK examples in `xian-py`
+- the recommended local `single-node-indexed` and remote `consortium-3`
+  operator paths for this pack
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

@@ -17,6 +17,7 @@ Every pack should explain:
 ## Available Packs
 
 - [Credits Ledger Pack](/solution-packs/credits-ledger)
+- [Registry / Approval Pack](/solution-packs/registry-approval)
 
 ## Intended Progression
 
