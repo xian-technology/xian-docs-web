@@ -30,3 +30,7 @@ The initial pack set is:
 
 The goal is to prove Xian through concrete backend patterns rather than generic
 toy contracts.
+
+Today the deepest pack is Credits Ledger: it already includes the first fuller
+reference-app slice with a projected read model built from indexed chain
+events.

@@ -2,6 +2,9 @@
 
 The Credits Ledger Pack is the first concrete Xian solution pack.
 
+It is also the first pack that has been deepened into a fuller reference
+application slice.
+
 It shows how to use Xian as an application-controlled internal ledger for
 credits, balances, issuance, transfers, burns, and auditability.
 
@@ -27,6 +30,22 @@ This pack is intentionally close to the product thesis:
 - clear event and history model
 - easy local and remote operator flows
 - straightforward monitoring and recovery story
+
+## Reference-App Pattern
+
+The deeper reference-app slice for this pack uses a three-part shape:
+
+1. the Xian contract remains the authoritative credits ledger
+2. a resumable projector rebuilds a local SQLite read model from indexed BDS
+   events
+3. an API service combines authoritative chain reads and projected
+   application reads
+
+That is the core backend pattern Xian is meant to support:
+
+- keep shared programmable state on-chain
+- reshape it into application-oriented queries off-chain
+- rebuild those read models deterministically from indexed chain events
 
 ## Recommended Operator Paths
 
@@ -66,8 +85,8 @@ The `xian-py` repo includes pack-specific examples under:
 Those cover:
 
 - contract bootstrap / admin flow
-- API-service integration
-- resumable event consumption
+- API-service integration with projected activity and summary views
+- resumable projection from indexed events into a local SQLite database
 
 ## Local Walkthrough
 
@@ -107,27 +126,76 @@ The admin job:
 uv run uvicorn examples.credits_ledger.api_service:app --reload --app-dir .
 ```
 
-The service exposes:
+The service exposes both authoritative and projected reads:
 
 - `GET /health`
 - `GET /balances/{address}`
+- `GET /accounts/{address}`
+- `GET /accounts/{address}/activity`
+- `GET /activity/recent`
+- `GET /projection/health`
+- `GET /projection/summary`
 - `GET /events/transfer`
 - `POST /issue`
+- `POST /burn`
 - `POST /transfer`
 
-### 4. Run The Event Worker
+The important split is:
+
+- `balances/{address}` reads the authoritative on-chain ledger state
+- `projection/*` and `accounts/*/activity` read the local application
+  projection built from indexed events
+
+### 4. Run The Projector Worker
 
 ```bash
-uv run python examples/credits_ledger/event_worker.py
+uv run python examples/credits_ledger/projector_worker.py
 ```
 
-The worker consumes:
+The projector:
+
+- backfills from indexed BDS events on first start
+- persists a local SQLite database
+- maintains resumable cursors inside that projection database
+- rebuilds:
+  - recent ledger activity
+  - per-account summary counters
+  - projected ledger supply totals
+
+It consumes:
 
 - `Issue`
 - `Transfer`
 - `Burn`
 
-It persists the last seen event IDs so it can resume cleanly after restarts.
+The default projection database path is:
+
+```text
+.credits-ledger-projection.sqlite3
+```
+
+Override it with:
+
+```bash
+export XIAN_CREDITS_PROJECTION_PATH=/path/to/credits-ledger.sqlite3
+```
+
+### 5. Query The Reference-App Views
+
+Once the projector is running, you can query the richer application views:
+
+```bash
+curl http://127.0.0.1:8000/projection/summary
+curl http://127.0.0.1:8000/activity/recent
+curl http://127.0.0.1:8000/accounts/<address>
+curl http://127.0.0.1:8000/accounts/<address>/activity
+```
+
+Those routes demonstrate the intended division of labor:
+
+- Xian stores and enforces the ledger
+- the projector shapes indexed events into application reads
+- the API service serves both authoritative and projected views
 
 ## Remote Operator Story
 
@@ -158,6 +226,7 @@ The Credits Ledger Pack proves that Xian can act as:
 
 - a programmable ledger backend
 - a service-friendly integration target for Python applications
+- an event-fed projection source for local application read models
 - an operationally manageable indexed node stack
 
 It is the first pack because it exercises nearly the full golden path without

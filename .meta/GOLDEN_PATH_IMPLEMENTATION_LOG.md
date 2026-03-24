@@ -300,6 +300,31 @@ What was documented:
 - the recommended local `single-node-indexed` and remote `embedded-backend`
   operator paths for this pack
 
+### 2026-03-24: Credits Ledger Reference-App Slice
+
+Repos changed:
+
+- `xian-meta`
+- `xian-py`
+- `xian-docs-web`
+
+Docs updated:
+
+- `tools/xian-py.md`
+- `solution-packs/index.md`
+- `solution-packs/credits-ledger.md`
+
+What was documented:
+
+- the Credits Ledger Pack is now also the first deeper reference-app slice
+- the reference-app pattern combines:
+  - an authoritative on-chain ledger
+  - indexed BDS events
+  - a local SQLite projection
+  - an API service that serves both authoritative and projected reads
+- the projector worker, projection database path, and the richer API routes
+  for account activity and summary views
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

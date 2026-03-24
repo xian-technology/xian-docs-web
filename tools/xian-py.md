@@ -520,21 +520,28 @@ uv run python examples/admin_job.py
 ### Credits Ledger Pack Examples
 
 `examples/credits_ledger/` adds a pack-specific set of examples for the first
-reference solution pack:
+reference solution pack and the first deeper reference-app slice:
 
 - `admin_job.py`: bootstrap or administer `con_credits_ledger`
-- `api_service.py`: expose credits balances, issuance, and transfers through a
-  small FastAPI service
-- `event_worker.py`: consume `Issue`, `Transfer`, and `Burn` events with
-  resumable cursors
+- `api_service.py`: expose authoritative balances plus projected activity and
+  summary views through a small FastAPI service
+- `projector_worker.py`: rebuild a local SQLite read model from indexed
+  `Issue`, `Transfer`, and `Burn` events
+- `event_worker.py`: compatibility wrapper around `projector_worker.py`
 
 Typical runs:
 
 ```bash
 uv run python examples/credits_ledger/admin_job.py
 uv run uvicorn examples.credits_ledger.api_service:app --reload --app-dir .
-uv run python examples/credits_ledger/event_worker.py
+uv run python examples/credits_ledger/projector_worker.py
 ```
+
+This is the first example set that demonstrates the full backend pattern:
+
+- Xian as the authoritative ledger
+- BDS-backed indexed events as the integration feed
+- a local projected read model for application-specific queries
 
 ### Registry / Approval Pack Examples
 
