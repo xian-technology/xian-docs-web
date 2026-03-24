@@ -229,6 +229,30 @@ What was documented:
 - the remote path for protocol state sync is now documented explicitly via
   `playbooks/bootstrap-state-sync.yml`
 
+### 2026-03-24: Credits Ledger Pack Slice
+
+Repos changed:
+
+- `xian-meta`
+- `xian-configs`
+- `xian-py`
+- `xian-docs-web`
+
+Docs updated:
+
+- `solution-packs/index.md`
+- `solution-packs/credits-ledger.md`
+- `tools/xian-py.md`
+
+What was documented:
+
+- the public solution-pack concept and why packs are product patterns instead
+  of generic tutorials
+- the first Credits Ledger Pack, tied to the existing `single-node-indexed`
+  and `embedded-backend` operator paths
+- the reusable contract asset in `xian-configs` and the pack-specific SDK
+  examples in `xian-py`
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

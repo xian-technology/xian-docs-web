@@ -21,6 +21,7 @@ This repo does not own:
 ## Key Directories
 
 - `api/`, `concepts/`, `node/`, `tools/`, `smart-contracts/`: published docs sections
+- `solution-packs/`: published product-oriented reference pack walkthroughs
 - `.meta/`: internal architecture and backlog notes for this repo
 - `.vitepress/`: site theme and build configuration
 

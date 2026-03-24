@@ -455,6 +455,10 @@ and wants both the current value and the indexed history view.
 The `xian-py` repo now includes application-facing examples under
 `examples/` that show how the SDK fits into ordinary backend workflows.
 
+It also now includes the first solution-pack example set under
+`examples/credits_ledger/`, which turns the generic SDK primitives into a
+concrete credits-ledger backend pattern.
+
 ### FastAPI Service
 
 `examples/fastapi_service.py` shows an async API service shape with:
@@ -504,6 +508,25 @@ Typical run:
 
 ```bash
 uv run python examples/admin_job.py
+```
+
+### Credits Ledger Pack Examples
+
+`examples/credits_ledger/` adds a pack-specific set of examples for the first
+reference solution pack:
+
+- `admin_job.py`: bootstrap or administer `con_credits_ledger`
+- `api_service.py`: expose credits balances, issuance, and transfers through a
+  small FastAPI service
+- `event_worker.py`: consume `Issue`, `Transfer`, and `Burn` events with
+  resumable cursors
+
+Typical runs:
+
+```bash
+uv run python examples/credits_ledger/admin_job.py
+uv run uvicorn examples.credits_ledger.api_service:app --reload --app-dir .
+uv run python examples/credits_ledger/event_worker.py
 ```
 
 ## Structured Errors

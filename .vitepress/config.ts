@@ -17,6 +17,7 @@ export default defineConfig({
       { text: 'Node', link: '/node/' },
       { text: 'API', link: '/api/' },
       { text: 'Tools', link: '/tools/' },
+      { text: 'Solution Packs', link: '/solution-packs/' },
       { text: 'Tutorials', link: '/tutorials/' },
       { text: 'Reference', link: '/reference/' }
     ],
@@ -180,6 +181,15 @@ export default defineConfig({
             { text: 'Linter', link: '/tools/linter' },
             { text: 'VS Code Extension', link: '/tools/vscode' },
             { text: 'MCP Server', link: '/tools/mcp-server' }
+          ]
+        }
+      ],
+      '/solution-packs/': [
+        {
+          text: 'Solution Packs',
+          items: [
+            { text: 'Overview', link: '/solution-packs/' },
+            { text: 'Credits Ledger Pack', link: '/solution-packs/credits-ledger' }
           ]
         }
       ],
