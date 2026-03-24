@@ -20,6 +20,7 @@ Prometheus and Grafana sidecars through the `xian-stack` backend.
 
 ```bash
 uv run xian node status validator-1
+uv run xian node endpoints validator-1
 ```
 
 `node status` reports:
@@ -28,6 +29,21 @@ uv run xian node status validator-1
 - the resolved manifest and profile paths
 - the `xian-stack` backend state when available
 - optional live RPC reachability
+- a compact summary of readiness, sync height, peer count, and optional
+  dashboard / monitoring reachability
+- the effective local endpoint catalog for RPC, `abci_query`, metrics, and
+  optional dashboard / monitoring services
+
+`node endpoints` is the quickest discovery command for local operator URLs. It
+prints the expected entrypoints for:
+
+- CometBFT RPC
+- CometBFT `/status`
+- ABCI query
+- CometBFT metrics
+- Xian metrics
+- dashboard and dashboard status when enabled
+- Prometheus and Grafana when monitoring is enabled
 
 `doctor` is the broader workspace and node-health preflight:
 
@@ -42,6 +58,7 @@ From `xian-stack`, the stable machine-readable backend is:
 ```bash
 python3 ./scripts/backend.py start --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py endpoints --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
 ```
 
@@ -75,6 +92,7 @@ Optional services:
 
 - dashboard: port `8080` by default
 - Xian Prometheus metrics: port `9108` by default
+- CometBFT metrics: port `26660` by default
 - Prometheus: port `9090` by default
 - Grafana: port `3000` by default
 - GraphQL/PostGraphile: port `5000` when BDS is enabled

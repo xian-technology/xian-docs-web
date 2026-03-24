@@ -116,6 +116,29 @@ What was documented:
 - the fact that template-driven node start can now request Prometheus and
   Grafana alongside the node runtime
 
+### 2026-03-24: Operator Status And Endpoint Discovery Slice
+
+Repos changed:
+
+- `xian-cli`
+- `xian-stack`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/index.md`
+- `node/installation.md`
+- `node/managing.md`
+
+What was documented:
+
+- `xian node status` now includes a compact operator summary
+- `xian node endpoints` exposes the effective local URLs for RPC, metrics,
+  dashboard, and monitoring services
+- `xian-stack/scripts/backend.py endpoints` is now part of the stable backend
+  machine interface
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

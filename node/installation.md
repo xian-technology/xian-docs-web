@@ -62,6 +62,7 @@ uv run xian node init validator-1
 ```bash
 uv run xian node start validator-1
 uv run xian node status validator-1
+uv run xian node endpoints validator-1
 ```
 
 For backend-only debugging from `xian-stack`:
