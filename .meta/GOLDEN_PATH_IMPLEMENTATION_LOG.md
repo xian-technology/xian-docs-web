@@ -205,6 +205,30 @@ What was documented:
 - service-node health now includes BDS queue, spool, lag, and database status
 - service-node endpoint discovery now includes BDS query URLs and GraphQL
 
+### 2026-03-24: Remote Health And Recovery Runbook Slice
+
+Repos changed:
+
+- `xian-deploy`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/index.md`
+- `node/installation.md`
+- `node/managing.md`
+
+What was documented:
+
+- `xian-deploy` now mirrors the local health/recovery model with remote
+  `status.yml`, `health.yml`, and `smoke.yml`
+- the operator docs now define the three concrete recovery/bootstrap paths:
+  prepared node-home archive, application-state snapshot import, and protocol
+  state sync
+- the remote path for protocol state sync is now documented explicitly via
+  `playbooks/bootstrap-state-sync.yml`
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

@@ -5,6 +5,8 @@ the maintained repos:
 
 - `xian-cli` owns operator workflows such as key generation, network join, node
   initialization, start, stop, status, snapshot restore, and doctor checks.
+- `xian-deploy` owns the Linux-focused remote deployment path, including remote
+  health checks, state-snapshot restore, and state-sync bootstrap playbooks.
 - `xian-stack` owns the Docker images, Compose topology, backend lifecycle
   script, localnet, and optional dashboard/BDS services.
 - `xian-abci` owns the deterministic node process, config rendering primitives,
@@ -21,6 +23,10 @@ The supported workflow today is:
 4. Materialize the local CometBFT home with `xian node init`
 5. Start and stop the runtime through `xian-stack`
 6. Use `xian node status`, `xian node endpoints`, `xian node health`, monitoring, and the optional dashboard for inspection
+
+For remote Linux hosts, keep the local `xian-cli` network/profile flow, then
+use `xian-deploy` for bootstrap, deployment, remote health, and recovery
+runbooks.
 
 Typical commands:
 

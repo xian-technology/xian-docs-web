@@ -1,7 +1,8 @@
 # Starting, Stopping & Monitoring
 
-Use `xian-cli` for operator-facing lifecycle commands. Use `xian-stack`
-directly only for backend validation or low-level debugging.
+Use `xian-cli` for local operator-facing lifecycle commands. Use
+`xian-deploy` for the remote Linux-host equivalents. Use `xian-stack` directly
+only for backend validation or low-level debugging.
 
 ## Start and Stop
 
@@ -105,6 +106,110 @@ Host-side storage inspection from `xian-stack`:
 python3 ./scripts/backend.py storage-report
 make storage-report
 ```
+
+## Remote Hosts With `xian-deploy`
+
+Use `xian-deploy` when the node is running on a remote Linux host and you want
+the deployment-side equivalent of the local health and recovery workflow.
+
+Common entrypoints:
+
+```bash
+ansible-playbook playbooks/status.yml
+ansible-playbook playbooks/health.yml
+ansible-playbook playbooks/smoke.yml
+```
+
+What they are for:
+
+- `status.yml`: inspect the remote deployment state through the runtime role
+- `health.yml`: the full remote equivalent of `xian node health` plus the
+  broader deployment checks that matter on a host
+- `smoke.yml`: a lighter post-deploy sanity check for services and endpoints
+
+The remote health playbook checks:
+
+- expected running containers for the selected topology
+- RPC reachability and current sync status
+- Xian metrics
+- optional dashboard / Prometheus / Grafana reachability
+- BDS queue, spool, lag, and database state when BDS is enabled
+- rendered state-sync readiness from the remote `config.toml`
+- deploy-root and BDS-spool disk pressure
+
+## Recovery Runbooks
+
+Use the recovery/bootstrap path that matches the artifact you already have.
+
+### Prepared Node-Home Archive
+
+Use this when you already have a full prepared `.cometbft` home for the target
+node.
+
+Local path:
+
+```bash
+uv run xian network join validator-1 --network mainnet
+uv run xian node init validator-1
+```
+
+Remote path:
+
+```bash
+ansible-playbook playbooks/push-home.yml
+ansible-playbook playbooks/deploy.yml
+```
+
+This is the closest remote equivalent to a local `snapshot_url` / node-home
+restore workflow.
+
+### Application-State Snapshot Import
+
+Use this when you have an exported `xian-state-snapshot` archive and want to
+restore Xian application state without replacing the full prepared node home.
+
+Local path:
+
+```bash
+uv run xian-state-snapshot import --input-path ./xian-state-snapshot.tar.gz
+```
+
+Remote path:
+
+```bash
+ansible-playbook playbooks/restore-state-snapshot.yml
+```
+
+Required remote variable:
+
+- `xian_state_snapshot_archive`
+
+### Protocol State Sync
+
+Use this when you want the node to bootstrap from trusted peers that already
+serve Xian application snapshots through CometBFT state sync.
+
+Local path:
+
+- set the rendered `[statesync]` config through the node profile
+- use `xian node health` / `xian doctor` to verify readiness
+
+Remote path:
+
+```bash
+ansible-playbook playbooks/bootstrap-state-sync.yml
+```
+
+Required remote variables:
+
+- `xian_statesync_enable=true`
+- at least two `xian_statesync_rpc_servers`
+- `xian_statesync_trust_height`
+- `xian_statesync_trust_hash`
+- `xian_statesync_trust_period`
+
+This playbook validates the state-sync inputs first, deploys the runtime, then
+prints a focused bootstrap summary from the remote host.
 
 ## Monitoring Layers
 

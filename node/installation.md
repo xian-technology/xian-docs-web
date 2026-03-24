@@ -74,6 +74,33 @@ python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monito
 python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
 ```
 
+## Remote Linux Hosts
+
+Use `xian-deploy` when you want the same runtime contract on remote Linux
+hosts.
+
+Typical path:
+
+```bash
+ansible-playbook playbooks/bootstrap.yml
+ansible-playbook playbooks/push-home.yml
+ansible-playbook playbooks/deploy.yml
+ansible-playbook playbooks/health.yml
+```
+
+Recovery/bootstrap variants:
+
+```bash
+ansible-playbook playbooks/restore-state-snapshot.yml
+ansible-playbook playbooks/bootstrap-state-sync.yml
+```
+
+Use `playbooks/restore-state-snapshot.yml` when you already have an exported
+Xian application-state snapshot archive.
+
+Use `playbooks/bootstrap-state-sync.yml` when you want the remote node to join
+from trusted peers through CometBFT state sync.
+
 ## Current Distribution Note
 
 The codebase is already structured around immutable images, but this repo set
