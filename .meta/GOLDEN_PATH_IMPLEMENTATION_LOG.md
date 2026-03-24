@@ -353,6 +353,33 @@ What was documented:
 - the projector worker, projection database path, and the richer API routes
   for records, pending proposals, approvals, and workflow activity
 
+### 2026-03-24: Workflow Backend Reference-App Slice
+
+Repos changed:
+
+- `xian-meta`
+- `xian-py`
+- `xian-docs-web`
+
+Docs updated:
+
+- `tools/xian-py.md`
+- `solution-packs/index.md`
+- `solution-packs/workflow-backend.md`
+
+What was documented:
+
+- the Workflow Backend Pack is now also the third deeper reference-app slice
+- the reference-app pattern combines:
+  - an authoritative workflow contract
+  - a processor worker
+  - indexed BDS events as projection triggers
+  - a local SQLite projection
+  - projector hydration from authoritative `get_item` reads
+  - an API service that serves both on-chain reads and projected queue views
+- the processor worker, projector worker, projection database path, and the
+  richer API routes for queue summaries, items, and workflow activity
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

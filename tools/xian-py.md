@@ -573,21 +573,32 @@ This is the second example set that demonstrates the deeper backend pattern:
 
 ### Workflow Backend Pack Examples
 
-`examples/workflow_backend/` adds the third reference pack:
+`examples/workflow_backend/` adds the third reference pack and the third
+deeper reference-app slice:
 
 - `admin_job.py`: deploy `con_job_workflow`, add workers, and optionally
   submit an initial workflow item
-- `api_service.py`: read workflow items and submit or cancel them
-- `event_worker.py`: claim submitted items and complete or fail them while
-  also monitoring the resulting workflow events
+- `api_service.py`: combine authoritative item reads with projected queue and
+  workflow activity views
+- `processor_worker.py`: claim submitted items and complete or fail them
+- `projector_worker.py`: rebuild a local SQLite queue/activity projection from
+  indexed events and authoritative `get_item` reads
+- `event_worker.py`: compatibility wrapper around `processor_worker.py`
 
 Typical runs:
 
 ```bash
 uv run python examples/workflow_backend/admin_job.py
 uv run uvicorn examples.workflow_backend.api_service:app --reload --app-dir .
-uv run python examples/workflow_backend/event_worker.py
+uv run python examples/workflow_backend/processor_worker.py
+uv run python examples/workflow_backend/projector_worker.py
 ```
+
+This is the third example set that demonstrates the deeper backend pattern:
+
+- a separate processor and projector worker model
+- indexed events as workflow and projection triggers
+- a local projected read model for queue state and workflow activity
 
 ## Structured Errors
 

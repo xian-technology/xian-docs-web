@@ -36,3 +36,5 @@ Today the deepest packs are:
 - Credits Ledger, with a projected read model built from indexed chain events
 - Registry / Approval, with an event-triggered projection hydrated from
   authoritative contract reads
+- Workflow Backend, with separate processor and projector workers plus a
+  projected queue/activity view

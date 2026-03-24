@@ -2,6 +2,9 @@
 
 The Workflow Backend Pack is the third concrete Xian solution pack.
 
+It is also the third pack that has been deepened into a fuller reference
+application slice.
+
 It shows how to use Xian as a job-style workflow backend where clients submit
 items, workers claim them, and workers complete or fail them while off-chain
 systems consume events and indexed state/history.
@@ -27,6 +30,22 @@ This pack is the strongest expression of Xian as a decentralized backend:
 - clear API-service integration
 - strong history and auditability through indexed reads
 - a clean operator story for backend-oriented deployments
+
+## Reference-App Pattern
+
+The deeper reference-app slice for this pack uses a four-part shape:
+
+1. the Xian contract remains the authoritative workflow state machine
+2. a processor worker reacts to submitted items and drives the workflow
+3. indexed BDS events trigger a resumable projector
+4. the projector hydrates current item state from authoritative contract reads
+   into a local SQLite projection
+
+This is the clearest expression of Xian as a decentralized backend:
+
+- the chain enforces workflow transitions
+- a processor worker performs application work around the chain
+- a projector builds queue and activity views for application reads
 
 ## Recommended Operator Paths
 
@@ -69,6 +88,8 @@ The `xian-py` repo includes pack-specific examples under:
 
 - `examples/workflow_backend/admin_job.py`
 - `examples/workflow_backend/api_service.py`
+- `examples/workflow_backend/processor_worker.py`
+- `examples/workflow_backend/projector_worker.py`
 - `examples/workflow_backend/event_worker.py`
 
 Those cover:
@@ -76,6 +97,7 @@ Those cover:
 - bootstrap and worker setup
 - API submission/query/cancel flows
 - event-driven worker processing
+- a local projected queue and activity model
 
 ## Local Walkthrough
 
@@ -116,24 +138,85 @@ uv run uvicorn examples.workflow_backend.api_service:app --reload --app-dir .
 The service exposes:
 
 - `GET /health`
+- `GET /projection/health`
+- `GET /projection/summary`
+- `GET /items`
 - `GET /items/{item_id}`
+- `GET /items/{item_id}/activity`
+- `GET /activity/recent`
 - `POST /items`
 - `POST /items/{item_id}/cancel`
 
-### 4. Run The Event Worker
+The important split is:
+
+- `items/{item_id}` still exposes the authoritative contract read
+- `projection/*`, `items`, and `activity/*` expose the local projected queue
+  and workflow views
+
+### 4. Run The Processor Worker
 
 ```bash
-uv run python examples/workflow_backend/event_worker.py
+uv run python examples/workflow_backend/processor_worker.py
 ```
 
-The worker:
+The processor worker:
 
 - watches `ItemSubmitted`
 - claims new items
 - completes or fails them
-- monitors the resulting `ItemClaimed`, `ItemCompleted`, `ItemFailed`, and
-  `ItemCancelled` events
-- persists last-seen event IDs so it can resume cleanly
+- keeps its own submission cursor so processing resumes cleanly after restarts
+
+### 5. Run The Projector Worker
+
+```bash
+uv run python examples/workflow_backend/projector_worker.py
+```
+
+The projector:
+
+- backfills from indexed BDS events on first start
+- persists a local SQLite queue/activity projection
+- maintains resumable cursors inside that projection database
+- hydrates current item state from `con_job_workflow.get_item`
+
+It consumes:
+
+- `ItemSubmitted`
+- `ItemClaimed`
+- `ItemCompleted`
+- `ItemFailed`
+- `ItemCancelled`
+
+The default projection database path is:
+
+```text
+.workflow-backend-projection.sqlite3
+```
+
+Override it with:
+
+```bash
+export XIAN_WORKFLOW_PROJECTION_PATH=/path/to/workflow-backend.sqlite3
+```
+
+### 6. Query The Reference-App Views
+
+Once the projector is running, you can query the richer application views:
+
+```bash
+curl http://127.0.0.1:8000/projection/summary
+curl http://127.0.0.1:8000/items
+curl http://127.0.0.1:8000/items?status=processing
+curl http://127.0.0.1:8000/activity/recent
+```
+
+Those routes demonstrate the intended division of labor:
+
+- Xian stores and enforces workflow state
+- the processor worker reacts to submitted items
+- indexed events trigger projection updates
+- authoritative `get_item` reads hydrate the projection
+- the API serves both on-chain reads and application-oriented queue views
 
 ## Remote Operator Story
 
@@ -164,6 +247,7 @@ The Workflow Backend Pack proves that Xian can act as:
 
 - a shared job/workflow state machine
 - an event-driven backend coordination layer
+- a projected queue and activity source for backend services
 - a practical integration target for Python services and workers
 
 It is the third pack because it is the strongest full expression of the
