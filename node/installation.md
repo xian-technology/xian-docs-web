@@ -41,8 +41,17 @@ contract from `xian-configs`.
 
 ```bash
 cd ~/xian/xian-cli
+uv run xian network template list
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --template single-node-dev --generate-validator-key --init-node
+```
+
+If you are joining an existing network instead of creating a fresh local one:
+
+```bash
 uv run xian keys validator generate --out-dir ./keys/validator-1
 uv run xian network join validator-1 --network mainnet \
+  --template embedded-backend \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 uv run xian node init validator-1
@@ -52,14 +61,15 @@ uv run xian node init validator-1
 
 ```bash
 uv run xian node start validator-1
+uv run xian node status validator-1
 ```
 
 For backend-only debugging from `xian-stack`:
 
 ```bash
-python3 ./scripts/backend.py start --no-service-node
-python3 ./scripts/backend.py status --no-service-node
-python3 ./scripts/backend.py stop --no-service-node
+python3 ./scripts/backend.py start --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
 ```
 
 ## Current Distribution Note

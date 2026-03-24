@@ -24,6 +24,7 @@ They are written as JSON and validated on read. The current schema is explicit:
   "block_policy_mode": "on_demand",
   "block_policy_interval": "0s",
   "dashboard_enabled": false,
+  "monitoring_enabled": false,
   "dashboard_host": "127.0.0.1",
   "dashboard_port": 8080
 }
@@ -39,6 +40,7 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `home` | explicit CometBFT home override |
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
+| `monitoring_enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
 | `dashboard_*` | optional runtime dashboard settings |
 
 ## How Profiles Are Created
@@ -46,10 +48,13 @@ They are written as JSON and validated on read. The current schema is explicit:
 Profiles are usually created with:
 
 ```bash
-uv run xian network join validator-1 --network mainnet ...
+uv run xian network join validator-1 --network mainnet --template embedded-backend ...
 ```
 
 or by `network create` when bootstrapping a fresh local network.
+
+Use `xian network template list` to inspect the canonical starter shapes before
+creating or joining a network.
 
 ## Scope
 

@@ -28,6 +28,15 @@ They carry network-wide defaults such as:
 
 Canonical manifests also live in `xian-configs/networks/<name>/manifest.json`.
 
+Starter templates live separately at:
+
+```text
+xian-configs/templates/<name>.json
+```
+
+They are reusable defaults for `xian network create --template ...` and
+`xian network join --template ...`, not live network manifests.
+
 ## Node Profiles
 
 Node profiles are operator-local JSON files stored by default at:
@@ -45,6 +54,7 @@ They carry node-local intent such as:
 - snapshot override
 - service-node mode
 - pruning settings
+- monitoring settings
 - optional state-sync settings
 - optional dashboard settings
 
@@ -95,12 +105,13 @@ Dashboard settings are runtime settings in the node profile, not CometBFT
 settings:
 
 - `dashboard_enabled`
+- `monitoring_enabled`
 - `dashboard_host`
 - `dashboard_port`
 
 When enabled, `xian node start` passes those values to the `xian-stack`
-backend, which starts the separate dashboard service alongside the node
-runtime.
+backend, which starts the separate dashboard service and, when requested,
+Prometheus and Grafana alongside the node runtime.
 
 ## Snapshot Settings
 

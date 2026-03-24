@@ -13,6 +13,9 @@ uv run xian node stop validator-1
 If the node profile enables the dashboard, `xian node start` also brings up the
 optional dashboard service on the configured host/port.
 
+If the node profile enables monitoring, `xian node start` also brings up the
+Prometheus and Grafana sidecars through the `xian-stack` backend.
+
 ## Status
 
 ```bash
@@ -37,15 +40,15 @@ uv run xian doctor validator-1
 From `xian-stack`, the stable machine-readable backend is:
 
 ```bash
-python3 ./scripts/backend.py start --no-service-node
-python3 ./scripts/backend.py status --no-service-node
-python3 ./scripts/backend.py stop --no-service-node
+python3 ./scripts/backend.py start --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
 ```
 
 For BDS-enabled integrated runs:
 
 ```bash
-python3 ./scripts/backend.py start --service-node
+python3 ./scripts/backend.py start --service-node --monitoring
 ```
 
 Host-side storage inspection from `xian-stack`:

@@ -15,24 +15,41 @@ the maintained repos:
 
 The supported workflow today is:
 
-1. Generate validator key material with `xian-cli`
-2. Create or join a network manifest/profile
-3. Materialize the local CometBFT home with `xian node init`
-4. Start and stop the runtime through `xian-stack`
-5. Use `xian node status` and the optional dashboard for inspection
+1. Inspect the available starter templates with `xian-cli`
+2. Generate validator key material with `xian-cli` when needed
+3. Create or join a network manifest/profile
+4. Materialize the local CometBFT home with `xian node init`
+5. Start and stop the runtime through `xian-stack`
+6. Use `xian node status`, monitoring, and the optional dashboard for inspection
 
 Typical commands:
 
 ```bash
-uv run xian keys validator generate --out-dir ./keys/validator-1
+uv run xian network template list
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --template single-node-dev --generate-validator-key --init-node
+uv run xian node status validator-1
+uv run xian node stop validator-1
+```
+
+For joining an existing network with indexed services and monitoring defaults:
+
+```bash
 uv run xian network join validator-1 --network mainnet \
+  --template embedded-backend \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 uv run xian node init validator-1
 uv run xian node start validator-1
-uv run xian node status validator-1
-uv run xian node stop validator-1
 ```
+
+Without templates, the lower-level flow is still available:
+
+1. Generate validator key material with `xian-cli`
+2. Create or join a network manifest/profile manually
+3. Materialize the local CometBFT home with `xian node init`
+4. Start and stop the runtime through `xian-stack`
+5. Use `xian node status` and the optional dashboard for inspection
 
 ## Runtime Topologies
 
