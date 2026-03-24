@@ -21,6 +21,7 @@ Prometheus and Grafana sidecars through the `xian-stack` backend.
 ```bash
 uv run xian node status validator-1
 uv run xian node endpoints validator-1
+uv run xian node health validator-1
 ```
 
 `node status` reports:
@@ -33,6 +34,16 @@ uv run xian node endpoints validator-1
   dashboard / monitoring reachability
 - the effective local endpoint catalog for RPC, `abci_query`, metrics, and
   optional dashboard / monitoring services
+
+`node health` is the concise machine-readable live-health view. It adds:
+
+- backend state as `healthy`, `degraded`, or `stopped`
+- RPC reachability and current sync detail
+- CometBFT and Xian metrics reachability
+- optional dashboard / Prometheus / Grafana reachability when enabled
+- optional disk-pressure checks through the local `xian-stack` storage report
+- rendered state-sync readiness from `config.toml`
+- the effective snapshot bootstrap URL
 
 `node endpoints` is the quickest discovery command for local operator URLs. It
 prints the expected entrypoints for:
@@ -59,6 +70,8 @@ is known. That includes:
 - RPC reachability and the current sync summary
 - dashboard reachability when the profile enables it
 - Prometheus and Grafana reachability when monitoring is enabled
+- state-sync readiness from the rendered CometBFT config
+- snapshot-bootstrap availability from the effective `snapshot_url`
 
 Use `--skip-live-checks` when you want the older artifact-only behavior for an
 offline preflight.
@@ -71,6 +84,7 @@ From `xian-stack`, the stable machine-readable backend is:
 python3 ./scripts/backend.py start --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py endpoints --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py health --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
 ```
 

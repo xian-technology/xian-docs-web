@@ -20,7 +20,7 @@ The supported workflow today is:
 3. Create or join a network manifest/profile
 4. Materialize the local CometBFT home with `xian node init`
 5. Start and stop the runtime through `xian-stack`
-6. Use `xian node status`, `xian node endpoints`, monitoring, and the optional dashboard for inspection
+6. Use `xian node status`, `xian node endpoints`, `xian node health`, monitoring, and the optional dashboard for inspection
 
 Typical commands:
 
@@ -30,6 +30,7 @@ uv run xian network create local-dev --chain-id xian-local-1 \
   --template single-node-dev --generate-validator-key --init-node
 uv run xian node status validator-1
 uv run xian node endpoints validator-1
+uv run xian node health validator-1
 uv run xian node stop validator-1
 ```
 
@@ -50,7 +51,7 @@ Without templates, the lower-level flow is still available:
 2. Create or join a network manifest/profile manually
 3. Materialize the local CometBFT home with `xian node init`
 4. Start and stop the runtime through `xian-stack`
-5. Use `xian node status`, `xian node endpoints`, and the optional dashboard for inspection
+5. Use `xian node status`, `xian node endpoints`, `xian node health`, and the optional dashboard for inspection
 
 ## Runtime Topologies
 

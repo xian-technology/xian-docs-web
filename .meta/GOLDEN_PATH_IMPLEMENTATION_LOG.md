@@ -158,6 +158,29 @@ What was documented:
   monitoring services
 - `--skip-live-checks` keeps the offline artifact-only preflight available
 
+### 2026-03-24: Runtime Health Slice
+
+Repos changed:
+
+- `xian-cli`
+- `xian-stack`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/index.md`
+- `node/installation.md`
+- `node/managing.md`
+
+What was documented:
+
+- `xian node health <name>` as the concise live-runtime health command
+- `xian-stack/scripts/backend.py health` as the backend machine-readable health
+  surface
+- health now includes runtime probes, disk pressure, state-sync readiness, and
+  effective snapshot bootstrap visibility
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:
