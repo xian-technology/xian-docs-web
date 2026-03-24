@@ -49,7 +49,19 @@ prints the expected entrypoints for:
 
 ```bash
 uv run xian doctor validator-1
+uv run xian doctor validator-1 --skip-live-checks
 ```
+
+By default, `doctor <name>` now performs live health checks when the node name
+is known. That includes:
+
+- `xian-stack` backend reachability
+- RPC reachability and the current sync summary
+- dashboard reachability when the profile enables it
+- Prometheus and Grafana reachability when monitoring is enabled
+
+Use `--skip-live-checks` when you want the older artifact-only behavior for an
+offline preflight.
 
 ## Backend Commands
 

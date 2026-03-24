@@ -139,6 +139,25 @@ What was documented:
 - `xian-stack/scripts/backend.py endpoints` is now part of the stable backend
   machine interface
 
+### 2026-03-24: Doctor Health Slice
+
+Repos changed:
+
+- `xian-cli`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/managing.md`
+
+What was documented:
+
+- `xian doctor <name>` now performs live health checks by default
+- live checks cover backend state, RPC reachability, and optional dashboard /
+  monitoring services
+- `--skip-live-checks` keeps the offline artifact-only preflight available
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:
