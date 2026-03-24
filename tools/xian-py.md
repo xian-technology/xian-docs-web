@@ -483,7 +483,11 @@ uv run uvicorn examples.fastapi_service:app --reload --app-dir .
 ```
 
 This example expects normal app dependencies such as `fastapi` and `uvicorn`;
-they are intentionally not part of the base `xian-py` package install.
+install them with the SDK app extra:
+
+```bash
+uv sync --group dev --extra app
+```
 
 ### Event Worker
 
@@ -532,6 +536,7 @@ reference solution pack and the first deeper reference-app slice:
 Typical runs:
 
 ```bash
+uv sync --group dev --extra app
 uv run python examples/credits_ledger/admin_job.py
 uv run uvicorn examples.credits_ledger.api_service:app --reload --app-dir .
 uv run python examples/credits_ledger/projector_worker.py
@@ -560,6 +565,7 @@ deeper reference-app slice:
 Typical runs:
 
 ```bash
+uv sync --group dev --extra app
 uv run python examples/registry_approval/admin_job.py
 uv run uvicorn examples.registry_approval.api_service:app --reload --app-dir .
 uv run python examples/registry_approval/projector_worker.py
@@ -588,6 +594,7 @@ deeper reference-app slice:
 Typical runs:
 
 ```bash
+uv sync --group dev --extra app
 uv run python examples/workflow_backend/admin_job.py
 uv run uvicorn examples.workflow_backend.api_service:app --reload --app-dir .
 uv run python examples/workflow_backend/processor_worker.py

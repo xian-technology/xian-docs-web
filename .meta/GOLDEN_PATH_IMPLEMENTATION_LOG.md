@@ -219,6 +219,27 @@ Docs updated:
 - `node/installation.md`
 - `node/managing.md`
 
+### 2026-03-24: Whole-Stack Validation Follow-Up
+
+Repos changed:
+
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+- `solution-packs/credits-ledger.md`
+
+What was documented:
+
+- the documented FastAPI and uvicorn examples now install via the optional
+  `xian-py[app]` extra instead of assuming framework dependencies are present
+- the deeper Credits Ledger walkthrough now reflects the live validated shape:
+  authoritative chain reads, BDS indexed events, a resumable projection, and a
+  thin API service running on top of the SDK helper layer
+
 What was documented:
 
 - `xian-deploy` now mirrors the local health/recovery model with remote

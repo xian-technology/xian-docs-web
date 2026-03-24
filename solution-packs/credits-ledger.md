@@ -122,6 +122,12 @@ The admin job:
 
 ### 3. Run The API Service
 
+Install the optional app dependencies first:
+
+```bash
+uv sync --group dev --extra app
+```
+
 ```bash
 uv run uvicorn examples.credits_ledger.api_service:app --reload --app-dir .
 ```
