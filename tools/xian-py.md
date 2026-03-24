@@ -545,22 +545,31 @@ This is the first example set that demonstrates the full backend pattern:
 
 ### Registry / Approval Pack Examples
 
-`examples/registry_approval/` adds the second reference pack:
+`examples/registry_approval/` adds the second reference pack and the second
+deeper reference-app slice:
 
 - `admin_job.py`: deploy `con_registry_records` and `con_registry_approval`,
   configure signers, and submit an initial proposal
-- `api_service.py`: read records and proposals and submit proposal/approval
-  transactions
-- `event_worker.py`: consume proposal and registry events with resumable
-  cursors
+- `api_service.py`: combine authoritative proposal/record reads with projected
+  workflow views for pending approvals and audit activity
+- `projector_worker.py`: rebuild a local SQLite workflow projection from
+  indexed events and hydrate rich proposal/record state from authoritative
+  contract reads
+- `event_worker.py`: compatibility wrapper around `projector_worker.py`
 
 Typical runs:
 
 ```bash
 uv run python examples/registry_approval/admin_job.py
 uv run uvicorn examples.registry_approval.api_service:app --reload --app-dir .
-uv run python examples/registry_approval/event_worker.py
+uv run python examples/registry_approval/projector_worker.py
 ```
+
+This is the second example set that demonstrates the deeper backend pattern:
+
+- indexed events as workflow triggers
+- authoritative contract reads as hydration
+- a local projected read model for application-oriented approval queries
 
 ### Workflow Backend Pack Examples
 

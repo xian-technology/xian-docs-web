@@ -325,6 +325,34 @@ What was documented:
 - the projector worker, projection database path, and the richer API routes
   for account activity and summary views
 
+### 2026-03-24: Registry / Approval Reference-App Slice
+
+Repos changed:
+
+- `xian-meta`
+- `xian-py`
+- `xian-docs-web`
+
+Docs updated:
+
+- `tools/xian-py.md`
+- `solution-packs/index.md`
+- `solution-packs/registry-approval.md`
+
+What was documented:
+
+- the Registry / Approval Pack is now also the second deeper reference-app
+  slice
+- the reference-app pattern combines:
+  - authoritative approval and registry contracts
+  - indexed BDS events as workflow triggers
+  - a local SQLite projection
+  - projector hydration from authoritative contract reads
+  - an API service that serves both on-chain reads and projected workflow
+    views
+- the projector worker, projection database path, and the richer API routes
+  for records, pending proposals, approvals, and workflow activity
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

@@ -2,6 +2,9 @@
 
 The Registry / Approval Pack is the second concrete Xian solution pack.
 
+It is also the second pack that has been deepened into a fuller reference
+application slice.
+
 It shows how to use Xian as shared programmable registry state where records
 must be proposed and approved before they become active or revoked.
 
@@ -27,6 +30,23 @@ coordination:
 - strong event and indexed history surfaces
 - straightforward Python admin/service integration
 - a realistic remote operator story through `consortium-3`
+
+## Reference-App Pattern
+
+The deeper reference-app slice for this pack uses a three-part shape:
+
+1. the Xian contracts remain the authoritative approval and registry layer
+2. indexed BDS events trigger a resumable projector
+3. the projector hydrates richer proposal and record views from authoritative
+   contract reads into a local SQLite projection
+
+This is the stronger backend pattern for approval workflows:
+
+- use chain events to detect workflow changes
+- use authoritative contract reads to hydrate the full proposal and record
+  state
+- serve pending approvals, record catalogs, and audit activity from the local
+  projection
 
 ## Recommended Operator Paths
 
@@ -69,13 +89,15 @@ The `xian-py` repo includes pack-specific examples under:
 
 - `examples/registry_approval/admin_job.py`
 - `examples/registry_approval/api_service.py`
+- `examples/registry_approval/projector_worker.py`
 - `examples/registry_approval/event_worker.py`
 
 Those cover:
 
 - bootstrap and signer setup
 - proposal submission and approval
-- event-driven read-side integration
+- a local projected workflow read model
+- event-driven read-side integration hydrated from authoritative contract reads
 
 ## Local Walkthrough
 
@@ -117,22 +139,46 @@ The admin job:
 uv run uvicorn examples.registry_approval.api_service:app --reload --app-dir .
 ```
 
-The service exposes:
+The service exposes both authoritative and projected workflow reads:
 
 - `GET /health`
+- `GET /projection/health`
+- `GET /projection/summary`
+- `GET /records`
 - `GET /records/{record_id}`
+- `GET /records/{record_id}/activity`
+- `GET /proposals`
+- `GET /proposals/pending`
 - `GET /proposals/{proposal_id}`
+- `GET /proposals/{proposal_id}/approvals`
+- `GET /activity/recent`
 - `POST /proposals/upsert`
 - `POST /proposals/revoke`
 - `POST /proposals/{proposal_id}/approve`
 
-### 4. Run The Event Worker
+The important split is:
+
+- `records/{record_id}` and `proposals/{proposal_id}` still expose the
+  authoritative contract reads
+- `projection/*`, `records`, `proposals`, and `activity/*` expose the local
+  projected workflow views
+
+### 4. Run The Projector Worker
 
 ```bash
-uv run python examples/registry_approval/event_worker.py
+uv run python examples/registry_approval/projector_worker.py
 ```
 
-The worker consumes:
+The projector:
+
+- backfills from indexed BDS events on first start
+- persists a local SQLite workflow projection
+- maintains resumable cursors inside that projection database
+- hydrates:
+  - proposal details from `con_registry_approval.get_proposal`
+  - record details from `con_registry_records.get_record`
+
+It consumes:
 
 - `ProposalSubmitted`
 - `ProposalApproved`
@@ -140,7 +186,35 @@ The worker consumes:
 - `RecordUpserted`
 - `RecordRevoked`
 
-It persists the last seen event IDs so it can resume cleanly after restarts.
+The default projection database path is:
+
+```text
+.registry-approval-projection.sqlite3
+```
+
+Override it with:
+
+```bash
+export XIAN_REGISTRY_PROJECTION_PATH=/path/to/registry-approval.sqlite3
+```
+
+### 5. Query The Reference-App Views
+
+Once the projector is running, you can query the richer application views:
+
+```bash
+curl http://127.0.0.1:8000/projection/summary
+curl http://127.0.0.1:8000/proposals/pending
+curl http://127.0.0.1:8000/records
+curl http://127.0.0.1:8000/activity/recent
+```
+
+Those routes demonstrate the intended division of labor:
+
+- Xian stores and enforces the approval workflow and registry state
+- indexed events trigger projection updates
+- authoritative contract reads hydrate the projection
+- the API serves both on-chain reads and application-oriented workflow views
 
 ## Remote Operator Story
 
@@ -171,6 +245,7 @@ The Registry / Approval Pack proves that Xian can act as:
 
 - a shared registry with explicit approval policy
 - a clean multi-contract coordination backend
+- an event-driven workflow source for richer projected approval queries
 - a practical Python-integrated foundation for multi-party application state
 
 It is second because it validates the shared-network story after the simpler
