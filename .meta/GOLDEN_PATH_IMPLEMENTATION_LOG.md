@@ -266,6 +266,29 @@ What was documented:
 - the stack now treats boolean ABCI state reads as first-class values instead
   of implicitly mislabeling them as integers
 
+### 2026-03-24: Workflow Backend Live Validation Follow-Up
+
+Repos changed:
+
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+- `solution-packs/workflow-backend.md`
+
+What was documented:
+
+- workflow processors and projections now treat indexed event fields as
+  first-class by merging `data_indexed` and `data`
+- the workflow bootstrap flow now funds configured workers by default so the
+  documented processor path can actually claim and complete items
+- the deeper workflow walkthrough now reflects the live-validated shape:
+  one completed item path plus a separate cancelled item path, both matching
+  projected and authoritative reads
+
 What was documented:
 
 - `xian-deploy` now mirrors the local health/recovery model with remote

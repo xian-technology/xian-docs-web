@@ -625,7 +625,12 @@ This is the third example set that demonstrates the deeper backend pattern:
 
 - a separate processor and projector worker model
 - indexed events as workflow and projection triggers
+- authoritative decoded readonly `get_item` calls for projection hydration
 - a local projected read model for queue state and workflow activity
+
+The workflow bootstrap now also tops up configured workers with native balance
+by default so the documented processor path can actually claim and complete
+items in local/reference networks.
 
 ## Structured Errors
 

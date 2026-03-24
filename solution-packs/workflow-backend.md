@@ -117,6 +117,7 @@ Use the admin job from `xian-py`:
 
 ```bash
 cd ~/xian/xian-py
+uv sync --group dev --extra app
 export XIAN_NODE_URL=http://127.0.0.1:26657
 export XIAN_CHAIN_ID=xian-workflow-local-1
 export XIAN_WALLET_PRIVATE_KEY=<private-key-hex>
@@ -127,7 +128,12 @@ The admin job:
 
 - deploys `con_job_workflow` if it does not exist yet
 - optionally adds worker accounts from `XIAN_WORKFLOW_WORKERS`
+- funds those configured workers with native balance by default so they can pay
+  for claim/complete transactions in the reference flow
 - optionally submits an initial item when `XIAN_WORKFLOW_ITEM_ID` is set
+
+Set `XIAN_WORKFLOW_WORKER_FUND_AMOUNT=0` if you want to disable the automatic
+worker top-up behavior.
 
 ### 3. Run The API Service
 
@@ -152,6 +158,9 @@ The important split is:
 - `items/{item_id}` still exposes the authoritative contract read
 - `projection/*`, `items`, and `activity/*` expose the local projected queue
   and workflow views
+
+The service now uses decoded readonly `call(...)` helpers for item hydration
+instead of returning raw simulation envelopes.
 
 ### 4. Run The Processor Worker
 
@@ -178,6 +187,8 @@ The projector:
 - persists a local SQLite queue/activity projection
 - maintains resumable cursors inside that projection database
 - hydrates current item state from `con_job_workflow.get_item`
+- merges indexed and non-indexed event payload fields so the projection matches
+  the live BDS event shape
 
 It consumes:
 
@@ -217,6 +228,16 @@ Those routes demonstrate the intended division of labor:
 - indexed events trigger projection updates
 - authoritative `get_item` reads hydrate the projection
 - the API serves both on-chain reads and application-oriented queue views
+
+This exact shape was validated live against an indexed local node:
+
+- one submitted item was claimed and completed by the processor worker
+- the projector reflected `ItemSubmitted`, `ItemClaimed`, and `ItemCompleted`
+  exactly
+- after pausing the processor, a second submitted item was cancelled through
+  the API
+- projected queue, item, and activity views all matched the authoritative
+  on-chain workflow state
 
 ## Remote Operator Story
 
