@@ -52,6 +52,12 @@ GET /api/contract/currency
 
 Returns the current contract source fetched through the node's query layer.
 
+For the canonical runtime form, query:
+
+```text
+GET /api/abci_query/contract_code/currency
+```
+
 ## ABCI Query Pass-Through
 
 The dashboard exposes arbitrary ABCI query paths under:
@@ -66,6 +72,7 @@ Examples:
 GET /api/abci_query/get/currency.balances:alice
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/contract/currency
+GET /api/abci_query/contract_code/currency
 GET /api/abci_query/contract_methods/currency
 GET /api/abci_query/contract_vars/currency
 GET /api/abci_query/simulate_tx/<hex_payload>

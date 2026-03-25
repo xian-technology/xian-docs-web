@@ -176,7 +176,7 @@ allowance = client.get_state("currency", "balances", wallet.public_key, "con_dex
 
 ```python
 source = client.get_contract("currency")
-clean_source = client.get_contract("currency", clean=True)
+runtime_code = client.get_contract_code("currency")
 ```
 
 ### send_tx
