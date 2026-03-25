@@ -11,6 +11,7 @@ Multi-contract architectures are a first-class pattern in Xian.
 - interface checks through `importlib.enforce_interface(...)`
 - ownership lookups through `importlib.owner_of(...)`
 - runtime metadata lookups through `importlib.contract_info(...)`
+- deterministic source/runtime verification through `importlib.code_hash(...)`
 - cross-contract reads via `ForeignVariable` and `ForeignHash`
 
 ## Recommended Split

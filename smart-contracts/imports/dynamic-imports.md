@@ -39,6 +39,8 @@ the contract name directly:
 owner = importlib.owner_of(contract_name)
 ok = importlib.enforce_interface(contract_name, expected_interface)
 info = importlib.contract_info(contract_name)
+runtime_hash = importlib.code_hash(contract_name)
+source_hash = importlib.code_hash(contract_name, kind="source")
 ```
 
 `importlib.contract_info(...)` returns canonical runtime metadata for the target
@@ -51,12 +53,17 @@ contract:
 - `initiator`
 - `submitted`
 
+`importlib.code_hash(...)` returns the canonical SHA3-256 digest of the stored
+runtime code by default. Pass `kind="source"` to hash the stored canonical
+source instead.
+
 ## When to Use It
 
 - plugin-style architectures
 - configurable token or market contracts
 - governance-selected implementation contracts
 - registry-driven dynamic dispatch
+- code allowlists and approved-template checks
 
 ## Security Model
 

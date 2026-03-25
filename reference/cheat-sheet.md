@@ -111,6 +111,8 @@ importlib.exists("con_token")
 importlib.has_export("con_token", "balance_of")
 importlib.owner_of("con_token")
 importlib.contract_info("con_token")
+importlib.code_hash("con_token")
+importlib.code_hash("con_token", kind="source")
 ```
 
 `importlib.enforce_interface(...)`, `importlib.owner_of(...)`, and
