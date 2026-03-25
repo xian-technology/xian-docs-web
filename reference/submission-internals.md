@@ -67,3 +67,12 @@ special-case runtime loophole for contract factories.
 Submission is security-sensitive because it sets the long-lived executable code
 for a contract name. That is why the linter, import restrictions, and runtime
 loader all participate in the submission path.
+
+It also owns the runtime metadata mutation surface for deployed contracts:
+
+- `submission.change_developer(contract, new_developer)`
+- `submission.change_owner(contract, new_owner)`
+
+`change_owner(...)` updates the runtime `__owner__` field that drives
+`ctx.owner` and runtime owner gating. It does not modify a contract's own
+application-level `owner = Variable()` or `metadata["owner"]` pattern.

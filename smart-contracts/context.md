@@ -9,7 +9,7 @@ The `ctx` object is available in every exported function. It tells you who calle
 | `ctx.caller` | `str` | The immediate caller — either a user address or a contract name |
 | `ctx.signer` | `str` | The original transaction signer (never changes in a call chain) |
 | `ctx.this` | `str` | The name of the currently executing contract |
-| `ctx.owner` | `str` or `None` | The owner set when the contract was deployed |
+| `ctx.owner` | `str` or `None` | The runtime owner stored for the contract |
 | `ctx.entry` | `tuple` | `(contract_name, function_name)` of the transaction entry point |
 | `ctx.submission_name` | `str` or `None` | The name of the contract currently being deployed during module-body execution and `@construct` |
 
@@ -76,6 +76,25 @@ the child module body and constructor:
 
 This means factories can create child contracts without losing the original
 transaction signer or the transaction entry point.
+
+## Runtime Owner Metadata
+
+`ctx.owner` comes from the contract's runtime `__owner__` metadata, not from an
+application variable such as `owner = Variable()` or `metadata["owner"]`.
+
+That runtime owner can be reassigned through the built-in `submission`
+contract:
+
+```python
+import submission
+
+@export
+def handoff(contract: str, new_owner: str):
+    submission.change_owner(contract=contract, new_owner=new_owner)
+```
+
+Changing the runtime owner affects runtime access control for owner-gated
+contracts. It does not rewrite a contract's own state variables.
 
 ## Common Patterns
 

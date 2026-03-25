@@ -125,6 +125,10 @@ Deployed contracts record immutable provenance in state:
 - `__initiator__`: original external signer
 - `__developer__`: current mutable developer field
 
+Runtime ownership can be transferred through `submission.change_owner(...)`.
+That updates `__owner__` / `ctx.owner`, not a contract's own `owner = Variable()`
+pattern.
+
 ## Read / Write Patterns
 
 ```python

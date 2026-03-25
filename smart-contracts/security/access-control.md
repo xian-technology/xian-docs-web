@@ -24,6 +24,24 @@ def transfer_ownership(new_owner: str):
     owner.set(new_owner)
 ```
 
+This pattern controls your contract's own state. It is separate from the
+runtime `__owner__` metadata that powers `ctx.owner` and runtime owner gating.
+
+If you deploy a contract with a runtime owner and want to transfer that runtime
+control later, use the built-in `submission.change_owner(...)` path:
+
+```python
+import submission
+
+@export
+def handoff_runtime_owner(contract: str, new_owner: str):
+    submission.change_owner(contract=contract, new_owner=new_owner)
+```
+
+Use the runtime owner path when you want the execution engine itself to enforce
+who may call exported functions on that contract. Use an `owner = Variable()`
+pattern when you want application-defined ownership logic inside the contract.
+
 ## Preventing Cross-Contract Calls
 
 Some functions should only be callable by end users (externally owned accounts), not by other contracts. Check that `ctx.caller` equals `ctx.signer`:
