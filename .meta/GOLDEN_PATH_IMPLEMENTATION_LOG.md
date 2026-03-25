@@ -470,6 +470,30 @@ What was documented:
 - this matters for localnet and validation workspaces that intentionally remap
   ports to avoid collisions while keeping the same node-profile shape
 
+### 2026-03-25: Reusable Projector Primitive Slice
+
+Repos changed:
+
+- `xian-py`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `tools/xian-py.md`
+
+What was documented:
+
+- `xian-py` now exposes reusable projector / projection primitives:
+  `merged_event_payload`, `SQLiteProjectionState`, `EventSource`,
+  `EventProjector`, and `EventProjectorError`
+- the three deeper reference apps now build on this shared layer instead of
+  each carrying their own event-loop and cursor implementation
+- the intended SDK boundary is now clearer:
+  - the SDK owns repetitive event polling, ordering, and cursor plumbing
+  - application code still owns domain-specific tables, hydration, and apply
+    logic
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

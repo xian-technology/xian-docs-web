@@ -469,6 +469,30 @@ history = balance_key.history(limit=20)
 This is useful when an application works with one exact state key repeatedly
 and wants both the current value and the indexed history view.
 
+## Reusable Projector Primitives
+
+`xian-py` now also includes a small reusable layer for event-driven read
+models and projector workers.
+
+Available primitives:
+
+- `merged_event_payload(event)`: merge BDS `data_indexed` and `data` once at
+  the SDK boundary
+- `SQLiteProjectionState`: persist integer cursors in SQLite-backed read models
+- `EventSource`: describe one indexed event stream
+- `EventProjector`: poll one or more indexed event streams, sort events
+  deterministically, optionally hydrate authoritative state, and call your
+  apply handler
+- `EventProjectorError`: surface hydrate/apply failures together with the
+  failing event context
+
+These primitives are intentionally thin. The SDK owns the repetitive event
+polling, ordering, and cursor plumbing; application code still owns its own
+projection tables, hydration strategy, and domain-specific apply logic.
+
+The three deeper reference-app slices now build on these shared primitives
+instead of each carrying their own event-loop and cursor implementation.
+
 ## Service Integration Examples
 
 The `xian-py` repo now includes application-facing examples under
