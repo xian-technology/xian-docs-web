@@ -104,6 +104,13 @@ importlib.call(
 The helper only resolves exported functions. It does not expose generic
 attribute lookup.
 
+Probe helpers:
+
+```python
+importlib.exists("con_token")
+importlib.has_export("con_token", "balance_of")
+```
+
 Factory deployments use the built-in submission contract:
 
 ```python

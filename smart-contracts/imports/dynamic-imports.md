@@ -18,6 +18,20 @@ return importlib.call(
 )
 ```
 
+If you need to probe before calling, use the read-only helpers:
+
+```python
+if importlib.exists(contract_name) and importlib.has_export(
+    contract_name,
+    "balance_of",
+):
+    return importlib.call(
+        contract_name,
+        "balance_of",
+        {"account": account},
+    )
+```
+
 ## When to Use It
 
 - plugin-style architectures
@@ -30,6 +44,10 @@ return importlib.call(
 `importlib.call(...)` only resolves exported contract functions. It does not
 expose generic `getattr(...)` style access to private functions or module
 attributes.
+
+`importlib.exists(...)` and `importlib.has_export(...)` are the intended probe
+surface for dynamic dispatch. They let contracts validate targets without
+opening generic module reflection.
 
 ## Caution
 
