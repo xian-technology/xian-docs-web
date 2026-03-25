@@ -9,6 +9,7 @@ Multi-contract architectures are a first-class pattern in Xian.
 - dynamic probes through `importlib.exists(...)` and `importlib.has_export(...)`
 - dynamic exported-function dispatch through `importlib.call(...)`
 - interface checks through `importlib.enforce_interface(...)`
+- ownership lookups through `importlib.owner_of(...)`
 - cross-contract reads via `ForeignVariable` and `ForeignHash`
 
 ## Recommended Split

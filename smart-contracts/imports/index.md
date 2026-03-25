@@ -8,6 +8,7 @@ Contracts can depend on other deployed contracts.
 - dynamic import: `importlib.import_module("con_example")`
 - dynamic function call: `importlib.call("con_example", "transfer", {"amount": 10, "to": "bob"})`
 - dynamic probes: `importlib.exists("con_example")`, `importlib.has_export("con_example", "transfer")`
+- flexible targets: `importlib.owner_of(...)` and `importlib.enforce_interface(...)` accept either a contract name string or an imported contract module
 
 ## Important Restriction
 

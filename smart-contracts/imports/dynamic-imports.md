@@ -32,6 +32,14 @@ if importlib.exists(contract_name) and importlib.has_export(
     )
 ```
 
+If you only need ownership metadata or an interface check, you can also pass
+the contract name directly:
+
+```python
+owner = importlib.owner_of(contract_name)
+ok = importlib.enforce_interface(contract_name, expected_interface)
+```
+
 ## When to Use It
 
 - plugin-style architectures
