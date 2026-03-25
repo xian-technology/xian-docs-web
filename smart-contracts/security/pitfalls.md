@@ -129,9 +129,11 @@ conceptually integral.
 
 ## 6. Random is Not Truly Random
 
-The `random` module in Xian contracts is **deterministic**. It is seeded from block data so that all validators produce the same result. This means:
+The `random` module in Xian contracts is **deterministic**. It is seeded from
+public execution context so that all validators produce the same result. This
+means:
 
-- The outcome is predictable if you know the block hash and transaction index
+- The outcome is reproducible if you know the block metadata and transaction-specific input hash
 - Do not use `random` for high-stakes outcomes where prediction matters
 - Miners/validators can potentially influence the seed
 

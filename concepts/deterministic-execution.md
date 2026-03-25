@@ -111,7 +111,16 @@ State values are serialized to JSON with deterministic properties:
 
 ### Deterministic Random
 
-The `random` module available in contracts is seeded from block data (block hash and transaction index). Every validator uses the same seed for the same transaction, producing the same "random" numbers.
+The `random` module available in contracts is seeded from public execution
+context:
+
+- `chain_id`
+- `block_num`
+- `block_hash`
+- a transaction-specific `__input_hash`
+
+Every validator uses the same seed for the same transaction, producing the
+same pseudorandom sequence.
 
 ### Deterministic Time
 
@@ -148,7 +157,7 @@ Common causes of divergence in practice:
 |--------------------------|---------------------|
 | Floating-point rounding | `ContractingDecimal` for all contract values |
 | System time | `now` is the consensus block timestamp |
-| Random numbers | Seeded from block hash + transaction index |
+| Random numbers | Seeded from public block context + transaction-specific input hash |
 | File/network I/O | Sandbox forbids all I/O |
 | Dictionary ordering | Python 3.7+ guarantees insertion order |
 | Memory allocation | Checked at boundary, not per-instruction |

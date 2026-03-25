@@ -16,6 +16,7 @@ Do not use it as if it were cryptographically unpredictable randomness.
 
 1. store balances or escrow state in `Hash` / `Variable`
 2. call `random.seed()` before using `random.randint(...)`
+   optional: pass a literal extra salt such as `random.seed("round-2")`
 3. emit an event describing the roll and payout
 4. keep the payout logic simple and auditable
 

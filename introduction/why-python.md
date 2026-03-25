@@ -51,7 +51,7 @@ The most common objection to Python for blockchain is non-determinism. Xian addr
 |---------|----------|
 | Floating-point rounding | decimal-backed numeric execution for contract `float` values |
 | System time dependency | `now` is the consensus block timestamp |
-| Random number generation | Seeded from block hash (deterministic across validators) |
+| Random number generation | Seeded from public execution context (deterministic across validators) |
 | File and network I/O | Completely forbidden in the sandbox |
 | Dictionary ordering | Guaranteed since Python 3.7 |
 | Standard library side effects | All stdlib imports forbidden; only Xian runtime modules available |
