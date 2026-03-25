@@ -4,19 +4,25 @@
 VitePress. It owns published docs content and keeps its repo-internal notes
 hidden under `.meta/` so they are not shipped as public pages.
 
-## Scope
+## Quick Start
 
-This repo owns:
+```bash
+npm install
+npm run dev
+```
 
-- the published documentation site and its content structure
-- docs updates that track public API, SDK, CLI, node, and operator behavior
-- internal repo notes stored under `.meta/`
+Use `npm run build` before pushing docs changes.
 
-This repo does not own:
+## Principles
 
-- canonical runtime behavior
-- SDK or node implementation logic
-- stack-wide convention definitions
+- Write in current-state language. Explain what the stack does and how to use
+  it, not how it changed.
+- Keep public docs in the published content tree and repo-internal notes in
+  `.meta/`.
+- Update docs alongside implementation changes whenever public behavior,
+  workflows, or operator guidance changes.
+- Prefer concise guidance, examples, and workflows over internal terminology or
+  changelog-style prose.
 
 ## Key Directories
 
@@ -36,12 +42,3 @@ npm run build
 
 - [AGENTS.md](AGENTS.md)
 - internal repo notes: `.meta/ARCHITECTURE.md`, `.meta/BACKLOG.md`, `.meta/README.md`
-
-## Development
-
-```bash
-npm run dev
-npm run preview
-```
-
-The site is deployed automatically to GitHub Pages on every push to `main`.
