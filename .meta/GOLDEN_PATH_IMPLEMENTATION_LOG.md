@@ -520,6 +520,32 @@ What was documented:
   including the recommended template, example directory, contract paths, and
   ordered commands/notes
 
+### 2026-03-25: Remote Starter and Monitoring Preset Slice
+
+Repos changed:
+
+- `xian-deploy`
+- `xian-stack`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `node/managing.md`
+- `solution-packs/credits-ledger.md`
+- `solution-packs/registry-approval.md`
+- `solution-packs/workflow-backend.md`
+
+What was documented:
+
+- `xian-deploy` now includes reusable remote runtime presets aligned with the
+  remote template classes used by the solution packs
+- `xian-deploy` also now includes example host layouts for the embedded-backend
+  and consortium-3 remote flows
+- `xian-stack` and `xian-deploy` now expose extra monitoring assets:
+  `Xian Embedded Backend`, `Xian Shared Network`, and matching Prometheus alert
+  presets
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

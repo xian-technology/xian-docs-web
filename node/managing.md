@@ -117,6 +117,15 @@ make storage-report
 Use `xian-deploy` when the node is running on a remote Linux host and you want
 the deployment-side equivalent of the local health and recovery workflow.
 
+The remote starter flows now also have reusable preset files in `xian-deploy`:
+
+- `presets/templates/embedded-backend.yml`
+- `presets/templates/consortium-validator.yml`
+- `presets/templates/consortium-service-node.yml`
+
+Use those with `ansible-playbook ... -e @presets/templates/<name>.yml` or place
+the same values into host/group vars in your private inventory.
+
 Common entrypoints:
 
 ```bash
@@ -242,6 +251,13 @@ Use the dashboard for chain inspection and WebSocket subscriptions.
 
 Use Prometheus and Grafana for remote monitoring, alerting, and retention.
 
+Template-specific monitoring assets now exist on top of the generic overview:
+
+- `Xian Embedded Backend` dashboard for service-node and embedded-backend
+  application deployments
+- `Xian Shared Network` dashboard for consortium/shared-network service nodes
+- embedded-backend and shared-network Prometheus alert presets
+
 From `xian-stack`:
 
 ```bash
@@ -252,6 +268,14 @@ make monitoring-bds-down
 make monitoring-fidelity-up
 make monitoring-fidelity-down
 ```
+
+The built-in monitoring commands now map to meaningful monitoring postures:
+
+- `monitoring-up`: generic integrated monitoring with the overview dashboard
+- `monitoring-bds-up`: integrated service-node monitoring with the
+  embedded-backend alert preset
+- `monitoring-fidelity-up`: shared-network monitoring with the shared-network
+  alert preset
 
 What gets scraped:
 

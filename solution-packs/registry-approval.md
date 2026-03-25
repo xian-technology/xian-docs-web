@@ -252,6 +252,16 @@ This exact shape was validated live against an indexed local node:
 For remote Linux hosts, use `xian-deploy` with the `consortium-3` deployment
 posture when the registry is actually shared across parties.
 
+Use the matching host-layout and runtime presets from `xian-deploy`:
+
+- host-layout example:
+  `inventories/example/solution-packs/consortium-3-hosts.yml`
+- validator preset: `presets/templates/consortium-validator.yml`
+- service-node preset: `presets/templates/consortium-service-node.yml`
+
+Apply the validator preset to the validator hosts and the service-node preset
+to the BDS/monitoring host.
+
 The main remote commands remain:
 
 ```bash
@@ -266,6 +276,10 @@ Use recovery intentionally:
 - prepared node-home archive: `push-home.yml` then `deploy.yml`
 - application-state snapshot import: `restore-state-snapshot.yml`
 - protocol state sync: `bootstrap-state-sync.yml`
+
+When monitoring is enabled on the service node through the consortium preset,
+Grafana also includes the `Xian Shared Network` dashboard and the matching
+shared-network Prometheus alert preset.
 
 See [Starting, Stopping & Monitoring](/node/managing) for the concrete local
 and remote operator runbooks.

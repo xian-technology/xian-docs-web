@@ -222,11 +222,19 @@ Those routes demonstrate the intended division of labor:
 For remote Linux hosts, use `xian-deploy` with the `embedded-backend`
 deployment posture.
 
+Use the matching remote preset and host-layout references from `xian-deploy`:
+
+- preset: `presets/templates/embedded-backend.yml`
+- host-layout example:
+  `inventories/example/solution-packs/embedded-backend-hosts.yml`
+
 The main remote commands are:
 
 ```bash
-ansible-playbook playbooks/deploy.yml
-ansible-playbook playbooks/health.yml
+ansible-playbook playbooks/deploy.yml \
+  -e @presets/templates/embedded-backend.yml
+ansible-playbook playbooks/health.yml \
+  -e @presets/templates/embedded-backend.yml
 ansible-playbook playbooks/bootstrap-state-sync.yml
 ansible-playbook playbooks/restore-state-snapshot.yml
 ```
@@ -236,6 +244,10 @@ Use recovery intentionally:
 - prepared node-home archive: `push-home.yml` then `deploy.yml`
 - application-state snapshot import: `restore-state-snapshot.yml`
 - protocol state sync: `bootstrap-state-sync.yml`
+
+When monitoring is enabled through the embedded-backend preset, Grafana also
+includes the `Xian Embedded Backend` dashboard and the matching embedded-backend
+Prometheus alert preset.
 
 See [Starting, Stopping & Monitoring](/node/managing) for the concrete local
 and remote runbooks behind those paths.
