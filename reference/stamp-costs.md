@@ -115,3 +115,7 @@ At 20 stamps per XIAN:
 | Token transfer | ~1,500 | ~75 |
 | Complex DEX swap | ~5,000 | ~250 |
 | Contract deployment | ~50,000+ | ~2,500+ |
+
+Deployment includes more than final writes. It also pays for contract-analysis
+work and canonical source storage. Large comments are not preserved in stored
+`__source__`, but raw submitted source is still size-limited.

@@ -66,6 +66,7 @@ datetime.datetime, datetime.timedelta
 | `ctx.this` | current contract name |
 | `ctx.owner` | current contract owner |
 | `ctx.entry` | `(contract, function)` entry point |
+| `ctx.submission_name` | child contract name during deployment |
 
 ## Environment Values
 
@@ -89,6 +90,27 @@ import decimal
 ```
 
 Do not use `from x import y`.
+
+Factory deployments use the built-in submission contract:
+
+```python
+import submission
+
+@export
+def deploy_child(name: str, code: str, owner: str = None):
+    submission.submit_contract(
+        name=name,
+        code=code,
+        owner=owner,
+        constructor_args={},
+    )
+```
+
+Deployed contracts record immutable provenance in state:
+
+- `__deployer__`: immediate deployer
+- `__initiator__`: original external signer
+- `__developer__`: current mutable developer field
 
 ## Read / Write Patterns
 

@@ -219,6 +219,29 @@ Docs updated:
 - `node/installation.md`
 - `node/managing.md`
 
+### 2026-03-25: Contract Factory Deployment Slice
+
+Repos changed:
+
+- `xian-contracting`
+- `xian-abci`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `smart-contracts/context.md`
+- `reference/cheat-sheet.md`
+- `reference/submission-internals.md`
+- `reference/stamp-costs.md`
+
+What was documented:
+
+- contracts can deploy child contracts again through `submission.submit_contract(...)`
+- child module-body execution and `@construct` now run under explicit child deployment context
+- deployed contracts now retain immutable deployment provenance
+- BDS/indexers discover deployments from contract state writes, not only from outer transaction payload shape
+
 ### 2026-03-24: Whole-Stack Validation Follow-Up
 
 Repos changed:

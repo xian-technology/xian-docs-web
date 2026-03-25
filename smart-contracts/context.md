@@ -11,7 +11,7 @@ The `ctx` object is available in every exported function. It tells you who calle
 | `ctx.this` | `str` | The name of the currently executing contract |
 | `ctx.owner` | `str` or `None` | The owner set when the contract was deployed |
 | `ctx.entry` | `tuple` | `(contract_name, function_name)` of the transaction entry point |
-| `ctx.submission_name` | `str` or `None` | The name of the contract being submitted (only during submission) |
+| `ctx.submission_name` | `str` or `None` | The name of the contract currently being deployed during module-body execution and `@construct` |
 
 ## How Context Changes in Call Chains
 
@@ -30,6 +30,52 @@ User "alice" calls contract_a.do_something()
 ```
 
 This distinction is critical for security. A token contract should check `ctx.caller` for allowance-based transfers, but `ctx.signer` for direct transfers.
+
+## Factory Deployment Context
+
+Contracts can deploy child contracts by calling the built-in `submission`
+contract.
+
+During child module-body execution and the child `@construct`, the child sees
+its own deployment context:
+
+```python
+import submission
+
+@export
+def deploy(name: str):
+    code = """
+value = Variable()
+
+@construct
+def seed():
+    value.set({
+        "this": ctx.this,
+        "caller": ctx.caller,
+        "signer": ctx.signer,
+        "entry": ctx.entry,
+        "submission_name": ctx.submission_name,
+    })
+
+@export
+def get():
+    return value.get()
+"""
+
+    submission.submit_contract(name=name, code=code)
+```
+
+If `con_factory.deploy("con_child")` is called by signer `alice`, then inside
+the child module body and constructor:
+
+- `ctx.this == "con_child"`
+- `ctx.caller == "con_factory"`
+- `ctx.signer == "alice"`
+- `ctx.entry == ("con_factory", "deploy")`
+- `ctx.submission_name == "con_child"`
+
+This means factories can create child contracts without losing the original
+transaction signer or the transaction entry point.
 
 ## Common Patterns
 
