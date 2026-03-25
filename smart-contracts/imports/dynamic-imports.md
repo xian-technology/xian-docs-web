@@ -38,7 +38,18 @@ the contract name directly:
 ```python
 owner = importlib.owner_of(contract_name)
 ok = importlib.enforce_interface(contract_name, expected_interface)
+info = importlib.contract_info(contract_name)
 ```
+
+`importlib.contract_info(...)` returns canonical runtime metadata for the target
+contract:
+
+- `name`
+- `owner`
+- `developer`
+- `deployer`
+- `initiator`
+- `submitted`
 
 ## When to Use It
 

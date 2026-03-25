@@ -110,10 +110,12 @@ Probe helpers:
 importlib.exists("con_token")
 importlib.has_export("con_token", "balance_of")
 importlib.owner_of("con_token")
+importlib.contract_info("con_token")
 ```
 
-`importlib.enforce_interface(...)` and `importlib.owner_of(...)` also accept an
-imported contract module if you already resolved one.
+`importlib.enforce_interface(...)`, `importlib.owner_of(...)`, and
+`importlib.contract_info(...)` also accept an imported contract module if you
+already resolved one.
 
 Factory deployments use the built-in submission contract:
 
