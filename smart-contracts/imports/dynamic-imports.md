@@ -7,11 +7,29 @@ token = importlib.import_module("con_token")
 token.transfer(amount=100, to="bob")
 ```
 
+If both the contract name and the exported function name are only known at
+runtime, use `importlib.call(...)` instead of generic reflection:
+
+```python
+return importlib.call(
+    contract_name,
+    "balance_of",
+    {"account": account},
+)
+```
+
 ## When to Use It
 
 - plugin-style architectures
 - configurable token or market contracts
 - governance-selected implementation contracts
+- registry-driven dynamic dispatch
+
+## Security Model
+
+`importlib.call(...)` only resolves exported contract functions. It does not
+expose generic `getattr(...)` style access to private functions or module
+attributes.
 
 ## Caution
 

@@ -91,6 +91,19 @@ import decimal
 
 Do not use `from x import y`.
 
+For dynamic function dispatch, prefer the explicit helper:
+
+```python
+importlib.call(
+    "con_token",
+    "balance_of",
+    {"account": "alice"},
+)
+```
+
+The helper only resolves exported functions. It does not expose generic
+attribute lookup.
+
 Factory deployments use the built-in submission contract:
 
 ```python
