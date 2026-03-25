@@ -494,6 +494,32 @@ What was documented:
   - application code still owns domain-specific tables, hydration, and apply
     logic
 
+### 2026-03-25: Solution-Pack Starter Flow Packaging Slice
+
+Repos changed:
+
+- `xian-configs`
+- `xian-cli`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `solution-packs/index.md`
+- `solution-packs/credits-ledger.md`
+- `solution-packs/registry-approval.md`
+- `solution-packs/workflow-backend.md`
+
+What was documented:
+
+- solution packs now have canonical machine-readable `pack.json` manifests in
+  `xian-configs`
+- `xian-cli` now exposes `solution-pack list`, `solution-pack show`, and
+  `solution-pack starter`
+- `starter` returns the canonical local or remote flow for each validated pack,
+  including the recommended template, example directory, contract paths, and
+  ordered commands/notes
+
 ## Next Docs Slice
 
 When the next operator slice lands, update:

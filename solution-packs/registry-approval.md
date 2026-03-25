@@ -61,6 +61,20 @@ Those operator paths match the pack:
 - monitoring and recovery that make sense for a shared network
 - an easy local path before moving to a real multi-party topology
 
+## CLI Starter Flow
+
+The same canonical starter flow used for this page is also packaged in
+`xian-cli`:
+
+```bash
+cd ~/xian/xian-cli
+uv run xian solution-pack starter registry-approval
+uv run xian solution-pack starter registry-approval --flow remote
+```
+
+Use `starter` when you want the concise machine-readable flow. Use the rest of
+this page when you want the fuller narrative walkthrough.
+
 ## Pack Assets
 
 ### Contract Assets

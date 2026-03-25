@@ -14,6 +14,25 @@ Every pack should explain:
 - the Python integration surface
 - the operator template and recovery story
 
+## Starter Flows
+
+The canonical starter flows are now packaged directly in `xian-cli`.
+
+Use:
+
+```bash
+cd ~/xian/xian-cli
+uv run xian solution-pack list
+uv run xian solution-pack show credits-ledger
+uv run xian solution-pack starter credits-ledger
+uv run xian solution-pack starter registry-approval --flow remote
+```
+
+`solution-pack show` returns the full machine-readable pack metadata. `starter`
+returns the canonical ordered flow for a specific local or remote posture,
+including the recommended network template, example directory, contract assets,
+and step-by-step commands.
+
 ## Available Packs
 
 - [Credits Ledger Pack](/solution-packs/credits-ledger)

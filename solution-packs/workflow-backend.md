@@ -60,6 +60,20 @@ Those operator paths match the pack:
 - backend-oriented runtime defaults
 - monitoring and recovery surfaces that fit event-driven services
 
+## CLI Starter Flow
+
+The same canonical starter flow used for this page is also packaged in
+`xian-cli`:
+
+```bash
+cd ~/xian/xian-cli
+uv run xian solution-pack starter workflow-backend
+uv run xian solution-pack starter workflow-backend --flow remote
+```
+
+Use `starter` when you want the concise machine-readable flow. Use the rest of
+this page when you want the fuller narrative walkthrough.
+
 ## Pack Assets
 
 ### Contract Asset

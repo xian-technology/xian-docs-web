@@ -60,6 +60,20 @@ Those operator paths already give this pack the right posture:
 - dashboard and health visibility
 - service-oriented integration defaults
 
+## CLI Starter Flow
+
+The same canonical starter flow used for this page is also packaged in
+`xian-cli`:
+
+```bash
+cd ~/xian/xian-cli
+uv run xian solution-pack starter credits-ledger
+uv run xian solution-pack starter credits-ledger --flow remote
+```
+
+Use `starter` when you want the concise machine-readable flow. Use the rest of
+this page when you want the fuller narrative walkthrough.
+
 ## Pack Assets
 
 ### Contract Asset
