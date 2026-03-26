@@ -16,24 +16,26 @@ Not every runtime setting lives at the same layer.
 | Layer | What belongs there |
 |------|---------------------|
 | starter template / network manifest | network defaults such as `tracer_mode` and block policy |
-| node profile | node-local posture such as `service_node`, pruning, dashboard, and monitoring |
-| rendered `config.toml` `[xian]` | advanced runtime toggles such as parallel execution, metrics, mempool nonce TTL, and BDS settings |
+| node profile | node-local posture such as `service_node`, pruning, dashboard, monitoring, and parallel execution |
+| rendered `config.toml` `[xian]` | materialized runtime settings such as parallel execution, metrics, mempool nonce TTL, and BDS settings |
 | `xian-stack` env / localnet env | stack-managed overrides for localnet, Docker publish behavior, metrics, perf snapshots, and local development |
 
 Current important point:
 
 - `tracer_mode` is part of the supported `xian-cli` template / manifest / profile
   flow.
-- parallel execution settings are real runtime settings, but they are not yet
-  surfaced through the higher-level `xian-cli` manifest/profile workflow.
+- parallel execution settings are now part of the supported `xian-cli`
+  template / profile flow too, but they remain node-local settings rather than
+  network-manifest state.
 
 That means:
 
 - use `xian network create ... --tracer-mode ...` or
   `xian network join ... --tracer-mode ...` for tracer selection
+- use `xian network create/join ... --parallel-execution-* ...` or template
+  defaults for node-local parallel execution posture
 - use the rendered `config.toml`, `xian-configure-node`, or localnet
-  environment variables for parallel execution and the lower-level `[xian]`
-  knobs
+  environment variables only when you need lower-level overrides
 
 ## Tracer Modes
 
@@ -102,10 +104,36 @@ What they mean:
 
 ### How To Set Parallel Execution
 
-Today this is an advanced runtime setting.
+Supported high-level path:
 
-It is **not** currently surfaced in the supported high-level `xian-cli`
-manifest/profile flow. Use one of these lower-level paths instead:
+```bash
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --template single-node-dev \
+  --parallel-execution-enabled \
+  --parallel-execution-workers 4 \
+  --parallel-execution-min-transactions 12
+
+uv run xian network join validator-1 --network mainnet \
+  --template embedded-backend \
+  --parallel-execution-enabled \
+  --parallel-execution-workers 4 \
+  --parallel-execution-min-transactions 12
+```
+
+Those values are written into the node profile and then materialized by
+`xian node init` into the rendered CometBFT home:
+
+```toml
+[xian]
+parallel_execution_enabled = true
+parallel_execution_workers = 4
+parallel_execution_min_transactions = 12
+```
+
+This is still a node-local posture. If you want a consistent fleet-wide
+default, standardize it through the canonical template you use for the network.
+
+Lower-level paths still exist when you need them:
 
 1. edit the rendered `config.toml` after `xian node init`
 2. use the lower-level `xian-abci` helper: `xian-configure-node`
@@ -139,9 +167,9 @@ These are the current operator-relevant runtime keys from the rendered
 | `metrics_host` | `127.0.0.1` | listen host for the Xian metrics endpoint | rendered config; stack-managed nodes may override binding behavior |
 | `metrics_port` | `9108` | listen port for the Xian metrics endpoint | rendered config or stack env |
 | `metrics_bds_refresh_seconds` | `5.0` | refresh interval for BDS-derived metrics | rendered config |
-| `parallel_execution_enabled` | `false` | enable speculative parallel execution | rendered config, `xian-configure-node`, or localnet env |
-| `parallel_execution_workers` | `0` | worker count for speculative execution | rendered config, `xian-configure-node`, or localnet env |
-| `parallel_execution_min_transactions` | `8` | threshold before parallel planning is attempted | rendered config, `xian-configure-node`, or localnet env |
+| `parallel_execution_enabled` | `false` | enable speculative parallel execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
+| `parallel_execution_workers` | `0` | worker count for speculative execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
+| `parallel_execution_min_transactions` | `8` | threshold before parallel planning is attempted | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `pending_nonce_reservation_ttl_seconds` | `60.0` | local mempool reservation TTL before stale pending nonces stop blocking retries | rendered config or `xian-configure-node` |
 
 ## `[xian.bds]` Service-Node Keys

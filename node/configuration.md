@@ -60,6 +60,7 @@ They carry node-local intent such as:
 - snapshot override
 - service-node mode
 - pruning settings
+- parallel execution settings
 - monitoring settings
 - optional state-sync settings
 - optional dashboard settings

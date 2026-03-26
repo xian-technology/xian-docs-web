@@ -242,6 +242,28 @@ What was documented:
 - the distinction between template/manifest, profile, rendered `config.toml`,
   and `xian-stack` environment control layers
 
+### 2026-03-26: High-Level Parallel Execution Slice
+
+Repos changed:
+
+- `xian-cli`
+- `xian-configs`
+- `xian-docs-web`
+
+Docs updated:
+
+- `node/runtime-features.md`
+- `node/configuration.md`
+- `node/profiles.md`
+- `node/installation.md`
+
+What was documented:
+
+- parallel execution settings are now part of the supported `xian-cli`
+  template/profile flow
+- node profiles now carry the parallel execution posture explicitly
+- the remaining lower-level override paths still available after `node init`
+
 ### 2026-03-25: Contract Factory Deployment Slice
 
 Repos changed:

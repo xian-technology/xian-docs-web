@@ -24,6 +24,9 @@ They are written as JSON and validated on read. The current schema is explicit:
   "block_policy_mode": "on_demand",
   "block_policy_interval": "0s",
   "tracer_mode": "python_line_v1",
+  "parallel_execution_enabled": false,
+  "parallel_execution_workers": 0,
+  "parallel_execution_min_transactions": 8,
   "operator_profile": "embedded_backend",
   "monitoring_profile": "service_node",
   "dashboard_enabled": false,
@@ -46,11 +49,15 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
 | `tracer_mode` | execution tracer backend materialized into `[xian].tracer_mode` |
+| `parallel_execution_enabled` | enables speculative parallel block execution for this node |
+| `parallel_execution_workers` | worker count for speculative execution on this node |
+| `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
 | `monitoring_enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
 | `dashboard_*` | optional runtime dashboard settings |
 
-For the lower-level runtime keys that are **not** currently surfaced through the
-high-level profile flow, see [Runtime Features](/node/runtime-features).
+For the remaining lower-level runtime keys that are **not** currently surfaced
+through the high-level profile flow, see
+[Runtime Features](/node/runtime-features).
 
 ## How Profiles Are Created
 

@@ -85,9 +85,9 @@ If you need lower-level runtime tuning such as:
 see [Runtime Features](/node/runtime-features).
 
 The supported high-level `xian-cli` flow currently surfaces tracer selection,
-but some lower-level runtime knobs still require editing the rendered
-`config.toml`, using `xian-configure-node`, or setting the relevant `xian-stack`
-environment variables.
+and parallel execution settings, but some lower-level runtime knobs still
+require editing the rendered `config.toml`, using `xian-configure-node`, or
+setting the relevant `xian-stack` environment variables.
 
 ## Remote Linux Hosts
 
