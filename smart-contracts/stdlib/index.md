@@ -12,6 +12,7 @@ contract environment.
 - `random`
 - `importlib`
 - `crypto`
+- `zk`
 - `decimal`
 
 These are runtime-provided globals. They are not general-purpose Python imports.

@@ -86,6 +86,7 @@ import datetime
 import random
 import importlib
 import crypto
+import zk
 import decimal
 ```
 
@@ -113,6 +114,13 @@ importlib.owner_of("con_token")
 importlib.contract_info("con_token")
 importlib.code_hash("con_token")
 importlib.code_hash("con_token", kind="source")
+```
+
+ZK verification:
+
+```python
+zk.is_available()
+zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
 ```
 
 `importlib.enforce_interface(...)`, `importlib.owner_of(...)`, and

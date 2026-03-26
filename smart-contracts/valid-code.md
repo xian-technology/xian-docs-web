@@ -101,7 +101,7 @@ Allowed imports fall into two buckets:
 
 - deployed contracts, for example `import currency`
 - runtime-provided modules such as `hashlib`, `datetime`, `random`,
-  `importlib`, `crypto`, and `decimal`
+  `importlib`, `crypto`, `zk`, and `decimal`
 
 The Python standard library is not generally available to contracts.
 
