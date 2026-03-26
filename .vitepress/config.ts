@@ -178,6 +178,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/tools/' },
             { text: 'xian-py', link: '/tools/xian-py' },
+            { text: 'xian-zk', link: '/tools/xian-zk' },
             { text: 'Contracting Playground', link: '/tools/playground' },
             { text: 'Contracting Hub', link: '/tools/hub' },
             { text: 'Linter', link: '/tools/linter' },
@@ -203,6 +204,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/tutorials/' },
             { text: 'Creating a Fungible Token', link: '/tutorials/creating-a-token' },
+            { text: 'Building a Shielded Privacy Token', link: '/tutorials/shielded-privacy-token' },
             { text: 'Building a Dice Game', link: '/tutorials/dice-game' },
             { text: 'Multi-Contract dApp', link: '/tutorials/multi-contract-dapp' },
             { text: 'Streaming Payments', link: '/tutorials/streaming-payments' }

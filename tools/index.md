@@ -8,6 +8,7 @@ integrating programmable decentralized networks and applications.
 | Tool | Purpose |
 |------|---------|
 | [xian-py](/tools/xian-py) | Python SDK for applications, services, wallets, transactions, and state queries |
+| [xian-zk](/tools/xian-zk) | Shielded-note proving toolkit, wallet state helper, and deployment bundle generator |
 | [Linter](/tools/linter) | Static analysis to catch invalid code before deployment |
 
 ## Quick Start
@@ -22,4 +23,10 @@ Install the contract engine (for local testing):
 
 ```bash
 pip install xian-contracting
+```
+
+Install the shielded proving toolkit:
+
+```bash
+pip install xian-zk
 ```

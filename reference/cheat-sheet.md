@@ -117,11 +117,16 @@ importlib.code_hash("con_token", kind="source")
 ZK verification:
 
 ```python
+# public_inputs must be exact 32-byte canonical BN254 field encodings
 zk.is_available()
-zk.has_verifying_key("square-v1")
-zk.verify_groth16("square-v1", proof_hex, public_inputs)
+zk.has_verifying_key("shielded-deposit-v2")
+zk.verify_groth16("shielded-deposit-v2", proof_hex, public_inputs)
 zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
 ```
+
+Prefer the registry-backed `vk_id` path for contract integrations. If a
+contract stores a verifier binding, pin the registry `vk_hash` alongside the
+`vk_id`.
 
 `importlib.enforce_interface(...)`, `importlib.owner_of(...)`, and
 `importlib.contract_info(...)` also accept an imported contract module if you

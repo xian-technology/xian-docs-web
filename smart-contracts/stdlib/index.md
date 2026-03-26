@@ -17,6 +17,10 @@ contract environment.
 
 These are runtime-provided globals. They are not general-purpose Python imports.
 
+The `zk` runtime is verification-only. Proof generation, witness construction,
+Merkle-path derivation, and note scanning stay off-chain in tooling such as
+`xian_zk`.
+
 The `decimal` runtime is the bridge behind Xian's deterministic numeric model.
 Most contracts should still use normal `float` syntax in function signatures and
 literals. The runtime converts those values into `ContractingDecimal` so users
