@@ -174,8 +174,6 @@ For contracts that use `importlib.import_module()`, submit the target contract b
 
 ```python
 def registry_contract():
-    import importlib
-
     registered = Hash(default_value=False)
 
     @export

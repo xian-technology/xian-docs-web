@@ -26,12 +26,15 @@ TransferEvent = LogEvent(
 )
 ```
 
-Module scope is also where contract imports and runtime-stdlib imports live:
+Module scope is also where contract imports live. Runtime modules such as
+`hashlib`, `datetime`, `random`, `importlib`, `crypto`, `zk`, and `decimal`
+are injected automatically and do not need `import` statements:
 
 ```python
 import currency
-import hashlib
-import datetime
+
+def commitment(label: str):
+    return hashlib.sha3(label)
 ```
 
 Do not put executable setup logic at module scope. Initialization belongs in

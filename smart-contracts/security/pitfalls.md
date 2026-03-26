@@ -138,8 +138,6 @@ means:
 - Miners/validators can potentially influence the seed
 
 ```python
-import random
-
 @export
 def roll_dice():
     # This is deterministic -- all validators get the same result

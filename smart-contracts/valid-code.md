@@ -19,7 +19,7 @@ The linter enforces that restricted subset before code is accepted.
 | collections | `list`, `dict`, `set`, `tuple` | |
 | list comprehensions | `[x for x in items]` | generator expressions are not allowed |
 | subscripts / slices | `x[0]`, `x[1:3]` | |
-| imports | `import currency`, `import hashlib` | module-level only |
+| imports | `import currency` | module-level only for deployed contracts |
 
 ## Forbidden Syntax
 
@@ -97,13 +97,14 @@ def bad(value: Decimal):
 
 ## Import Rules
 
-Allowed imports fall into two buckets:
+Allowed imports are deployed contracts, for example `import currency`.
 
-- deployed contracts, for example `import currency`
-- runtime-provided modules such as `hashlib`, `datetime`, `random`,
-  `importlib`, `crypto`, `zk`, and `decimal`
+Runtime-provided modules such as `hashlib`, `datetime`, `random`, `importlib`,
+`crypto`, `zk`, and `decimal` are injected directly into contract scope and do
+not need `import` statements.
 
-The Python standard library is not generally available to contracts.
+The Python standard library is not generally available to contracts beyond that
+runtime surface.
 
 ## Practical Guidance
 

@@ -91,8 +91,6 @@ Malformed inputs raise an assertion error instead of returning `False`.
 ## Typical Use
 
 ```python
-import zk
-
 @export
 def verify_join(vk_id: str, proof_hex: str, public_inputs: list):
     assert zk.has_verifying_key(vk_id), "Unknown verifying key!"
@@ -107,8 +105,6 @@ Low-level raw-key verification is still available when a contract must work
 with an explicit verifying key:
 
 ```python
-import zk
-
 @export
 def verify_raw(vk_hex: str, proof_hex: str, public_inputs: list):
     return zk.verify_groth16_bn254(

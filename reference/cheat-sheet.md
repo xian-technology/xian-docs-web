@@ -81,14 +81,12 @@ datetime.datetime, datetime.timedelta
 
 ```python
 import currency
-import hashlib
-import datetime
-import random
-import importlib
-import crypto
-import zk
-import decimal
 ```
+
+Only deployed contracts are imported explicitly.
+
+Runtime modules such as `hashlib`, `datetime`, `random`, `importlib`,
+`crypto`, `zk`, and `decimal` are available directly in contract scope.
 
 Do not use `from x import y`.
 
