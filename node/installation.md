@@ -74,6 +74,21 @@ python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monito
 python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
 ```
 
+## Advanced Runtime Features
+
+If you need lower-level runtime tuning such as:
+
+- `python_line_v1` vs `native_instruction_v1`
+- speculative parallel transaction execution
+- direct `[xian]` metrics or mempool settings
+
+see [Runtime Features](/node/runtime-features).
+
+The supported high-level `xian-cli` flow currently surfaces tracer selection,
+but some lower-level runtime knobs still require editing the rendered
+`config.toml`, using `xian-configure-node`, or setting the relevant `xian-stack`
+environment variables.
+
 ## Remote Linux Hosts
 
 Use `xian-deploy` when you want the same runtime contract on remote Linux

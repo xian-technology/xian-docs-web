@@ -87,8 +87,14 @@ The rendered home contains:
 Relevant current configuration sections:
 
 - `[statesync]` for CometBFT state sync
-- `[xian]` for Xian runtime features like tracing, metrics, pruning, and
-  parallel execution
+- `[xian]` for Xian runtime features such as tracing, metrics, pruning,
+  parallel execution, mempool nonce reservations, and service-node behavior
+- `[xian.bds]` for BDS / indexed-read runtime settings when `service_node` is
+  enabled
+
+See [Runtime Features](/node/runtime-features) for the detailed operator-facing
+reference of the current `[xian]` and `[xian.bds]` keys, including tracer modes
+and parallel execution.
 
 ## Ports
 

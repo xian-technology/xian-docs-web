@@ -219,6 +219,29 @@ Docs updated:
 - `node/installation.md`
 - `node/managing.md`
 
+### 2026-03-26: Node Runtime Feature Reference Slice
+
+Repos changed:
+
+- `xian-docs-web`
+
+Docs updated:
+
+- `node/runtime-features.md`
+- `node/configuration.md`
+- `node/profiles.md`
+- `node/installation.md`
+- `node/index.md`
+
+What was documented:
+
+- the current operator-facing `[xian]` and `[xian.bds]` runtime-key reference
+- tracer modes as real supported values with current operational guidance
+- where parallel execution is configured today and the fact that it is not yet
+  part of the higher-level `xian-cli` manifest/profile flow
+- the distinction between template/manifest, profile, rendered `config.toml`,
+  and `xian-stack` environment control layers
+
 ### 2026-03-25: Contract Factory Deployment Slice
 
 Repos changed:

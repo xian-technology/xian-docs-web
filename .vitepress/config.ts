@@ -145,6 +145,7 @@ export default defineConfig({
             { text: 'System Requirements', link: '/node/requirements' },
             { text: 'Installation & Setup', link: '/node/installation' },
             { text: 'Configuration', link: '/node/configuration' },
+            { text: 'Runtime Features', link: '/node/runtime-features' },
             { text: 'Node Profiles', link: '/node/profiles' },
             { text: 'Starting, Stopping & Monitoring', link: '/node/managing' },
             { text: 'Upgrading', link: '/node/upgrading' }

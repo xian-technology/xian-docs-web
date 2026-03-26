@@ -23,6 +23,7 @@ They are written as JSON and validated on read. The current schema is explicit:
   "blocks_to_keep": 100000,
   "block_policy_mode": "on_demand",
   "block_policy_interval": "0s",
+  "tracer_mode": "python_line_v1",
   "operator_profile": "embedded_backend",
   "monitoring_profile": "service_node",
   "dashboard_enabled": false,
@@ -44,8 +45,12 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `home` | explicit CometBFT home override |
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
+| `tracer_mode` | execution tracer backend materialized into `[xian].tracer_mode` |
 | `monitoring_enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
 | `dashboard_*` | optional runtime dashboard settings |
+
+For the lower-level runtime keys that are **not** currently surfaced through the
+high-level profile flow, see [Runtime Features](/node/runtime-features).
 
 ## How Profiles Are Created
 
