@@ -120,6 +120,8 @@ ZK verification:
 
 ```python
 zk.is_available()
+zk.has_verifying_key("square-v1")
+zk.verify_groth16("square-v1", proof_hex, public_inputs)
 zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
 ```
 
