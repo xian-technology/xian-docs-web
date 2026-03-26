@@ -2,10 +2,14 @@
 
 The contract runtime exposes a narrow `zk` module for proof verification.
 
-This is a verifier surface, not a proving toolkit.
+This is still a verifier surface inside contracts.
 
 The first real proof-backed contract flow using this module is the
 shielded-note token work in `xian-contracts`.
+
+For off-chain proof generation and note helpers, the current development path
+is the `xian-zk` package in `xian-contracting`. That proving toolkit stays
+outside the validator runtime.
 
 ## Available Functions
 
@@ -126,3 +130,5 @@ def verify_raw(vk_hex: str, proof_hex: str, public_inputs: list):
 - derive the next state from canonical contract storage instead of trusting
   caller-supplied transition metadata
 - keep proof generation and witness construction outside the validator runtime
+- treat deterministic dev proving bundles as local test tooling only, not as
+  network-ready setup material
