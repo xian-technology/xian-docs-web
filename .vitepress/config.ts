@@ -73,7 +73,8 @@ export default defineConfig({
             { text: 'Crypto', link: '/smart-contracts/stdlib/crypto' },
             { text: 'Hashlib', link: '/smart-contracts/stdlib/hashlib' },
             { text: 'Random', link: '/smart-contracts/stdlib/random' },
-            { text: 'Datetime', link: '/smart-contracts/stdlib/datetime' }
+            { text: 'Datetime', link: '/smart-contracts/stdlib/datetime' },
+            { text: 'ZK', link: '/smart-contracts/stdlib/zk' }
           ]
         },
         {

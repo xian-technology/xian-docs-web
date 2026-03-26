@@ -4,6 +4,9 @@ The contract runtime exposes a narrow `zk` module for proof verification.
 
 This is a verifier surface, not a proving toolkit.
 
+The first real proof-backed contract flow using this module is the
+shielded-note token work in `xian-contracts`.
+
 ## Available Functions
 
 ```python
@@ -87,6 +90,8 @@ Malformed inputs raise an assertion error instead of returning `False`.
 - verification is metered
 - payload sizes are bounded before native verification runs
 - this module verifies proofs only; it does not generate them
+- public inputs must be canonical BN254 field elements, not arbitrary 32-byte
+  hashes
 
 ## Typical Use
 
@@ -113,3 +118,11 @@ def verify_raw(vk_hex: str, proof_hex: str, public_inputs: list):
         public_inputs=public_inputs,
     )
 ```
+
+## Design Guidance
+
+- bind every public input on-chain before verification
+- prefer registry-backed `vk_id` usage for contract-facing integrations
+- derive the next state from canonical contract storage instead of trusting
+  caller-supplied transition metadata
+- keep proof generation and witness construction outside the validator runtime

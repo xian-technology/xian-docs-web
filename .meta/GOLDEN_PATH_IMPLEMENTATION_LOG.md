@@ -569,10 +569,30 @@ What was documented:
   `Xian Embedded Backend`, `Xian Shared Network`, and matching Prometheus alert
   presets
 
+### 2026-03-26: Proof-Backed Shielded Note Slice
+
+Repos changed:
+
+- `xian-contracting`
+- `xian-contracts`
+- `xian-docs-web`
+- `xian-meta`
+
+Docs updated:
+
+- `smart-contracts/stdlib/zk.md`
+- `.vitepress/config.ts`
+
+What was documented:
+
+- the zk runtime docs now reflect the real shielded-note contract usage pattern
+- public docs now explicitly call out canonical BN254 field-input requirements
+- the smart-contract sidebar now exposes the `zk` page directly
+
 ## Next Docs Slice
 
-When the next operator slice lands, update:
+When the next operator or zk/privacy slice lands, update:
 
-- the affected node/operator pages
-- any CLI or stack docs that changed materially
+- the affected public docs pages
+- any contract-runtime or proving docs that changed materially
 - this file with the new completed slice
