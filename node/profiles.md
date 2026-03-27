@@ -24,6 +24,11 @@ They are written as JSON and validated on read. The current schema is explicit:
   "block_policy_mode": "on_demand",
   "block_policy_interval": "0s",
   "tracer_mode": "python_line_v1",
+  "transaction_trace_logging": false,
+  "app_log_level": "INFO",
+  "app_log_json": false,
+  "app_log_rotation_hours": 1,
+  "app_log_retention_days": 7,
   "simulation_enabled": true,
   "simulation_max_concurrency": 2,
   "simulation_timeout_ms": 3000,
@@ -53,6 +58,11 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
 | `tracer_mode` | execution tracer backend materialized into `[xian].tracer_mode` |
+| `transaction_trace_logging` | enables per-transaction debug summaries during block execution |
+| `app_log_level` | Xian application log level written to stderr and rotated files |
+| `app_log_json` | emits Xian application logs as structured JSON instead of plain text |
+| `app_log_rotation_hours` | rotation interval for Xian application logs |
+| `app_log_retention_days` | retention window for rotated Xian application logs |
 | `simulation_enabled` | enables readonly transaction simulation on this node |
 | `simulation_max_concurrency` | maximum concurrent readonly simulations accepted by this node |
 | `simulation_timeout_ms` | wall-clock timeout for one readonly simulation worker |
@@ -102,3 +112,7 @@ idle. Contract `now` still comes from the finalized consensus block timestamp.
 Readonly simulation and speculative parallel execution are both node-local
 operator posture. They do not change consensus rules, but they do change how a
 node exposes free compute and how it schedules block execution work locally.
+
+Application logging is also node-local. It changes how much execution context
+the node records and how those logs are formatted and retained under
+`.cometbft/xian/logs`.

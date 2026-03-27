@@ -91,6 +91,73 @@ Current canonical template defaults show the intended posture:
 - `single-node-indexed`, `consortium-3`, and `embedded-backend` use
   `native_instruction_v1`
 
+## Application Logging
+
+Xian also has its own application logger for block execution, mempool
+validation, simulation, and service-node runtime behavior.
+
+Current keys:
+
+```toml
+[xian]
+transaction_trace_logging = false
+app_log_level = "INFO"
+app_log_json = false
+app_log_rotation_hours = 1
+app_log_retention_days = 7
+```
+
+What they mean:
+
+- `transaction_trace_logging`: emit per-transaction debug summaries during
+  block execution
+- `app_log_level`: minimum level written to stderr and the rotated file sink
+- `app_log_json`: emit structured JSON logs instead of the plain text format
+- `app_log_rotation_hours`: rotate the Xian application log file on this
+  interval
+- `app_log_retention_days`: keep rotated Xian application logs for this many
+  days
+
+Operational guidance:
+
+- the Xian application logger is separate from CometBFT's own `log_level`
+- Xian application logs are written under `.cometbft/xian/logs`
+- retention is enforced by the logger itself, including compressed rotated
+  archives
+- keep `transaction_trace_logging=false` unless you are actively debugging a
+  contract or runtime path
+- prefer `app_log_json=true` when shipping logs into a structured collector
+
+### How To Set Application Logging
+
+Supported high-level path:
+
+```bash
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --template single-node-dev \
+  --app-log-level INFO \
+  --app-log-rotation-hours 1 \
+  --app-log-retention-days 7
+
+uv run xian network join validator-1 --network mainnet \
+  --template embedded-backend \
+  --app-log-level DEBUG \
+  --transaction-trace-logging \
+  --app-log-json
+```
+
+Those values are written into the node profile and then materialized by
+`xian node init` into the rendered CometBFT home:
+
+```toml
+[xian]
+transaction_trace_logging = true
+app_log_level = "DEBUG"
+app_log_json = true
+app_log_rotation_hours = 1
+app_log_retention_days = 7
+```
+
 ## Readonly Simulation
 
 Xian also has a readonly transaction simulator behind the `simulate_tx` query
@@ -244,6 +311,11 @@ These are the current operator-relevant runtime keys from the rendered
 | `metrics_host` | `127.0.0.1` | listen host for the Xian metrics endpoint | rendered config; stack-managed nodes may override binding behavior |
 | `metrics_port` | `9108` | listen port for the Xian metrics endpoint | rendered config or stack env |
 | `metrics_bds_refresh_seconds` | `5.0` | refresh interval for BDS-derived metrics | rendered config |
+| `transaction_trace_logging` | `false` | emit per-transaction debug summaries during block execution | template/profile, rendered config, or `xian-configure-node` |
+| `app_log_level` | `INFO` | Xian application log level for stderr and rotated files | template/profile, rendered config, or `xian-configure-node` |
+| `app_log_json` | `false` | emit Xian application logs as structured JSON | template/profile, rendered config, or `xian-configure-node` |
+| `app_log_rotation_hours` | `1` | Xian application log rotation interval in hours | template/profile, rendered config, or `xian-configure-node` |
+| `app_log_retention_days` | `7` | Xian application log retention window in days | template/profile, rendered config, or `xian-configure-node` |
 | `simulation_enabled` | `true` | enable readonly transaction simulation | template/profile, rendered config, or `xian-configure-node` |
 | `simulation_max_concurrency` | `2` | concurrent readonly simulation workers | template/profile, rendered config, or `xian-configure-node` |
 | `simulation_timeout_ms` | `3000` | wall-clock timeout for one readonly simulation | template/profile, rendered config, or `xian-configure-node` |

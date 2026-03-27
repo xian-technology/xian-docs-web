@@ -85,6 +85,31 @@ is known. That includes:
 Use `--skip-live-checks` when you want the older artifact-only behavior for an
 offline preflight.
 
+## Application Logs
+
+The Xian application runtime writes its own logs separately from CometBFT's
+logs.
+
+Current behavior:
+
+- live stderr output follows `[xian].app_log_level`
+- rotated application log files live under `.cometbft/xian/logs`
+- rotation follows `[xian].app_log_rotation_hours`
+- retention follows `[xian].app_log_retention_days`
+- when `[xian].app_log_json = true`, both stderr and the rotated file sink are
+  structured JSON
+
+Use this logger when you need to answer questions like:
+
+- why a transaction was rejected in `CheckTx`
+- why `prepare_proposal` dropped a transaction
+- what happened during `finalize_block`
+- why readonly simulation was rejected, timed out, or failed
+
+`transaction_trace_logging` is the noisy per-transaction debug mode. Keep it
+off for normal operation and enable it temporarily when you need tx-by-tx
+execution summaries.
+
 ## Backend Commands
 
 From `xian-stack`, the stable machine-readable backend is:

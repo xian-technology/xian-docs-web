@@ -204,6 +204,24 @@ In the Docker stack, the runtime binds the Xian metrics server inside the
 container and publishes it to the host separately from CometBFT's `26660`
 metrics endpoint.
 
+## Xian Application Logging Settings
+
+Xian's own application logs are configured under `[xian]` in the rendered
+`config.toml`.
+
+Current keys:
+
+- `transaction_trace_logging`
+- `app_log_level`
+- `app_log_json`
+- `app_log_rotation_hours`
+- `app_log_retention_days`
+
+These settings control the Xian application logger, not CometBFT's own
+`log_level` / `log_format` settings. The runtime writes its rotated log files
+under `.cometbft/xian/logs` and lets Loguru enforce rotation and retention
+directly.
+
 ## Readonly Simulation Settings
 
 Readonly transaction simulation is configured under `[xian]` in the rendered
