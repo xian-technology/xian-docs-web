@@ -45,6 +45,8 @@ def transfer(to: str, amount: float):
 - exported function arguments must be annotated
 - exported function return annotations are allowed, but only with the same
   whitelisted types accepted for arguments
+- exported functions may opt into runtime argument / return checks with
+  `@export(typecheck=True)`
 - names starting or ending with `_` are rejected
 - classes, nested functions, `try/except`, `lambda`, `async`, `yield`, and
   `from x import y` are rejected

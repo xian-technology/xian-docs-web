@@ -71,12 +71,21 @@ def transfer(to: str, amount: float):
     balances[to] += amount
 ```
 
+You can also opt into runtime type enforcement for a specific export:
+
+```python
+@export(typecheck=True)
+def summarize(items: list[int]) -> int:
+    return len(items)
+```
+
 Current rules:
 
 - a contract must expose at least one `@export`
 - every exported argument must have a whitelisted annotation
 - exported return annotations are allowed when they use a whitelisted type
 - only one decorator is allowed per function
+- `@export(typecheck=True)` is a valid single-decorator export form
 
 Whitelisted annotation types are:
 

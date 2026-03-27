@@ -45,6 +45,7 @@ The linter enforces that restricted subset before code is accepted.
 | invalid export return annotation | `E018` | export returns may only use allowed types |
 | nested function definition | `E019` | avoids closures and hidden state |
 | parse error | `E020` | ordinary syntax error |
+| invalid decorator arguments | `E021` | `@export` only supports `typecheck=True/False`; `@construct` takes no arguments |
 
 ## Allowed Builtins
 
@@ -88,6 +89,24 @@ def decode_batch(items: list[int]) -> dict[str, int]:
 
 Subscripted container annotations are valid when the base type is allowed, for
 example `list[int]` and `dict[str, int]`.
+
+## Export Decorator Options
+
+`@export` may be used in either of these forms:
+
+```python
+@export
+def balance_of(address: str) -> float:
+    return balances[address]
+
+@export(typecheck=True)
+def transfer(to: str, amount: float):
+    balances[ctx.caller] -= amount
+    balances[to] += amount
+```
+
+No positional decorator arguments are allowed. The only supported keyword is
+`typecheck`, and it must be `True` or `False`.
 
 Invalid annotations still fail:
 

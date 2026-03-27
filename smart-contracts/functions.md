@@ -19,6 +19,21 @@ def transfer(to: str, amount: float):
     balances[to] += amount
 ```
 
+By default, these annotations define the public interface and pass through the
+linter, but they are not enforced automatically at runtime.
+
+If a contract wants runtime enforcement, it can opt in on a per-function basis:
+
+```python
+@export(typecheck=True)
+def calculate(limit: float) -> str:
+    return "YES" if limit > 0.1 else "NO"
+```
+
+With `typecheck=True`, Xian checks annotated arguments before the function body
+runs and checks the annotated return value before handing it back to the
+caller.
+
 ### Argument Annotations
 
 Every exported argument must be annotated:
@@ -57,9 +72,16 @@ for example:
 - `dict[str, int]`
 - `dict[str, list[int]]`
 
+If `typecheck=True` is enabled, those nested container annotations are checked
+recursively at runtime.
+
 `float` is the normal annotation for decimal-backed numeric values in Xian.
 Although the annotation says `float`, contract execution uses deterministic
 `ContractingDecimal` values under the hood.
+
+The same rule applies to opt-in runtime checks. A `float` annotation accepts
+decimal-backed numeric values such as `ContractingDecimal`, as well as normal
+Python `int` / `float` values from local testing.
 
 That also applies to float literal default values in exported signatures, so a
 default like `rate: float = 0.1` is compiled with the same deterministic
