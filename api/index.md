@@ -12,7 +12,7 @@ equivalent.
 | Dashboard REST | optional convenience API on top of CometBFT RPC |
 | Dashboard WebSocket | optional real-time observer/subscription layer |
 | BDS-backed ABCI query | optional indexed/history query layer on the node itself |
-| GraphQL / PostGraphile | optional convenience layer over the BDS database |
+| GraphQL / PostGraphile v5 | optional convenience layer over the BDS database |
 
 ## Which One To Use
 
@@ -27,7 +27,7 @@ Keep the read contract split clear:
 - raw ABCI query is authoritative for current state
 - BDS-backed ABCI query is the indexed/history layer and may lag briefly while
   catch-up is running
-- GraphQL/PostGraphile sits on top of BDS and inherits that eventual
+- GraphQL/PostGraphile v5 sits on top of BDS and inherits that eventual
   consistency
 
 ## Quick Examples

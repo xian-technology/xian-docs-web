@@ -118,7 +118,7 @@ Common ports in the current stack:
 | `8080` | optional dashboard |
 | `9090` | optional Prometheus |
 | `3000` | optional Grafana |
-| `5000` | optional GraphQL / PostGraphile in BDS mode |
+| `5000` | optional GraphQL / PostGraphile v5 in BDS mode |
 
 ## Dashboard Settings
 

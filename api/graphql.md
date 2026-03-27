@@ -12,9 +12,9 @@ The GraphQL server is exposed on port `5000` by default.
 
 ## What It Is
 
-The current implementation uses PostGraphile over the BDS Postgres database. It
-is useful for indexed, exploratory queries that are awkward through raw ABCI
-queries.
+The current implementation uses PostGraphile v5 over the BDS Postgres
+database. It is useful for indexed, exploratory queries that are awkward
+through raw ABCI queries.
 
 GraphQL is therefore a convenience layer over BDS, not the authoritative read
 contract. The authoritative indexed node-facing surface is still the ABCI query

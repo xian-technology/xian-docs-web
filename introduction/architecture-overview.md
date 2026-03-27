@@ -107,7 +107,7 @@ consensus path:
 - dashboard HTTP/WebSocket service
 - BDS indexed read stack with Postgres storage, automatic catch-up, and local
   replay/reindex tooling
-- optional GraphQL/PostGraphile convenience layer over that BDS database
+- optional GraphQL/PostGraphile v5 convenience layer over that BDS database
 
 Those services improve observability and query ergonomics, but validators do
 not depend on them for consensus.

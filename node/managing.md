@@ -349,7 +349,7 @@ Use the monitoring surfaces in this order:
   monitoring
 - dashboard REST/WebSocket for operator UX and exploration
 - BDS-backed ABCI query for indexed/history reads
-- GraphQL/PostGraphile only as an optional convenience layer over BDS
+- GraphQL/PostGraphile v5 only as an optional convenience layer over BDS
 
 ## Dashboard and GraphQL
 
@@ -360,7 +360,7 @@ Optional services:
 - CometBFT metrics: port `26660` by default
 - Prometheus: port `9090` by default
 - Grafana: port `3000` by default
-- GraphQL/PostGraphile: port `5000` when BDS is enabled
+- GraphQL/PostGraphile v5: port `5000` when BDS is enabled
 
 Use the dashboard for chain inspection and WebSocket subscriptions.
 

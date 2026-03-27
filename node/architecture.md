@@ -51,7 +51,7 @@ orchestrated deployment.
   endpoint
 - BDS: optional indexed storage layer with asynchronous block ingestion,
   automatic catch-up from CometBFT RPC, and replay/reindex tooling
-- GraphQL: optional PostGraphile layer over the BDS Postgres database for
+- GraphQL: optional PostGraphile v5 layer over the BDS Postgres database for
   convenience queries only
 - Host-backed storage growth comes from chain data, Xian state, the BDS spool,
   and Postgres volumes rather than mutable growth inside a container image
