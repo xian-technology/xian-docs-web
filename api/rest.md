@@ -169,7 +169,10 @@ Developer reward aggregation:
 - `/developer_rewards/<recipient_key>` returns the cumulative indexed
   `developer_reward` total for that recipient across contract executions.
 - The payload also includes reward row count, distinct transaction count,
-  distinct contract count, and first/last indexed block and timestamp fields.
+  distinct rewarded source-contract count, and first/last indexed block and
+  timestamp fields.
+- Developer rewards are attributed across participating contracts by metered
+  execution share, not only to the top-level transaction contract.
 - This is a BDS-backed aggregate. It requires BDS to be enabled on the node and
   reflects the indexed view, not an unindexed raw-state scan.
 

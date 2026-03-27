@@ -38,6 +38,11 @@ Each deployed contract stores:
 `__source__` is normalized before storage, so comments are not preserved on
 chain.
 
+`__developer__` is the runtime field used for developer-reward attribution.
+When a transaction executes across multiple contracts, the developer-reward
+bucket is split across the participating contracts proportionally to metered
+execution cost and then paid to the current `__developer__` recipients.
+
 ## Deployment Context
 
 During child module-body execution and `@construct`, the child sees:

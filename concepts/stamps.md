@@ -101,6 +101,11 @@ balances["alice"] = 999000
 
 Calling a function on another contract incurs the stamp cost of executing that function, plus the overhead of the call itself.
 
+Developer rewards now follow that metered execution path too. The transaction's
+developer-reward bucket is split across the participating contracts in
+proportion to their metered execution cost, then aggregated back to the
+relevant `__developer__` recipients.
+
 ## Optimizing Stamp Usage
 
 - **Minimize storage writes** -- writes cost 25x more than reads per byte
@@ -111,6 +116,11 @@ Calling a function on another contract incurs the stamp cost of executing that f
 
 ## Stamps in Practice
 
-A simple token transfer typically costs between 200 and 500 stamps. A complex DEX swap involving multiple contracts might cost 2,000-10,000 stamps. Contract deployment (submission) costs more because the entire source code is stored on-chain.
+A simple token transfer typically costs between 200 and 500 stamps. A complex
+DEX swap involving multiple contracts might cost 2,000-10,000 stamps. In that
+multi-contract case, developer rewards are not paid only to the entry
+contract's developer anymore; they are split across the participating contract
+developers by measured execution share. Contract deployment (submission) costs
+more because the entire source code is stored on-chain.
 
 You can estimate stamp costs before submitting a transaction by using [dry runs](/api/dry-runs).

@@ -366,7 +366,10 @@ Also available:
 `get_developer_rewards(recipient_key)` uses the BDS aggregate query surface and
 returns the cumulative indexed `developer_reward` total for that recipient,
 along with reward row count, distinct transaction count, distinct contract
-count, and first/last indexed reward metadata.
+count, and first/last indexed reward metadata. The contract count here is the
+count of distinct source contracts that actually earned developer rewards for
+that recipient, including called contracts when a transaction spans multiple
+contracts.
 
 ```python
 summary = client.get_developer_rewards("alice")
