@@ -326,6 +326,9 @@ Operator response:
 Treat this as a social-consensus / operator runbook event, not a normal
 contract-level governance action.
 
+For the concrete JSON plan format and `xian recovery validate/apply` commands,
+see [Recovery Plans](/node/recovery-plans).
+
 Required remote variables:
 
 - `xian_statesync_enable=true`

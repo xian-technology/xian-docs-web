@@ -174,3 +174,6 @@ procedure:
 That means forward patching is the primary **live** remediation path, while
 consensus-halting nondeterminism still requires off-chain validator
 coordination first.
+
+For the operator-side JSON plan and `xian-cli` commands used in that emergency
+path, see [Recovery Plans](/node/recovery-plans).

@@ -147,6 +147,7 @@ export default defineConfig({
             { text: 'Configuration', link: '/node/configuration' },
             { text: 'Runtime Features', link: '/node/runtime-features' },
             { text: 'Protocol Governance & State Patches', link: '/node/protocol-governance' },
+            { text: 'Recovery Plans', link: '/node/recovery-plans' },
             { text: 'Node Profiles', link: '/node/profiles' },
             { text: 'Starting, Stopping & Monitoring', link: '/node/managing' },
             { text: 'Upgrading', link: '/node/upgrading' }

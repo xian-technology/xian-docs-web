@@ -83,6 +83,8 @@ deterministic validator path.
 - [Protocol Governance & State Patches](/node/protocol-governance): the
   first-class forward patching model, local bundle directory, and emergency
   boundary
+- [Recovery Plans](/node/recovery-plans): the guided operator rollback /
+  restore workflow when forward patching is not enough
 - [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`
 - [Starting, Stopping & Monitoring](/node/managing): the operational commands
 - [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,
