@@ -34,7 +34,7 @@ python3 ./scripts/backend.py localnet-e2e
 Artifacts are written under:
 
 ```text
-.localnet/e2e/<run-id>/
+.artifacts/localnet-e2e/<run-id>/
 ```
 
 The runner writes:
@@ -67,8 +67,8 @@ The phases intentionally build on each other:
 12. approve and apply a governed forward state patch
 13. switch logging posture to `DEBUG` and `TRACE` and verify the expected log
     output appears
-14. deploy `zk_registry`, deploy the shielded-note-token, then test deposit,
-    shielded transfer, and withdraw flows
+14. use the governed system `zk_registry`, deploy the shielded-note-token, then
+    test deposit, shielded transfer, and withdraw flows
 
 ## Recommended Matrix
 
@@ -131,6 +131,16 @@ already-running localnet.
   currently listed on the DEX in the canonical run. The current DEX fixture
   expects float-based token semantics, while the shielded-note-token public
   interface uses integer amounts.
+- The localnet validator image must include `xian-zk`, not just the Python-side
+  prover utilities. The shielded phase verifies proofs inside the validator
+  runtime.
+- The shielded phase uses explicit transaction stamp ceilings. The default
+  readonly simulator cap is intentionally smaller than proof-backed shielded
+  execution, so simulator-based stamp estimation is not the right path for
+  those transactions in the canonical run.
+- Hex-looking public addresses are valid shielded withdraw recipients. The
+  toolkit and contract now use matching recipient-digest hashing semantics for
+  those values.
 - Keep the logging phase short. `TRACE` is intentionally expensive and exists
   for debugging, not for steady-state operation.
 

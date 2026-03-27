@@ -65,6 +65,23 @@ Because the pure-Python tracer is line-bucket based, the contract linter also
 rejects source shapes that create poor bucket precision, including ternary
 expressions, semicolons, and one-line compound statements.
 
+The meter also has two separate safety layers:
+
+- a very high hard raw-cost ceiling inside the tracer, meant only to stop
+  obviously runaway execution
+- backend-specific event ceilings for `python_line_v1` and
+  `native_instruction_v1`
+
+In normal paid execution, the meaningful user-facing limit is still the
+transaction's supplied stamp budget. The tracer hard ceiling is intentionally
+far above ordinary transaction execution so it does not become a hidden
+consensus-path cap for large but valid workloads.
+
+Readonly simulation is different. Nodes can configure a smaller
+`simulation_max_stamps` limit on purpose so free dry runs do not turn into
+unbounded public compute. That simulator-specific cap is an operational abuse
+control, not the normal paid-transaction metering rule.
+
 ### No Syscalls in the Hot Path
 
 During contract execution, no system calls occur in the critical computation path. All I/O is limited to:
