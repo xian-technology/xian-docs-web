@@ -330,6 +330,9 @@ result = client.submit_contract(
 )
 ```
 
+`name` must use lowercase ASCII letters, digits, and underscores only. For
+user contracts, keep the standard `con_` prefix.
+
 ## Other Helpers
 
 Also available:

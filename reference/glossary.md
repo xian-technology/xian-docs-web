@@ -24,7 +24,7 @@ The Byzantine Fault Tolerant consensus engine used by Xian (formerly known as Te
 The `@construct` decorator marks a function that runs once when a contract is deployed. It initializes state and is never callable again after deployment.
 
 ### Contract
-A Python source file deployed to the Xian blockchain. Contains state declarations, an optional constructor, and one or more exported functions. User-submitted contracts must have names starting with `con_`.
+A Python source file deployed to the Xian blockchain. Contains state declarations, an optional constructor, and one or more exported functions. User-submitted contracts must have names starting with `con_`, and all deployed contract names must use lowercase ASCII letters, digits, and underscores only.
 
 ## E
 

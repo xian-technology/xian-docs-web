@@ -33,6 +33,11 @@ result = client.submit_contract(
 )
 ```
 
+Contract names must use lowercase ASCII letters, digits, and underscores only.
+User-submitted contracts should keep the `con_` prefix, so names like
+`con_example_token` are valid while names like `con-example` or `con.example`
+are rejected.
+
 ## Simulate Before You Send
 
 ```python

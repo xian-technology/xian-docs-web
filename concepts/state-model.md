@@ -22,6 +22,9 @@ Examples:
 
 The `.` separates the contract name from the variable name. The `:` separates key dimensions. You never construct these keys manually in contract code -- the ORM (`Hash`, `Variable`) handles it. But knowing the format is useful when querying state via the API.
 
+Because `.` and `:` are reserved separators in storage keys, deployed contract
+names are limited to lowercase ASCII letters, digits, and underscores.
+
 ## Storage Backend: LMDB
 
 Xian uses LMDB (Lightning Memory-Mapped Database) as the underlying storage engine. LMDB provides:

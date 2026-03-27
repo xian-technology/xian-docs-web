@@ -14,6 +14,9 @@ Contract submission is an on-chain action, not a special side channel.
 ## Important Constraints
 
 - user-submitted contract names should use the `con_` prefix
+- contract names must start with a lowercase ASCII letter
+- contract names may contain only lowercase ASCII letters, digits, and
+  underscores
 - the submitted source must pass the linter
 - imports resolve to deployed contracts, not Python packages
 - constructor arguments are provided as a dictionary
@@ -67,6 +70,10 @@ special-case runtime loophole for contract factories.
 Submission is security-sensitive because it sets the long-lived executable code
 for a contract name. That is why the linter, import restrictions, and runtime
 loader all participate in the submission path.
+
+The name rule is intentionally strict because state keys use `.` and `:` as
+reserved separators. Allowing those characters inside contract names creates
+ambiguous keys and awkward import behavior.
 
 It also owns the runtime metadata mutation surface for deployed contracts:
 

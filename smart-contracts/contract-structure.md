@@ -124,5 +124,8 @@ Other important naming rules:
 
 - deployed contract names must start with `con_` unless they are seeded system
   contracts
-- deployed contract names must be lowercase
+- deployed contract names must start with a lowercase ASCII letter
+- deployed contract names may contain only lowercase ASCII letters, digits, and
+  underscores
+- special characters such as `.`, `:`, `-`, and spaces are rejected
 - the special identifier `rt` is reserved
