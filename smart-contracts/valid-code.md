@@ -80,12 +80,14 @@ def balance_of(address: str) -> float:
     return balances[address]
 
 @export
-def stream_window(stream_id: str) -> dict:
+def decode_batch(items: list[int]) -> dict[str, int]:
     return {
-        "begins": streams[stream_id, "begins"],
-        "closes": streams[stream_id, "closes"],
+        "count": len(items),
     }
 ```
+
+Subscripted container annotations are valid when the base type is allowed, for
+example `list[int]` and `dict[str, int]`.
 
 Invalid annotations still fail:
 

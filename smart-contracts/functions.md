@@ -25,7 +25,12 @@ Every exported argument must be annotated:
 
 ```python
 @export
-def create_order(item: str, quantity: int, price: float, metadata: dict):
+def create_order(
+    item: str,
+    quantity: int,
+    price: float,
+    metadata: dict[str, int],
+):
     orders[item] = {
         "quantity": quantity,
         "price": price,
@@ -45,6 +50,13 @@ Allowed annotation types:
 - `datetime.datetime`
 - `datetime.timedelta`
 
+Subscripted container forms are also allowed when their base type is allowed,
+for example:
+
+- `list[int]`
+- `dict[str, int]`
+- `dict[str, list[int]]`
+
 `float` is the normal annotation for decimal-backed numeric values in Xian.
 Although the annotation says `float`, contract execution uses deterministic
 `ContractingDecimal` values under the hood.
@@ -56,8 +68,8 @@ annotations when the annotation is one of the same whitelisted types.
 
 ```python
 @export
-def balance_of(address: str) -> float:
-    return balances[address]
+def summarize(items: list[int]) -> dict[str, int]:
+    return {"count": len(items)}
 ```
 
 Invalid return annotations still fail linting:

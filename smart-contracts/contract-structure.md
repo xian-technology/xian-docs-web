@@ -85,6 +85,9 @@ str, int, float, bool, dict, list, Any
 datetime.datetime, datetime.timedelta
 ```
 
+Subscripted `list[...]` and `dict[...]` forms are allowed too, as long as the
+base type is still one of those whitelisted types.
+
 ## Private Helpers
 
 Functions without decorators are private to the contract module:
