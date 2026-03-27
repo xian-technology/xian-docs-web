@@ -251,7 +251,7 @@ These are the current operator-relevant runtime keys from the rendered
 | `parallel_execution_enabled` | `false` | enable speculative parallel execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `parallel_execution_workers` | `0` | worker count for speculative execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `parallel_execution_min_transactions` | `8` | threshold before parallel planning is attempted | template/profile, rendered config, `xian-configure-node`, or localnet env |
-| `pending_nonce_reservation_ttl_seconds` | `60.0` | local mempool reservation TTL before stale pending nonces stop blocking retries | rendered config or `xian-configure-node` |
+| `pending_nonce_reservation_ttl_seconds` | `60.0` | local mempool reservation TTL before stale pending nonces stop blocking retries; reservations are created only after signature, chain-id, and payload-shape validation succeeds | rendered config or `xian-configure-node` |
 
 ## `[xian.bds]` Service-Node Keys
 

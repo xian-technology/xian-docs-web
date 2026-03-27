@@ -101,6 +101,9 @@ Before entering the mempool, the transaction passes through validation:
 4. **Balance check** -- the sender must have enough XIAN to cover the requested stamp limit
 
 If any check fails, the transaction is rejected and never enters the mempool.
+Local pending-nonce reservations only happen after the transaction passes the
+static checks above, so bad signatures, wrong `chain_id` values, and malformed
+wire payloads do not temporarily block the sender's next valid nonce.
 
 ### 8. Mempool
 

@@ -169,6 +169,11 @@ uv run xian-state-snapshot import --input-path ./xian-state-snapshot.tar.gz
 These application snapshots are the snapshots served through CometBFT state
 sync.
 
+Incoming snapshot offers are rejected unless the metadata matches the current
+chain, declared height, archive hash, app hash, and a positive chunk count.
+Oversized chunks are rejected during apply, so malformed or inconsistent state
+sync payloads fail cleanly instead of progressing partway through import.
+
 ## Pruning Settings
 
 Pruning in the current stack is block-history pruning, not a separate
