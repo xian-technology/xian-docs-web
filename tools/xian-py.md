@@ -54,6 +54,10 @@ from xian_py import (
 `HDWallet` and `EthereumWallet` live in `xian_py.wallet`; they are optional
 helpers, not part of the small top-level API.
 
+`Xian` and `XianAsync` require an Ed25519 Xian signer. `EthereumWallet` is a
+separate helper for Ethereum-style account workflows and is not valid for
+signing Xian transactions.
+
 ## Wallets
 
 ### Basic Wallet
@@ -84,6 +88,17 @@ print(child.public_key)
 ```
 
 HD wallet support requires `xian-py[hd]`.
+
+### Ethereum Wallet
+
+```python
+from xian_py.wallet import EthereumWallet
+
+wallet = EthereumWallet()
+print(wallet.address)
+```
+
+Ethereum wallet helpers require `xian-py[eth]`.
 
 ## Synchronous Client
 
