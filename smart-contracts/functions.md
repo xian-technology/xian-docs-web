@@ -61,6 +61,10 @@ for example:
 Although the annotation says `float`, contract execution uses deterministic
 `ContractingDecimal` values under the hood.
 
+That also applies to float literal default values in exported signatures, so a
+default like `rate: float = 0.1` is compiled with the same deterministic
+decimal semantics as any other float literal in contract code.
+
 ### Return Annotations
 
 Return values are allowed, and exported functions may also use return type
