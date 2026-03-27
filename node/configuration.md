@@ -82,6 +82,7 @@ The rendered home contains:
 
 - `config/config.toml`
 - `config/genesis.json`
+- `config/state-patches/`
 - `config/priv_validator_key.json`
 - `config/node_key.json`
 - `data/priv_validator_state.json`
@@ -94,6 +95,11 @@ Relevant current configuration sections:
   service-node behavior
 - `[xian.bds]` for BDS / indexed-read runtime settings when `service_node` is
   enabled
+
+The rendered home also carries the local state patch bundle directory used by
+the governed forward patching flow:
+
+- `config/state-patches/` for locally stored governed patch bundles
 
 See [Runtime Features](/node/runtime-features) for the detailed operator-facing
 reference of the current `[xian]` and `[xian.bds]` keys, including tracer modes
@@ -173,6 +179,23 @@ Incoming snapshot offers are rejected unless the metadata matches the current
 chain, declared height, archive hash, app hash, and a positive chunk count.
 Oversized chunks are rejected during apply, so malformed or inconsistent state
 sync payloads fail cleanly instead of progressing partway through import.
+
+## State Patch Bundles
+
+Forward state patches use local bundle files, not `config.toml` keys.
+
+Current path:
+
+```text
+<cometbft-home>/config/state-patches
+```
+
+Those bundle files are validator-local artifacts that must match the
+on-chain-approved `bundle_hash` from the `governance` contract. They are part
+of the protocol recovery path, not ad hoc local configuration.
+
+See [Protocol Governance & State Patches](/node/protocol-governance) for the
+current bundle format and approval flow.
 
 ## Pruning Settings
 

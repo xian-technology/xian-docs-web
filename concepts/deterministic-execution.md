@@ -173,6 +173,20 @@ Common causes of divergence in practice:
 - Corrupted LMDB state database
 - Hardware memory errors
 
+If the underlying bug is severe enough to stop the network from progressing,
+forward state patch governance is not enough on its own. Governance proposals
+still need a live chain to be approved and executed.
+
+That means the emergency order is:
+
+1. restore deterministic execution across validators first
+2. get the chain moving again
+3. then use a governed forward state patch if the live state still needs correction
+
+Forward patching reduces the need for historical rollbacks, but it does not
+replace the need for an operator-coordinated emergency procedure when consensus
+itself is broken.
+
 ## Summary
 
 | Source of Non-Determinism | How Xian Prevents It |

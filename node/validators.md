@@ -38,4 +38,15 @@ active validator depends on the target network's on-chain validator/membership
 rules and governance process.
 
 Inspect the target network bundle in `xian-configs` and the canonical
-contracts, especially `members.s.py`, for the active policy.
+contracts, especially `members.s.py` and `governance.s.py`, for the active
+policy.
+
+On current networks, validator governance is broader than simple membership:
+
+- membership controls who can participate
+- protocol governance controls approved contract calls and forward state patches
+- validators are expected to carry approved local patch bundles when a governed
+  state patch is scheduled
+
+See [Protocol Governance & State Patches](/node/protocol-governance) for the
+current remediation model.

@@ -278,6 +278,54 @@ Remote path:
 ansible-playbook playbooks/bootstrap-state-sync.yml
 ```
 
+### Forward State Patch Activation
+
+Use this when the chain is still live and the protocol issue can be corrected
+forward without rewriting finalized history.
+
+Operator checklist:
+
+1. place the approved patch bundle under `config/state-patches/` on every validator
+2. confirm the local bundle inventory and `bundle_hash` match
+3. approve the `state_patch` proposal on-chain through protocol governance
+4. verify the scheduled activation height through the query/API surfaces
+5. watch the activation block and confirm the patch status moves to `applied`
+
+Useful inspection paths:
+
+```text
+GET /api/abci_query/state_patch_bundles
+GET /api/abci_query/scheduled_state_patches/<height>
+GET /api/abci_query/state_patches
+GET /api/abci_query/state_patches_for_block/<height>
+```
+
+Important boundary:
+
+- validators must already have the local bundle before the activation block
+- if the local bundle is malformed or mismatched, the runtime now fails hard
+  instead of silently skipping the patch
+
+### Consensus-Halt Emergency Recovery
+
+Use this when the bug itself prevents the chain from continuing, for example a
+determinism or metering issue that causes validators to diverge during block
+execution.
+
+In that case, on-chain governance is not enough by itself because the chain may
+not advance far enough to approve or execute a patch.
+
+Operator response:
+
+1. stop validators from continuing divergent execution
+2. agree off-chain on the fixed runtime build and recovery procedure
+3. roll the validator set onto the same fixed deterministic runtime
+4. restart the network in a coordinated way
+5. if the resulting state still needs correction, use a governed forward patch after recovery
+
+Treat this as a social-consensus / operator runbook event, not a normal
+contract-level governance action.
+
 Required remote variables:
 
 - `xian_statesync_enable=true`

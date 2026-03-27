@@ -6,6 +6,8 @@ up under `[xian]` and `[xian.bds]` in the rendered `config.toml`.
 Use it together with:
 
 - [Configuration](/node/configuration) for the three config layers
+- [Protocol Governance & State Patches](/node/protocol-governance) for the
+  governed forward patching model
 - [Node Profiles](/node/profiles) for the high-level `xian-cli` JSON contract
 - [Starting, Stopping & Monitoring](/node/managing) for runtime inspection
 
@@ -40,6 +42,13 @@ That means:
   defaults for node-local parallel execution posture
 - use the rendered `config.toml`, `xian-configure-node`, or localnet
   environment variables only when you need lower-level overrides
+
+Important boundary:
+
+- governed state patch bundles are first-class runtime inputs, but they are not
+  `config.toml` keys
+- validators load them from `config/state-patches/` and the runtime validates
+  them against the on-chain approved `bundle_hash`
 
 ## Tracer Modes
 

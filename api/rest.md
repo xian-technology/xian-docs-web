@@ -140,6 +140,8 @@ GET /api/abci_query/state_history/<key>/limit=50/offset=0
 GET /api/abci_query/state_for_tx/<hash>
 GET /api/abci_query/state_for_block/123
 GET /api/abci_query/contracts/limit=50/offset=0
+GET /api/abci_query/state_patch_bundles
+GET /api/abci_query/scheduled_state_patches/123
 GET /api/abci_query/state_patches
 GET /api/abci_query/state_patches_for_block/123
 GET /api/abci_query/state_patch/<hash>
@@ -200,4 +202,15 @@ GET /api/abci_query/contract_vars/<name>
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
+GET /api/abci_query/state_patch_bundles
+GET /api/abci_query/scheduled_state_patches/123
 ```
+
+State patch query split:
+
+- `/state_patch_bundles` returns the node's local governed patch bundle
+  inventory and does not require BDS
+- `/scheduled_state_patches/<height>` returns the node's on-chain view of
+  approved scheduled patches for that height and does not require BDS
+- `/state_patches...` and `/state_changes_for_patch/...` are BDS-backed
+  historical/indexed views of patches that were actually applied

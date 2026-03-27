@@ -80,6 +80,9 @@ deterministic validator path.
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
 - [Runtime Features](/node/runtime-features): tracer modes, readonly
   simulation, parallel execution, and the current `[xian]` runtime keys
+- [Protocol Governance & State Patches](/node/protocol-governance): the
+  first-class forward patching model, local bundle directory, and emergency
+  boundary
 - [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`
 - [Starting, Stopping & Monitoring](/node/managing): the operational commands
 - [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,
