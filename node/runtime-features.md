@@ -148,6 +148,8 @@ export XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS=12
 Operational guidance:
 
 - treat this as a rollout-managed runtime feature for validator fleets
+- parallel execution is speculative and must remain serial-equivalent; exact-key
+  conflicts and tracked prefix-scan conflicts fall back to serial execution
 - enable it only after testing your actual workload
 - verify behavior through `xian node health`, the dashboard, and the parallel
   execution metrics

@@ -96,3 +96,8 @@ print(result["state"])
 - dry runs are estimates against the current committed state, not a future state
 - nonce/signature admission rules are not the focus of the simulator itself
 - state can change between simulation and real submission
+- `simulate_tx` executes in-process on the node, so operators should not expose
+  it as unrestricted public compute on validator RPC endpoints
+- if you expose dry runs to users, front them with gateway-level protections
+  such as rate limiting, request timeouts, concurrency caps, and preferably a
+  dedicated service-node or API tier

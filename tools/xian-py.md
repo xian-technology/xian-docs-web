@@ -281,6 +281,10 @@ The dry-run result currently comes from the node simulator and uses:
 - `result`
 - `payload`
 
+The simulator is a readonly preview, not a consensus transaction. If you expose
+it to end users, treat it as free but rate-limited compute at the infrastructure
+layer rather than an unrestricted public endpoint.
+
 ### call
 
 Use `call` when you want the decoded readonly contract return value instead of
