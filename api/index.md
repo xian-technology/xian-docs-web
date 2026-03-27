@@ -41,6 +41,7 @@ GET http://localhost:8080/api/abci_query/contract_code/currency
 GET http://localhost:8080/api/abci_query/get/currency.balances:alice
 GET http://localhost:8080/api/abci_query/bds_status
 GET http://localhost:8080/api/abci_query/bds_spool/limit=20/offset=0
+GET http://localhost:8080/api/abci_query/developer_rewards/<recipient_key>
 GET http://localhost:26657/abci_query?path="/perf_status"
 GET http://localhost:9108/metrics
 GET http://localhost:8080/api/abci_query/simulate_tx/<hex_payload>

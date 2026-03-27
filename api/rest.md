@@ -134,6 +134,7 @@ GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
 GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
+GET /api/abci_query/developer_rewards/<recipient_key>
 GET /api/abci_query/state/<prefix>/limit=50/offset=0
 GET /api/abci_query/state_history/<key>/limit=50/offset=0
 GET /api/abci_query/state_for_tx/<hash>
@@ -162,6 +163,15 @@ Cursor-based event consumption:
 - Use `after_id` for resumable consumers and long-running watchers.
 - The older `offset` form is still useful for ad hoc browsing, but `after_id`
   is the better shape for application event consumers.
+
+Developer reward aggregation:
+
+- `/developer_rewards/<recipient_key>` returns the cumulative indexed
+  `developer_reward` total for that recipient across contract executions.
+- The payload also includes reward row count, distinct transaction count,
+  distinct contract count, and first/last indexed block and timestamp fields.
+- This is a BDS-backed aggregate. It requires BDS to be enabled on the node and
+  reflects the indexed view, not an unindexed raw-state scan.
 
 Current catch-up behavior:
 

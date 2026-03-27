@@ -347,6 +347,7 @@ Also available:
 - `get_node_status()`
 - `get_perf_status()`
 - `get_bds_status()`
+- `get_developer_rewards(recipient_key)`
 - `list_blocks(limit=..., offset=...)`
 - `get_block(height)`
 - `get_block_by_hash(block_hash)`
@@ -361,6 +362,16 @@ Also available:
 - `get_state_for_block(block_ref)`
 - `watch_blocks(start_height=..., poll_interval_seconds=...)`
 - `watch_events(contract, event, after_id=..., limit=..., poll_interval_seconds=...)`
+
+`get_developer_rewards(recipient_key)` uses the BDS aggregate query surface and
+returns the cumulative indexed `developer_reward` total for that recipient,
+along with reward row count, distinct transaction count, distinct contract
+count, and first/last indexed reward metadata.
+
+```python
+summary = client.get_developer_rewards("alice")
+print(summary.total_rewards, summary.tx_count, summary.contract_count)
+```
 
 `get_tx(tx_hash)` and `wait_for_tx(tx_hash)` now return a `TransactionReceipt`
 that exposes the two important pieces separately:
