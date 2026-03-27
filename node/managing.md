@@ -118,6 +118,37 @@ Practical detail:
 - `app_log_level=TRACE` is the expensive mode that also emits full serialized
   tx-result payloads
 
+### Practical Log Workflow
+
+Typical local path:
+
+```bash
+tail -f ~/.cometbft/xian/logs/*.log
+```
+
+If JSON logging is enabled:
+
+```bash
+tail -f ~/.cometbft/xian/logs/*.log | jq .
+```
+
+Useful patterns to look for:
+
+- `stage=check_tx` for mempool admission failures
+- `stage=prepare_proposal` for transactions dropped before proposal assembly
+- `stage=process_proposal` for proposed-block rejection reasons
+- `stage=finalize_start`, `stage=finalize_parallel`, and `stage=finalize_complete` for block lifecycle debugging
+- `stage=simulate_tx` for readonly simulation saturation, timeout, or worker failures
+
+Recommended escalation order:
+
+1. start with `app_log_level=INFO`
+2. if that is not enough, move to `app_log_level=DEBUG`
+3. only use `app_log_level=TRACE` for short-lived deep tx debugging
+
+When you are done debugging, turn `transaction_trace_logging` back off and
+return the node to its normal log level.
+
 ## Backend Commands
 
 From `xian-stack`, the stable machine-readable backend is:

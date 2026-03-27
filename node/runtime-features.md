@@ -134,6 +134,22 @@ Operational guidance:
   `transaction_trace_logging=true` and `app_log_level=TRACE`
 - prefer `app_log_json=true` when shipping logs into a structured collector
 
+### Recommended Logging Postures
+
+Use these as the current practical defaults:
+
+| Goal | Recommended settings |
+|------|----------------------|
+| normal validator or service-node operation | `app_log_level="INFO"`, `transaction_trace_logging=false`, `app_log_json=false` unless you already ship JSON logs |
+| active incident investigation | `app_log_level="DEBUG"`, `transaction_trace_logging=true` |
+| short-lived deep tx debugging | `app_log_level="TRACE"`, `transaction_trace_logging=true` |
+
+Important boundary:
+
+- `DEBUG` gives you compact per-tx summaries
+- `TRACE` is the expensive mode that also emits full serialized tx-result payloads
+- do not leave `TRACE` enabled on busy production nodes unless you really mean to pay for the extra log volume
+
 ### How To Set Application Logging
 
 Supported high-level path:
