@@ -4,6 +4,10 @@ Use `xian-cli` for local operator-facing lifecycle commands. Use
 `xian-deploy` for the remote Linux-host equivalents. Use `xian-stack` directly
 only for backend validation or low-level debugging.
 
+For the maintained whole-stack local validation flow, use the dedicated
+[4-Node Localnet E2E](/node/localnet-e2e) run instead of stitching together ad
+hoc load, governance, and logging checks by hand.
+
 ## Start and Stop
 
 ```bash

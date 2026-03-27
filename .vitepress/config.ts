@@ -146,6 +146,7 @@ export default defineConfig({
             { text: 'Installation & Setup', link: '/node/installation' },
             { text: 'Configuration', link: '/node/configuration' },
             { text: 'Runtime Features', link: '/node/runtime-features' },
+            { text: '4-Node Localnet E2E', link: '/node/localnet-e2e' },
             { text: 'Protocol Governance & State Patches', link: '/node/protocol-governance' },
             { text: 'Recovery Plans', link: '/node/recovery-plans' },
             { text: 'Node Profiles', link: '/node/profiles' },
