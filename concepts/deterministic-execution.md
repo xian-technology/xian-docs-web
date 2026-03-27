@@ -28,6 +28,22 @@ Contracts run in a restricted Python sandbox. The following are forbidden:
 
 This eliminates the most common sources of non-determinism in Python programs.
 
+### Fresh Contract Modules Per Execution
+
+Contract modules are reloaded from chain state for each execution. Xian does
+not rely on CPython's normal `sys.modules` cache as durable contract state.
+
+That means:
+
+- module-level Python globals do **not** persist across transactions
+- dynamic imports through `importlib.import_module(...)` also get a fresh
+  contract module view
+- after a contract is flushed and redeployed, execution uses the fresh stored
+  code, not a stale cached module object
+
+Persistent state must live in `Variable` and `Hash`, not in ordinary Python
+globals.
+
 ### Deterministic Metering with `sys.monitoring`
 
 Xian uses Python's `sys.monitoring` API, but the current meter is not a Python

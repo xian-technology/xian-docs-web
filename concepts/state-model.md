@@ -2,6 +2,10 @@
 
 Xian stores all contract data in a key-value database. Every `Variable` and `Hash` in every contract maps to entries in this database. Understanding how state is organized, cached, and committed helps you write efficient contracts and debug unexpected behavior.
 
+Ordinary Python module globals are not part of this durable state model.
+Contracts are reloaded fresh for each execution, so if you need persistence you
+must store it in `Variable` or `Hash`.
+
 ## Key Format
 
 All state keys follow the pattern:
@@ -98,6 +102,11 @@ When a transaction fails (assertion error, out of stamps, runtime error), its st
 4. Events emitted during the failed transaction are also discarded
 
 This rollback is immediate and requires no explicit undo logic -- the pending writes were never committed.
+
+The same rule applies to nested cross-contract execution. If contract `A`
+calls contract `B` and `B` fails after mutating state or emitting events, the
+entire transaction rolls back, including the earlier writes and events from
+`A`.
 
 ## State and the App Hash
 

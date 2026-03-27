@@ -22,6 +22,7 @@ Contract submission is an on-chain action, not a special side channel.
 - constructor arguments are provided as a dictionary
 - child deployments go through the same `submission.submit_contract(...)` entrypoint
 - raw submitted source is size-limited before analysis
+- runtime `owner` metadata must be omitted or set to a non-empty string
 
 ## What Gets Stored
 
@@ -84,6 +85,12 @@ It also owns the runtime metadata mutation surface for deployed contracts:
 
 - `submission.change_developer(contract, new_developer)`
 - `submission.change_owner(contract, new_owner)`
+
+Those metadata updates are intentionally narrow:
+
+- `contract` must be a non-empty string
+- `new_developer` must be a non-empty string
+- `new_owner` must be a non-empty string
 
 `change_owner(...)` updates the runtime `__owner__` field that drives
 `ctx.owner` and runtime owner gating. It does not modify a contract's own

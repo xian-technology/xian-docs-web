@@ -76,7 +76,9 @@ def transfer(to: str, amount: float):
 
 ## 4. Mutable Default Values in Hash
 
-When you read a `list` or `dict` from a `Hash`, you get a **copy**. Modifying the copy does not update storage. You must write it back explicitly:
+When you read a `list` or `dict` from a `Hash`, including through `Hash.all()`,
+you get a **copy**. Modifying the copy does not update storage. You must write
+it back explicitly:
 
 ```python
 # BAD -- the append modifies a copy, not the stored value
@@ -210,6 +212,11 @@ def withdraw(amount: float):
 
 The general rule: **update your own state before calling external contracts**.
 
+If the nested call fails, Xian rolls back the whole transaction, including
+earlier writes and events from the parent contract. That protects atomicity,
+but it does not remove the need for correct checks-effects-interactions order
+in successful call paths.
+
 ## 10. Storing Sensitive Data On-Chain
 
 All state is publicly readable. Do not store secrets, private keys, or passwords in contract state:
@@ -223,6 +230,33 @@ def seed():
     secret.set("my_secret_password")
 
 # Use commit-reveal patterns or off-chain secret management instead
+```
+
+## 11. Using Python Globals as State
+
+Module-level Python globals are not durable contract state. Xian reloads
+contract modules fresh for each execution, including dynamic imports:
+
+```python
+counter = 0
+
+@export
+def bump():
+    global counter
+    counter += 1
+    return counter
+```
+
+Do not use this pattern for balances, counters, guards, or configuration.
+Persistent state belongs in `Variable` and `Hash`:
+
+```python
+counter = Variable(default_value=0)
+
+@export
+def bump():
+    counter.set(counter.get() + 1)
+    return counter.get()
 ```
 
 ## Security Checklist
