@@ -96,6 +96,8 @@ Current behavior:
 - rotated application log files live under `.cometbft/xian/logs`
 - rotation follows `[xian].app_log_rotation_hours`
 - retention follows `[xian].app_log_retention_days`
+- both stderr and file logging are queued asynchronously to avoid blocking the
+  runtime on every write
 - when `[xian].app_log_json = true`, both stderr and the rotated file sink are
   structured JSON
 
@@ -109,6 +111,12 @@ Use this logger when you need to answer questions like:
 `transaction_trace_logging` is the noisy per-transaction debug mode. Keep it
 off for normal operation and enable it temporarily when you need tx-by-tx
 execution summaries.
+
+Practical detail:
+
+- `app_log_level=DEBUG` gives you compact per-tx summaries
+- `app_log_level=TRACE` is the expensive mode that also emits full serialized
+  tx-result payloads
 
 ## Backend Commands
 

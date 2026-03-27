@@ -124,8 +124,14 @@ Operational guidance:
 - Xian application logs are written under `.cometbft/xian/logs`
 - retention is enforced by the logger itself, including compressed rotated
   archives
+- both stderr and the rotated file sink are queued asynchronously to reduce
+  execution-path blocking on log I/O
 - keep `transaction_trace_logging=false` unless you are actively debugging a
   contract or runtime path
+- `transaction_trace_logging=true` only emits per-transaction summaries when
+  `app_log_level` includes `DEBUG`
+- full serialized per-transaction results are emitted only when
+  `transaction_trace_logging=true` and `app_log_level=TRACE`
 - prefer `app_log_json=true` when shipping logs into a structured collector
 
 ### How To Set Application Logging
