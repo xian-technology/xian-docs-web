@@ -32,7 +32,7 @@ Every transaction on Xian follows a defined path from creation to finalization. 
   FINALIZE_BLOCK
       |
       |  10. Execute contract function in sandbox
-      |  11. Meter every instruction (stamps)
+      |  11. Meter contract execution (stamps)
       |  12. Apply state changes (or rollback on failure)
       |  13. Deduct stamps from sender's XIAN balance
       |  14. Collect events emitted by the contract
@@ -119,7 +119,7 @@ Each transaction in the block is executed sequentially:
 
 1. **Sandbox setup** -- the contract runtime initializes with the sender's context (`ctx.caller`, `ctx.signer`)
 2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs
-3. **Metering** -- `sys.monitoring` tracks every Python instruction and charges compute units
+3. **Metering** -- the selected tracer backend charges compute units via `sys.monitoring`
 4. **Storage operations** -- reads and writes are charged per byte (1 stamp/byte read, 25 stamps/byte write)
 5. **Block time injection** -- all transactions in the block observe the same
    consensus timestamp as `now`

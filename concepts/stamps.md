@@ -42,7 +42,8 @@ The byte count includes both the key and the value.
 | Limit | Value |
 |-------|-------|
 | Maximum stamps per transaction | 6,500,000 |
-| Maximum call count per transaction | 800,000 opcodes |
+| Maximum Python line events per transaction (`python_line_v1`) | 800,000 |
+| Maximum instruction events per transaction (`native_instruction_v1`) | 3,250,000 |
 | Maximum write per transaction | 128 KB |
 | Default stamp allocation | 1,000,000 |
 
@@ -71,7 +72,15 @@ Examples:
 
 ### Computation
 
-Every Python bytecode instruction incurs a cost. The metering engine uses `sys.monitoring` to count instructions during execution. Common instruction costs range from 2 to 1610 compute units.
+Xian has two supported metering backends:
+
+- `python_line_v1` precomputes a bytecode-cost bucket for each executable
+  source line and charges that bucket when the line executes
+- `native_instruction_v1` charges exact executed bytecode instructions
+
+Both backends use the same opcode cost schedule, where common compute-unit
+costs range from `2` to `1610`. The network chooses one tracer mode and keeps
+validators aligned on it.
 
 ### Storage Reads
 

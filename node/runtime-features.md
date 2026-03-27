@@ -47,8 +47,8 @@ Xian currently supports two execution tracers:
 
 | Mode | Meaning | Typical use |
 |------|---------|-------------|
-| `python_line_v1` | pure-Python line-bucket metering | local development, easiest standalone install, conservative default |
-| `native_instruction_v1` | Rust-backed instruction-level metering | maintained node/runtime stacks, lower-overhead production-style execution |
+| `python_line_v1` | pure-Python line-bucket metering with an `800,000` line-event ceiling | local development, easiest standalone install, conservative default |
+| `native_instruction_v1` | Rust-backed exact instruction metering with a `3,250,000` instruction-event ceiling | maintained node/runtime stacks, lower-overhead production-style execution |
 
 What matters operationally:
 
@@ -57,6 +57,12 @@ What matters operationally:
 - the maintained `xian-stack` node image includes the native tracer package
 - if you run `xian-abci` directly outside the maintained stack, native tracing
   requires the native extra / package to be installed
+- `python_line_v1` keeps its performance profile by rejecting source shapes that
+  distort line buckets, including ternary expressions, semicolons, and
+  one-line compound statements
+- `native_instruction_v1` is both more precise and lower-overhead, but it is a
+  consensus-policy choice because its metering semantics differ from the
+  Python tracer
 
 ### How To Set The Tracer
 

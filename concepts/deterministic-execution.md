@@ -36,12 +36,18 @@ callback on every executed opcode.
 Instead, Xian:
 
 - registers only contract code objects
-- precomputes a deterministic bytecode-cost bucket for each executable source
-  line
-- charges that bucket when the interpreter reports execution of that line
+- on `python_line_v1`, precomputes a deterministic bytecode-cost bucket for
+  each executable source line and charges that bucket when the interpreter
+  reports execution of that line
+- on `native_instruction_v1`, charges the exact executed bytecode instructions
+  inside a Rust extension
 
 This preserves deterministic accounting while keeping validator performance
 practical on adversarial or very large loops.
+
+Because the pure-Python tracer is line-bucket based, the contract linter also
+rejects source shapes that create poor bucket precision, including ternary
+expressions, semicolons, and one-line compound statements.
 
 ### No Syscalls in the Hot Path
 
@@ -161,6 +167,6 @@ Common causes of divergence in practice:
 | File/network I/O | Sandbox forbids all I/O |
 | Dictionary ordering | Python 3.7+ guarantees insertion order |
 | Memory allocation | Checked at boundary, not per-instruction |
-| Instruction counting | deterministic line-based bytecode buckets with integer cost arithmetic |
+| Instruction counting | deterministic line buckets or exact native instruction metering, depending on the selected tracer mode |
 | Python version differences | All validators must run the same CPython version |
 | JSON serialization | Compact format, fixed type markers, no whitespace |

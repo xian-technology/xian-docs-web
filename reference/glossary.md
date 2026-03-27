@@ -39,7 +39,9 @@ A key-value mapping that persists on-chain. Supports up to 16 key dimensions. De
 ## M
 
 ### Metering
-The system that counts and costs every Python bytecode instruction during contract execution. Prevents infinite loops and ensures deterministic stamp accounting via `sys.monitoring`.
+The system that charges contract execution work via `sys.monitoring`. Xian
+supports a pure-Python line-bucket tracer and a native exact-instruction
+tracer. Both prevent infinite loops and ensure deterministic stamp accounting.
 
 ## N
 

@@ -1,6 +1,8 @@
 # Measuring Stamp Costs
 
-Stamps are the gas unit on Xian. Every instruction, read, and write costs stamps. During development, you can enable metering in tests to measure how many stamps your contract functions consume.
+Stamps are the gas unit on Xian. Every metered compute step, read, and write
+costs stamps. During development, you can enable metering in tests to measure
+how many stamps your contract functions consume.
 
 ## Enabling Metering
 
@@ -12,13 +14,15 @@ from contracting.client import ContractingClient
 client = ContractingClient(metering=True)
 ```
 
-With metering enabled, every contract call is instrumented with per-instruction cost tracking, just like on-chain execution.
+With metering enabled, contract calls use the same tracer mode that the runtime
+would use on-chain. On the default pure-Python backend that means deterministic
+line buckets; on the native backend it means exact instruction metering.
 
 ## How Stamps Are Calculated
 
 The stamp cost of a transaction has three components:
 
-1. **Instruction costs** -- each Python opcode has a cost (2-1610 compute units per instruction)
+1. **Compute costs** -- each Python opcode has a cost (2-1610 compute units)
 2. **Read costs** -- 1 stamp per byte of key + value read from storage
 3. **Write costs** -- 25 stamps per byte of key + value written to storage
 
@@ -38,7 +42,8 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 | `WRITE_COST_PER_BYTE` | 25 | Stamps per byte for storage writes |
 | `STAMPS_PER_T` | 20 | How many stamps one XIAN buys. `T` stands for the native token. |
 | Max stamps per tx | 6,500,000 | Hard ceiling per transaction |
-| Max call count | 800,000 | Maximum Python opcode calls per transaction |
+| Max line events (`python_line_v1`) | 800,000 | Maximum line callbacks per transaction |
+| Max instruction events (`native_instruction_v1`) | 3,250,000 | Maximum native instruction callbacks per transaction |
 
 ## Checking Stamps Used
 

@@ -23,7 +23,8 @@ Byte count includes both the encoded key (e.g., `currency.balances:alice`) and t
 | Limit | Value |
 |-------|-------|
 | Maximum stamps per transaction | 6,500,000 |
-| Maximum call count (opcodes) per transaction | 800,000 |
+| Maximum line events per transaction (`python_line_v1`) | 800,000 |
+| Maximum instruction events per transaction (`native_instruction_v1`) | 3,250,000 |
 | Maximum write data per transaction | 128 KB |
 | Default stamp allocation | 1,000,000 |
 
@@ -34,14 +35,17 @@ stamps_used = (raw_compute_cost // 1000) + 5 + storage_read_cost + storage_write
 ```
 
 Where:
-- `raw_compute_cost` = sum of all opcode costs during execution
+- `raw_compute_cost` = sum of all opcode costs charged by the selected tracer backend
 - `5` = base transaction cost
 - `storage_read_cost` = total bytes read * 1
 - `storage_write_cost` = total bytes written * 25
 
 ## Opcode Costs
 
-Each Python bytecode instruction has a fixed cost in compute units (CU). These are converted to stamps via `raw_cost // 1000`.
+Each Python bytecode instruction has a fixed cost in compute units (CU). The
+native tracer charges those instructions exactly; the pure-Python tracer
+precomputes line buckets from the same opcode schedule. Both are converted to
+stamps via `raw_cost // 1000`.
 
 | Cost Range (CU) | Instructions |
 |-----------------|--------------|

@@ -25,7 +25,7 @@ The linter enforces that restricted subset before code is accepted.
 
 | Feature | Error Code | Why |
 |---------|------------|-----|
-| `try/except`, `with`, `lambda`, `yield`, `yield from`, `nonlocal`, `@` | `E001` | blocked syntax in the sandbox |
+| `try/except`, `with`, `lambda`, ternary expressions, `yield`, `yield from`, `nonlocal`, `@`, semicolons, one-line compound statements | `E001` | blocked syntax in the sandbox or rejected to keep line-bucket metering predictable |
 | names starting or ending with `_` | `E002` | blocks Python internals / escape paths |
 | import inside a function | `E003` | imports must be explicit and module-level |
 | `from x import y` | `E004` | use `import x` then `x.y` |
@@ -132,6 +132,7 @@ runtime surface.
 When in doubt:
 
 - keep contract code flat and explicit
+- keep one statement per line
 - use `assert` instead of exception handling
 - keep all imports at module scope
 - prefer simple data structures
