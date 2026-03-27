@@ -17,7 +17,8 @@ In Xian, `xian-abci` implements the application side of that boundary and
 ## Important Behavior
 
 - successful transactions emit standard ABCI events for contract events
-- `simulate_tx` is handled in-process, not by a sidecar socket
+- `simulate_tx` runs through a bounded subprocess worker attached to the app,
+  not through the deterministic consensus execution path
 - dashboard REST and WebSocket endpoints proxy or enrich CometBFT-facing data
 
 ## Why This Boundary Matters

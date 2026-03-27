@@ -285,6 +285,11 @@ The simulator is a readonly preview, not a consensus transaction. If you expose
 it to end users, treat it as free but rate-limited compute at the infrastructure
 layer rather than an unrestricted public endpoint.
 
+Node operators can also refuse or cap simulations through
+`simulation_enabled`, `simulation_max_concurrency`, `simulation_timeout_ms`,
+and `simulation_max_stamps`, so client code should expect structured failures
+when a node disables or limits the simulator.
+
 ### call
 
 Use `call` when you want the decoded readonly contract return value instead of

@@ -16,14 +16,16 @@ Not every runtime setting lives at the same layer.
 | Layer | What belongs there |
 |------|---------------------|
 | starter template / network manifest | network defaults such as `tracer_mode` and block policy |
-| node profile | node-local posture such as `service_node`, pruning, dashboard, monitoring, and parallel execution |
-| rendered `config.toml` `[xian]` | materialized runtime settings such as parallel execution, metrics, mempool nonce TTL, and BDS settings |
+| node profile | node-local posture such as `service_node`, pruning, dashboard, monitoring, readonly simulation, and parallel execution |
+| rendered `config.toml` `[xian]` | materialized runtime settings such as readonly simulation, parallel execution, metrics, mempool nonce TTL, and BDS settings |
 | `xian-stack` env / localnet env | stack-managed overrides for localnet, Docker publish behavior, metrics, perf snapshots, and local development |
 
 Current important point:
 
 - `tracer_mode` is part of the supported `xian-cli` template / manifest / profile
   flow.
+- readonly simulation settings are now part of the supported `xian-cli`
+  template / profile flow too, and they remain node-local runtime posture
 - parallel execution settings are now part of the supported `xian-cli`
   template / profile flow too, but they remain node-local settings rather than
   network-manifest state.
@@ -32,6 +34,8 @@ That means:
 
 - use `xian network create ... --tracer-mode ...` or
   `xian network join ... --tracer-mode ...` for tracer selection
+- use `xian network create/join ... --simulation-* ...` or template defaults
+  for node-local readonly simulation posture
 - use `xian network create/join ... --parallel-execution-* ...` or template
   defaults for node-local parallel execution posture
 - use the rendered `config.toml`, `xian-configure-node`, or localnet
@@ -80,6 +84,71 @@ Current canonical template defaults show the intended posture:
 - `single-node-dev` uses `python_line_v1`
 - `single-node-indexed`, `consortium-3`, and `embedded-backend` use
   `native_instruction_v1`
+
+## Readonly Simulation
+
+Xian also has a readonly transaction simulator behind the `simulate_tx` query
+path.
+
+Current keys:
+
+```toml
+[xian]
+simulation_enabled = true
+simulation_max_concurrency = 2
+simulation_timeout_ms = 3000
+simulation_max_stamps = 1000000
+```
+
+What they mean:
+
+- `simulation_enabled`: turn readonly transaction simulation on or off
+- `simulation_max_concurrency`: maximum concurrent simulation workers accepted
+  by this node
+- `simulation_timeout_ms`: wall-clock timeout for one simulation worker
+- `simulation_max_stamps`: readonly stamp budget cap used for simulation
+
+### How To Set Readonly Simulation
+
+Supported high-level path:
+
+```bash
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --template single-node-dev \
+  --simulation-enabled \
+  --simulation-max-concurrency 2 \
+  --simulation-timeout-ms 3000 \
+  --simulation-max-stamps 1000000
+
+uv run xian network join validator-1 --network mainnet \
+  --template embedded-backend \
+  --simulation-enabled \
+  --simulation-max-concurrency 2 \
+  --simulation-timeout-ms 3000 \
+  --simulation-max-stamps 1000000
+```
+
+Those values are written into the node profile and then materialized by
+`xian node init` into the rendered CometBFT home:
+
+```toml
+[xian]
+simulation_enabled = true
+simulation_max_concurrency = 2
+simulation_timeout_ms = 3000
+simulation_max_stamps = 1000000
+```
+
+Operational guidance:
+
+- simulation is free compute, so treat it as a protected API capability
+- the node executes simulation in a bounded subprocess worker, not inside the
+  main validator execution process
+- keep public access behind a gateway or dedicated service-node tier
+- use low concurrency and short timeouts on validator RPC endpoints
+- raise the budget only when your client workflows need it
+- expect structured failure results when simulation is disabled, saturated, or
+  timed out
 
 ## Parallel Execution
 
@@ -169,6 +238,10 @@ These are the current operator-relevant runtime keys from the rendered
 | `metrics_host` | `127.0.0.1` | listen host for the Xian metrics endpoint | rendered config; stack-managed nodes may override binding behavior |
 | `metrics_port` | `9108` | listen port for the Xian metrics endpoint | rendered config or stack env |
 | `metrics_bds_refresh_seconds` | `5.0` | refresh interval for BDS-derived metrics | rendered config |
+| `simulation_enabled` | `true` | enable readonly transaction simulation | template/profile, rendered config, or `xian-configure-node` |
+| `simulation_max_concurrency` | `2` | concurrent readonly simulation workers | template/profile, rendered config, or `xian-configure-node` |
+| `simulation_timeout_ms` | `3000` | wall-clock timeout for one readonly simulation | template/profile, rendered config, or `xian-configure-node` |
+| `simulation_max_stamps` | `1000000` | stamp budget cap used by readonly simulation | template/profile, rendered config, or `xian-configure-node` |
 | `parallel_execution_enabled` | `false` | enable speculative parallel execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `parallel_execution_workers` | `0` | worker count for speculative execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `parallel_execution_min_transactions` | `8` | threshold before parallel planning is attempted | template/profile, rendered config, `xian-configure-node`, or localnet env |

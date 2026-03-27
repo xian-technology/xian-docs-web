@@ -24,6 +24,10 @@ They are written as JSON and validated on read. The current schema is explicit:
   "block_policy_mode": "on_demand",
   "block_policy_interval": "0s",
   "tracer_mode": "python_line_v1",
+  "simulation_enabled": true,
+  "simulation_max_concurrency": 2,
+  "simulation_timeout_ms": 3000,
+  "simulation_max_stamps": 1000000,
   "parallel_execution_enabled": false,
   "parallel_execution_workers": 0,
   "parallel_execution_min_transactions": 8,
@@ -49,6 +53,10 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
 | `tracer_mode` | execution tracer backend materialized into `[xian].tracer_mode` |
+| `simulation_enabled` | enables readonly transaction simulation on this node |
+| `simulation_max_concurrency` | maximum concurrent readonly simulations accepted by this node |
+| `simulation_timeout_ms` | wall-clock timeout for one readonly simulation worker |
+| `simulation_max_stamps` | readonly stamp budget cap used during simulation |
 | `parallel_execution_enabled` | enables speculative parallel block execution for this node |
 | `parallel_execution_workers` | worker count for speculative execution on this node |
 | `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
@@ -90,3 +98,7 @@ manifest; node-specific overrides belong in the profile.
 
 The block policy only changes whether chain time advances while the chain is
 idle. Contract `now` still comes from the finalized consensus block timestamp.
+
+Readonly simulation and speculative parallel execution are both node-local
+operator posture. They do not change consensus rules, but they do change how a
+node exposes free compute and how it schedules block execution work locally.

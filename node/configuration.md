@@ -60,6 +60,7 @@ They carry node-local intent such as:
 - snapshot override
 - service-node mode
 - pruning settings
+- readonly simulation settings
 - parallel execution settings
 - monitoring settings
 - optional state-sync settings
@@ -89,13 +90,14 @@ Relevant current configuration sections:
 
 - `[statesync]` for CometBFT state sync
 - `[xian]` for Xian runtime features such as tracing, metrics, pruning,
-  parallel execution, mempool nonce reservations, and service-node behavior
+  readonly simulation, parallel execution, mempool nonce reservations, and
+  service-node behavior
 - `[xian.bds]` for BDS / indexed-read runtime settings when `service_node` is
   enabled
 
 See [Runtime Features](/node/runtime-features) for the detailed operator-facing
 reference of the current `[xian]` and `[xian.bds]` keys, including tracer modes
-and parallel execution.
+readonly simulation, and parallel execution.
 
 ## Ports
 
@@ -196,6 +198,21 @@ Current keys:
 In the Docker stack, the runtime binds the Xian metrics server inside the
 container and publishes it to the host separately from CometBFT's `26660`
 metrics endpoint.
+
+## Readonly Simulation Settings
+
+Readonly transaction simulation is configured under `[xian]` in the rendered
+`config.toml`.
+
+Current keys:
+
+- `simulation_enabled`
+- `simulation_max_concurrency`
+- `simulation_timeout_ms`
+- `simulation_max_stamps`
+
+These are node-local operational controls. Use them to keep dry runs useful for
+wallets and SDKs without turning validator RPC into unrestricted free compute.
 
 ## Stack Performance Snapshot Settings
 

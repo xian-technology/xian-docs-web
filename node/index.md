@@ -78,8 +78,8 @@ deterministic validator path.
 - [System Requirements](/node/requirements): host, Docker, and workspace needs
 - [Installation & Setup](/node/installation): supported setup path today
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
-- [Runtime Features](/node/runtime-features): tracer modes, parallel execution,
-  and the current `[xian]` runtime keys
+- [Runtime Features](/node/runtime-features): tracer modes, readonly
+  simulation, parallel execution, and the current `[xian]` runtime keys
 - [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`
 - [Starting, Stopping & Monitoring](/node/managing): the operational commands
 - [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,

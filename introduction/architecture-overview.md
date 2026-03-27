@@ -61,7 +61,7 @@ Owns:
 - `CHECK_TX`, `FINALIZE_BLOCK`, `COMMIT`, `QUERY`
 - transaction validation and nonce logic
 - event conversion into standard ABCI events
-- dry-run simulation
+- bounded dry-run simulation
 - optional dashboard and WebSocket observer service
 
 ### xian-configs
