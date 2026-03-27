@@ -1,16 +1,28 @@
 # Staking Mechanics
 
-The current codebase does not expose a separate end-user staking CLI.
+Xian still does not expose a separate end-user staking CLI, but validator
+economics and validator admission are now explicit on-chain surfaces.
 
-Validator membership and related economics are network-driven and governed by
-the canonical contracts shipped in `xian-configs`, especially the `members`
-contract and associated network presets.
+Validator governance is network-driven and comes from the canonical contracts
+shipped in `xian-configs`, especially:
+
+- `members.s.py`, submitted as `masternodes`
+- `rewards.s.py`
+- `governance.s.py`
 
 ## What Exists Today
 
-- validator admission and removal logic live on-chain
-- network economics are encoded in the canonical contracts and genesis assets
-- operator setup is handled off-chain through `xian-cli` and `xian-stack`
+- validator admission and removal live on-chain
+- candidates register with a bond through `masternodes.register(...)`
+- active validators vote on validator onboarding, offboarding, and validator
+  power changes
+- validator governance proposals use snapshotted voter weights
+- validator voting power drives both CometBFT validator power and the validator
+  share of tx-fee rewards
+- validator rewards can be redirected to an explicit payout address through
+  `reward_key`
+- operator setup is still handled off-chain through `xian-cli` and
+  `xian-stack`
 
 ## What This Means Operationally
 
@@ -18,8 +30,15 @@ If you are preparing a validator:
 
 1. coordinate with the target network's governance and validator policy
 2. prepare the node key material and profile locally
-3. run the node with the approved network configuration
+3. register the validator on-chain and provide the desired validator metadata
+4. wait for the validator-set approval vote to finalize
+5. run the node with the approved network configuration
 
 If you are documenting or integrating staking behavior, treat it as
-network-specific until the protocol exposes a broader, stable public staking
-surface.
+network-specific, but no longer treat validator economics as an opaque manual
+process. The canonical validator-governance contract now defines:
+
+- the validator bond gate
+- validator statuses and lifecycle
+- validator power
+- payout routing for validator rewards

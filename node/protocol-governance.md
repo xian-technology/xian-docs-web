@@ -31,10 +31,17 @@ For state patches, governance stores:
 Important current behavior:
 
 - proposal thresholds are snapshotted when the proposal is created
+- when the membership contract exposes explicit member weights, proposal voting
+  weights are snapshotted too
 - membership changes after proposal creation do not change the required votes
 - approved patches are scheduled on-chain by activation height
 - validators only apply a patch if the local bundle matches the approved
   `bundle_hash`
+
+On current canonical networks, that means protocol governance follows the
+validator set exposed by `masternodes`, and validator power can influence
+governance approval thresholds when the membership contract exports weighted
+voting helpers.
 
 ## Local Bundle Directory
 

@@ -115,6 +115,11 @@ developer-reward bucket is split across the participating contracts in
 proportion to their metered execution cost, then aggregated back to the
 relevant `__developer__` recipients.
 
+The validator portion of tx fees also follows the current validator-governance
+model. It is no longer split equally per validator by default. The validator
+reward bucket is now distributed by each active validator's configured
+`validator_power`, and the payout is sent to that validator's `reward_key`.
+
 ## Optimizing Stamp Usage
 
 - **Minimize storage writes** -- writes cost 25x more than reads per byte
@@ -129,7 +134,9 @@ A simple token transfer typically costs between 200 and 500 stamps. A complex
 DEX swap involving multiple contracts might cost 2,000-10,000 stamps. In that
 multi-contract case, developer rewards are not paid only to the entry
 contract's developer anymore; they are split across the participating contract
-developers by measured execution share. Contract deployment (submission) costs
-more because the entire source code is stored on-chain.
+developers by measured execution share. On the validator side, the validator
+slice is distributed by validator power rather than an equal per-node split.
+Contract deployment (submission) costs more because the entire source code is
+stored on-chain.
 
 You can estimate stamp costs before submitting a transaction by using [dry runs](/api/dry-runs).
