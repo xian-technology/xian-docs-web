@@ -20,7 +20,8 @@ All of them ultimately map to deterministic key-value storage in LMDB.
 
 ## Key Facts
 
-- `Variable` uses `.set()` and `.get()`
+- `Variable` uses `.set()` and `.get()`, and also supports top-level dict/list
+  helpers for mutable values
 - `Hash` uses index syntax like `balances["alice"]`
 - hash keys can be multi-dimensional
 - foreign storage is read-only by design

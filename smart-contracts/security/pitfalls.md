@@ -94,7 +94,15 @@ def add_item(item: str):
     data["list"] = items
 ```
 
-This applies to any mutable value (`list`, `dict`) stored in a `Hash` or `Variable`.
+This still applies to:
+
+- any mutable value stored in a `Hash`
+- nested mutable values inside a `Variable`
+- values returned by `Variable.get()`, because `.get()` returns a defensive copy
+
+For top-level mutable `Variable` values, you can now use helpers like
+`settings["mode"] = "strict"` or `queue.append(item)` instead of the full
+read-modify-write cycle.
 
 ## 5. Numeric Semantics
 
