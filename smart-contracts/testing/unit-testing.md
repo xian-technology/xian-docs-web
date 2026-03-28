@@ -79,6 +79,22 @@ def my_token():
 client.submit(my_token, name="con_my_token", constructor_args={"initial_supply": 500000})
 ```
 
+If you use the lower-level storage API directly:
+
+```python
+from contracting.storage.contract import Contract
+
+Contract(driver=client.raw_driver).submit(
+    name="con_fixture",
+    code=source,
+    constructor_args={"initial_supply": 500000},
+)
+```
+
+the deployment and its `@construct` writes use that same driver. That keeps
+constructor state visible to the rest of the current test client instead of
+writing into a separate temporary driver.
+
 ## Getting a Contract Handle
 
 ### get_contract()
