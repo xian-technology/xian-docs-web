@@ -153,6 +153,9 @@ Operator-oriented BDS inspection:
 - `/bds_status` reports worker state, queue depth, spool size, indexed head,
   lag relative to the node's current block height, filesystem storage metrics,
   and warning/error alerts.
+- `catching_up` is the meaningful “still behind” signal. `queue_depth` may stay
+  nonzero while the service is otherwise caught up, so treat indexed height,
+  spool state, DB health, and `catching_up` as the primary recovery signals.
 - `/bds_spool` lists the block payloads currently present on the local spool
   for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,

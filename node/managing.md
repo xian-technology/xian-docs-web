@@ -603,6 +603,14 @@ python3 ./scripts/backend.py storage-report
 Use `/bds_status` to inspect the BDS worker, indexed head, spool size, and
 low-disk alerts.
 
+Interpretation note:
+
+- `current_block_height` and `height_lag` are now derived from the latest
+  committed node height even when no block is currently being executed
+- `catching_up` reflects actual indexing lag or spool backlog
+- `queue_depth` still matters operationally, but a nonzero queue by itself does
+  not necessarily mean BDS is behind
+
 Operational guidance:
 
 - on pruned nodes, local BDS reindex only works for heights the node still

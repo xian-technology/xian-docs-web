@@ -399,6 +399,14 @@ that exposes the two important pieces separately:
 - for convenience, `xian-py` also surfaces these as typed attributes:
   `receipt.transaction` and `receipt.execution`
 
+`wait_for_tx(tx_hash)` first uses the normal node `/tx` lookup path. If that
+index lags briefly on a live node, `xian-py` now falls back to recent block
+inspection so a just-finalized transaction can still be recovered by hash.
+
+`get_bds_status()` returns a typed `BdsStatus` model. The main high-signal
+fields are `indexed_height`, `current_block_height`, `height_lag`,
+`catching_up`, `spool_pending_count`, and `alerts`.
+
 ## Watching Blocks And Events
 
 `xian-py` now includes polling-based watcher helpers for long-running
