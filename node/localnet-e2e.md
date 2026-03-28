@@ -12,10 +12,11 @@ real runtime path with:
 - real validator governance
 - governed forward state patches
 - `xian-py`
+- nested contract deployment and dynamic contract-call routing
 - DEX deployment and mixed trading flows
 - shielded-note-token proof-backed flows
 - indexed reads, websocket subscriptions, and event watching
-- logging and readonly simulation under load
+- logging, readonly simulation under load, and intentional BDS catch-up
 
 ## Canonical Command
 
@@ -29,6 +30,7 @@ Equivalent machine-facing backend command:
 
 ```bash
 python3 ./scripts/backend.py localnet-e2e
+python3 ./scripts/backend.py localnet-e2e --start-phase 10-retrieval-surfaces --resume-dir .artifacts/localnet-e2e/<run-id>
 ```
 
 Artifacts are written under:
@@ -53,21 +55,26 @@ The phases intentionally build on each other:
    equality
 3. use `xian-py` to fund accounts, deploy helper contracts, simulate, and read
    state
-4. send periodic transfers from different nodes
-5. run a higher-rate burst workload and capture approximate TPS
-6. trigger conflicting and invalid transactions intentionally
-7. deploy and exercise the DEX contract pack
-8. hammer readonly simulation and capture approximate simulator QPS
-9. validate retrieval through indexed BDS reads, `abci_query`, `xian-py`
+4. deploy a contract factory that submits multiple child contracts, then test
+   dynamic contract/function dispatch and multi-hop `ctx.caller` /
+   `ctx.signer` behavior
+5. send periodic transfers from different nodes
+6. run a higher-rate burst workload and capture approximate TPS
+7. trigger conflicting and invalid transactions intentionally
+8. deploy and exercise the DEX contract pack
+9. hammer readonly simulation and capture approximate simulator QPS
+10. intentionally let BDS fall behind by stopping Postgres, generate live
+    chain traffic, then verify BDS catches back up
+11. validate retrieval through indexed BDS reads, `abci_query`, `xian-py`
    watchers, and raw websocket tx subscriptions
-10. run a dedicated determinism check by comparing recent app hashes, sampled
+12. run a dedicated determinism check by comparing recent app hashes, sampled
     state, and simulation outputs across validators
-11. vote a validator power change, remove a validator, and add it back through
+13. vote a validator power change, remove a validator, and add it back through
     real on-chain governance
-12. approve and apply a governed forward state patch
-13. switch logging posture to `DEBUG` and `TRACE` and verify the expected log
+14. approve and apply a governed forward state patch
+15. switch logging posture to `DEBUG` and `TRACE` and verify the expected log
     output appears
-14. use the governed system `zk_registry`, deploy the shielded-note-token, then
+16. use the governed system `zk_registry`, deploy the shielded-note-token, then
     test deposit, shielded transfer, and withdraw flows
 
 ## Recommended Matrix
@@ -131,6 +138,16 @@ already-running localnet.
   currently listed on the DEX in the canonical run. The current DEX fixture
   expects float-based token semantics, while the shielded-note-token public
   interface uses integer amounts.
+- The orchestration phase validates contract-submitted child deployments,
+  dynamic name-based and module-based dispatch, rollback on nested submission
+  failure, and preserved `ctx.caller` / `ctx.signer` across a multi-hop call
+  chain.
+- The BDS catch-up phase intentionally stops the local Postgres service. The
+  pass condition is that live block production continues, BDS reports backlog
+  or degraded indexing, and the indexed surface catches up again after
+  Postgres returns. On the current service-node implementation, `queue_depth`
+  can stay nonzero in steady state, so the meaningful recovery signals are the
+  indexed height, spool state, and DB health.
 - The localnet validator image must include `xian-zk`, not just the Python-side
   prover utilities. The shielded phase verifies proofs inside the validator
   runtime.
@@ -138,6 +155,9 @@ already-running localnet.
   readonly simulator cap is intentionally smaller than proof-backed shielded
   execution, so simulator-based stamp estimation is not the right path for
   those transactions in the canonical run.
+- The shielded phase is normally the slowest phase in the whole run because it
+  includes real proving work. A clean success run can spend multiple minutes in
+  that phase alone.
 - Hex-looking public addresses are valid shielded withdraw recipients. The
   toolkit and contract now use matching recipient-digest hashing semantics for
   those values.
