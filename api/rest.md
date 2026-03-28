@@ -91,6 +91,12 @@ This route backs the dashboard's operator cards. It aggregates:
 - the node's decoded `/bds_status` ABCI query when BDS is enabled
 - CometBFT `unconfirmed_txs`
 
+The dashboard home view combines that monitoring summary with:
+
+- `/api/status` for sync state, validator identity, and latest block metadata
+- `/api/net_info` for peer count and peer details
+- `/api/validators` for live validator-set and voting-power visibility
+
 Use it for explorer/operator UX. For canonical reads, keep using CometBFT RPC
 and direct ABCI query paths.
 

@@ -408,6 +408,13 @@ that with `XIAN_PERF_ENABLED=0` if you explicitly want to disable the
 
 What the dashboard adds without duplicating the main node cards:
 
+- an operator summary that turns sync, peer, mempool, execution, and BDS lag
+  into immediate attention signals
+- validator-set visibility with active validator count, total power, local
+  validator role, and top voting-power rows
+- a live activity feed for committed blocks and decoded transactions
+- opt-in global live watches for all contract events or all state changes when
+  you need to debug the chain in real time
 - execution health from `/perf_status`
 - mempool pressure from `unconfirmed_txs`
 - BDS lag, queue, spool, and alerts from `/bds_status`

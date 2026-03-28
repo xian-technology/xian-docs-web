@@ -12,6 +12,12 @@ Replace `localhost:8080` with the dashboard address of the node you want to conn
 
 Once connected, you'll automatically receive `new_block` messages for every block the node commits. To receive state changes or contract events, you need to subscribe explicitly.
 
+The built-in dashboard UI uses that same socket for its live activity feed:
+
+- blocks and decoded transaction summaries stream automatically
+- global contract-event and global state-change watching stay opt-in because
+  they can get noisy on busy nodes
+
 ## Message Types
 
 All messages are JSON. Every message has a `type` field.
@@ -20,7 +26,7 @@ All messages are JSON. Every message has a `type` field.
 
 | Type | Description | When |
 |------|-------------|------|
-| `new_block` | Block summary with height, hash, and transaction list | Every committed block |
+| `new_block` | Block summary with height, hash, proposer, and decoded transaction list | Every committed block |
 | `node_status` | CometBFT connection status (`"online"` or `"offline"`) | On connect/disconnect |
 | `state_change` | A state key you subscribed to was modified | On matching tx |
 | `contract_event` | A contract event you subscribed to was emitted | On matching tx |
@@ -34,6 +40,15 @@ All messages are JSON. Every message has a `type` field.
 | Additional fields | Depend on the subscription type (see below) |
 
 Every action returns a JSON response with `"status": "ok"` or `"status": "error"`.
+
+`new_block` messages include a `txs` array with decoded payload summaries when
+the raw transaction could be decoded. Each tx summary currently includes:
+
+- `tx_hash`
+- `contract`
+- `function`
+- `sender`
+- `stamps_supplied`
 
 ## State Subscriptions
 
