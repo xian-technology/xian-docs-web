@@ -21,6 +21,10 @@ optional dashboard service on the configured host/port.
 If the node profile enables monitoring, `xian node start` also brings up the
 Prometheus and Grafana sidecars through the `xian-stack` backend.
 
+If the node profile enables `xian-intentkit`, `xian node start` also brings up
+the stack-managed IntentKit frontend, API, worker, scheduler, and support
+services as a separate Compose project.
+
 ## Status
 
 ```bash
@@ -36,9 +40,9 @@ uv run xian node health validator-1
 - the `xian-stack` backend state when available
 - optional live RPC reachability
 - a compact summary of readiness, sync height, peer count, and optional
-  dashboard / monitoring reachability
+  dashboard / monitoring / `xian-intentkit` reachability
 - the effective local endpoint catalog for RPC, `abci_query`, metrics, and
-  optional dashboard / monitoring services
+  optional dashboard / monitoring / `xian-intentkit` services
 
 `node health` is the concise machine-readable live-health view. It adds:
 
@@ -47,6 +51,7 @@ uv run xian node health validator-1
 - CometBFT and Xian metrics reachability
 - BDS queue, spool, lag, and database status when `service_node` is enabled
 - optional dashboard / Prometheus / Grafana reachability when enabled
+- optional `xian-intentkit` frontend and API reachability when enabled
 - optional disk-pressure checks through the local `xian-stack` storage report
 - rendered state-sync readiness from `config.toml`
 - the effective snapshot bootstrap URL
@@ -63,6 +68,7 @@ prints the expected entrypoints for:
 - GraphQL when `service_node` is enabled
 - dashboard and dashboard status when enabled
 - Prometheus and Grafana when monitoring is enabled
+- `xian-intentkit` frontend and API health URLs when enabled
 
 For stack-managed nodes, the endpoint catalog reflects the actual published
 Docker host ports of the running services when they differ from the profile
@@ -163,6 +169,15 @@ python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monito
 python3 ./scripts/backend.py endpoints --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py health --no-service-node --no-dashboard --no-monitoring
 python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
+```
+
+With stack-managed `xian-intentkit`:
+
+```bash
+python3 ./scripts/backend.py start --service-node --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py endpoints --service-node --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py health --service-node --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py stop --service-node --intentkit --intentkit-network-id xian-mainnet
 ```
 
 For BDS-enabled integrated runs:
@@ -367,6 +382,15 @@ Optional services:
 - GraphQL/PostGraphile v5: port `5000` when BDS is enabled
 
 Use the dashboard for chain inspection and WebSocket subscriptions.
+
+For a direct local dashboard process against an already running node:
+
+```bash
+uv run --project /path/to/xian-abci python3 -m xian.dashboard.cli \
+  --rpc-url http://127.0.0.1:26657 \
+  --host 127.0.0.1 \
+  --port 18080
+```
 
 Use Prometheus and Grafana for remote monitoring, alerting, and retention.
 
