@@ -435,11 +435,16 @@ What the dashboard adds without duplicating the main node cards:
 - validator-set visibility with active validator count, total power, local
   validator role, top voting-power rows, and a node selector for jumping to a
   known peer dashboard target
-- a dedicated explorer at `/explorer`, plus `/explorer/contracts` and
-  `/explorer/events`
+- a dedicated explorer at `/explorer`, plus `/explorer/contracts`,
+  `/explorer/addresses`, and `/explorer/events`
 - contract browsing sorted by creation date or name
 - contract source browsing with syntax-highlighted original source and
   function-to-source jumping
+- address drill-down that shows indexed sender history and lets you reopen tx
+  detail from an address page
+- richer contract metadata, including owner / developer / deployer / creator
+  fields, clickable address links, and indexed generated developer-reward
+  totals when BDS is available
 - recent indexed event browsing on service nodes with BDS enabled
 - execution health from `/perf_status`, plus explicit visibility when advanced
   perf capture is disabled

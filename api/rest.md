@@ -37,6 +37,7 @@ result are separate:
 ### Contracts / ABCI
 
 - `GET /api/contract/{name}`
+- `GET /api/address/{address}`
 - `GET /api/contracts`
 - `GET /api/recent_events`
 - `GET /api/abci_query/{path}`
@@ -58,8 +59,17 @@ When the contract keeps original source in `__source__`, the dashboard returns
 that original source text instead of the transformed compiled runtime form.
 
 In the explorer UI, the contract page now renders that source with Python
-syntax highlighting and lets you jump from a listed function to its definition
-in the source pane.
+syntax highlighting, lets you jump from a listed function to its definition
+in the source pane, and enriches the page with runtime metadata such as owner,
+developer, deployer, creator/initiator, creation tx, and indexed reward totals
+when BDS is available.
+
+```text
+GET /api/address/<address>?limit=50&offset=0
+```
+
+Returns indexed sender history for the address on BDS-enabled service nodes,
+plus the developer-reward aggregate for that same address when available.
 
 For the canonical runtime form, query:
 
@@ -82,6 +92,7 @@ GET /api/abci_query/get/currency.balances:alice
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/contract/currency
 GET /api/abci_query/contracts/limit=50/offset=0/sort=submitted_at/order=desc
+GET /api/abci_query/contract_info/currency
 GET /api/abci_query/contract_code/currency
 GET /api/abci_query/contract_methods/currency
 GET /api/abci_query/contract_vars/currency
@@ -117,12 +128,16 @@ The built-in explorer routes are:
 ```text
 GET /explorer
 GET /explorer/contracts
+GET /explorer/addresses
 GET /explorer/events
 ```
 
 - `/explorer` is the block explorer view
 - `/explorer/contracts` lists deployed contracts, sorted by creation date by
   default, with optional client-side switching to name sorting
+- `/explorer/addresses` is the address drill-down entrypoint; selecting an
+  address shows its indexed submitted transactions and lets you open each tx
+  detail again
 - `/explorer/events` lists recent indexed contract events when BDS is enabled
 
 The dashboard also accepts an optional `rpc` query parameter for peer-targeted
@@ -178,6 +193,7 @@ GET /api/abci_query/tx/<hash>
 GET /api/abci_query/txs_for_block/123
 GET /api/abci_query/txs_by_sender/<address>/limit=50/offset=0
 GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
+GET /api/abci_query/contract_summary/<contract>
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
 GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
