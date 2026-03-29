@@ -12,11 +12,9 @@ Replace `localhost:8080` with the dashboard address of the node you want to conn
 
 Once connected, you'll automatically receive `new_block` messages for every block the node commits. To receive state changes or contract events, you need to subscribe explicitly.
 
-The built-in dashboard UI uses that same socket for its live activity feed:
-
-- blocks and decoded transaction summaries stream automatically
-- global contract-event and global state-change watching stay opt-in because
-  they can get noisy on busy nodes
+The built-in dashboard UI uses that same socket for live node status and block
+updates. Recent event browsing itself now lives in the explorer on service
+nodes with BDS enabled instead of in a separate live-activity panel.
 
 ## Message Types
 

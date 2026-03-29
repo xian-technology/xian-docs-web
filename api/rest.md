@@ -36,6 +36,8 @@ result are separate:
 ### Contracts / ABCI
 
 - `GET /api/contract/{name}`
+- `GET /api/contracts`
+- `GET /api/recent_events`
 - `GET /api/abci_query/{path}`
 
 ## Important Notes
@@ -51,6 +53,8 @@ GET /api/contract/currency
 ```
 
 Returns the current contract source fetched through the node's query layer.
+When the contract keeps original source in `__source__`, the dashboard returns
+that original source text instead of the transformed compiled runtime form.
 
 For the canonical runtime form, query:
 
@@ -72,6 +76,7 @@ Examples:
 GET /api/abci_query/get/currency.balances:alice
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/contract/currency
+GET /api/abci_query/contracts/limit=50/offset=0/sort=submitted_at/order=desc
 GET /api/abci_query/contract_code/currency
 GET /api/abci_query/contract_methods/currency
 GET /api/abci_query/contract_vars/currency
@@ -99,6 +104,32 @@ The dashboard home view combines that monitoring summary with:
 
 Use it for explorer/operator UX. For canonical reads, keep using CometBFT RPC
 and direct ABCI query paths.
+
+## Explorer Views
+
+The built-in explorer routes are:
+
+```text
+GET /explorer
+GET /explorer/contracts
+GET /explorer/events
+```
+
+- `/explorer` is the block explorer view
+- `/explorer/contracts` lists deployed contracts, sorted by creation date by
+  default, with optional client-side switching to name sorting
+- `/explorer/events` lists recent indexed contract events when BDS is enabled
+
+The dashboard also accepts an optional `rpc` query parameter for peer-targeted
+inspection through the same UI:
+
+```text
+GET /explorer?rpc=http://10.0.0.25:26657
+```
+
+The backend only allows the default node RPC or currently connected peer RPC
+targets, so this stays scoped to known network peers instead of acting as a
+generic proxy.
 
 When BDS is enabled, additional query paths are available under the same ABCI
 query surface. These are still node queries, but backed by the optional BDS
@@ -140,6 +171,7 @@ GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
 GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
+GET /api/abci_query/recent_events/limit=50/offset=0
 GET /api/abci_query/developer_rewards/<recipient_key>
 GET /api/abci_query/state/<prefix>/limit=50/offset=0
 GET /api/abci_query/state_history/<key>/limit=50/offset=0
