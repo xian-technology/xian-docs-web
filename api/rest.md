@@ -57,7 +57,10 @@ GET /api/contract/currency
 
 Returns the current contract source fetched through the node's query layer.
 When the contract keeps original source in `__source__`, the dashboard returns
-that original source text instead of the transformed compiled runtime form.
+that original source text separately from the stored runtime form. If the
+original source is not available, the contract route still returns the stored
+runtime code, but the explorer labels it explicitly as runtime code instead of
+presenting it as source.
 
 In the explorer UI, the contract page now renders that source with Python
 syntax highlighting, lets you jump from a listed function to its definition
@@ -70,9 +73,10 @@ GET /api/addresses?limit=50&offset=0
 ```
 
 Returns the recent indexed sender set for the explorer address list. On
-BDS-enabled service nodes this is backed by sender history; when the connected
-node does not expose that indexed address query yet, the dashboard falls back
-to deriving a compact recent-address list from recent indexed events.
+BDS-enabled service nodes this is backed by the canonical sender-history index.
+If the connected node does not expose that indexed address query, the dashboard
+returns the route as unavailable instead of synthesizing address rows from some
+other data source.
 
 ```text
 GET /api/address/<address>?limit=50&offset=0
