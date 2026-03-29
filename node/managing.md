@@ -435,6 +435,9 @@ What the dashboard adds without duplicating the main node cards:
 - validator-set visibility with active validator count, total power, local
   validator role, a scrollable full validator table, and clickable validator
   rows for jumping to a known peer dashboard target
+- live P2P peer visibility separate from the validator set, so current network
+  connectivity problems remain visible even when the consensus membership is
+  unchanged
 - a dedicated explorer at `/explorer`, plus `/explorer/contracts`,
   `/explorer/addresses`, and `/explorer/events`, so block/event browsing stays
   in the explorer instead of duplicating those tables on the main dashboard
