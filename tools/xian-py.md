@@ -8,14 +8,17 @@ applications, services, wallets, and automation workflows.
 Base install:
 
 ```bash
-pip install xian-py
+pip install xian-tech-py
 ```
+
+The published PyPI package name is `xian-tech-py`. The import package remains
+`xian_py`.
 
 Optional extras:
 
 ```bash
-pip install "xian-py[hd]"   # mnemonic / HD wallet support
-pip install "xian-py[eth]"  # Ethereum wallet helpers
+pip install "xian-tech-py[hd]"   # mnemonic / HD wallet support
+pip install "xian-tech-py[eth]"  # Ethereum wallet helpers
 ```
 
 ## Public API
@@ -87,7 +90,7 @@ child = wallet.get_wallet([0, 0])
 print(child.public_key)
 ```
 
-HD wallet support requires `xian-py[hd]`.
+HD wallet support requires `xian-tech-py[hd]`.
 
 ### Ethereum Wallet
 
@@ -98,7 +101,7 @@ wallet = EthereumWallet()
 print(wallet.address)
 ```
 
-Ethereum wallet helpers require `xian-py[eth]`.
+Ethereum wallet helpers require `xian-tech-py[eth]`.
 
 ## Synchronous Client
 

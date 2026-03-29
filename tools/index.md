@@ -17,7 +17,7 @@ integrating programmable decentralized networks and applications.
 Install the SDK:
 
 ```bash
-pip install xian-py
+pip install xian-tech-py
 ```
 
 Install the contract engine (for local testing):
