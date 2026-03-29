@@ -15,6 +15,10 @@ The supported setup path today is the sibling-workspace model:
 This is the layout used by image builds, smoke tests, and the cross-repo
 operator flow.
 
+If you install the operator CLI from PyPI instead of using the sibling
+workspace, the published package name is `xian-tech-cli`. The command remains
+`xian`.
+
 ## Host Requirements
 
 - macOS or Linux
