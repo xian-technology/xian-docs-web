@@ -438,6 +438,9 @@ What the dashboard adds without duplicating the main node cards:
 - a dedicated explorer at `/explorer`, plus `/explorer/contracts`,
   `/explorer/addresses`, and `/explorer/events`, so block/event browsing stays
   in the explorer instead of duplicating those tables on the main dashboard
+- `/explorer/addresses` opens with a recent indexed address list instead of an
+  empty prompt-only view, and selecting a row drills down into that address's
+  submitted transaction history
 - contract browsing sorted by creation date or name
 - contract source browsing with syntax-highlighted original source and
   function-to-source jumping

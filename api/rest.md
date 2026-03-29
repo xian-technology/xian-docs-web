@@ -37,6 +37,7 @@ result are separate:
 ### Contracts / ABCI
 
 - `GET /api/contract/{name}`
+- `GET /api/addresses`
 - `GET /api/address/{address}`
 - `GET /api/contracts`
 - `GET /api/recent_events`
@@ -63,6 +64,15 @@ syntax highlighting, lets you jump from a listed function to its definition
 in the source pane, and enriches the page with runtime metadata such as owner,
 developer, deployer, creator/initiator, creation tx, and indexed reward totals
 when BDS is available.
+
+```text
+GET /api/addresses?limit=50&offset=0
+```
+
+Returns the recent indexed sender set for the explorer address list. On
+BDS-enabled service nodes this is backed by sender history; when the connected
+node does not expose that indexed address query yet, the dashboard falls back
+to deriving a compact recent-address list from recent indexed events.
 
 ```text
 GET /api/address/<address>?limit=50&offset=0
@@ -135,9 +145,9 @@ GET /explorer/events
 - `/explorer` is the block explorer view
 - `/explorer/contracts` lists deployed contracts, sorted by creation date by
   default, with optional client-side switching to name sorting
-- `/explorer/addresses` is the address drill-down entrypoint; selecting an
-  address shows its indexed submitted transactions and lets you open each tx
-  detail again
+- `/explorer/addresses` lists recent indexed addresses and also acts as the
+  address drill-down entrypoint; selecting an address shows its indexed
+  submitted transactions and lets you open each tx detail again
 - `/explorer/events` lists recent indexed contract events when BDS is enabled
 
 The dashboard also accepts an optional `rpc` query parameter for peer-targeted
