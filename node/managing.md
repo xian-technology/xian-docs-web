@@ -435,6 +435,8 @@ What the dashboard adds without duplicating the main node cards:
 - validator-set visibility with set height, active validator count, total
   power, a scrollable full validator table, and clickable validator rows for
   jumping to a known peer dashboard target
+- validator rows keep a consistent height even when the local validator row is
+  marked with the `self` badge
 - the validator table is sized to keep roughly five rows visible before it
   needs to scroll on the standard desktop layout
 - live P2P peer visibility separate from the validator set, so current network
