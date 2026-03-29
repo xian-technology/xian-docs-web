@@ -22,6 +22,7 @@ the published package names are:
 - `xian-tech-abci`
 - `xian-tech-contracting`
 - `xian-tech-py`
+- `xian-tech-linter`
 
 The command and import surfaces remain the same, for example `xian`,
 `xian-abci`, `contracting`, and `xian_py`.

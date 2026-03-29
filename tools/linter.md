@@ -7,6 +7,10 @@ Xian has two related linting surfaces:
 
 Both ultimately enforce the same contract-language rules.
 
+The published PyPI package name for the standalone service is
+`xian-tech-linter`. The import package and console command remain
+`xian_linter` and `xian-linter`.
+
 ## Using The Core Linter
 
 Use `contracting.compilation.linter.Linter` when you are already inside Python:
@@ -45,7 +49,7 @@ The core linter returns structured `LintError` objects with:
 Install the server extras:
 
 ```bash
-pip install "xian-linter[server]"
+pip install "xian-tech-linter[server]"
 ```
 
 Start the service:
