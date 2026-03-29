@@ -8,7 +8,8 @@ must upgrade in a coordinated way.
 
 1. Stop the node
 2. Update the repos or release artifact
-3. Rebuild or pull the immutable node image
+3. Pull the pinned immutable node image, or rebuild locally if the node profile
+   intentionally uses `node_image_mode=local_build`
 4. Run validation and smoke coverage
 5. Start the node again and verify status
 
@@ -30,6 +31,8 @@ uv run xian node status validator-1
 - CPython minor version across validators
 - `xian-contracting` and `xian-abci` versions
 - canonical network bundle selection from `xian-configs`
+- the pinned node image digests in the manifest/profile for registry-backed
+  runtimes
 
 ## State and Config Safety
 

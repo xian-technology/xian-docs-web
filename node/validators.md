@@ -18,6 +18,11 @@ uv run xian network join validator-1 --network mainnet \
   --stack-dir ../xian-stack
 ```
 
+For canonical networks, that profile now inherits the pinned published
+`xian-node` image digests from the network manifest by default. Use
+`--node-image-mode local_build` only when you intentionally want a
+source-built local override.
+
 Initialize the node home:
 
 ```bash

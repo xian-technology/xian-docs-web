@@ -21,6 +21,9 @@ They carry network-wide defaults such as:
 - `chain_id`
 - `mode`
 - `runtime_backend`
+- `node_image_mode`
+- `node_integrated_image`
+- `node_split_image`
 - `genesis_source`
 - `snapshot_url`
 - `seed_nodes`
@@ -56,6 +59,7 @@ They carry node-local intent such as:
 - moniker
 - validator key reference
 - stack checkout path
+- node image posture and pinned image references
 - node-local seed overrides
 - snapshot override
 - service-node mode

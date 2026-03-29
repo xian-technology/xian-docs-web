@@ -51,6 +51,11 @@ uv run xian node init validator-1
 uv run xian node start validator-1
 ```
 
+When the joined network manifest pins published node images, `xian node start`
+pulls those immutable images by default through `xian-stack`. Use
+`--node-image-mode local_build` during `network join` when you need a dev
+override against the local workspace instead.
+
 Without templates, the lower-level flow is still available:
 
 1. Generate validator key material with `xian-cli`

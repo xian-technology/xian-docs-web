@@ -13,6 +13,9 @@ They are written as JSON and validated on read. The current schema is explicit:
   "moniker": "validator-1",
   "validator_key_ref": "./keys/validator-1/validator_key_info.json",
   "runtime_backend": "xian-stack",
+  "node_image_mode": "registry",
+  "node_integrated_image": "ghcr.io/xian-technology/xian-node@sha256:...",
+  "node_split_image": "ghcr.io/xian-technology/xian-node-split@sha256:...",
   "stack_dir": "../xian-stack",
   "seeds": [],
   "genesis_url": null,
@@ -56,6 +59,8 @@ They are written as JSON and validated on read. The current schema is explicit:
 |------|---------|
 | `validator_key_ref` | path to `validator_key_info.json` or `priv_validator_key.json` |
 | `stack_dir` | explicit `xian-stack` checkout used by the runtime backend |
+| `node_image_mode` | `registry` for pinned published images or `local_build` for workspace-built images |
+| `node_*_image` | immutable integrated/split image references used when `node_image_mode=registry` |
 | `service_node` | enables the optional indexed-service stack used for BDS-backed reads |
 | `operator_profile` | the intended operator posture inherited from the selected starter template |
 | `monitoring_profile` | the monitoring posture inherited from the selected starter template |
@@ -113,6 +118,15 @@ The current canonical templates standardize these postures:
 
 Profiles are intentionally node-local. Network-wide defaults belong in the
 manifest; node-specific overrides belong in the profile.
+
+For canonical networks, the normal flow is:
+
+- the network manifest pins published image digests
+- `xian network join` copies those pinned image references into the node profile
+- `xian node start` pulls those images by default
+
+Use `node_image_mode=local_build` when you intentionally want the profile to
+run whatever the local `xian-stack` workspace builds instead.
 
 The block policy only changes whether chain time advances while the chain is
 idle. Contract `now` still comes from the finalized consensus block timestamp.

@@ -57,6 +57,21 @@ uv run xian network join validator-1 --network mainnet \
 uv run xian node init validator-1
 ```
 
+Canonical network manifests can now pin published `xian-node` image digests.
+When those fields are present, `xian network join` writes them into the node
+profile and `xian node start` pulls those images by default instead of building
+from the local workspace.
+
+Use a local source-built override when you want to test unreleased changes:
+
+```bash
+uv run xian network join validator-1 --network mainnet \
+  --template embedded-backend \
+  --validator-key-ref ./keys/validator-1/validator_key_info.json \
+  --stack-dir ../xian-stack \
+  --node-image-mode local_build
+```
+
 ## Start the Runtime
 
 ```bash
@@ -116,9 +131,12 @@ Xian application-state snapshot archive.
 Use `playbooks/bootstrap-state-sync.yml` when you want the remote node to join
 from trusted peers through CometBFT state sync.
 
-## Current Distribution Note
+## Distribution Model
 
-The codebase is already structured around immutable images, but this repo set
-currently documents the source-built workspace path. If you later publish
-versioned node images, that becomes a distribution layer on top of the same
-runtime contract documented here.
+Xian now supports two node-runtime paths on the same `xian-stack` backend:
+
+- canonical networks can pin published immutable `xian-node` images by digest
+- local and custom workflows can keep using source-built workspace images
+
+The local `xian-stack` checkout still matters in both cases because it owns the
+Compose topology, backend control plane, and smoke-tested operator flow.
