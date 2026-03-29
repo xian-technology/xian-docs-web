@@ -441,6 +441,8 @@ What the dashboard adds without duplicating the main node cards:
 - a dedicated explorer at `/explorer`, plus `/explorer/contracts`,
   `/explorer/addresses`, and `/explorer/events`, so block/event browsing stays
   in the explorer instead of duplicating those tables on the main dashboard
+- the block explorer auto-refreshes while you are on the newest block page, but
+  keeps older paginated block views stable while you inspect historical data
 - `/explorer/addresses` opens with a recent indexed address list instead of an
   empty prompt-only view when the node exposes the BDS sender-history index,
   and selecting a row drills down into that address's submitted transaction
