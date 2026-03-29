@@ -433,10 +433,11 @@ that with `XIAN_PERF_ENABLED=0` if you explicitly want to disable the
 What the dashboard adds without duplicating the main node cards:
 
 - validator-set visibility with active validator count, total power, local
-  validator role, top voting-power rows, and a node selector for jumping to a
-  known peer dashboard target
+  validator role, a scrollable full validator table, and a node selector for
+  jumping to a known peer dashboard target
 - a dedicated explorer at `/explorer`, plus `/explorer/contracts`,
-  `/explorer/addresses`, and `/explorer/events`
+  `/explorer/addresses`, and `/explorer/events`, so block/event browsing stays
+  in the explorer instead of duplicating those tables on the main dashboard
 - contract browsing sorted by creation date or name
 - contract source browsing with syntax-highlighted original source and
   function-to-source jumping
@@ -449,7 +450,8 @@ What the dashboard adds without duplicating the main node cards:
 - execution health from `/perf_status`, plus explicit visibility when advanced
   perf capture is disabled
 - BDS lag, queue, spool, and alerts from `/bds_status`
-- click-to-copy truncation for long node identity values in the dashboard cards
+- click-to-copy middle truncation for long node identity values in the
+  dashboard cards
 - peer switching that keeps the dashboard scoped to a selected node, including
   localnet host-port inference for the standard `node-<n>` layout
 
