@@ -65,7 +65,8 @@ What matters operationally:
 - validators in the same network should stay aligned on the same tracer mode
 - the maintained `xian-stack` node image includes the native tracer package
 - if you run `xian-abci` directly outside the maintained stack, native tracing
-  requires the native extra / package to be installed
+  requires the native extra or the published `xian-tech-native-tracer` package
+  to be installed
 - `python_line_v1` keeps its performance profile by rejecting source shapes that
   distort line buckets, including ternary expressions, semicolons, and
   one-line compound statements

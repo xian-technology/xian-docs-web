@@ -29,5 +29,5 @@ pip install xian-contracting
 Install the shielded proving toolkit:
 
 ```bash
-pip install xian-zk
+pip install xian-tech-zk
 ```

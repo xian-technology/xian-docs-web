@@ -14,8 +14,11 @@ It is not part of the validator runtime. Validators only need the runtime-side
 ## Installation
 
 ```bash
-pip install xian-zk
+pip install xian-tech-zk
 ```
+
+The published PyPI package name is `xian-tech-zk`. The import package remains
+`xian_zk`, and the CLI command remains `xian-zk-shielded-bundle`.
 
 For local development against the editable workspace package:
 
