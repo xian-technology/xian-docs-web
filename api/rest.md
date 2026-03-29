@@ -13,6 +13,7 @@ http://<dashboard-host>:8080
 
 ### Node / Network
 
+- `GET /api/config`
 - `GET /api/status`
 - `GET /api/net_info`
 - `GET /api/validators`
@@ -55,6 +56,10 @@ GET /api/contract/currency
 Returns the current contract source fetched through the node's query layer.
 When the contract keeps original source in `__source__`, the dashboard returns
 that original source text instead of the transformed compiled runtime form.
+
+In the explorer UI, the contract page now renders that source with Python
+syntax highlighting and lets you jump from a listed function to its definition
+in the source pane.
 
 For the canonical runtime form, query:
 
@@ -130,6 +135,11 @@ GET /explorer?rpc=http://10.0.0.25:26657
 The backend only allows the default node RPC or currently connected peer RPC
 targets, so this stays scoped to known network peers instead of acting as a
 generic proxy.
+
+For the standard localnet layout (`node-0`, `node-1`, … with host-port stride
+`100`), the dashboard also infers host-routable peer RPC URLs so peer switching
+works from a host-local dashboard process instead of falling back to
+container-internal addresses.
 
 When BDS is enabled, additional query paths are available under the same ABCI
 query surface. These are still node queries, but backed by the optional BDS

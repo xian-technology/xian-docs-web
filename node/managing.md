@@ -432,20 +432,21 @@ that with `XIAN_PERF_ENABLED=0` if you explicitly want to disable the
 
 What the dashboard adds without duplicating the main node cards:
 
-- an operator summary that turns sync, peer, mempool, execution, and BDS lag
-  into immediate attention signals
 - validator-set visibility with active validator count, total power, local
   validator role, top voting-power rows, and a node selector for jumping to a
   known peer dashboard target
 - a dedicated explorer at `/explorer`, plus `/explorer/contracts` and
   `/explorer/events`
 - contract browsing sorted by creation date or name
+- contract source browsing with syntax-highlighted original source and
+  function-to-source jumping
 - recent indexed event browsing on service nodes with BDS enabled
 - execution health from `/perf_status`, plus explicit visibility when advanced
   perf capture is disabled
-- mempool pressure from `unconfirmed_txs`
 - BDS lag, queue, spool, and alerts from `/bds_status`
 - click-to-copy truncation for long node identity values in the dashboard cards
+- peer switching that keeps the dashboard scoped to a selected node, including
+  localnet host-port inference for the standard `node-<n>` layout
 
 Use the node's ABCI query surface for canonical reads:
 
