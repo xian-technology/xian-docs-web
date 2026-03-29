@@ -41,7 +41,12 @@ They are written as JSON and validated on read. The current schema is explicit:
   "dashboard_enabled": false,
   "monitoring_enabled": true,
   "dashboard_host": "127.0.0.1",
-  "dashboard_port": 8080
+  "dashboard_port": 8080,
+  "intentkit_enabled": false,
+  "intentkit_network_id": "xian-mainnet",
+  "intentkit_host": "127.0.0.1",
+  "intentkit_port": 38000,
+  "intentkit_api_port": 38080
 }
 ```
 
@@ -72,6 +77,9 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
 | `monitoring_enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
 | `dashboard_*` | optional runtime dashboard settings |
+| `intentkit_enabled` | starts the optional stack-managed `xian-intentkit` deployment |
+| `intentkit_network_id` | selects the Xian network slot exposed to `xian-intentkit` |
+| `intentkit_*` | published local host/port settings for the stack-managed frontend and API |
 
 For the remaining lower-level runtime keys that are **not** currently surfaced
 through the high-level profile flow, see
@@ -116,3 +124,8 @@ node exposes free compute and how it schedules block execution work locally.
 Application logging is also node-local. It changes how much execution context
 the node records and how those logs are formatted and retained under
 `.cometbft/xian/logs`.
+
+`xian-intentkit` posture is also node-local. The profile only stores the
+operator-facing enable flag, selected Xian network slot, and local published
+ports. The stack adapter generates the actual `xian-intentkit` env file from
+those profile fields plus the resolved RPC endpoint and chain ID of the node.

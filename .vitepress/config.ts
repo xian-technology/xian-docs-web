@@ -181,6 +181,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/tools/' },
             { text: 'xian-py', link: '/tools/xian-py' },
+            { text: 'xian-intentkit', link: '/tools/xian-intentkit' },
             { text: 'xian-zk', link: '/tools/xian-zk' },
             { text: 'Contracting Playground', link: '/tools/playground' },
             { text: 'Contracting Hub', link: '/tools/hub' },

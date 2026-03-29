@@ -8,6 +8,7 @@ integrating programmable decentralized networks and applications.
 | Tool | Purpose |
 |------|---------|
 | [xian-py](/tools/xian-py) | Python SDK for applications, services, wallets, transactions, and state queries |
+| [xian-intentkit](/tools/xian-intentkit) | AI-agent stack with Xian-native wallet and contract skills, optional stack-managed deployment, and deployer-configurable pricing |
 | [xian-zk](/tools/xian-zk) | Shielded-note proving toolkit, wallet state helper, and deployment bundle generator |
 | [Linter](/tools/linter) | Static analysis to catch invalid code before deployment |
 
