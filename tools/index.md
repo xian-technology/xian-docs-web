@@ -23,7 +23,7 @@ pip install xian-py
 Install the contract engine (for local testing):
 
 ```bash
-pip install xian-contracting
+pip install xian-tech-contracting
 ```
 
 Install the shielded proving toolkit:

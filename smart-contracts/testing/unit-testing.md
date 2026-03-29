@@ -7,7 +7,7 @@
 Install the contracting library:
 
 ```bash
-pip install xian-contracting
+pip install xian-tech-contracting
 ```
 
 Create your test file:

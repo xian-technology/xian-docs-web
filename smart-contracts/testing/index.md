@@ -30,7 +30,7 @@ contract.transfer(to="bob", amount=100)
 ## Installation
 
 ```bash
-pip install xian-contracting
+pip install xian-tech-contracting
 ```
 
 This gives you access to `ContractingClient`, the linter, and all runtime primitives (`Hash`, `Variable`, `ctx`, etc.).

@@ -10,7 +10,7 @@ Get up and running with Xian smart contracts in minutes.
 ## Installation
 
 ```bash
-pip install xian-contracting
+pip install xian-tech-contracting
 ```
 
 This installs the contract execution engine, the linter, and the `ContractingClient` for local testing.
