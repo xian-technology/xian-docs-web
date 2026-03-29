@@ -39,6 +39,9 @@ uv run xian node health validator-1
 - the resolved manifest and profile paths
 - the `xian-stack` backend state when available
 - optional live RPC reachability
+- the configured image mode plus registry image digests when the profile uses published images
+- the embedded release-manifest provenance block for canonical images, including component Git refs and build toolchain
+- the actual running container image names seen by Docker when the backend is reachable
 - a compact summary of readiness, sync height, peer count, and optional
   dashboard / monitoring / `xian-intentkit` reachability
 - the effective local endpoint catalog for RPC, `abci_query`, metrics, and

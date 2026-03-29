@@ -74,6 +74,11 @@ When those fields are present, `xian network join` writes them into the node
 profile and `xian node start` pulls those images by default instead of building
 from the local workspace.
 
+Canonical network manifests also carry the embedded release-manifest provenance
+for those images. That same provenance block is copied into the node profile, so
+`xian node status` can show both the pinned image digests and the exact repo
+refs / build toolchain those images were produced from.
+
 Use a local source-built override when you want to test unreleased changes:
 
 ```bash

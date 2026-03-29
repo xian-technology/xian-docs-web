@@ -33,6 +33,8 @@ uv run xian node status validator-1
 - canonical network bundle selection from `xian-configs`
 - the pinned node image digests in the manifest/profile for registry-backed
   runtimes
+- the embedded release-manifest provenance block in canonical manifests and
+  profiles, so the node image and the component refs stay aligned
 
 ## State and Config Safety
 
