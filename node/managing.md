@@ -433,12 +433,13 @@ that with `XIAN_PERF_ENABLED=0` if you explicitly want to disable the
 What the dashboard adds without duplicating the main node cards:
 
 - validator-set visibility with set height, active validator count, total
-  power, a scrollable full validator table, and clickable validator rows for
-  jumping to a known peer dashboard target
+  power, a clickable validator list, and rows for jumping to a known peer
+  dashboard target
 - validator rows keep a consistent height even when the local validator row is
   marked with the `self` badge
-- the validator table is sized to keep roughly five rows visible before it
-  needs to scroll on the standard desktop layout
+- the validator list expands to use the full panel height for smaller
+  validator sets and stays scrollable for larger ones, so the validator card
+  does not leave dead space on the standard desktop layout
 - live P2P peer visibility separate from the validator set, so current network
   connectivity problems remain visible even when the consensus membership is
   unchanged
