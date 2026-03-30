@@ -1,8 +1,8 @@
 # xian-intentkit
 
 `xian-intentkit` is the AI-agent stack for Xian-native wallets, balances,
-transfers, contract calls, transactions, indexed-event reads, and agent-facing
-automation flows.
+transfers, contract calls, transactions, indexed-event reads, current Xian DEX
+quote/trade flows, and agent-facing automation flows.
 
 It stays its own repo and product. The Xian stack integration is intentionally
 thin:
@@ -78,6 +78,48 @@ Basic Xian wallet and transaction flows only need RPC access.
 If you want indexed transaction inspection, event listing, and the broader
 service-node read surface inside `xian-intentkit`, run the node as a service
 node so the BDS-backed ABCI query paths are available.
+
+## Current Xian Skill Surface
+
+The current Xian skill category inside `xian-intentkit` covers:
+
+- wallet details and balances
+- token transfers and approvals
+- contract state reads and read-only contract calls
+- writable contract transactions
+- transaction inspection
+- indexed event listing
+- node and BDS status reads
+- dedicated Xian DEX quote and trade helpers
+
+The dedicated DEX tools are:
+
+- `xian_dex_quote`
+- `xian_dex_trade`
+
+They are intentionally narrow and match the current live Xian DEX contracts:
+
+- `con_dex`
+- `con_pairs`
+- `con_dex_helper`
+
+Today they focus on single-pair quote and helper-based buy/sell execution.
+Advanced multi-hop routing and custom DEX integrations still use the generic
+Xian contract-call and contract-transaction tools.
+
+## Autonomous Trading Pattern
+
+For an autonomous Xian trading agent, the recommended current pattern is:
+
+1. run `xian-intentkit` against a service node
+2. poll indexed events with `xian_list_events`
+3. quote planned trades with `xian_dex_quote`
+4. execute through `xian_dex_trade`
+5. only trigger side effects such as social posting after the confirmed
+   transaction succeeds
+
+The current autonomous execution model inside `xian-intentkit` is scheduled
+polling, not a native event-driven push trigger model.
 
 ## Generated Env
 
