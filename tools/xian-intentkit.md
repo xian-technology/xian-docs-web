@@ -112,14 +112,26 @@ Xian contract-call and contract-transaction tools.
 For an autonomous Xian trading agent, the recommended current pattern is:
 
 1. run `xian-intentkit` against a service node
-2. poll indexed events with `xian_list_events`
-3. quote planned trades with `xian_dex_quote`
-4. execute through `xian_dex_trade`
-5. only trigger side effects such as social posting after the confirmed
+2. configure an autonomous task with:
+   - `trigger_type="xian_event"`
+   - `xian_event={contract,event,filters?,cooldown_seconds?}`
+3. let the Xian event trigger service wake from node websocket traffic
+4. let IntentKit confirm and drain the matching indexed events before execution
+5. quote planned trades with `xian_dex_quote`
+6. execute through `xian_dex_trade`
+7. only trigger side effects such as social posting after the confirmed
    transaction succeeds
 
-The current autonomous execution model inside `xian-intentkit` is scheduled
-polling, not a native event-driven push trigger model.
+This is intentionally a hybrid model:
+
+- node websocket traffic provides near-real-time wake-ups
+- indexed BDS events plus Redis cursors remain the source of truth
+- a periodic indexed sync loop stays active so websocket reconnects or BDS lag
+  do not cause missed triggers
+
+This is better than trying to “fire cron immediately.” Cron remains the right
+tool for periodic tasks; Xian event triggers are a separate reactive path that
+reuses the same autonomous execution entrypoint.
 
 ## Generated Env
 
@@ -131,6 +143,9 @@ Derived values include:
 - `AWS_S3_CDN_URL`
 - the selected `XIAN_<NETWORK>_RPC_URL`
 - the selected `XIAN_<NETWORK>_CHAIN_ID`
+- `XIAN_EVENT_TRIGGER_ENABLED`
+- `XIAN_EVENT_TRIGGER_POLL_INTERVAL_SECONDS`
+- `XIAN_EVENT_TRIGGER_BATCH_LIMIT`
 
 All other IntentKit settings still come from the normal IntentKit env contract.
 That includes LLM provider keys such as `OPENAI_API_KEY` or
