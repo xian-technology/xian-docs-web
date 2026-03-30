@@ -11,6 +11,187 @@ thin:
 - `xian-stack` owns the adapter layer and generated env handoff
 - `xian-cli` owns the operator-facing profile flags
 
+## Web Interface
+
+Yes. `xian-intentkit` has a normal web interface and API.
+
+With the stack-managed local/default ports:
+
+- frontend: `http://127.0.0.1:38000`
+- API: `http://127.0.0.1:38080`
+
+For most users, the frontend is the normal way to:
+
+- create an agent
+- inspect its wallet and linked accounts
+- enable skills
+- define autonomous tasks
+- review autonomous chats and tool calls
+
+The API is useful for scripted provisioning, tests, and integration with other
+operator tooling.
+
+## What You Need To Run An Agent
+
+In practice, you do not need another major Xian-side feature before using
+IntentKit agents autonomously. You need a complete runtime setup and a clear
+agent/task definition.
+
+Minimum requirements:
+
+- a running `xian-intentkit` frontend and API
+- a reachable Xian network
+- at least one configured LLM provider
+- a wallet for the agent
+- the right enabled skills for what the agent is allowed to do
+
+Recommended for serious Xian automation:
+
+- run against a service node so indexed reads and event-triggered workflows are
+  available
+- fund the agent with a dedicated limited-purpose wallet
+- keep the agent’s skill surface narrow
+
+## Normal Setup Flow
+
+In a normal operator or user workflow, the sequence is:
+
+1. start `xian-intentkit`
+2. open the frontend
+3. create an agent
+4. define the agent purpose
+5. select the model
+6. enable only the skills the agent should use
+7. link any external accounts the workflow needs
+8. create one or more autonomous tasks
+9. monitor the resulting autonomous chats and tool calls
+
+For node operators using the stack-managed integration, the usual entrypoint is:
+
+```bash
+uv run xian network join mainnet-agent-node \
+  --network mainnet \
+  --template embedded-backend \
+  --service-node \
+  --enable-intentkit \
+  --intentkit-network-id xian-mainnet \
+  --init-node
+
+uv run xian node start mainnet-agent-node
+uv run xian node endpoints mainnet-agent-node
+```
+
+For local/private runs, the same model applies: bring up the frontend/API,
+point it at the intended Xian network, then create agents and tasks through the
+UI or API.
+
+## Defining The Agent
+
+An autonomous agent is usually the combination of:
+
+- the agent purpose
+- the enabled skills
+- the model
+- the wallet/account context
+- one or more autonomous tasks
+
+The purpose should answer:
+
+- what the agent is responsible for
+- what it is allowed to optimize for
+- what it must never do
+
+Example:
+
+- “Monitor a Xian DEX pair, react to significant price changes, trade with a
+  capped amount, verify the emitted events, and notify Telegram and X.”
+
+## Defining The Goal
+
+The “goal” is usually not one global hidden setting. In practice it is split
+between prompt-like instructions and hard configuration.
+
+Put these in the agent purpose or autonomous-task prompt:
+
+- the business objective
+- the event or schedule to react to
+- the order of operations
+- the wording/format of notifications
+
+Put these in hard config where possible:
+
+- which wallet the agent uses
+- which skills are enabled
+- which network it targets
+- linked X / Telegram accounts
+- the specific autonomous trigger type
+
+If something must not be violated, prefer config and skill restrictions over
+hoping the model follows a soft instruction forever.
+
+## Autonomous Tasks
+
+IntentKit currently supports two important autonomous patterns for Xian:
+
+- scheduled tasks
+- event-triggered tasks
+
+### Scheduled Tasks
+
+Use scheduled tasks when the agent should check something periodically, for
+example:
+
+- every 5 minutes inspect a pair
+- every hour summarize recent trading activity
+- every day post a report
+
+### Xian Event Tasks
+
+Use Xian event tasks when the workflow should react to on-chain activity, for
+example:
+
+- a DEX `Sync` event moves beyond a price-change threshold
+- a contract emits a specific event for a watched pair or address
+- a transfer or execution event should wake the agent immediately
+
+This is the recommended pattern for near-real-time Xian automation.
+
+## A Good Default Pattern
+
+For a normal autonomous Xian trading or monitoring agent, the recommended
+current pattern is:
+
+1. run `xian-intentkit` against a service node
+2. create an agent in the frontend
+3. give it a narrow purpose
+4. enable only the Xian and notification skills it needs
+5. create an autonomous task with:
+   - `trigger_type="xian_event"`
+   - `xian_event={contract,event,filters?,cooldown_seconds?}`
+6. let the event-trigger service wake from node websocket activity
+7. let IntentKit confirm the authoritative indexed events before acting
+8. execute the on-chain action
+9. verify the resulting transaction and events
+10. send the side effects, such as Telegram or X notifications
+
+## Guardrails And Production Safety
+
+If the agent can move funds or post externally, treat these as required design
+concerns:
+
+- use a dedicated agent wallet, not an operator’s main wallet
+- keep balances capped
+- enable only the skills the workflow requires
+- prefer dedicated Xian skills over generic contract-write tools for critical
+  operations
+- limit the workflow to specific contracts, pairs, or tokens
+- keep clear cooldowns and thresholds
+- review autonomous chat history regularly
+
+The current system is capable enough for real autonomous workflows, but
+production safety still comes mostly from good wallet discipline and a narrow
+skill/config surface.
+
 ## What The Stack Integration Does
 
 When a node profile enables `xian-intentkit`:
@@ -79,6 +260,8 @@ If you want indexed transaction inspection, event listing, and the broader
 service-node read surface inside `xian-intentkit`, run the node as a service
 node so the BDS-backed ABCI query paths are available.
 
+For Xian event-triggered agents, this is the normal recommended posture.
+
 ## Current Xian Skill Surface
 
 The current Xian skill category inside `xian-intentkit` covers:
@@ -134,6 +317,25 @@ This is intentionally a hybrid model:
 This is better than trying to “fire cron immediately.” Cron remains the right
 tool for periodic tasks; Xian event triggers are a separate reactive path that
 reuses the same autonomous execution entrypoint.
+
+## Linking External Accounts
+
+For notification or social workflows, the agent may need linked external
+accounts.
+
+Examples:
+
+- Telegram bot/chat configuration for `telegram_send_message`
+- linked X account for `twitter_post_tweet`
+
+For X posting, the linked-account flow is the preferred normal setup:
+
+- enable X user authentication for the app
+- configure the X OAuth callback URL
+- let IntentKit link the agent through its existing `/auth/twitter` flow
+
+This avoids having to inject per-agent X access-token secrets into every live
+workflow runner.
 
 ## End-To-End Workflow Tests
 
