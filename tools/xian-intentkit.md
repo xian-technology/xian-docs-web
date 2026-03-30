@@ -135,6 +135,65 @@ This is better than trying to “fire cron immediately.” Cron remains the righ
 tool for periodic tasks; Xian event triggers are a separate reactive path that
 reuses the same autonomous execution entrypoint.
 
+## End-To-End Workflow Test
+
+There is now a deterministic workflow harness for the full IntentKit-side
+automation path:
+
+1. a Xian indexed event wakes the event-trigger service
+2. the task checks a `price_change_pct` threshold
+3. the agent executes a Xian DEX sell through `xian_dex_trade`
+4. the agent posts to Telegram
+5. the agent posts to X
+
+The harness is intentionally shaped for repeatable local testing:
+
+- it uses the real `XianEventTriggerService`
+- it uses the real `xian_dex_trade`, `telegram_send_message`, and
+  `twitter_post_tweet` skills
+- it mocks only the indexed event feed, the DEX transport layer, and the
+  Telegram/X delivery endpoints
+
+That means you can validate the full IntentKit workflow without real social
+credentials or a live Xian DEX wallet.
+
+Run it from the IntentKit repo:
+
+```bash
+cd /Users/endogen/Projekte/xian/xian-intentkit
+uv run python scripts/test_xian_trade_social_workflow.py --threshold-pct 3.0
+```
+
+The default fixture feed contains two events:
+
+- event `1` with `price_change_pct=1.5`, which should be ignored
+- event `2` with `price_change_pct=6.4`, which should trigger the workflow
+
+The script prints a JSON summary with:
+
+- `acted_on_event_ids`
+- `trade_calls`
+- `telegram_payloads`
+- `twitter_payloads`
+- `final_cursor`
+
+For automated validation, the targeted test set is:
+
+```bash
+cd /Users/endogen/Projekte/xian/xian-intentkit
+REDIS_HOST=localhost uv run pytest -q \
+  tests/skills/test_telegram.py \
+  tests/skills/test_twitter.py \
+  tests/core/test_xian_event_triggers.py \
+  tests/core/test_xian_trade_social_workflow.py
+```
+
+When you are ready to move from local workflow validation to real delivery,
+keep the same Xian trigger and DEX setup, but replace:
+
+- the Telegram test sink with a real bot token and target chat
+- the Twitter `mock_webhook_url` with real X credentials
+
 ## Generated Env
 
 The stack adapter writes `xian-intentkit/deployment/.env`.
