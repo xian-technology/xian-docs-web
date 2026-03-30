@@ -180,6 +180,7 @@ export default defineConfig({
           text: 'SDKs & Tools',
           items: [
             { text: 'Overview', link: '/tools/' },
+            { text: 'xian-js', link: '/tools/xian-js' },
             { text: 'xian-py', link: '/tools/xian-py' },
             { text: 'xian-intentkit', link: '/tools/xian-intentkit' },
             { text: 'xian-zk', link: '/tools/xian-zk' },
