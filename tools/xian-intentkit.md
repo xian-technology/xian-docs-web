@@ -135,10 +135,13 @@ This is better than trying to “fire cron immediately.” Cron remains the righ
 tool for periodic tasks; Xian event triggers are a separate reactive path that
 reuses the same autonomous execution entrypoint.
 
-## End-To-End Workflow Test
+## End-To-End Workflow Tests
 
-There is now a deterministic workflow harness for the full IntentKit-side
-automation path:
+There are now two IntentKit-side workflow paths for this pattern:
+
+### Deterministic Skill/Trigger Harness
+
+This one is still useful for CI and focused development:
 
 1. a Xian indexed event wakes the event-trigger service
 2. the task checks a `price_change_pct` threshold
@@ -146,16 +149,11 @@ automation path:
 4. the agent posts to Telegram
 5. the agent posts to X
 
-The harness is intentionally shaped for repeatable local testing:
+It uses the real trigger service and real skills, but it still mocks:
 
-- it uses the real `XianEventTriggerService`
-- it uses the real `xian_dex_trade`, `telegram_send_message`, and
-  `twitter_post_tweet` skills
-- it mocks only the indexed event feed, the DEX transport layer, and the
-  Telegram/X delivery endpoints
-
-That means you can validate the full IntentKit workflow without real social
-credentials or a live Xian DEX wallet.
+- the indexed event feed
+- the DEX transport layer
+- the Telegram/X delivery endpoints
 
 Run it from the IntentKit repo:
 
@@ -188,11 +186,46 @@ REDIS_HOST=localhost uv run pytest -q \
   tests/core/test_xian_trade_social_workflow.py
 ```
 
-When you are ready to move from local workflow validation to real delivery,
-keep the same Xian trigger and DEX setup, but replace:
+### Live Localnet Workflow
 
-- the Telegram test sink with a real bot token and target chat
-- the Twitter `mock_webhook_url` with real X credentials
+There is now also a real live runner for the same workflow. It uses:
+
+- a real Xian localnet
+- a real service node with BDS enabled
+- a real IntentKit local API and autonomous worker
+- a real DEX pack deployed during the run
+- a real `con_pairs.Sync` event trigger with reserve-based threshold detection
+- a real agent-side `xian_dex_trade`
+- a real Telegram post
+- a real X post
+
+The live runner is:
+
+```bash
+cd /Users/endogen/Projekte/xian/xian-intentkit
+uv run python scripts/test_xian_trade_social_live.py --allow-live-posts
+```
+
+Required env vars:
+
+- `INTENTKIT_E2E_TELEGRAM_BOT_TOKEN`
+- `INTENTKIT_E2E_TELEGRAM_CHAT_ID`
+- `INTENTKIT_E2E_TWITTER_CONSUMER_KEY`
+- `INTENTKIT_E2E_TWITTER_CONSUMER_SECRET`
+- `INTENTKIT_E2E_TWITTER_ACCESS_TOKEN`
+- `INTENTKIT_E2E_TWITTER_ACCESS_TOKEN_SECRET`
+
+Common optional overrides:
+
+- `INTENTKIT_E2E_API_URL`
+- `INTENTKIT_E2E_MODEL`
+- `INTENTKIT_E2E_THRESHOLD_PCT`
+- `INTENTKIT_E2E_TRIGGER_SELL_AMOUNT`
+- `INTENTKIT_E2E_AGENT_SELL_AMOUNT`
+
+The script prints a JSON summary with the deployed DEX contracts, the founder
+trigger trade hash, the agent trade hash, the skill-call sequence, and the
+on-chain events emitted by the agent trade.
 
 ## Generated Env
 
