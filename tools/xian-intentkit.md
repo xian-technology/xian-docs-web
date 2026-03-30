@@ -88,6 +88,7 @@ The current Xian skill category inside `xian-intentkit` covers:
 - contract state reads and read-only contract calls
 - writable contract transactions
 - transaction inspection
+- transaction-scoped indexed event inspection
 - indexed event listing
 - node and BDS status reads
 - dedicated Xian DEX quote and trade helpers
@@ -119,8 +120,9 @@ For an autonomous Xian trading agent, the recommended current pattern is:
 4. let IntentKit confirm and drain the matching indexed events before execution
 5. quote planned trades with `xian_dex_quote`
 6. execute through `xian_dex_trade`
-7. only trigger side effects such as social posting after the confirmed
-   transaction succeeds
+7. verify the confirmed receipt and emitted indexed events with
+   `xian_get_transaction` and `xian_get_events_for_tx`
+8. only trigger side effects such as social posting after that confirmation
 
 This is intentionally a hybrid model:
 
