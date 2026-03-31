@@ -23,14 +23,11 @@ foreign_balances = ForeignHash(
 ## Events
 
 ```python
-TransferEvent = LogEvent(
-    event="Transfer",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float, decimal)},
-    },
-)
+TransferEvent = LogEvent("Transfer", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float, decimal),
+})
 ```
 
 ## Decorators

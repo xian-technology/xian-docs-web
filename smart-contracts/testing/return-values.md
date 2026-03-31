@@ -57,14 +57,11 @@ When a contract emits events via `LogEvent`, you can inspect them through the ex
 def token_with_events():
     balances = Hash(default_value=0)
 
-    Transfer = LogEvent(
-        event="Transfer",
-        params={
-            "from":   {"type": str, "idx": True},
-            "to":     {"type": str, "idx": True},
-            "amount": {"type": (int, float)},
-        },
-    )
+    Transfer = LogEvent("Transfer", {
+        "from": indexed(str),
+        "to": indexed(str),
+        "amount": (int, float),
+    })
 
     @construct
     def seed():

@@ -32,23 +32,17 @@ def balance_of(address: str) -> float:
 balances = Hash(default_value=0)
 metadata = Hash()
 
-TransferEvent = LogEvent(
-    event="Transfer",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float, decimal)},
-    },
-)
+TransferEvent = LogEvent("Transfer", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float, decimal),
+})
 
-ApproveEvent = LogEvent(
-    event="Approve",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float, decimal)},
-    },
-)
+ApproveEvent = LogEvent("Approve", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float, decimal),
+})
 ```
 
 `balances[address]` stores token balances. `balances[owner, spender]` stores
@@ -126,23 +120,17 @@ they use the normal export allowlist.
 balances = Hash(default_value=0)
 metadata = Hash()
 
-TransferEvent = LogEvent(
-    event="Transfer",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float, decimal)},
-    },
-)
+TransferEvent = LogEvent("Transfer", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float, decimal),
+})
 
-ApproveEvent = LogEvent(
-    event="Approve",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float, decimal)},
-    },
-)
+ApproveEvent = LogEvent("Approve", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float, decimal),
+})
 
 @construct
 def seed(name: str = "Example Token", symbol: str = "EXT"):

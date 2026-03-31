@@ -7,14 +7,11 @@ Events let contracts emit structured, observable signals during execution. Walle
 Use `LogEvent` in your contract to declare an event with typed parameters:
 
 ```python
-Transfer = LogEvent(
-    event="Transfer",
-    params={
-        "from":   {"type": str, "idx": True},
-        "to":     {"type": str, "idx": True},
-        "amount": {"type": (int, float)},
-    },
-)
+Transfer = LogEvent("Transfer", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float),
+})
 ```
 
 Each parameter entry has:
@@ -23,6 +20,11 @@ Each parameter entry has:
 |-------|----------|-------------|
 | `type` | Yes | A type or tuple of types (`str`, `int`, `float`, `bool`, `decimal`) |
 | `idx`  | No | If `True`, the parameter is indexed and searchable. Max **3 indexed** params per event. |
+
+You can also use the shorthand forms:
+
+- `"amount": int` instead of `{"type": int}`
+- `"owner": indexed(str)` instead of `{"type": str, "idx": True}`
 
 ## Emitting an Event
 
@@ -48,23 +50,17 @@ The event is emitted only if the transaction succeeds. If the transaction fails 
 balances = Hash(default_value=0)
 metadata = Hash()
 
-Transfer = LogEvent(
-    event="Transfer",
-    params={
-        "from":   {"type": str, "idx": True},
-        "to":     {"type": str, "idx": True},
-        "amount": {"type": (int, float)},
-    },
-)
+Transfer = LogEvent("Transfer", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float),
+})
 
-Approve = LogEvent(
-    event="Approve",
-    params={
-        "owner":   {"type": str, "idx": True},
-        "spender": {"type": str, "idx": True},
-        "amount":  {"type": (int, float)},
-    },
-)
+Approve = LogEvent("Approve", {
+    "owner": indexed(str),
+    "spender": indexed(str),
+    "amount": (int, float),
+})
 
 @construct
 def seed():
@@ -108,8 +104,10 @@ def transfer_from(amount: float, to: str, main_account: str):
 - **Max 1024 bytes** per parameter value (UTF-8 encoded).
 - **Types must be** `str`, `int`, `float`, `bool`, or `decimal` (ContractingDecimal).
 - **At least one parameter** is required per event.
+- **Non-indexed is the default**. Only indexed fields need `indexed(...)` or `idx: True`.
 - **Events cost stamps** — both indexed and non-indexed parameters incur write costs during execution (25 stamps per byte).
 - **Events are atomic** — if the transaction fails, all events are rolled back.
+- **Event names are not globally unique**. Consumers should key by both `contract` and `event`.
 
 ## How Events Flow Through the System
 

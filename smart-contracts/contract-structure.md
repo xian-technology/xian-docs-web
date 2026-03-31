@@ -16,14 +16,11 @@ balances = Hash(default_value=0)
 owner = Variable()
 metadata = Hash()
 
-TransferEvent = LogEvent(
-    event="Transfer",
-    params={
-        "from": {"type": str, "idx": True},
-        "to": {"type": str, "idx": True},
-        "amount": {"type": (int, float, decimal)},
-    },
-)
+TransferEvent = LogEvent("Transfer", {
+    "from": indexed(str),
+    "to": indexed(str),
+    "amount": (int, float, decimal),
+})
 ```
 
 Module scope is also where contract imports live. Runtime modules such as
