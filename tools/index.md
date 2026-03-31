@@ -11,7 +11,7 @@ integrating programmable decentralized networks and applications.
 | [xian-py](/tools/xian-py) | Python SDK for services, workers, indexed reads, websocket watchers, and projector-backed integrations |
 | [xian-intentkit](/tools/xian-intentkit) | AI-agent stack with a web UI, Xian-native wallet and contract skills, autonomous task support, optional stack-managed deployment, and deployer-configurable pricing |
 | [xian-zk](/tools/xian-zk) | Shielded-note proving toolkit, wallet state helper, and deployment bundle generator |
-| [Linter](/tools/linter) | Static analysis to catch invalid code before deployment |
+| [xian-linter](/tools/linter) | Static analysis to catch invalid code before deployment |
 
 ## Quick Start
 
