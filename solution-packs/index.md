@@ -37,6 +37,7 @@ and step-by-step commands.
 
 - [Credits Ledger Pack](/solution-packs/credits-ledger)
 - [Registry / Approval Pack](/solution-packs/registry-approval)
+- [Stable Protocol Pack](/solution-packs/stable-protocol)
 - [Workflow Backend Pack](/solution-packs/workflow-backend)
 
 ## Intended Progression
@@ -45,7 +46,8 @@ The initial pack set is:
 
 1. Credits Ledger Pack
 2. Registry / Approval Pack
-3. Workflow Backend Pack
+3. Stable Protocol Pack
+4. Workflow Backend Pack
 
 The goal is to prove Xian through concrete backend patterns rather than generic
 toy contracts.
@@ -55,5 +57,7 @@ Today the deepest packs are:
 - Credits Ledger, with a projected read model built from indexed chain events
 - Registry / Approval, with an event-triggered projection hydrated from
   authoritative contract reads
+- Stable Protocol, with governance-owned protocol contracts, vaults, auctions,
+  a savings layer, and a peg stability module
 - Workflow Backend, with separate processor and projector workers plus a
   projected queue/activity view
