@@ -30,6 +30,7 @@ def balance_of(address: str) -> float:
 
 ```python
 balances = Hash(default_value=0)
+approvals = Hash(default_value=0)
 metadata = Hash()
 
 TransferEvent = LogEvent("Transfer", {
@@ -45,7 +46,7 @@ ApproveEvent = LogEvent("Approve", {
 })
 ```
 
-`balances[address]` stores token balances. `balances[owner, spender]` stores
+`balances[address]` stores token balances. `approvals[owner, spender]` stores
 allowances.
 
 ## Step 2: Seed Metadata And Initial Supply
@@ -82,7 +83,7 @@ increment:
 @export
 def approve(amount: float, to: str):
     assert amount >= 0, "Cannot approve negative balances"
-    balances[ctx.caller, to] = amount
+    approvals[ctx.caller, to] = amount
 
     ApproveEvent({"from": ctx.caller, "to": to, "amount": amount})
 ```
@@ -93,10 +94,10 @@ def approve(amount: float, to: str):
 @export
 def transfer_from(amount: float, to: str, main_account: str):
     assert amount > 0, "Amount must be positive"
-    assert balances[main_account, ctx.caller] >= amount, "Insufficient allowance"
+    assert approvals[main_account, ctx.caller] >= amount, "Insufficient allowance"
     assert balances[main_account] >= amount, "Insufficient balance"
 
-    balances[main_account, ctx.caller] -= amount
+    approvals[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
     balances[to] += amount
 
@@ -118,6 +119,7 @@ they use the normal export allowlist.
 
 ```python
 balances = Hash(default_value=0)
+approvals = Hash(default_value=0)
 metadata = Hash()
 
 TransferEvent = LogEvent("Transfer", {
@@ -150,15 +152,15 @@ def transfer(amount: float, to: str):
 @export
 def approve(amount: float, to: str):
     assert amount >= 0, "Cannot approve negative balances"
-    balances[ctx.caller, to] = amount
+    approvals[ctx.caller, to] = amount
     ApproveEvent({"from": ctx.caller, "to": to, "amount": amount})
 
 @export
 def transfer_from(amount: float, to: str, main_account: str):
     assert amount > 0, "Amount must be positive"
-    assert balances[main_account, ctx.caller] >= amount, "Insufficient allowance"
+    assert approvals[main_account, ctx.caller] >= amount, "Insufficient allowance"
     assert balances[main_account] >= amount, "Insufficient balance"
-    balances[main_account, ctx.caller] -= amount
+    approvals[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
     balances[to] += amount
     TransferEvent({"from": main_account, "to": to, "amount": amount})

@@ -48,6 +48,7 @@ The event is emitted only if the transaction succeeds. If the transaction fails 
 
 ```python
 balances = Hash(default_value=0)
+approvals = Hash(default_value=0)
 metadata = Hash()
 
 Transfer = LogEvent("Transfer", {
@@ -80,18 +81,18 @@ def transfer(amount: float, to: str):
 
 @export
 def approve(amount: float, to: str):
-    assert amount > 0, "Cannot approve negative amount"
-    balances[ctx.caller, to] += amount
+    assert amount >= 0, "Cannot approve negative amount"
+    approvals[ctx.caller, to] = amount
 
     Approve({"owner": ctx.caller, "spender": to, "amount": amount})
 
 @export
 def transfer_from(amount: float, to: str, main_account: str):
     assert amount > 0, "Cannot send negative amount"
-    assert balances[main_account, ctx.caller] >= amount, "Not enough approved"
+    assert approvals[main_account, ctx.caller] >= amount, "Not enough approved"
     assert balances[main_account] >= amount, "Insufficient balance"
 
-    balances[main_account, ctx.caller] -= amount
+    approvals[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
     balances[to] += amount
 

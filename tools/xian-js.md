@@ -11,8 +11,10 @@ It currently ships two public packages:
   provider implementation for demos, tests, injected-wallet discovery, and
   early integrations
 
-The browser wallet product line now lives in the sibling `xian-wallet-browser`
-repo, which consumes these SDK packages.
+The browser wallet product line now lives in the sibling
+`xian-wallet-browser` repo, which consumes these SDK packages. The current
+wallet product surface is documented here under
+[xian-wallet-browser](/tools/xian-wallet-browser).
 
 ## Current Status
 
@@ -21,8 +23,9 @@ repo, which consumes these SDK packages.
 - `@xian-tech/client`
 - `@xian-tech/provider`
 
-The browser wallet product line is documented separately in the sibling
-`xian-wallet-browser` repo, which publishes `@xian-tech/wallet-core`.
+The browser wallet product line is documented separately under
+[xian-wallet-browser](/tools/xian-wallet-browser). The source repo publishes
+`@xian-tech/wallet-core`.
 
 ## Workspace Setup
 
@@ -702,6 +705,9 @@ npm run build
 npm run dev --workspace example-browser-dapp
 ```
 
+For the walkthrough of the maintained browser playground itself, see
+[xian-js Playground](/tools/playground).
+
 ## Browser Wallet Companion Repo
 
 The concrete browser wallet implementation now lives in the sibling
@@ -714,6 +720,9 @@ That repo currently owns:
 
 During local development, `xian-wallet-browser` consumes `@xian-tech/client` and
 `@xian-tech/provider` from the `xian-js` checkout.
+
+See [xian-wallet-browser](/tools/xian-wallet-browser) for the current wallet
+scope, build flow, and extension loading steps.
 
 ## Validation
 
@@ -730,3 +739,5 @@ npm run validate
 - [WebSocket Subscriptions](/api/websockets)
 - [Estimating Stamps](/api/dry-runs)
 - [xian-py](/tools/xian-py)
+- [xian-wallet-browser](/tools/xian-wallet-browser)
+- [xian-js Playground](/tools/playground)

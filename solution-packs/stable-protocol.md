@@ -76,7 +76,7 @@ Main roles:
 
 - controller-minted token
 - controllers are expected to include `vaults` and `psm`
-- users can burn their own balances
+- users can transfer, approve, and burn their own balances
 
 Relevant exports:
 

@@ -147,13 +147,13 @@ Use the constructor for:
 Private helpers are internal utilities:
 
 ```python
-def ensure_positive(amount):
-    assert amount > 0, "Amount must be positive"
+def ensure_nonnegative(amount):
+    assert amount >= 0, "Amount must be non-negative"
 
 @export
 def approve(amount: float, to: str):
-    ensure_positive(amount)
-    balances[ctx.caller, to] = amount
+    ensure_nonnegative(amount)
+    approvals[ctx.caller, to] = amount
 ```
 
 They are not callable through transactions or by other contracts.

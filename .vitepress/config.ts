@@ -181,13 +181,13 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/tools/' },
             { text: 'xian-js', link: '/tools/xian-js' },
+            { text: 'xian-wallet-browser', link: '/tools/xian-wallet-browser' },
+            { text: 'xian-js Playground', link: '/tools/playground' },
             { text: 'xian-py', link: '/tools/xian-py' },
             { text: 'xian-intentkit', link: '/tools/xian-intentkit' },
             { text: 'xian-zk', link: '/tools/xian-zk' },
-            { text: 'Contracting Playground', link: '/tools/playground' },
             { text: 'Contracting Hub', link: '/tools/hub' },
             { text: 'Linter', link: '/tools/linter' },
-            { text: 'VS Code Extension', link: '/tools/vscode' },
             { text: 'MCP Server', link: '/tools/mcp-server' }
           ]
         }

@@ -19,7 +19,7 @@ Examples:
 | Contract State | Storage Key |
 |---------------|-------------|
 | `currency.balances["alice"]` | `currency.balances:alice` |
-| `currency.balances["alice", "bob"]` | `currency.balances:alice:bob` |
+| `currency.approvals["alice", "bob"]` | `currency.approvals:alice:bob` |
 | `con_nft.owner` (Variable) | `con_nft.owner` |
 | `con_dex.pairs["XIAN", "ETH"]` | `con_dex.pairs:XIAN:ETH` |
 | `con_game.metadata["name"]` | `con_game.metadata:name` |

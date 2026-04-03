@@ -8,6 +8,8 @@ integrating programmable decentralized networks and applications.
 | Tool | Purpose |
 |------|---------|
 | [xian-js](/tools/xian-js) | JavaScript / TypeScript SDK for browser apps, wallets, providers, transaction building, and websocket subscriptions |
+| [xian-wallet-browser](/tools/xian-wallet-browser) | Browser-wallet product workspace with `@xian-tech/wallet-core` and the MV3 Xian wallet extension |
+| [xian-js Playground](/tools/playground) | Runnable browser dapp example for provider flows, injected-wallet discovery, tx preparation, quick sends, and websocket subscriptions |
 | [xian-py](/tools/xian-py) | Python SDK for services, workers, indexed reads, websocket watchers, and projector-backed integrations |
 | [xian-intentkit](/tools/xian-intentkit) | AI-agent stack with a web UI, Xian-native wallet and contract skills, autonomous task support, optional stack-managed deployment, and deployer-configurable pricing |
 | [xian-zk](/tools/xian-zk) | Shielded-note proving toolkit, wallet state helper, and deployment bundle generator |

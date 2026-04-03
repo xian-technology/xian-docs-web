@@ -13,6 +13,7 @@ Submit contracts in dependency order. If contract B imports contract A, submit A
 ```python
 def token_contract():
     balances = Hash(default_value=0)
+    approvals = Hash(default_value=0)
 
     @construct
     def seed():
@@ -27,15 +28,15 @@ def token_contract():
 
     @export
     def approve(amount: float, to: str):
-        assert amount > 0, "Amount must be positive"
-        balances[ctx.caller, to] += amount
+        assert amount >= 0, "Amount must be non-negative"
+        approvals[ctx.caller, to] = amount
 
     @export
     def transfer_from(amount: float, to: str, main_account: str):
         assert amount > 0, "Amount must be positive"
-        assert balances[main_account, ctx.caller] >= amount, "Not enough approved"
+        assert approvals[main_account, ctx.caller] >= amount, "Not enough approved"
         assert balances[main_account] >= amount, "Insufficient balance"
-        balances[main_account, ctx.caller] -= amount
+        approvals[main_account, ctx.caller] -= amount
         balances[main_account] -= amount
         balances[to] += amount
 

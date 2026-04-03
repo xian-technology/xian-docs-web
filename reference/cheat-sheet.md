@@ -162,10 +162,10 @@ owner.set("alice")
 current_owner = owner.get()
 
 balances["alice"] = 100
-balances["alice", "con_dex"] = 25
+approvals["alice", "con_dex"] = 25
 
 bal = balances["alice"]
-allowance = balances["alice", "con_dex"]
+allowance = approvals["alice", "con_dex"]
 ```
 
 Client-side direct inspection:

@@ -187,7 +187,7 @@ balance = client.get_balance(contract="currency")
 
 ```python
 value = client.get_state("currency", "balances", wallet.public_key)
-allowance = client.get_state("currency", "balances", wallet.public_key, "con_dex")
+allowance = client.get_state("currency", "approvals", wallet.public_key, "con_dex")
 ```
 
 ### get_contract
