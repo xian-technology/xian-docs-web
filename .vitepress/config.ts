@@ -182,6 +182,7 @@ export default defineConfig({
             { text: 'Overview', link: '/tools/' },
             { text: 'xian-js', link: '/tools/xian-js' },
             { text: 'xian-wallet-browser', link: '/tools/xian-wallet-browser' },
+            { text: 'xian-wallet-mobile', link: '/tools/xian-wallet-mobile' },
             { text: 'xian-js Playground', link: '/tools/playground' },
             { text: 'xian-py', link: '/tools/xian-py' },
             { text: 'xian-intentkit', link: '/tools/xian-intentkit' },
