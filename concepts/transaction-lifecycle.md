@@ -118,7 +118,19 @@ during execution of that block.
 
 ### 10-14. FINALIZE_BLOCK (Execution)
 
-Each transaction in the block is executed sequentially:
+Canonical block semantics are sequential: every validator must end up with the
+same result as if the transactions were executed in block order, one after the
+other.
+
+Nodes may optionally speculate in parallel before acceptance, but any accepted
+speculative result still has to pass serial-equivalence checks against earlier
+transactions in the block. Conflicting speculative results are re-executed
+serially.
+
+See [Parallel Block Execution](/concepts/parallel-block-execution) for the
+mechanism.
+
+Per transaction, the execution flow is:
 
 1. **Sandbox setup** -- the contract runtime initializes with the sender's context (`ctx.caller`, `ctx.signer`)
 2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs

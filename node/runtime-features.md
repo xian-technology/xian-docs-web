@@ -259,6 +259,15 @@ Operational guidance:
 
 Xian also has speculative parallel block execution in the runtime.
 
+Implementation boundary:
+
+- `xian-contracting` itself remains single-execution per process
+- `xian-abci` runs speculative work in separate worker processes
+- accepted results are still validated and applied in canonical block order
+
+For the full model, see
+[Parallel Block Execution](/concepts/parallel-block-execution).
+
 Current keys:
 
 ```toml
@@ -273,8 +282,8 @@ What they mean:
 - `parallel_execution_enabled`: turn speculative parallel execution on or off
 - `parallel_execution_workers`: number of worker processes used for speculative
   execution
-- `parallel_execution_min_transactions`: minimum block size before the parallel
-  planner is used
+- `parallel_execution_min_transactions`: minimum block size before speculative
+  parallel execution is attempted
 
 ### How To Set Parallel Execution
 
@@ -322,9 +331,14 @@ export XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS=12
 Operational guidance:
 
 - treat this as a rollout-managed runtime feature for validator fleets
-- parallel execution is speculative and must remain serial-equivalent; exact-key
-  conflicts and tracked prefix-scan conflicts fall back to serial execution
+- parallel execution is speculative and must remain serial-equivalent
+- same-sender reuse, exact-key conflicts, and tracked prefix-scan conflicts
+  fall back to serial execution
+- additive reward deltas can overlap safely, but reads or ordinary overwrites of
+  those keys still force serial fallback
 - enable it only after testing your actual workload
+- if speculation fails at the executor level, the node drops back to ordinary
+  serial block execution
 - verify behavior through `xian node health`, the dashboard, and the parallel
   execution metrics
 
