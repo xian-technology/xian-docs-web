@@ -261,7 +261,7 @@ Xian also has speculative parallel block execution in the runtime.
 
 Implementation boundary:
 
-- `xian-contracting` itself remains single-execution per process
+- `xian-contracting` does not execute multiple contracts concurrently inside a single Python process
 - `xian-contracting` owns the native speculative execution controller and
   process-pool worker model
 - `xian-abci` uses that controller for block execution and adds
