@@ -5,8 +5,8 @@ Use `xian-cli` for local operator-facing lifecycle commands. Use
 only for backend validation or low-level debugging.
 
 For the maintained whole-stack local validation flow, use the dedicated
-[4-Node Localnet E2E](/node/localnet-e2e) run instead of stitching together ad
-hoc load, governance, and logging checks by hand.
+[5-Validator Localnet E2E](/node/localnet-e2e) run instead of stitching
+together ad hoc load, governance, and logging checks by hand.
 
 ## Start and Stop
 
@@ -77,6 +77,24 @@ For stack-managed nodes, the endpoint catalog reflects the actual published
 Docker host ports of the running services when they differ from the profile
 defaults. That matters for localnet and validation workspaces that remap ports
 to avoid collisions.
+
+## Dashboard Monitoring
+
+When the optional dashboard is enabled, the `Execution Health -> Parallel` row
+is the quickest operator-facing check for speculative block execution posture.
+
+Current behavior:
+
+- `disabled`: the node config has parallel execution turned off
+- `activated`: the node config has parallel execution turned on
+- `activated · <workers> workers · min <n> tx · waiting for eligible block`:
+  the feature is enabled, but no recent block met the threshold yet
+- `activated · <accepted> accepted / <prefiltered> prefiltered / <fallback>
+  fallback`: a recent eligible block used the parallel executor and the row is
+  showing that block's execution summary
+
+That row is config-aware now, so it no longer looks disabled just because the
+latest block was too small or not eligible.
 
 `doctor` is the broader workspace and node-health preflight:
 
