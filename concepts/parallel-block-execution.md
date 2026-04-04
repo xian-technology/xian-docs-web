@@ -5,7 +5,7 @@ the canonical result of the block.
 
 The important boundary is this:
 
-- `xian-contracting` stays single-execution per process
+- `xian-contracting` does not execute multiple contracts concurrently inside a single Python process
 - `xian-contracting` now owns the native speculative execution controller
 - `xian-abci` wraps that controller for block processing, reward shaping, and
   node-facing metrics
