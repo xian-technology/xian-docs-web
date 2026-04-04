@@ -262,7 +262,10 @@ Xian also has speculative parallel block execution in the runtime.
 Implementation boundary:
 
 - `xian-contracting` itself remains single-execution per process
-- `xian-abci` runs speculative work in separate worker processes
+- `xian-contracting` owns the native speculative execution controller and
+  process-pool worker model
+- `xian-abci` uses that controller for block execution and adds
+  transaction-specific runtime wiring
 - accepted results are still validated and applied in canonical block order
 
 For the full model, see
@@ -332,15 +335,45 @@ Operational guidance:
 
 - treat this as a rollout-managed runtime feature for validator fleets
 - parallel execution is speculative and must remain serial-equivalent
+- it is real process-level parallelism, not in-process concurrent mutation
 - same-sender reuse, exact-key conflicts, and tracked prefix-scan conflicts
-  fall back to serial execution
+  are either respeculated in later waves or fall back to serial execution
 - additive reward deltas can overlap safely, but reads or ordinary overwrites of
   those keys still force serial fallback
 - enable it only after testing your actual workload
 - if speculation fails at the executor level, the node drops back to ordinary
   serial block execution
-- verify behavior through `xian node health`, the dashboard, and the parallel
-  execution metrics
+- verify behavior through `xian node health`, `/perf_status`, the dashboard, and
+  the parallel execution metrics
+
+Dashboard behavior:
+
+- the dashboard `Execution Health -> Parallel` row now shows `activated` as soon
+  as the node config has parallel execution enabled
+- if no eligible block has used it yet, the row shows the configured worker
+  count, minimum transaction threshold, and `waiting for eligible block`
+- when a recent block used the feature, the same row appends the speculative
+  accepted, serial-prefiltered, and serial-fallback counts from that block
+
+Representative benchmark harness:
+
+```bash
+uv run python tests/performance/benchmark_parallel_tps.py \
+  --tx-count 256 \
+  --rounds 50000 \
+  --iterations 3 \
+  --workers 8 \
+  --warmup-transactions 16
+```
+
+Representative local result on the current implementation:
+
+- serial mean about `430.62 TPS`
+- parallel mean about `1582.88 TPS`
+- mean speedup about `3.68x`
+
+Treat those as execution-path comparison numbers, not as an end-to-end network
+TPS promise.
 
 ## Core `[xian]` Runtime Keys
 

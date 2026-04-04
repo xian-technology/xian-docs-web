@@ -1,12 +1,12 @@
-# 4-Node Localnet E2E
+# 5-Validator Localnet E2E
 
 Use this workflow when you want to validate the live Xian stack on one machine
-with a real 4-node network, not just repo-local unit tests.
+with a real 5-validator network, not just repo-local unit tests.
 
 The maintained entrypoint lives in `xian-stack` and is designed to exercise the
 real runtime path with:
 
-- 4 validators
+- 5 validators
 - the native Rust tracer
 - one BDS-enabled service node
 - real validator governance
@@ -16,7 +16,8 @@ real runtime path with:
 - DEX deployment and mixed trading flows
 - shielded-note-token proof-backed flows
 - indexed reads, websocket subscriptions, and event watching
-- logging, readonly simulation under load, and intentional BDS catch-up
+- logging, readonly simulation under load, intentional BDS catch-up, and
+  dedicated parallel-execution validation
 
 ## Canonical Command
 
@@ -49,7 +50,7 @@ The runner writes:
 
 The phases intentionally build on each other:
 
-1. bootstrap a fresh 4-node network with the native tracer and a BDS-enabled
+1. bootstrap a fresh 5-validator network with the native tracer and a BDS-enabled
    service node
 2. verify health, peer connectivity, validator count, and recent app-hash
    equality
@@ -76,6 +77,13 @@ The phases intentionally build on each other:
     output appears
 16. use the governed system `zk_registry`, deploy the shielded-note-token, then
     test deposit, shielded transfer, and withdraw flows
+17. run a dedicated parallel-execution probe that:
+    - verifies `/perf_status` reports the configured parallel on/off posture on
+      every validator
+    - forces a non-conflicting batch and checks for speculative acceptance
+    - forces same-sender reuse and checks for serial prefiltering
+    - forces read-after-write and prefix-scan tails and checks for multi-wave
+      speculative handling
 
 ## Recommended Matrix
 
@@ -142,6 +150,9 @@ already-running localnet.
   dynamic name-based and module-based dispatch, rollback on nested submission
   failure, and preserved `ctx.caller` / `ctx.signer` across a multi-hop call
   chain.
+- The parallel-execution phase uses a dedicated `parallel_probe` contract and
+  validates the runtime through recent `/perf_status` block metadata, not just
+  transaction success.
 - The BDS catch-up phase intentionally stops the local Postgres service. The
   pass condition is that live block production continues, BDS reports backlog
   or degraded indexing, and the indexed surface catches up again after

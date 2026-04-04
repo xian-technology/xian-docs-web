@@ -85,7 +85,7 @@ deterministic validator path.
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
 - [Runtime Features](/node/runtime-features): tracer modes, readonly
   simulation, parallel execution, and the current `[xian]` runtime keys
-- [4-Node Localnet E2E](/node/localnet-e2e): the canonical whole-stack local
+- [5-Validator Localnet E2E](/node/localnet-e2e): the canonical whole-stack local
   validation run across validators, BDS, governance, DEX, logging, and
   shielded-note flows
 - [Protocol Governance & State Patches](/node/protocol-governance): the

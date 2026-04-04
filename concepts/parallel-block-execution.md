@@ -6,7 +6,9 @@ the canonical result of the block.
 The important boundary is this:
 
 - `xian-contracting` stays single-execution per process
-- `xian-abci` owns the optional parallel block executor
+- `xian-contracting` now owns the native speculative execution controller
+- `xian-abci` wraps that controller for block processing, reward shaping, and
+  node-facing metrics
 - final accepted state must stay equivalent to normal serial execution in block
   order
 
@@ -20,8 +22,10 @@ That runtime mutates process-global Python import hooks and module caches, so it
 does not try to run multiple contract executions concurrently inside one Python
 process.
 
-Instead, `xian-abci` uses separate worker processes for speculative execution.
-Each worker builds its own `ContractingClient`, `Driver`, and `TxProcessor`
+Instead, `xian-contracting` exposes a native speculative controller that uses
+separate worker processes for speculative execution. In the block path,
+`xian-abci` uses that controller with a worker runtime built from
+`ContractingClient`, `Driver`, `TxProcessor`, and the optional rewards handler
 against the same committed LMDB state snapshot.
 
 So the model is:
@@ -35,16 +39,17 @@ So the model is:
 At a high level:
 
 1. CometBFT finalizes the block contents and order.
-2. If parallel execution is enabled and the block is large enough, `xian-abci`
-   sends the block transactions to a worker pool.
+2. If parallel execution is enabled and the block is large enough, the native
+   controller in `xian-contracting` builds a speculative wave and sends those
+   transactions to a worker pool.
 3. Each worker executes its assigned transaction with `auto_commit=false`,
    collects access metadata, and returns a proposed result.
-4. The main process walks the block again in canonical order and checks each
-   speculative result against the writes already accepted from earlier
-   transactions in that same block.
-5. If the speculative result is still valid, the main process applies it.
-6. If it is no longer valid, the transaction is re-executed serially against
-   the latest main-process state.
+4. The main process checks the speculative results in canonical order and
+   accepts the conflict-free prefix of that wave.
+5. If the tail conflicts with earlier accepted work, the node either
+   respeculates that tail against the updated overlay or falls back to serial
+   execution when the remaining tail is no longer worth speculating.
+6. Accepted speculative results are applied in canonical order.
 7. After the block is complete, the node commits the final block state through
    the normal LMDB batch write path.
 
@@ -90,6 +95,18 @@ Current fallback conditions include:
 This is why parallel execution is described as speculative rather than
 concurrent mutation.
 
+## Why It Is Real Parallelism
+
+This is real parallel execution, but not unsafe shared-state concurrency.
+
+- multiple transactions can execute at the same time in separate worker
+  processes
+- one in-process `Executor` still executes one transaction at a time
+- final acceptance stays serial-equivalent
+
+So Xian now uses multiple CPU cores for speculative contract execution, while
+keeping the correctness model tied to canonical block order.
+
 ## The Reward-Delta Exception
 
 Normal shared writes are treated conservatively as conflicts.
@@ -115,6 +132,23 @@ This design is consensus-safe because it preserves serial semantics:
 
 In other words, the node is allowed to guess in parallel, but it is only
 allowed to commit what is still correct in serial order.
+
+## Representative Throughput
+
+The runtime now includes a dedicated benchmark harness in
+`xian-contracting/tests/performance/benchmark_parallel_tps.py`.
+
+Representative local numbers from the current implementation on an 8-core
+development machine, using mostly non-conflicting automated transactions:
+
+- `256` transactions, `20,000` contract-loop rounds per transaction:
+  serial about `915 TPS`, parallel about `1,655 TPS`, about `1.77x`
+- `256` transactions, `50,000` contract-loop rounds per transaction:
+  serial about `431 TPS`, parallel about `1,583 TPS`, about `3.68x`
+
+Those numbers are execution-engine throughput, not full end-to-end network TPS.
+They are useful for comparing the execution path, not for quoting a guaranteed
+validator TPS figure.
 
 ## What It Does Not Do
 
