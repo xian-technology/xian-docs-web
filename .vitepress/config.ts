@@ -1,5 +1,26 @@
 import { defineConfig } from 'vitepress'
 
+const getStartedSidebar = [
+  {
+    text: 'Overview',
+    items: [
+      { text: 'What is Xian?', link: '/introduction/' },
+      { text: 'Why Python?', link: '/introduction/why-python' },
+      { text: 'Architecture Overview', link: '/introduction/architecture-overview' },
+      { text: 'How It Compares', link: '/introduction/comparison' }
+    ]
+  },
+  {
+    text: 'First Steps',
+    items: [
+      { text: 'Quickstart', link: '/getting-started/' },
+      { text: 'Development Environment', link: '/getting-started/dev-environment' },
+      { text: 'Your First Smart Contract', link: '/getting-started/first-contract' },
+      { text: 'Deploying & Interacting', link: '/getting-started/deploying' }
+    ]
+  }
+]
+
 export default defineConfig({
   base: '/',
   head: [
@@ -9,41 +30,34 @@ export default defineConfig({
   description: 'Official Xian Technology documentation',
   themeConfig: {
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Introduction', link: '/introduction/' },
-      { text: 'Getting Started', link: '/getting-started/' },
+      { text: 'Get Started', link: '/introduction/' },
       { text: 'Smart Contracts', link: '/smart-contracts/' },
       { text: 'Concepts', link: '/concepts/' },
-      { text: 'Node', link: '/node/' },
-      { text: 'API', link: '/api/' },
-      { text: 'Tools', link: '/tools/' },
-      { text: 'Solution Packs', link: '/solution-packs/' },
-      { text: 'Tutorials', link: '/tutorials/' },
-      { text: 'Reference', link: '/reference/' }
+      {
+        text: 'Node & API',
+        items: [
+          { text: 'Node', link: '/node/' },
+          { text: 'API', link: '/api/' }
+        ]
+      },
+      {
+        text: 'Tools',
+        items: [
+          { text: 'Tools & SDKs', link: '/tools/' },
+          { text: 'Solution Packs', link: '/solution-packs/' }
+        ]
+      },
+      {
+        text: 'Guides',
+        items: [
+          { text: 'Tutorials', link: '/tutorials/' },
+          { text: 'Reference', link: '/reference/' }
+        ]
+      }
     ],
     sidebar: {
-      '/introduction/': [
-        {
-          text: 'Introduction',
-          items: [
-            { text: 'What is Xian?', link: '/introduction/' },
-            { text: 'Why Python for Smart Contracts?', link: '/introduction/why-python' },
-            { text: 'Architecture Overview', link: '/introduction/architecture-overview' },
-            { text: 'How It Compares', link: '/introduction/comparison' }
-          ]
-        }
-      ],
-      '/getting-started/': [
-        {
-          text: 'Getting Started',
-          items: [
-            { text: 'Quickstart', link: '/getting-started/' },
-            { text: 'Development Environment', link: '/getting-started/dev-environment' },
-            { text: 'Your First Smart Contract', link: '/getting-started/first-contract' },
-            { text: 'Deploying & Interacting', link: '/getting-started/deploying' }
-          ]
-        }
-      ],
+      '/introduction/': getStartedSidebar,
+      '/getting-started/': getStartedSidebar,
       '/smart-contracts/': [
         {
           text: 'Language Basics',
@@ -213,6 +227,7 @@ export default defineConfig({
             { text: 'Overview', link: '/tutorials/' },
             { text: 'Creating a Fungible Token', link: '/tutorials/creating-a-token' },
             { text: 'Building a Shielded Privacy Token', link: '/tutorials/shielded-privacy-token' },
+            { text: 'Building Shielded Commands', link: '/tutorials/shielded-commands' },
             { text: 'Building a Dice Game', link: '/tutorials/dice-game' },
             { text: 'Multi-Contract dApp', link: '/tutorials/multi-contract-dapp' },
             { text: 'Streaming Payments', link: '/tutorials/streaming-payments' }

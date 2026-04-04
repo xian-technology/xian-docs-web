@@ -1,0 +1,109 @@
+/* ── Brand palette ──────────────────────────────────────── */
+
+:root {
+  --vp-c-brand-1: #3b82f6;
+  --vp-c-brand-2: #2563eb;
+  --vp-c-brand-3: #1d4ed8;
+  --vp-c-brand-soft: rgba(59, 130, 246, 0.14);
+}
+
+.dark {
+  --vp-c-brand-1: #60a5fa;
+  --vp-c-brand-2: #3b82f6;
+  --vp-c-brand-3: #2563eb;
+  --vp-c-brand-soft: rgba(96, 165, 250, 0.14);
+}
+
+/* ── Hero gradient name ────────────────────────────────── */
+
+:root {
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981);
+}
+
+.dark {
+  --vp-home-hero-name-background: linear-gradient(135deg, #60a5fa, #22d3ee, #34d399);
+}
+
+/* ── Feature cards ─────────────────────────────────────── */
+
+.VPFeature {
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s !important;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.dark .VPFeature:hover {
+  box-shadow: 0 4px 20px rgba(96, 165, 250, 0.08);
+}
+
+/* ── Home: quick-link sections below features ──────────── */
+
+.home-sections {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.home-section {
+  padding: 24px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+  transition: border-color 0.25s;
+}
+
+.home-section:hover {
+  border-color: var(--vp-c-brand-soft);
+}
+
+.home-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--vp-c-text-1);
+}
+
+.home-section .section-desc {
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.home-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-links a {
+  font-size: 14px;
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.home-links a:hover {
+  color: var(--vp-c-brand-2);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .home-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 959px) {
+  .home-sections {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
