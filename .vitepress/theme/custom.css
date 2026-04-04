@@ -46,7 +46,7 @@
 .home-sections {
   max-width: 1152px;
   margin: 0 auto;
-  padding: 0 24px 80px;
+  padding: 48px 24px 80px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
