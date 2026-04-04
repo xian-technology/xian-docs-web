@@ -56,6 +56,43 @@ At a high level:
 The critical point is that speculation happens first, but acceptance still
 happens in normal block order.
 
+## Worked Example
+
+Consider a canonical block ordered like this:
+
+1. `tx1`: `currency.transfer(alice -> bob, 10)`
+2. `tx2`: `currency.transfer(carol -> dave, 20)`
+3. `tx3`: `orders.place(id=1)` writing `orders:1`
+4. `tx4`: `orders.summary()` scanning `orders:` with `Hash.all()`
+
+The controller can speculate all four in one wave because nothing about the
+front of the queue makes that impossible up front.
+
+The worker results might look like this:
+
+- `tx1` reads and writes Alice and Bob balance keys
+- `tx2` reads and writes Carol and Dave balance keys
+- `tx3` writes `orders:1`
+- `tx4` records a prefix read on `orders:`
+
+Acceptance still walks the block in order:
+
+- `tx1` is accepted
+- `tx2` is accepted
+- `tx3` is accepted
+- `tx4` is rejected from that wave because its prefix read overlaps with the
+  earlier accepted write to `orders:1`
+
+At that point, the node does not reorder the block. It keeps `tx1`, `tx2`, and
+`tx3` exactly where they are, then handles the tail:
+
+- it can respeculate `tx4` against the updated overlay in a later wave
+- or it can execute `tx4` serially if the remaining tail is no longer worth
+  speculating
+
+Either way, the final result must still match normal serial execution of
+`tx1 -> tx2 -> tx3 -> tx4`.
+
 ## What Metadata Is Tracked
 
 The safety model depends on deterministic access tracking.
@@ -95,6 +132,22 @@ Current fallback conditions include:
 This is why parallel execution is described as speculative rather than
 concurrent mutation.
 
+## Prefiltered vs Fallback
+
+The runtime exposes two different operator-facing counters because they mean
+different things:
+
+- `serial_prefiltered`: the controller chose not to speculate a remaining head
+  transaction at all, usually because there were no longer at least two safe
+  front-of-queue candidates worth putting into a wave
+- `serial_fallbacks`: the transaction was part of speculative handling, but the
+  accepted-prefix checks or a worker failure forced it back onto the serial path
+
+In practice, same-sender reuse near the front of the remaining queue often
+shows up as prefiltering, while read-after-write tails, write conflicts, and
+prefix-scan conflicts are more likely to show up as speculative fallback or
+later-wave respeculation.
+
 ## Why It Is Real Parallelism
 
 This is real parallel execution, but not unsafe shared-state concurrency.
@@ -124,6 +177,8 @@ executor falls back to serial execution.
 This design is consensus-safe because it preserves serial semantics:
 
 - canonical block order never changes
+- validators can mix enabled and disabled parallel posture and still converge on
+  the same final block result
 - speculative workers do not commit their writes to disk
 - accepted speculative results are revalidated against earlier accepted writes
 - conflicting transactions are re-run serially on the latest state

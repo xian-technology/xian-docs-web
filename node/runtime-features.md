@@ -355,6 +355,22 @@ Dashboard behavior:
 - when a recent block used the feature, the same row appends the speculative
   accepted, serial-prefiltered, and serial-fallback counts from that block
 
+Inspection surfaces:
+
+- `/perf_status` always includes the configured top-level posture:
+  `parallel_execution_enabled`, `parallel_execution_workers`, and
+  `parallel_execution_min_transactions`
+- when a recent block actually used the executor, the block metadata under
+  `recent_blocks[].metadata` also includes:
+  `parallel_enabled`, `parallel_worker_count`,
+  `parallel_planned_stage_count`,
+  `parallel_planned_parallelizable_transactions`,
+  `parallel_speculative_wave_count`, `parallel_speculative_accepted`,
+  `parallel_serial_prefiltered`, and `parallel_serial_fallbacks`
+- the dashboard `Execution Health -> Parallel` row is derived from those same
+  values, so `/perf_status` is the machine-facing source of truth and the
+  dashboard is the operator-facing summary
+
 Representative benchmark harness:
 
 ```bash
