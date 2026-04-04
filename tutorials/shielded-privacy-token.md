@@ -68,7 +68,7 @@ client = ContractingClient()
 client.flush()
 
 zk_registry_source = Path(
-    "xian-contracting/src/contracting/contracts/zk_registry.s.py"
+    "xian-configs/contracts/zk_registry.s.py"
 ).read_text()
 shielded_token_source = Path(
     "xian-contracts/contracts/shielded-note-token/src/con_shielded_note_token.py"
@@ -117,7 +117,9 @@ That writes:
 - `shielded-note-registry-manifest.json`: public verifying-key manifest
 - `shielded-note-deployment.md`: operator guide for registration and binding
 
-Then register the manifest entries:
+Then register the manifest entries. The manifest already carries the current
+registry metadata surface, so the simplest path is to forward each entry
+directly after removing the helper-only `action` field:
 
 ```python
 import json
@@ -128,16 +130,12 @@ manifest = json.loads(
 )
 
 for entry in manifest["registry_entries"]:
-    zk_registry.register_vk(
-        vk_id=entry["vk_id"],
-        vk_hex=entry["vk_hex"],
-        circuit_name=entry["circuit_name"],
-        version=entry["version"],
-        signer="sys",
-    )
+    args = dict(entry)
+    args.pop("action", None)
+    zk_registry.register_vk(**args, signer="sys")
 ```
 
-For local development, the deterministic `v2` dev bundle still contains the
+For local development, the deterministic `v3` dev bundle still contains the
 matching verifying keys:
 
 ```python
@@ -146,21 +144,21 @@ from xian_zk import ShieldedNoteProver
 prover = ShieldedNoteProver.build_insecure_dev_bundle()
 
 for action in ("deposit", "transfer", "withdraw"):
-    vk = prover.bundle[action]
-    zk_registry.register_vk(
-        vk_id=vk["vk_id"],
-        vk_hex=vk["vk_hex"],
-        circuit_name=vk["circuit_name"],
-        version=vk["version"],
-        signer="sys",
+    entry = next(
+        item
+        for item in prover.registry_manifest()["registry_entries"]
+        if item["action"] == action
     )
+    args = dict(entry)
+    args.pop("action", None)
+    zk_registry.register_vk(**args, signer="sys")
 ```
 
-This registers the current `v2` ids:
+This registers the current `v3` ids:
 
-- `shielded-deposit-v2`
-- `shielded-transfer-v2`
-- `shielded-withdraw-v2`
+- `shielded-deposit-v3`
+- `shielded-transfer-v3`
+- `shielded-withdraw-v3`
 
 ## Step 3: Bind The Keys To The Token
 
@@ -554,7 +552,7 @@ assert exact_exit.output_payloads == []
 
 ## Operational Notes
 
-- The current shielded circuit family is `v2`.
+- The current shielded circuit family is `shielded_note_v3`.
 - Tree depth is fixed per circuit family. If you want a different depth, you
   need a new circuit and new verifying keys.
 - The on-chain payload channel is for note delivery and optional viewer
@@ -563,9 +561,10 @@ assert exact_exit.output_payloads == []
 - `ShieldedWallet` is the current canonical Python-side wallet abstraction for
   seed backup, state snapshots, note sync, note selection, and request
   planning.
-- Encrypted payloads are a delivery channel, not a proof-bound statement. A
-  wallet should always decrypt the payload and recompute the commitment before
-  trusting the note.
+- Encrypted payloads are now proof-bound by per-output payload hashes. A wallet
+  should still decrypt the payload and recompute the commitment before trusting
+  the note, but an attacker cannot swap the stored payload without also
+  breaking proof validity.
 - The contract accepts proofs against recent accepted roots, not only the
   latest root. That gives wallets some concurrency room while the contract
   still owns the canonical append frontier.

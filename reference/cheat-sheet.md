@@ -116,8 +116,8 @@ ZK verification:
 ```python
 # public_inputs must be exact 32-byte canonical BN254 field encodings
 zk.is_available()
-zk.has_verifying_key("shielded-deposit-v2")
-zk.verify_groth16("shielded-deposit-v2", proof_hex, public_inputs)
+zk.has_verifying_key("shielded-deposit-v3")
+zk.verify_groth16("shielded-deposit-v3", proof_hex, public_inputs)
 zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
 ```
 

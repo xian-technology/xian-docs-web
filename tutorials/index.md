@@ -6,6 +6,7 @@ Step-by-step guides for building real contracts on Xian.
 
 - [Creating a Fungible Token](/tutorials/creating-a-token) -- build an XSC-0001 token with transfer, allowance, and events
 - [Building a Shielded Privacy Token](/tutorials/shielded-privacy-token) -- deploy the existing note-based privacy token, register verifying keys, and drive deposit, transfer, and withdraw proofs
+- [Building Shielded Commands](/tutorials/shielded-commands) -- register command circuits, plan anonymous relayed execution, and drive adapter-based public actions
 - [Building a Dice Game](/tutorials/dice-game) -- deterministic randomness and game state
 - [Multi-Contract dApp](/tutorials/multi-contract-dapp) -- compose contracts safely
 - [Streaming Payments](/tutorials/streaming-payments) -- model recurring token flows

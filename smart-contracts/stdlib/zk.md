@@ -11,8 +11,10 @@ For off-chain proof generation and note helpers, the current development path
 is the `xian-zk` package in `xian-contracting`. That proving toolkit stays
 outside the validator runtime.
 
-The current shielded-note circuit family is `v2`, built around Merkle auth
-paths and a chain-owned append frontier rather than whole-tree witnesses.
+The current shielded-note circuit family is `shielded_note_v3`, built around
+Merkle auth paths and a chain-owned append frontier rather than whole-tree
+witnesses. The current shielded-command execution family is
+`shielded_command_v4`.
 
 ## Available Functions
 
@@ -103,8 +105,8 @@ Malformed inputs raise an assertion error instead of returning `False`.
 
 ## Current Proof-Backed Pattern
 
-The first real contract family using this verifier surface is the
-shielded-note token in `xian-contracts`.
+The first real contract families using this verifier surface are the
+shielded-note token and shielded-command stack in `xian-contracts`.
 
 The current pattern is:
 
@@ -120,7 +122,7 @@ The current pattern is:
   history off-chain
 - use a chain-owned append frontier for post-state projection
 
-The shipped `v2` shielded-note flow uses:
+The shipped `shielded_note_v3` flow uses:
 
 - Merkle auth paths instead of whole-tree witnesses
 - a default tree depth of `20`
@@ -128,6 +130,16 @@ The shipped `v2` shielded-note flow uses:
 - exact withdraw support with `0` outputs when no change note is needed
 - recent-root proving, where a proof may target a still-accepted recent root
   while outputs are still appended against the current canonical frontier
+- proof-bound output payload hashes, so encrypted note payloads cannot be
+  swapped after proof generation without invalidating the proof
+
+The shipped `shielded_command_v4` flow adds:
+
+- note-spending command proofs on top of the same root / nullifier model
+- binding to a target contract, payload digest, relayer, expiry, and chain id
+- proof-bound relayer fees
+- proof-bound public spend budgets for allowlisted adapter contracts
+- execution indexes by nullifier, binding, and execution tag
 
 For the full contract-level deployment and wallet-side usage flow, see
 [Building a Shielded Privacy Token](/tutorials/shielded-privacy-token).
@@ -191,6 +203,8 @@ def verify_raw(vk_hex: str, proof_hex: str, public_inputs: list):
 - prefer registry-backed `vk_id` usage for contract-facing integrations
 - if a contract stores a verifier binding, persist both `vk_id` and `vk_hash`
   from `zk_registry`
+- if a contract relies on specific circuit metadata, also validate the
+  registry-reported family, statement version, tree depth, and IO bounds
 - derive the next state from canonical contract storage instead of trusting
   caller-supplied transition metadata
 - when using recent-root proving, treat `old_root` and append-state as separate

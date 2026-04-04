@@ -1,12 +1,13 @@
 # xian-zk
 
 `xian-zk` is the current external proving, wallet, and deployment-tooling
-package for Xian's shielded-note token flow.
+package for Xian's shielded note and shielded command flows.
 
 It is not part of the validator runtime. Validators only need the runtime-side
 `zk` verifier bridge. `xian-zk` is the off-chain package for:
 
 - proving shielded deposit, transfer, and withdraw transitions
+- proving shielded command execution transitions
 - scanning encrypted note records
 - managing shielded wallet state
 - generating deployment bundles and verifying-key manifests
@@ -33,14 +34,20 @@ uv run maturin develop
 The current package surface includes:
 
 - Groth16 / BN254 verification helpers
-- shielded-note proof generation for the `v2` circuit family
+- shielded-note proof generation for the `shielded_note_v3` circuit family
+- shielded-command proof generation for the `shielded_command_v4` circuit
+  family
 - note commitments, nullifiers, Merkle roots, and auth-path helpers
 - `ShieldedWallet` for seed backup, wallet snapshots, sync, note selection, and
   request planning
+- `ShieldedCommandWallet` for planning relayed shielded commands with proof-bound
+  relayer fees and optional proof-bound public spend
 - encrypted note payload handling with separated spend keys and viewing keys
+- proof-bound output payload hashes for note and command outputs
 - optional disclosed viewers on output payloads
-- a CLI for generating a random trusted-setup bundle plus a registry-ready
-  manifest
+- a CLI for generating a random shielded-note trusted-setup bundle plus a
+  registry-ready manifest
+- programmatic bundle / manifest generation for shielded-command circuits
 
 ## Canonical Wallet Model
 
@@ -80,7 +87,7 @@ resume file that keeps synced commitments and note state.
 
 ## Planning Shielded Actions
 
-`ShieldedWallet` can build requests and payloads directly:
+`ShieldedWallet` can build note requests and payloads directly:
 
 ```python
 transfer_plan = wallet.build_transfer(
@@ -104,6 +111,40 @@ The returned plan objects include:
 Exact exits are supported. If a withdraw needs no change note, the plan uses
 `outputs=[]`.
 
+For relayed anonymous execution, use `ShieldedCommandWallet`:
+
+```python
+from xian_zk import ShieldedCommandWallet
+
+command_wallet = ShieldedCommandWallet.from_json(wallet.to_json())
+
+command_plan = command_wallet.build_command(
+    target_contract="con_shielded_dex_adapter",
+    relayer="relayer-1",
+    chain_id="xian-mainnet-1",
+    fee=5,
+    public_amount=100,
+    payload={
+        "action": "swap_exact_in",
+        "pair": 7,
+        "recipient": "alice",
+        "amount_out_min": 95,
+        "deadline": "2026-04-04 13:00:00",
+    },
+)
+```
+
+The command plan includes:
+
+- the proving request
+- selected hidden input notes
+- any hidden change note
+- encrypted hidden output payloads
+- the bound `command_binding` and `execution_tag`
+
+The `public_amount` is part of the proof statement. Allowlisted adapter
+contracts can spend only that exact public budget during the active execution.
+
 ## Deployment CLI
 
 For a real deployment, use the CLI instead of the deterministic dev bundle:
@@ -123,6 +164,17 @@ The output directory contains:
 
 The manifest can be registered directly in `zk_registry` and then bound into
 the token contract with `configure_vk(...)`.
+
+The registry entries now carry richer metadata. The easiest operator path is to
+register each manifest entry directly after removing the helper-only `action`
+field:
+
+```python
+for entry in manifest["registry_entries"]:
+    args = dict(entry)
+    args.pop("action", None)
+    zk_registry.register_vk(**args, signer="sys")
+```
 
 ## Dev Bundle vs Deployment Bundle
 
@@ -144,6 +196,18 @@ prover = ShieldedNoteProver.build_random_bundle(
 manifest = prover.registry_manifest()
 ```
 
+For shielded commands:
+
+```python
+from xian_zk import ShieldedCommandProver
+
+command_prover = ShieldedCommandProver.build_random_bundle(
+    contract_name="con_shielded_commands",
+    vk_id_prefix="shielded-command-mainnet-20260404",
+)
+command_manifest = command_prover.registry_manifest()
+```
+
 The deployment bundle is random and suitable for operator use. The dev bundle
 is deterministic local tooling only.
 
@@ -160,4 +224,5 @@ generator as an MPC flow.
 ## See Also
 
 - [Building a Shielded Privacy Token](/tutorials/shielded-privacy-token)
+- [Building Shielded Commands](/tutorials/shielded-commands)
 - [ZK Stdlib](/smart-contracts/stdlib/zk)
