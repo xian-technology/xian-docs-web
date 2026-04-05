@@ -26,10 +26,13 @@
 }
 
 /* ── Nav bar: solid background prevents content bleeding
-   through during fast scrolling ────────────────────────── */
+   through during fast scrolling and on page reload.
+   !important overrides VitePress scoped styles that have
+   higher specificity and a 0.5 s background transition. ── */
 
 .VPNav {
-  background-color: var(--vp-c-bg);
+  background-color: var(--vp-c-bg) !important;
+  transition: none !important;
   transform: translateZ(0);
 }
 

@@ -24,7 +24,8 @@ const getStartedSidebar = [
 export default defineConfig({
   base: '/',
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }]
+    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
+    ['style', {}, '.VPNav{background-color:var(--vp-c-bg,#fff)!important;transition:none!important}']
   ],
   title: 'Xian Documentation',
   description: 'Official Xian Technology documentation',
