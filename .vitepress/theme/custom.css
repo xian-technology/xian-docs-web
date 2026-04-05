@@ -25,6 +25,13 @@
   --vp-home-hero-name-background: linear-gradient(135deg, #60a5fa, #22d3ee, #34d399);
 }
 
+/* ── Nav bar: force GPU layer to prevent content bleeding
+   through during fast scrolling ────────────────────────── */
+
+.VPNav {
+  transform: translateZ(0);
+}
+
 /* ── Feature cards ─────────────────────────────────────── */
 
 .VPFeature {
