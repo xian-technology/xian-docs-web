@@ -44,13 +44,10 @@
 /* ── Home: quick-link sections below features ──────────── */
 
 .home-sections {
-  max-width: 1152px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 48px 0 80px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  box-sizing: content-box;
+  gap: 16px;
 }
 
 .home-section {
@@ -97,13 +94,6 @@
   text-decoration: underline;
 }
 
-@media (min-width: 640px) {
-  .home-sections {
-    padding-left: 48px;
-    padding-right: 48px;
-  }
-}
-
 @media (max-width: 768px) {
   .home-sections {
     grid-template-columns: 1fr;
@@ -113,12 +103,5 @@
 @media (min-width: 769px) and (max-width: 959px) {
   .home-sections {
     grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 960px) {
-  .home-sections {
-    padding-left: 64px;
-    padding-right: 64px;
   }
 }
