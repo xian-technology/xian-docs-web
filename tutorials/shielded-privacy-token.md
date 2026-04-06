@@ -16,8 +16,11 @@ surface, see [xian-zk](/tools/xian-zk).
 - a shielded pool backed by Groth16 proofs
 - recipient public shielded addresses instead of recipient spending-secret
   sharing
-- encrypted note payloads stored on-chain for wallet-side note recovery
+- encrypted note payloads carried in transaction history for wallet-side note
+  recovery
 - shielded deposit, transfer, and withdraw flows
+- optional relayed shielded transfers where the public tx sender is a relayer
+  instead of the hidden note owner
 - a depth-20 shielded tree with capacity for `1,048,576` notes
 
 ## What Is Private
@@ -25,6 +28,7 @@ surface, see [xian-zk](/tools/xian-zk).
 - shielded transfer values stay inside the proof domain
 - note ownership stays off-chain as long as the wallet keeps note material
   private
+- relayed shielded transfers can hide the note owner's public transaction sender
 
 ## What Is Still Public
 
@@ -32,6 +36,7 @@ surface, see [xian-zk](/tools/xian-zk).
 - deposits into the shielded pool
 - withdraw amounts and withdraw recipients
 - nullifiers, output commitments, and accepted roots
+- the relayer account and relayer fee for relayed transfers
 
 ## Current Caveats
 
@@ -41,6 +46,8 @@ surface, see [xian-zk](/tools/xian-zk).
   multi-party ceremony
 - `ShieldedNoteProver.build_insecure_dev_bundle()` is local test tooling only
   and must never be used for a real network
+- wallet note sync depends on indexed transaction history, not just contract
+  state
 
 ## Before You Start
 
@@ -101,6 +108,7 @@ The shielded token needs one verifying key for each shielded action:
 - `deposit`
 - `transfer`
 - `withdraw`
+- `relay_transfer`
 
 For a real deployment, generate a random bundle and registry manifest once:
 
@@ -139,19 +147,16 @@ For local development, the deterministic `v3` dev bundle still contains the
 matching verifying keys:
 
 ```python
-from xian_zk import ShieldedNoteProver
+from xian_zk import ShieldedNoteProver, ShieldedRelayTransferProver
 
 prover = ShieldedNoteProver.build_insecure_dev_bundle()
+relay_prover = ShieldedRelayTransferProver.build_insecure_dev_bundle()
 
-for action in ("deposit", "transfer", "withdraw"):
-    entry = next(
-        item
-        for item in prover.registry_manifest()["registry_entries"]
-        if item["action"] == action
-    )
-    args = dict(entry)
-    args.pop("action", None)
-    zk_registry.register_vk(**args, signer="sys")
+for manifest in (prover.registry_manifest(), relay_prover.registry_manifest()):
+    for entry in manifest["registry_entries"]:
+        args = dict(entry)
+        args.pop("action", None)
+        zk_registry.register_vk(**args, signer="sys")
 ```
 
 This registers the current `v3` ids:
@@ -159,6 +164,7 @@ This registers the current `v3` ids:
 - `shielded-deposit-v3`
 - `shielded-transfer-v3`
 - `shielded-withdraw-v3`
+- `shielded-relay-transfer-v4`
 
 ## Step 3: Bind The Keys To The Token
 
@@ -173,12 +179,19 @@ for action in ("deposit", "transfer", "withdraw"):
         vk_id=prover.bundle[action]["vk_id"],
         signer="sys",
     )
+
+token.configure_vk(
+    action="relay_transfer",
+    vk_id=relay_prover.bundle["relay_transfer"]["vk_id"],
+    signer="sys",
+)
 ```
 
 You can inspect the binding at any time:
 
 ```python
 token.get_vk_binding(action="deposit", signer="sys")
+token.get_vk_binding(action="relay_transfer", signer="sys")
 ```
 
 ## Step 4: Mint Public Supply
@@ -215,8 +228,10 @@ from xian_zk import (
     ShieldedDepositRequest,
     ShieldedKeyBundle,
     ShieldedNote,
+    note_records_from_transactions,
     recover_encrypted_notes,
 )
+from xian_py import Xian
 
 FIELD_MODULUS = (
     21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -227,18 +242,25 @@ def rand_field() -> str:
     return f"0x{secrets.randbelow(FIELD_MODULUS):064x}"
 
 
-def load_all_records(token_contract):
-    total = token_contract.get_note_count(signer="sys")
-    records = []
-    for start in range(0, total, 128):
-        records.extend(
-            token_contract.list_note_records(
-                start=start,
-                limit=min(128, total - start),
-                signer="sys",
-            )
+indexed_client = Xian("http://127.0.0.1:26657")
+
+
+def load_all_records(indexed_client, contract_name):
+    txs = []
+    offset = 0
+    while True:
+        page = indexed_client.list_txs_by_contract(
+            contract_name,
+            limit=128,
+            offset=offset,
         )
-    return records
+        if not page:
+            break
+        txs.extend(page)
+        if len(page) < 128:
+            break
+        offset += len(page)
+    return note_records_from_transactions(txs)
 
 
 alice_keys = ShieldedKeyBundle.generate()
@@ -275,11 +297,11 @@ token.deposit_shielded(
     signer="alice",
 )
 
-records = load_all_records(token)
+records = load_all_records(indexed_client, "con_private_usd")
 alice_discovered = recover_encrypted_notes(
     asset_id=token.asset_id(signer="sys"),
-    commitments=[record["commitment"] for record in records],
-    payloads=[record["payload"] for record in records],
+    commitments=[record.commitment for record in records],
+    payloads=[record.payload for record in records],
     owner_secret=alice_keys.owner_secret,
     viewing_private_key=alice_keys.viewing_private_key,
 )
@@ -289,8 +311,9 @@ After the deposit:
 
 - Alice public balance drops from `100` to `40`
 - shielded supply rises from `0` to `60`
-- the contract stores the new commitment plus the encrypted payload
-- Alice can recover the note from `list_note_records(...)`
+- the contract stores the new commitment plus the proof-bound payload hash
+- the encrypted payload remains available in indexed transaction history
+- Alice can recover the note from `list_txs_by_contract(...)`
 
 ## Step 5A: Sync And Backup A Wallet Snapshot
 
@@ -307,7 +330,13 @@ alice_wallet = ShieldedWallet.from_parts(
     viewing_private_key=alice_keys.viewing_private_key,
 )
 
-alice_wallet.sync_records(load_all_records(token))
+alice_wallet.sync_transactions(
+    indexed_client.list_txs_by_contract(
+        "con_private_usd",
+        limit=128,
+        offset=0,
+    )
+)
 
 assert alice_wallet.available_balance() == 60
 
@@ -408,11 +437,62 @@ network sees only:
 - the accepted `old_root`
 - spent nullifiers
 - the new output commitments
-- the encrypted payload blobs
+- the transaction-carried encrypted payload blobs
+- the proof-bound payload hashes
 - the next accepted root
 
-Bob can now recover the incoming note by reading `list_note_records(...)` and
-decrypting payloads with `recover_encrypted_notes(...)`.
+Bob can now recover the incoming note by reading indexed contract transactions
+and decrypting payloads with `recover_encrypted_notes(...)`.
+
+## Optional: Hide The Public Transaction Sender With A Relayer
+
+The standard `transfer_shielded(...)` flow still exposes the caller as the
+public L1 transaction sender. If you want the hidden note owner to stay off the
+public sender field, use `relay_transfer_shielded(...)` instead.
+
+That relayed flow keeps the note spend private while making the relayer the
+public transaction sender:
+
+```python
+from xian_zk import (
+    ShieldedRelayTransferProver,
+    ShieldedRelayTransferWallet,
+)
+
+alice_relay_wallet = ShieldedRelayTransferWallet.from_json(alice_wallet.to_json())
+
+relay_plan = alice_relay_wallet.build_relay_transfer(
+    recipient=bob_keys.recipient,
+    amount=10,
+    relayer="relayer-1",
+    chain_id="xian-mainnet-1",
+    fee=2,
+)
+
+relay_proof = relay_prover.prove_relay_transfer(relay_plan.request)
+
+token.relay_transfer_shielded(
+    old_root=relay_proof.old_root,
+    input_nullifiers=relay_proof.input_nullifiers,
+    output_commitments=relay_proof.output_commitments,
+    proof_hex=relay_proof.proof_hex,
+    relayer_fee=relay_proof.relayer_fee,
+    output_payloads=relay_plan.output_payloads,
+    signer="relayer-1",
+)
+```
+
+What the network learns in this mode:
+
+- the relayer account
+- the relayer fee
+- nullifiers, output commitments, and roots
+
+What stays hidden:
+
+- the hidden note owner's public transaction sender
+- the hidden recipient inside the note payload
+- the transferred shielded amount
 
 If Alice wants to disclose the transfer to an auditor without giving up spend
 authority, she can add an extra viewer:
@@ -448,11 +528,11 @@ transfer_payloads = [
     ),
 ]
 
-records = load_all_records(token)
+records = load_all_records(indexed_client, "con_private_usd")
 auditor_view = recover_viewable_notes(
     asset_id=token.asset_id(signer="sys"),
-    commitments=[record["commitment"] for record in records],
-    payloads=[record["payload"] for record in records],
+    commitments=[record.commitment for record in records],
+    payloads=[record.payload for record in records],
     viewing_private_key=auditor_keys.viewing_private_key,
 )
 ```

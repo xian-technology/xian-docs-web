@@ -90,6 +90,34 @@ After loading the unpacked extension:
 - approve and reject connect / sign / send flows
 - export a backup and restore it into a clean browser profile
 
+## Initial Wallet Setup
+
+On first launch the extension shows three setup modes:
+
+- **Create** - generates a new 12-word BIP39 recovery seed and derives the first account
+- **Seed** - restores from an existing 12 or 24-word BIP39 recovery phrase
+- **Key** - imports a single 32-byte hex private-key seed without HD-account support
+
+The setup form always asks for a wallet password. In **Create** mode the seed is
+shown only after the wallet is created, so the normal flow is:
+
+1. choose **Create**
+2. enter a wallet password
+3. optionally expand **Network settings**
+4. create the wallet
+5. record the recovery seed before closing the screen
+
+The **Network settings** disclosure on the setup screen lets you override:
+
+- network label
+- expected chain ID
+- RPC URL
+- dashboard URL
+
+If you leave those fields on the local defaults, the built-in **Local node**
+preset stays active. If you change them during setup, the wallet creates a
+custom preset and makes it active immediately.
+
 ## Release Flow
 
 The end-user artifact is a GitHub release zip that contains the unpacked
@@ -217,7 +245,9 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 
 - **Reveal seed** - password-protected, click to copy
 - **Reveal private key** - password-protected, click to copy
-- **Session** - mnemonic and password stored in `chrome.storage.session` (memory-only, cleared on browser close) for seamless account operations while unlocked
+- **Session** - while unlocked, the extension keeps the active private key, the
+  mnemonic when the wallet is seed-backed, and a derived session key in
+  `chrome.storage.session`; the raw password is not persisted
 
 ### dApp Integration
 

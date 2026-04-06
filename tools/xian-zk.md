@@ -40,6 +40,10 @@ The current package surface includes:
 - note commitments, nullifiers, Merkle roots, and auth-path helpers
 - `ShieldedWallet` for seed backup, wallet snapshots, sync, note selection, and
   request planning
+- `ShieldedRelayTransferWallet` for relayed note-to-note transfers where the
+  public L1 sender is the relayer instead of the hidden note owner
+- `ShieldedRelayTransferProver` for proof-bound relayer-fee transfers on top of
+  the shielded note pool
 - `ShieldedCommandWallet` for planning relayed shielded commands with proof-bound
   relayer fees and optional proof-bound public spend
 - encrypted note payload handling with separated spend keys and viewing keys
@@ -62,7 +66,10 @@ The current Python-side wallet model is:
 Basic example:
 
 ```python
+from xian_py import Xian
 from xian_zk import ShieldedWallet
+
+indexed_client = Xian("http://127.0.0.1:26657")
 
 wallet = ShieldedWallet.from_parts(
     asset_id=token.asset_id(signer="sys"),
@@ -70,9 +77,15 @@ wallet = ShieldedWallet.from_parts(
     viewing_private_key="11" * 32,
 )
 
-wallet.sync_records(token.list_note_records(start=0, limit=64, signer="sys"))
+wallet.sync_transactions(
+    indexed_client.list_txs_by_contract("con_private_usd", limit=64, offset=0)
+)
 balance = wallet.available_balance()
 ```
+
+`ShieldedWallet` now syncs from indexed transaction history rather than reading
+encrypted note payloads out of contract state. On a live node, that means BDS
+or another equivalent indexed transaction feed needs to be available.
 
 Wallet snapshots:
 
@@ -110,6 +123,43 @@ The returned plan objects include:
 
 Exact exits are supported. If a withdraw needs no change note, the plan uses
 `outputs=[]`.
+
+For hidden-sender note-to-note transfers, use `ShieldedRelayTransferWallet`:
+
+```python
+from xian_zk import (
+    ShieldedRelayTransferProver,
+    ShieldedRelayTransferWallet,
+)
+
+relay_wallet = ShieldedRelayTransferWallet.from_json(wallet.to_json())
+
+relay_plan = relay_wallet.build_relay_transfer(
+    recipient=recipient_bundle.recipient,
+    amount=25,
+    relayer="relayer-1",
+    chain_id="xian-mainnet-1",
+    fee=2,
+)
+
+relay_prover = ShieldedRelayTransferProver.build_random_bundle(
+    contract_name="con_private_usd",
+    vk_id_prefix="private-usd-relay-20260406",
+)
+relay_proof = relay_prover.prove_relay_transfer(relay_plan.request)
+```
+
+The relayed transfer binds all of the following into the proof statement:
+
+- the spent input nullifiers
+- the relayer account
+- the chain id
+- the optional expiry
+- the exact relayer fee
+
+That means the relayer can submit the transaction and get paid, but cannot
+change the fee, redirect the execution to a different relayer account, or reuse
+the proof on another chain.
 
 For relayed anonymous execution, use `ShieldedCommandWallet`:
 
@@ -210,6 +260,18 @@ command_manifest = command_prover.registry_manifest()
 
 The deployment bundle is random and suitable for operator use. The dev bundle
 is deterministic local tooling only.
+
+For relayed note transfers:
+
+```python
+from xian_zk import ShieldedRelayTransferProver
+
+relay_prover = ShieldedRelayTransferProver.build_random_bundle(
+    contract_name="con_private_usd",
+    vk_id_prefix="private-usd-relay-20260406",
+)
+relay_manifest = relay_prover.registry_manifest()
+```
 
 ## Important Warning
 
