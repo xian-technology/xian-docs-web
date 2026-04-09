@@ -211,6 +211,8 @@ GET /api/abci_query/contract_summary/<contract>
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
 GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
+GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0
+GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0/kind=sync_hint
 GET /api/abci_query/recent_events/limit=50/offset=0
 GET /api/abci_query/developer_rewards/<recipient_key>
 GET /api/abci_query/state/<prefix>/limit=50/offset=0
@@ -246,6 +248,17 @@ Cursor-based event consumption:
 - Use `after_id` for resumable consumers and long-running watchers.
 - The older `offset` form is still useful for ad hoc browsing, but `after_id`
   is the better shape for application event consumers.
+
+Shielded wallet history:
+
+- `/shielded_wallet_history/<tag>/limit=.../after_note_index=...` is the
+  protocol-shaped light-wallet recovery feed for shielded note wallets.
+- it returns the canonical note-commitment sequence in `note_index` order and
+  only exposes `output_payload` for outputs whose indexed tag matches the
+  requested `tag`
+- use `kind=sync_hint` for the normal wallet path; `kind=discovery_tag` is
+  also accepted for lower-level tooling
+- use `after_note_index` as the durable cursor for resumable wallet sync
 
 Developer reward aggregation:
 

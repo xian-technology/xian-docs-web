@@ -116,8 +116,16 @@ sync_result = wallet.sync_records(candidates)
 
 Indexed note records now also expose `payload_tags`, which indexers can persist
 for future selective note-discovery queries. Newer wallet sync flows should use
-indexed `sync_hint` lookups first and only fetch full transaction payloads for
-matching outputs.
+the higher-level `shielded_wallet_history` feed first. That feed keeps the full
+commitment sequence in note-index order and only includes `output_payload` for
+rows whose indexed tag matches the wallet. If that feed is not available,
+`ShieldedWallet.sync_indexed_client(...)` still falls back to the older
+event/tag/transaction fan-out path.
+
+Browser and mobile wallet integrations can now treat `state_snapshot` as a
+first-class user backup. Stored shielded snapshots are included in full wallet
+backup exports, and users can also store, export, or remove shielded wallet
+snapshots directly through the wallet settings flows.
 
 ## Runtime Cost Direction
 

@@ -369,6 +369,11 @@ restored_wallet = ShieldedWallet.from_json(state_snapshot)
 resume snapshot that also keeps synced commitments and wallet note state so the
 wallet can continue scanning and planning without rebuilding everything first.
 
+The browser and mobile wallet apps now treat this `state_snapshot` as a
+first-class backup primitive: users can store shielded snapshots in wallet
+settings, include them automatically in full encrypted wallet backups, and
+export individual shielded snapshots when needed.
+
 `ShieldedWallet.sync_transactions(...)` now prefilters note payloads before full
 decryption. If you already materialized note records from indexed transactions,
 you can prefilter first:
@@ -378,6 +383,10 @@ records = load_all_records(indexed_client, "con_private_usd")
 candidates = alice_wallet.candidate_records(records)
 alice_wallet.sync_records(candidates)
 ```
+
+On live indexed nodes, newer wallet sync can also use the higher-level
+`shielded_wallet_history` feed instead of reconstructing note records through
+separate event, tag, and transaction reads.
 
 The same wallet can also build deposit, transfer, and withdraw requests plus
 their encrypted payloads directly:

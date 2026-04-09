@@ -373,6 +373,7 @@ Also available:
 - `list_txs_for_block(block_ref)`
 - `list_txs_by_sender(sender, limit=..., offset=...)`
 - `list_txs_by_contract(contract, limit=..., offset=...)`
+- `list_shielded_wallet_history(tag_value, kind=..., limit=..., after_note_index=...)`
 - `get_events_for_tx(tx_hash)`
 - `list_events(contract, event, limit=..., offset=..., after_id=...)`
 - `get_state_history(key, limit=..., offset=...)`
@@ -408,6 +409,12 @@ inspection so a just-finalized transaction can still be recovered by hash.
 
 `get_bds_status()` returns a typed `BdsStatus` model. The main high-signal
 fields are `indexed_height`, `current_block_height`, `height_lag`,
+
+`list_shielded_wallet_history(tag_value, ...)` is the higher-level shielded
+light-wallet recovery feed. It returns the canonical note-commitment sequence
+in note-index order and only exposes `output_payload` for outputs whose indexed
+tag matches the requested wallet tag. Use `after_note_index` as the resumable
+cursor.
 `catching_up`, `spool_pending_count`, and `alerts`.
 
 ## Watching Blocks And Events
