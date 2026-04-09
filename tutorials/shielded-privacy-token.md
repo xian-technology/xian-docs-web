@@ -49,6 +49,23 @@ surface, see [xian-zk](/tools/xian-zk).
 - wallet note sync depends on indexed transaction history, not just contract
   state
 
+## Current Cost Profile
+
+The current shielded implementation is much cheaper than the original
+all-Python contract path because tree updates and relay-digest hot paths now
+run through native `xian-zk` bindings inside the runtime.
+
+Local benchmark reference values from April 2026:
+
+- normal public transfer: `48` stamps
+- shielded exact withdraw with no new output: about `2,405` stamps
+- shielded deposit with 2 outputs: about `3,742` stamps
+- shielded transfer with 2 inputs / 2 outputs: about `4,062` stamps
+- relayed hidden-sender shielded transfer: about `5,726` stamps
+
+Those are still more expensive than a public transfer, but no longer in the
+earlier five-digit stamp range.
+
 ## Before You Start
 
 You need:
@@ -315,6 +332,9 @@ After the deposit:
 - the encrypted payload remains available in indexed transaction history
 - Alice can recover the note from `list_txs_by_contract(...)`
 
+Newer payloads use anonymous discovery tags instead of embedding the recipient
+viewing key in cleartext, so indexed history is less searchable by recipient.
+
 ## Step 5A: Sync And Backup A Wallet Snapshot
 
 The canonical Python-side wallet abstraction is `ShieldedWallet`. It tracks
@@ -348,6 +368,16 @@ restored_wallet = ShieldedWallet.from_json(state_snapshot)
 `seed_backup` is the minimal recovery backup. `state_snapshot` is the richer
 resume snapshot that also keeps synced commitments and wallet note state so the
 wallet can continue scanning and planning without rebuilding everything first.
+
+`ShieldedWallet.sync_transactions(...)` now prefilters note payloads before full
+decryption. If you already materialized note records from indexed transactions,
+you can prefilter first:
+
+```python
+records = load_all_records(indexed_client, "con_private_usd")
+candidates = alice_wallet.candidate_records(records)
+alice_wallet.sync_records(candidates)
+```
 
 The same wallet can also build deposit, transfer, and withdraw requests plus
 their encrypted payloads directly:

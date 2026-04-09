@@ -26,7 +26,7 @@ For local development against the editable workspace package:
 ```bash
 cd xian-contracting/packages/xian-zk
 uv sync --group dev
-uv run maturin develop
+uv run maturin develop -r
 ```
 
 ## What It Ships
@@ -47,11 +47,14 @@ The current package surface includes:
 - `ShieldedCommandWallet` for planning relayed shielded commands with proof-bound
   relayer fees and optional proof-bound public spend
 - encrypted note payload handling with separated spend keys and viewing keys
+- anonymous note-discovery tags for newer encrypted payloads
 - proof-bound output payload hashes for note and command outputs
 - optional disclosed viewers on output payloads
 - a CLI for generating a random shielded-note trusted-setup bundle plus a
   registry-ready manifest
 - programmatic bundle / manifest generation for shielded-command circuits
+- a trusted local prover service and matching prover clients for wallet-side
+  proving offload
 
 ## Canonical Wallet Model
 
@@ -87,6 +90,11 @@ balance = wallet.available_balance()
 encrypted note payloads out of contract state. On a live node, that means BDS
 or another equivalent indexed transaction feed needs to be available.
 
+For newer payloads, `xian-zk` no longer embeds the recipient viewing public key
+in cleartext. Instead it stores anonymous discovery-tag entries plus ephemeral
+keys inside the encrypted payload bundle. Wallet sync uses those entries to
+prefilter candidate notes before full decryption.
+
 Wallet snapshots:
 
 ```python
@@ -97,6 +105,39 @@ restored = ShieldedWallet.from_json(state_snapshot)
 
 `seed_backup` is the minimal recovery secret. `state_snapshot` is the richer
 resume file that keeps synced commitments and note state.
+
+If you already have extracted note records, you can prefilter them before a
+full sync:
+
+```python
+candidates = wallet.candidate_records(records)
+sync_result = wallet.sync_records(candidates)
+```
+
+Indexed note records now also expose `payload_tags`, which indexers can persist
+for future selective note-discovery queries. Newer wallet sync flows should use
+indexed `sync_hint` lookups first and only fetch full transaction payloads for
+matching outputs.
+
+## Runtime Cost Direction
+
+Recent shielded-fee work moved the Merkle frontier append and relay-digest hot
+paths out of Python contract code and into native `xian-zk` bindings exposed
+through the runtime `zk` bridge. That was the change that materially lowered
+shielded transaction cost.
+
+Using the reproducible benchmark in
+`xian-abci/scripts/benchmark_shielded_stamps.py`, the local April 2026 numbers
+for the current implementation are roughly:
+
+- shielded deposit with 2 outputs: `3,742` stamps
+- shielded transfer with 2 inputs / 2 outputs: `4,062` stamps
+- shielded withdraw with 1 input / 1 output: `3,479` stamps
+- exact withdraw with no new output note: `2,405` stamps
+- relayed hidden-sender transfer: `5,726` stamps
+
+Those are still above a plain public transfer, but they are dramatically lower
+than the earlier five-digit shielded costs from the all-Python contract path.
 
 ## Planning Shielded Actions
 
@@ -160,6 +201,36 @@ The relayed transfer binds all of the following into the proof statement:
 That means the relayer can submit the transaction and get paid, but cannot
 change the fee, redirect the execution to a different relayer account, or reuse
 the proof on another chain.
+
+## Trusted Local Prover Service
+
+`xian-zk` now ships a local prover-service entrypoint for wallet-side proving
+offload:
+
+```bash
+uv run xian-zk-prover-service \
+  --host 127.0.0.1 \
+  --port 8787 \
+  --auth-token local-dev-token \
+  --insecure-dev-note \
+  --insecure-dev-command
+```
+
+Clients can talk to that service directly:
+
+```python
+from xian_zk import ShieldedNoteProverClient
+
+client = ShieldedNoteProverClient(
+    "http://127.0.0.1:8787",
+    auth_token="local-dev-token",
+)
+proof = client.prove_deposit(deposit_plan.request)
+```
+
+This is a trusted local companion service, not a true split-prover protocol.
+It improves browser/mobile deployment options, but the service still handles
+the witness material.
 
 For relayed anonymous execution, use `ShieldedCommandWallet`:
 
