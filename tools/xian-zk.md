@@ -213,6 +213,127 @@ That means the relayer can submit the transaction and get paid, but cannot
 change the fee, redirect the execution to a different relayer account, or reuse
 the proof on another chain.
 
+## Private Submission Relayer
+
+The proof-bound relayed transfer and shielded-command paths now also have a
+concrete network-facing relayer service:
+
+- Python client: `ShieldedRelayerClient`
+- async Python client: `ShieldedRelayerAsyncClient`
+- Python pool clients: `ShieldedRelayerPoolClient`,
+  `ShieldedRelayerAsyncPoolClient`
+- TypeScript client: `XianShieldedRelayerClient`
+- TypeScript pool client: `XianShieldedRelayerPoolClient`
+- stack-managed runtime: `xian-shielded-relayer`
+
+HTTP surface:
+
+- `GET /health`
+- `GET /v1/info`
+- `GET /metrics`
+- `POST /v1/quote`
+- `POST /v1/jobs/shielded-note-transfer`
+- `POST /v1/jobs/shielded-command`
+- `GET /v1/jobs/{job_id}`
+
+The important rule is that `quote` returns the exact relayer account, chain id,
+fee, and expiry that the proof must bind. The relayer service then submits the
+matching on-chain call through the normal `xian-py` transaction path.
+
+Networks can now advertise one or more relayers in their manifest. The
+canonical field is `shielded_relayers`, while the older single-entry
+`shielded_relayer` field is still readable for compatibility.
+
+Example:
+
+```json
+{
+  "shielded_relayers": [
+    {
+      "id": "primary-eu",
+      "base_url": "https://relayer-eu.example.org",
+      "auth_scheme": "bearer",
+      "public_info": true,
+      "public_quote": false,
+      "public_job_lookup": false,
+      "priority": 10,
+      "submission_kinds": [
+        "shielded_note_relay_transfer",
+        "shielded_command"
+      ]
+    }
+  ]
+}
+```
+
+The current CLI-side selection rule is intentionally simple: sort by
+`priority`, then `id`, then `base_url`, and expose the first entry as the
+primary relayer while keeping the full catalog available to tooling. The routed
+pool clients in `xian-py` and `xian-js` now use that same ordered catalog.
+
+Current pool-client behavior is:
+
+- `get_info` / `getInfo` and `get_quote` / `getQuote` can fail over across the
+  ordered relayer list
+- submit and `get_job` / `getJob` stay explicitly routed when more than one
+  relayer is configured
+- if only one candidate relayer exists for a submission kind, submit can use it
+  directly without an explicit relayer id
+
+That split is intentional: quote/info are safe to retry, but submissions are
+proof-bound to a specific relayer and job ids are relayer-local.
+
+For local operator use through `xian-stack`:
+
+```bash
+export XIAN_SHIELDED_RELAYER_PRIVATE_KEY=<relayer-ed25519-private-key>
+python3 ./scripts/backend.py start --no-service-node --shielded-relayer
+python3 ./scripts/backend.py endpoints --no-service-node --shielded-relayer
+```
+
+The relayer can optionally require a bearer token for quote and submission
+routes:
+
+```bash
+export XIAN_SHIELDED_RELAYER_AUTH_TOKEN=local-dev-token
+```
+
+If the relayer binds to a non-loopback host, the current stack-managed runtime
+now requires `XIAN_SHIELDED_RELAYER_AUTH_TOKEN`. Treat that as a minimum
+hardening rule, not an optional production extra.
+
+Operational knobs now also include:
+
+```bash
+export XIAN_SHIELDED_RELAYER_PUBLIC_INFO=1
+export XIAN_SHIELDED_RELAYER_PUBLIC_QUOTE=0
+export XIAN_SHIELDED_RELAYER_PUBLIC_JOB_LOOKUP=0
+export XIAN_SHIELDED_RELAYER_METRICS_ENABLED=1
+export XIAN_SHIELDED_RELAYER_METRICS_PUBLIC=0
+export XIAN_SHIELDED_RELAYER_RATE_LIMIT_REQUESTS_PER_MINUTE=120
+export XIAN_SHIELDED_RELAYER_RATE_LIMIT_BURST=30
+export XIAN_SHIELDED_RELAYER_JOB_HISTORY_TTL_SECONDS=86400
+```
+
+`expires_at` uses the canonical contract-time string format:
+
+```text
+YYYY-MM-DD HH:MM:SS
+```
+
+That second-resolution format is important because the proof binds the same
+logical expiry value the contract checks on-chain.
+
+Operational privacy notes:
+
+- the relayer is a trusted submission hop, not an anonymity network
+- the relayer can still observe submitter transport metadata unless another
+  anonymity layer sits in front of it
+- relayer job lookups are for short-lived operational status, not long-term
+  privacy-preserving storage
+- `/metrics` is for operator monitoring, and should normally stay private on
+  shared relayers
+
 ## Trusted Local Prover Service
 
 `xian-zk` now ships a local prover-service entrypoint for wallet-side proving
