@@ -53,10 +53,19 @@ allowances.
 
 ```python
 @construct
-def seed(name: str = "Example Token", symbol: str = "EXT"):
+def seed(
+    name: str = "Example Token",
+    symbol: str = "EXT",
+    logo_url: str = "",
+    logo_svg: str = "",
+    website: str = "",
+):
     balances[ctx.caller] = 1_000_000
     metadata["token_name"] = name
     metadata["token_symbol"] = symbol
+    metadata["token_logo_url"] = logo_url
+    metadata["token_logo_svg"] = logo_svg
+    metadata["token_website"] = website
     metadata["operator"] = ctx.caller
 ```
 
@@ -135,10 +144,19 @@ ApproveEvent = LogEvent("Approve", {
 })
 
 @construct
-def seed(name: str = "Example Token", symbol: str = "EXT"):
+def seed(
+    name: str = "Example Token",
+    symbol: str = "EXT",
+    logo_url: str = "",
+    logo_svg: str = "",
+    website: str = "",
+):
     balances[ctx.caller] = 1_000_000
     metadata["token_name"] = name
     metadata["token_symbol"] = symbol
+    metadata["token_logo_url"] = logo_url
+    metadata["token_logo_svg"] = logo_svg
+    metadata["token_website"] = website
     metadata["operator"] = ctx.caller
 
 @export
@@ -196,7 +214,13 @@ client = Xian("http://127.0.0.1:26657", wallet=wallet)
 result = client.submit_contract(
     name="con_example_token",
     code=TOKEN_CODE,
-    args={"name": "Example Token", "symbol": "EXT"},
+    args={
+        "name": "Example Token",
+        "symbol": "EXT",
+        "logo_url": "https://example.invalid/token.svg",
+        "logo_svg": "",
+        "website": "https://example.invalid",
+    },
     stamps=500_000,
 )
 ```
