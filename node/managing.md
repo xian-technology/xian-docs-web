@@ -650,6 +650,22 @@ uv run xian-bds-snapshot export --output-path ./xian-bds-snapshot.tar.gz
 uv run xian-bds-snapshot import --input-path ./xian-bds-snapshot.tar.gz
 ```
 
+On `xian-stack`, the standardized operator path is:
+
+```bash
+python3 ./scripts/backend.py bds-snapshot-export
+python3 ./scripts/backend.py bds-snapshot-import
+```
+
+That backend command writes and reads the canonical archive at:
+
+```bash
+.cometbft/snapshots/xian-bds-snapshot.tar.gz
+```
+
+You can override it, but it must still live under `XIAN_COMETBFT_HOME` so the
+stack container can access the file.
+
 Recommended use:
 
 - export from a healthy indexed node
@@ -662,6 +678,14 @@ Snapshot import is the best path when:
 - BDS is being enabled for the first time on a large network
 - the local node is pruned and cannot rebuild full history from its own RPC
 - you want a faster bootstrap than replaying the whole chain from scratch
+
+Operational requirement for shielded / indexed deployments:
+
+- keep at least one recent exported BDS snapshot from a healthy indexed node
+- keep at least one archival recovery source, or another node that can still
+  export a full BDS snapshot
+- treat BDS snapshot export/import as part of normal recovery validation, not a
+  one-off disaster procedure
 
 ## Storage and Retention
 

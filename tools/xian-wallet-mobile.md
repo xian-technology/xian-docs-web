@@ -33,7 +33,24 @@ browser wallet for device performance reasons.
 
 - Node.js 18+
 - npm 9+
+- A sibling checkout of `xian-js`
 - A local checkout of `xian-wallet-mobile`
+
+Expected local layout:
+
+```text
+.../xian/
+  xian-js/
+  xian-wallet-mobile/
+```
+
+Build the shared client once before installing the mobile app:
+
+```bash
+cd xian-js
+npm install
+npm run build
+```
 
 Install dependencies once from the repo root:
 
@@ -87,6 +104,10 @@ npx expo start --dev-client
 adb reverse tcp:8081 tcp:8081
 ```
 
+The mobile repo is configured to watch the sibling workspace so the Expo dev
+client can resolve the local `@xian-tech/client` package. If you change code in
+`xian-js/packages/client`, rebuild that package before reloading the app.
+
 #### Android smoke testing
 
 At minimum, verify:
@@ -98,6 +119,41 @@ At minimum, verify:
 - receive by copying the address or scanning the QR code
 - send a small transaction and confirm the result screen / explorer link
 - export a backup and re-import it on a fresh install
+
+## Initial Wallet Setup
+
+The setup screen has three modes:
+
+- **Create** - generates a fresh 12-word BIP39 recovery seed
+- **Seed** - restores from a 12 or 24-word BIP39 recovery phrase
+- **Key** - imports a single 32-byte hex private-key seed
+
+The normal create flow is:
+
+1. choose **Create**
+2. enter and confirm a wallet password
+3. create the wallet
+4. record the generated recovery seed before continuing
+
+For seed-backed wallets, additional accounts can be derived later while the
+wallet is unlocked. Private-key imports are single-account only.
+
+### Network setup on real devices
+
+The built-in **Local node** preset uses `http://127.0.0.1:26657` and
+`http://127.0.0.1:8080`. That is useful for emulators or special local
+tunneling, but on a physical phone `127.0.0.1` points to the phone itself.
+
+When testing against a dev node running on your computer, add or switch to a
+custom network preset in **Settings > Networks** that uses your computer's LAN
+address instead, for example:
+
+```text
+RPC: http://192.168.x.y:26657
+Dashboard: http://192.168.x.y:8080
+```
+
+Use the same Wi-Fi network for the phone and the dev machine.
 
 #### Android release APK
 
@@ -214,7 +270,7 @@ xian-wallet-mobile/
       crypto-polyfill.ts   # Self-contained SHA-256, PBKDF2, AES-GCM
       wallet-controller.ts # Portable business logic
       wallet-context.tsx   # React context for state management
-      rpc-client.ts        # Xian node RPC communication
+      rpc-client.ts        # Shared xian-js client wrapper + extra ABCI helpers
       storage.ts           # AsyncStorage + SecureStore adapter
       haptics.ts           # Haptic feedback utility
       preferences.ts       # User preferences (layout, labels)
@@ -254,7 +310,7 @@ self-contained crypto polyfill:
 | HMAC-SHA256 | Built on native SHA-256 via `expo-crypto` for PBKDF2 loop performance |
 | PBKDF2 | 10,000 iterations (lower than browser's 250k due to JS-native bridge overhead) |
 | AES-256-GCM | Pure JS with lookup-table AES block cipher + GF(2^128) GHASH |
-| Ed25519 | `tweetnacl` (pure JS) |
+| Ed25519 | `@xian-tech/client` signer (`tweetnacl` under the hood) |
 | BIP39 | `@scure/bip39` (pure JS) |
 | Random | `react-native-get-random-values` (native RNG) |
 
@@ -271,18 +327,22 @@ the raw seed or key material and re-encrypts it for the target platform.
 | Data | Backend | Purpose |
 |------|---------|---------|
 | Wallet state | `AsyncStorage` | Encrypted keys, accounts, presets, assets |
-| Unlocked session | `expo-secure-store` | Private key, mnemonic, password (memory-only on device) |
+| Unlocked session | `expo-secure-store` | Active private key, mnemonic when available, and a derived session key while unlocked |
 | Contacts | `AsyncStorage` | Saved recipient addresses |
 | Preferences | `AsyncStorage` | Layout, label visibility |
 
 ### RPC Client
 
-Direct communication with Xian nodes via HTTP:
+The mobile wallet uses `@xian-tech/client` as its canonical transaction and RPC
+layer. A thin wrapper adds a few direct ABCI helpers for endpoints that are not
+yet modeled there.
+
+Current important calls include:
 
 - `getBalance` - `/get/{contract}.balances:{address}` ABCI query
 - `getChainId` - `/status` endpoint
 - `estimateStamps` - `/simulate` ABCI query
-- `sendTransaction` - builds, signs (Ed25519), broadcasts via `broadcast_tx_sync`
+- `sendTransaction` - builds, signs, and broadcasts through the shared Xian JS client
 - `getTransactionHistory` - `/txs_by_sender/{address}` ABCI query
 - `waitForTx` - polls `/tx?hash=` until finalized
 
