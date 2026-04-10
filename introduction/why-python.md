@@ -85,7 +85,7 @@ Python is interpreted and slower than compiled languages like Rust, Go, or C++.
 However, Xian is not trying to win by being the fastest chain:
 
 - **Many real workloads are state- and coordination-heavy** -- storage, validation, and network coordination often matter more than raw compute speed
-- **Metering limits total computation** -- deterministic stamp limits cap expensive work regardless of language speed
+- **Metering limits total computation** -- deterministic chi limits cap expensive work regardless of language speed
 - **Operational clarity matters** -- easier contracts and easier tooling can be more valuable than squeezing out another benchmark win
 - **The product goal is usability** -- Xian is intended to be a flexible programmable backend, not a throughput-first chain
 

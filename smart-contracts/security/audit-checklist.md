@@ -40,7 +40,7 @@ Use this list before shipping a contract to a real network.
 - unauthorized caller tests exist for every privileged export
 - edge cases are covered for zero, negative, empty, expired, and duplicate
   inputs
-- stamp-heavy paths are exercised locally
+- chi-heavy paths are exercised locally
 
 ## Deployment Discipline
 

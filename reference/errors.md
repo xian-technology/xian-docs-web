@@ -25,7 +25,7 @@ These happen before execution, during mempool admission:
 - invalid signature
 - wrong `chain_id`
 - nonce mismatch
-- insufficient balance for the supplied stamp limit
+- insufficient balance for the supplied chi limit
 
 These transactions do not enter the block execution path.
 
@@ -34,13 +34,13 @@ These transactions do not enter the block execution path.
 These happen during contract execution:
 
 - failed `assert`
-- out-of-stamps
+- out-of-chi
 - runtime exceptions
 
 Effects:
 
 - state changes for that transaction are rolled back
-- consumed stamps are still charged
+- consumed chi are still charged
 - emitted events from that transaction are discarded
 
 ## Query/Service Errors

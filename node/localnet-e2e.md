@@ -162,9 +162,9 @@ already-running localnet.
 - The localnet validator image must include `xian-zk`, not just the Python-side
   prover utilities. The shielded phase verifies proofs inside the validator
   runtime.
-- The shielded phase uses explicit transaction stamp ceilings. The default
+- The shielded phase uses explicit transaction chi ceilings. The default
   readonly simulator cap is intentionally smaller than proof-backed shielded
-  execution, so simulator-based stamp estimation is not the right path for
+  execution, so simulator-based chi estimation is not the right path for
   those transactions in the canonical run.
 - The shielded phase is normally the slowest phase in the whole run because it
   includes real proving work. A clean success run can spend multiple minutes in

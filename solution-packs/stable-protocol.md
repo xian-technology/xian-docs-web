@@ -366,6 +366,6 @@ At the time of writing:
 
 - [Protocol Governance & State Patches](/node/protocol-governance)
 - [GraphQL (BDS)](/api/graphql)
-- [Estimating Stamps](/api/dry-runs)
+- [Estimating Chi](/api/dry-runs)
 - [xian-py](/tools/xian-py)
 - [xian-js](/tools/xian-js)

@@ -62,7 +62,7 @@ LMDB (disk)
 
 ### Pending Writes
 
-During execution of a single transaction, all writes go into an in-memory buffer. If the transaction succeeds, these writes are promoted to the next layer. If it fails (assertion error, out of stamps), they are discarded entirely.
+During execution of a single transaction, all writes go into an in-memory buffer. If the transaction succeeds, these writes are promoted to the next layer. If it fails (assertion error, out of chi), they are discarded entirely.
 
 This is how Xian achieves atomic transactions -- either all state changes apply or none do.
 
@@ -94,11 +94,11 @@ Commit:
 
 ## Rollback on Failed Transactions
 
-When a transaction fails (assertion error, out of stamps, runtime error), its state changes are rolled back:
+When a transaction fails (assertion error, out of chi, runtime error), its state changes are rolled back:
 
 1. The pending writes buffer for that transaction is discarded
 2. No state from the failed transaction reaches LMDB
-3. The stamps consumed up to the failure point are still charged
+3. The chi consumed up to the failure point are still charged
 4. Events emitted during the failed transaction are also discarded
 
 This rollback is immediate and requires no explicit undo logic -- the pending writes were never committed.

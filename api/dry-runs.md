@@ -1,4 +1,4 @@
-# Estimating Stamps
+# Estimating Chi
 
 Xian supports dry runs through the `simulate_tx` ABCI query path. This executes
 contract logic against the node's current effective state view and then drops
@@ -62,7 +62,7 @@ The current simulator returns:
       "value": "999900"
     }
   ],
-  "stamps_used": 342,
+  "chi_used": 342,
   "result": "None"
 }
 ```
@@ -70,7 +70,7 @@ The current simulator returns:
 Key fields:
 
 - `status`: `0` for success, `1` for failure
-- `stamps_used`: estimated stamps consumed
+- `chi_used`: estimated chi consumed
 - `state`: preview of writes that would occur
 - `result`: safe string representation of the function result or failure
 
@@ -80,7 +80,7 @@ When the node refuses or aborts a dry run, you still get the same envelope with
 - simulation disabled on this node
 - simulation capacity exceeded on this node
 - simulation timed out on this node
-- simulation stamp budget exceeded during readonly execution
+- simulation chi budget exceeded during readonly execution
 
 ## SDK Example
 
@@ -97,7 +97,7 @@ result = client.simulate(
 )
 
 print(result["status"])
-print(result["stamps_used"])
+print(result["chi_used"])
 print(result["state"])
 ```
 
@@ -124,7 +124,7 @@ Readonly simulation is node-local and configurable under `[xian]`:
 simulation_enabled = true
 simulation_max_concurrency = 2
 simulation_timeout_ms = 3000
-simulation_max_stamps = 1000000
+simulation_max_chi = 1000000
 ```
 
 What these keys do:
@@ -132,7 +132,7 @@ What these keys do:
 - `simulation_enabled`: turn the `simulate_tx` query path on or off
 - `simulation_max_concurrency`: maximum concurrent dry runs accepted by this node
 - `simulation_timeout_ms`: wall-clock timeout for one dry run worker
-- `simulation_max_stamps`: readonly stamp budget cap used during simulation
+- `simulation_max_chi`: readonly chi budget cap used during simulation
 
 See [Runtime Features](/node/runtime-features) for the operator-facing runtime
 reference and [Node Profiles](/node/profiles) for the high-level `xian-cli`

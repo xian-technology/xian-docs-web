@@ -215,7 +215,7 @@ await client.getNonce(address);
 await client.getState("currency", "balances", [address]);
 await client.getBalance(address);
 await client.getTokenMetadata("currency");
-await client.getStampRate();
+await client.getChiRate();
 await client.getContract("currency");
 await client.getContractCode("currency");
 ```
@@ -236,10 +236,10 @@ const simulation = await client.simulate({
 });
 ```
 
-Estimate stamps:
+Estimate chi:
 
 ```ts
-const estimate = await client.estimateStamps({
+const estimate = await client.estimateChi({
   sender: address,
   contract: "currency",
   function: "transfer",
@@ -264,7 +264,7 @@ const tx = await client.buildTx({
   contract: "currency",
   function: "transfer",
   kwargs: { to: "bob", amount: "5" },
-  stamps: 50_000,
+  chi: 50_000,
 });
 ```
 
@@ -313,7 +313,7 @@ Send through the contract helper:
 await currency.send(
   "transfer",
   { to: "bob", amount: "5" },
-  { signer, stamps: 50_000, mode: "checktx" },
+  { signer, chi: 50_000, mode: "checktx" },
 );
 ```
 
@@ -328,13 +328,13 @@ await token.transfer({
   signer,
   to: "bob",
   amount: "5",
-  stamps: 50_000,
+  chi: 50_000,
 });
 await token.approve({
   signer,
   spender: "con_dex",
   amount: "100",
-  stamps: 50_000,
+  chi: 50_000,
 });
 ```
 
@@ -554,7 +554,7 @@ For real browser wallets, prefer the intent-based path over prebuilding every
 payload in the dapp:
 
 - `prepareTransaction(...)` lets the wallet fill sender, active chain, nonce,
-  and default stamps
+  and default chi
 - `sendCall(...)` lets the wallet do prepare + sign + broadcast in one request
 
 That avoids stale nonces and wrong-account or wrong-chain mismatches better
@@ -737,7 +737,7 @@ npm run validate
 
 - [REST API](/api/rest)
 - [WebSocket Subscriptions](/api/websockets)
-- [Estimating Stamps](/api/dry-runs)
+- [Estimating Chi](/api/dry-runs)
 - [xian-py](/tools/xian-py)
 - [xian-wallet-browser](/tools/xian-wallet-browser)
 - [xian-js Playground](/tools/playground)

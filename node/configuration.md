@@ -259,7 +259,7 @@ Current keys:
 - `simulation_enabled`
 - `simulation_max_concurrency`
 - `simulation_timeout_ms`
-- `simulation_max_stamps`
+- `simulation_max_chi`
 
 These are node-local operational controls. Use them to keep dry runs useful for
 wallets and SDKs without turning validator RPC into unrestricted free compute.

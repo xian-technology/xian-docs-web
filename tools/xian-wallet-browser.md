@@ -197,14 +197,14 @@ Key derivation is deterministic:
 1. Select a token from the dropdown (defaults to XIAN)
 2. Enter recipient address (or pick from contacts)
 3. Enter amount (or tap MAX)
-4. Review - stamps are estimated automatically via `/simulate`
+4. Review - chi are estimated automatically via `/simulate`
 5. Send - shows result with TX hash linked to the explorer
 
 **Advanced transaction:**
 
 - Enter contract name - functions auto-load from the node
 - Select function - arguments auto-populate with typed fields
-- Set stamps manually or auto-estimate
+- Set chi manually or auto-estimate
 - Review and send
 
 ### Activity
@@ -213,7 +213,7 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 
 - Incoming / outgoing indicators
 - Success / fail badges
-- Tap for details - hash, block, stamps, time, explorer link
+- Tap for details - hash, block, chi, time, explorer link
 
 ### Asset Management
 

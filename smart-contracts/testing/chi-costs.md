@@ -1,8 +1,8 @@
-# Measuring Stamp Costs
+# Measuring Chi Costs
 
-Stamps are the gas unit on Xian. Every metered compute step, read, and write
-costs stamps. During development, you can enable metering in tests to measure
-how many stamps your contract functions consume.
+Chi are the gas unit on Xian. Every metered compute step, read, and write
+costs chi. During development, you can enable metering in tests to measure
+how many chi your contract functions consume.
 
 ## Enabling Metering
 
@@ -18,18 +18,18 @@ With metering enabled, contract calls use the same tracer mode that the runtime
 would use on-chain. On the default pure-Python backend that means deterministic
 line buckets; on the native backend it means exact instruction metering.
 
-## How Stamps Are Calculated
+## How Chi Are Calculated
 
-The stamp cost of a transaction has three components:
+The chi cost of a transaction has three components:
 
 1. **Compute costs** -- each Python opcode has a cost (2-1610 compute units)
-2. **Read costs** -- 1 stamp per byte of key + value read from storage
-3. **Write costs** -- 25 stamps per byte of key + value written to storage
+2. **Read costs** -- 1 chi per byte of key + value read from storage
+3. **Write costs** -- 25 chi per byte of key + value written to storage
 
-The raw compute units are converted to stamps using the formula:
+The raw compute units are converted to chi using the formula:
 
 ```
-stamps_used = (raw_cost // 1000) + 5
+chi_used = (raw_cost // 1000) + 5
 ```
 
 The `+ 5` is the base transaction cost that every transaction pays regardless of computation.
@@ -38,16 +38,16 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `READ_COST_PER_BYTE` | 1 | Stamps per byte for storage reads |
-| `WRITE_COST_PER_BYTE` | 25 | Stamps per byte for storage writes |
-| `STAMPS_PER_T` | 20 | How many stamps one XIAN buys. `T` stands for the native token. |
-| Max stamps per tx | 6,500,000 | Hard ceiling per transaction |
+| `READ_COST_PER_BYTE` | 1 | Chi per byte for storage reads |
+| `WRITE_COST_PER_BYTE` | 25 | Chi per byte for storage writes |
+| `CHI_PER_T` | 20 | How many chi one XIAN buys. `T` stands for the native token. |
+| Max chi per tx | 6,500,000 | Hard ceiling per transaction |
 | Max line events (`python_line_v1`) | 800,000 | Maximum line callbacks per transaction |
 | Max instruction events (`native_instruction_v1`) | 3,250,000 | Maximum native instruction callbacks per transaction |
 
-## Checking Stamps Used
+## Checking Chi Used
 
-When metering is enabled, you need to set a stamp limit for execution. Use the `Executor` class directly for detailed stamp analysis:
+When metering is enabled, you need to set a chi limit for execution. Use the `Executor` class directly for detailed chi analysis:
 
 ```python
 from contracting.client import ContractingClient
@@ -79,11 +79,11 @@ output = executor.execute(
     sender="sys",
     contract_name="con_counter",
     function_name="increment",
-    stamps=1_000_000,  # stamp limit
+    chi=1_000_000,  # chi limit
     kwargs={},
 )
 
-print(f"Stamps used: {output['stamps_used']}")
+print(f"Chi used: {output['chi_used']}")
 print(f"Result: {output['result']}")
 print(f"Status code: {output['status_code']}")
 ```
@@ -92,12 +92,12 @@ The output dictionary contains:
 
 | Key | Description |
 |-----|-------------|
-| `stamps_used` | Total stamps consumed by the transaction |
+| `chi_used` | Total chi consumed by the transaction |
 | `result` | The return value of the function |
 | `status_code` | `0` for success, `1` for failure |
 | `state` | List of state changes made |
 
-## Example: Comparing Stamp Costs
+## Example: Comparing Chi Costs
 
 ```python
 import unittest
@@ -127,7 +127,7 @@ def cost_test_contract():
         return counter.get()
 
 
-class TestStampCosts(unittest.TestCase):
+class TestChiCosts(unittest.TestCase):
     def setUp(self):
         self.client = ContractingClient()
         self.client.flush()
@@ -139,7 +139,7 @@ class TestStampCosts(unittest.TestCase):
             sender="sys",
             contract_name="con_cost",
             function_name=function_name,
-            stamps=1_000_000,
+            chi=1_000_000,
             kwargs=kwargs or {},
         )
 
@@ -148,8 +148,8 @@ class TestStampCosts(unittest.TestCase):
         write_output = self.execute("write_small")
 
         self.assertGreater(
-            write_output["stamps_used"],
-            read_output["stamps_used"],
+            write_output["chi_used"],
+            read_output["chi_used"],
         )
 
     def test_large_write_costs_more(self):
@@ -157,37 +157,37 @@ class TestStampCosts(unittest.TestCase):
         large_output = self.execute("write_large")
 
         self.assertGreater(
-            large_output["stamps_used"],
-            small_output["stamps_used"],
+            large_output["chi_used"],
+            small_output["chi_used"],
         )
 
-    def test_stamps_under_limit(self):
+    def test_chi_under_limit(self):
         output = self.execute("write_large")
-        self.assertLess(output["stamps_used"], 100_000)
+        self.assertLess(output["chi_used"], 100_000)
 
 
 if __name__ == "__main__":
     unittest.main()
 ```
 
-## Out of Stamps
+## Out of Chi
 
-If a contract exceeds its stamp limit, the transaction fails and all state changes are rolled back. The stamps are still consumed (charged to the sender):
+If a contract exceeds its chi limit, the transaction fails and all state changes are rolled back. The chi are still consumed (charged to the sender):
 
 ```python
 output = executor.execute(
     sender="sys",
     contract_name="con_cost",
     function_name="write_large",
-    stamps=10,  # very low limit
+    chi=10,  # very low limit
     kwargs={},
 )
 
 assert output["status_code"] == 1  # failure
-# stamps_used will equal the stamp limit
+# chi_used will equal the chi limit
 ```
 
-## Tips for Optimizing Stamp Costs
+## Tips for Optimizing Chi Costs
 
 - **Minimize writes** -- writes cost 25x more than reads per byte
 - **Use shorter keys** -- key length is part of the byte cost

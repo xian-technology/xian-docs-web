@@ -187,7 +187,7 @@ Supported vote types are currently:
 - `change_registration_fee`
 - `reward_change`
 - `dao_payout`
-- `stamp_cost_change`
+- `chi_cost_change`
 - `change_types`
 - `update_policy`
 - `topic_vote`

@@ -49,7 +49,7 @@ applications / services / wallets / automation
 Owns:
 
 - sandboxed Python execution
-- stamp metering
+- chi metering
 - contract linter
 - LMDB-backed state driver
 - local testing surface via `ContractingClient`

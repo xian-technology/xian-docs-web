@@ -73,12 +73,12 @@ The meter also has two separate safety layers:
   `native_instruction_v1`
 
 In normal paid execution, the meaningful user-facing limit is still the
-transaction's supplied stamp budget. The tracer hard ceiling is intentionally
+transaction's supplied chi budget. The tracer hard ceiling is intentionally
 far above ordinary transaction execution so it does not become a hidden
 consensus-path cap for large but valid workloads.
 
 Readonly simulation is different. Nodes can configure a smaller
-`simulation_max_stamps` limit on purpose so free dry runs do not turn into
+`simulation_max_chi` limit on purpose so free dry runs do not turn into
 unbounded public compute. That simulator-specific cap is an operational abuse
 control, not the normal paid-transaction metering rule.
 
@@ -101,11 +101,11 @@ All validators must run the same version of CPython. The Python bytecode compile
 
 ### Integer Arithmetic for Costs
 
-All stamp cost calculations use integer arithmetic. There is no floating-point math in the metering engine. This eliminates rounding differences across CPU architectures:
+All chi cost calculations use integer arithmetic. There is no floating-point math in the metering engine. This eliminates rounding differences across CPU architectures:
 
 ```
 raw_cost = sum of integer opcode costs
-stamps_used = (raw_cost // 1000) + 5  # integer division, no float
+chi_used = (raw_cost // 1000) + 5  # integer division, no float
 ```
 
 ### Decimal Arithmetic for Contract Values

@@ -1,39 +1,39 @@
-# Stamps & Metering
+# Chi & Metering
 
-Stamps are Xian's unit of computation, analogous to gas on Ethereum. Every operation in a smart contract -- arithmetic, storage reads, storage writes, function calls -- costs stamps. This prevents infinite loops, limits resource consumption, and compensates validators for execution work.
+Chi is Xian's name for transaction execution energy: the network's unit of computation, analogous to gas on Ethereum. It is not a separate token or an acronym. Every operation in a smart contract -- arithmetic, storage reads, storage writes, function calls -- costs chi. This prevents infinite loops, limits resource consumption, and compensates validators for execution work.
 
-## How Stamps Work
+## How Chi Works
 
-When you submit a transaction, you specify a stamp limit (the maximum stamps you are willing to spend). The contract executes, and the actual stamps consumed are deducted from your XIAN balance.
+When you submit a transaction, you specify a chi limit (the maximum chi you are willing to spend). The contract executes, and the actual chi consumed is deducted from your XIAN balance.
 
-- If the contract completes within the stamp limit, you pay only the stamps actually used.
-- If the contract exceeds the stamp limit, execution halts, all state changes are rolled back, and you pay the full stamp limit.
+- If the contract completes within the chi limit, you pay only the chi actually used.
+- If the contract exceeds the chi limit, execution halts, all state changes are rolled back, and you pay the full chi limit.
 
 ## Cost Constants
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `READ_COST_PER_BYTE` | 1 | Stamps charged per byte when reading from storage |
-| `WRITE_COST_PER_BYTE` | 25 | Stamps charged per byte when writing to storage |
-| `STAMPS_PER_T` | 20 | Number of stamps purchased by 1 XIAN. `T` stands for the native token. |
-| Base transaction cost | 5 | Flat stamp cost added to every transaction |
+| `READ_COST_PER_BYTE` | 1 | Chi charged per byte when reading from storage |
+| `WRITE_COST_PER_BYTE` | 25 | Chi charged per byte when writing to storage |
+| `CHI_PER_T` | 20 | Number of chi purchased by 1 XIAN. `T` stands for the native token. |
+| Base transaction cost | 5 | Flat chi cost added to every transaction |
 
-## The Stamp Formula
+## The Chi Formula
 
-The total stamp cost of a transaction is computed as:
+The total chi cost of a transaction is computed as:
 
 ```
-stamps_used = (raw_compute_cost // 1000) + 5
+chi_used = (raw_compute_cost // 1000) + 5
 ```
 
 Where:
 - `raw_compute_cost` is the sum of all instruction costs (each Python opcode has a cost between 2 and 1610 compute units)
-- The `// 1000` division converts compute units to stamps
+- The `// 1000` division converts compute units to chi
 - `+ 5` is the base transaction cost
 
 Storage costs are added on top of compute costs:
-- Each storage read adds `byte_count * 1` stamps
-- Each storage write adds `byte_count * 25` stamps
+- Each storage read adds `byte_count * 1` chi
+- Each storage write adds `byte_count * 25` chi
 
 The byte count includes both the key and the value.
 
@@ -41,26 +41,26 @@ The byte count includes both the key and the value.
 
 | Limit | Value |
 |-------|-------|
-| Maximum stamps per transaction | 6,500,000 |
+| Maximum chi per transaction | 6,500,000 |
 | Maximum Python line events per transaction (`python_line_v1`) | 800,000 |
 | Maximum instruction events per transaction (`native_instruction_v1`) | 3,250,000 |
 | Maximum write per transaction | 128 KB |
-| Default stamp allocation | 1,000,000 |
+| Default chi allocation | 1,000,000 |
 
-If any limit is exceeded, the transaction fails and all state changes are reverted. The stamps consumed up to the failure point are still charged.
+If any limit is exceeded, the transaction fails and all state changes are reverted. The chi consumed up to the failure point are still charged.
 
-## Converting Stamps to XIAN
+## Converting Chi to XIAN
 
-Stamps are purchased with XIAN, the native currency:
+Chi are purchased with XIAN, the native currency:
 
 ```
-XIAN cost = stamps_used / STAMPS_PER_T
-XIAN cost = stamps_used / 20
+XIAN cost = chi_used / CHI_PER_T
+XIAN cost = chi_used / 20
 ```
 
 Examples:
 
-| Stamps Used | XIAN Cost |
+| Chi Used | XIAN Cost |
 |-------------|----------|
 | 100 | 5.0 |
 | 1,000 | 50.0 |
@@ -68,7 +68,7 @@ Examples:
 | 100,000 | 5,000.0 |
 | 1,000,000 | 50,000.0 |
 
-## What Costs Stamps
+## What Costs Chi
 
 ### Computation
 
@@ -84,31 +84,31 @@ validators aligned on it.
 
 ### Storage Reads
 
-Reading a value from state costs 1 stamp per byte of the key and value combined:
+Reading a value from state costs 1 chi per byte of the key and value combined:
 
 ```python
 # Reading balances["alice"] where the stored value is "1000000"
 # Key: "con_token.balances:alice" (24 bytes)
 # Value: "1000000" (7 bytes)
-# Cost: 31 stamps
+# Cost: 31 chi
 balance = balances["alice"]
 ```
 
 ### Storage Writes
 
-Writing a value costs 25 stamps per byte:
+Writing a value costs 25 chi per byte:
 
 ```python
 # Writing balances["alice"] = 999000
 # Key: "con_token.balances:alice" (24 bytes)
 # Value: "999000" (6 bytes)
-# Cost: 750 stamps
+# Cost: 750 chi
 balances["alice"] = 999000
 ```
 
 ### Cross-Contract Calls
 
-Calling a function on another contract incurs the stamp cost of executing that function, plus the overhead of the call itself.
+Calling a function on another contract incurs the chi cost of executing that function, plus the overhead of the call itself.
 
 Developer rewards now follow that metered execution path too. The transaction's
 developer-reward bucket is split across the participating contracts in
@@ -120,18 +120,18 @@ model. It is no longer split equally per validator by default. The validator
 reward bucket is now distributed by each active validator's configured
 `validator_power`, and the payout is sent to that validator's `reward_key`.
 
-## Optimizing Stamp Usage
+## Optimizing Chi Usage
 
 - **Minimize storage writes** -- writes cost 25x more than reads per byte
 - **Use shorter variable and key names** -- key length contributes to byte cost
-- **Cache reads in local variables** -- reading the same key twice costs stamps twice
+- **Cache reads in local variables** -- reading the same key twice costs chi twice
 - **Use `default_value`** -- avoids storing default entries explicitly
 - **Batch related operations** -- fewer cross-contract calls means less overhead
 
-## Stamps in Practice
+## Chi in Practice
 
-A simple token transfer typically costs between 200 and 500 stamps. A complex
-DEX swap involving multiple contracts might cost 2,000-10,000 stamps. In that
+A simple token transfer typically costs between 200 and 500 chi. A complex
+DEX swap involving multiple contracts might cost 2,000-10,000 chi. In that
 multi-contract case, developer rewards are not paid only to the entry
 contract's developer anymore; they are split across the participating contract
 developers by measured execution share. On the validator side, the validator
@@ -139,4 +139,4 @@ slice is distributed by validator power rather than an equal per-node split.
 Contract deployment (submission) costs more because the entire source code is
 stored on-chain.
 
-You can estimate stamp costs before submitting a transaction by using [dry runs](/api/dry-runs).
+You can estimate chi costs before submitting a transaction by using [dry runs](/api/dry-runs).

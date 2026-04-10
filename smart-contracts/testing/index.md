@@ -25,7 +25,7 @@ contract.transfer(to="bob", amount=100)
 - [Unit Testing](/smart-contracts/testing/unit-testing) -- full guide to setting up tests with ContractingClient
 - [Return Values & Events](/smart-contracts/testing/return-values) -- inspecting function outputs and emitted events
 - [Multi-Contract Testing](/smart-contracts/testing/multi-contract) -- testing contracts that import each other
-- [Stamp Costs](/smart-contracts/testing/stamp-costs) -- measuring gas consumption in tests
+- [Chi Costs](/smart-contracts/testing/chi-costs) -- measuring gas consumption in tests
 
 ## Installation
 

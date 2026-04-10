@@ -41,7 +41,7 @@ A key-value mapping that persists on-chain. Supports up to 16 key dimensions. De
 ### Metering
 The system that charges contract execution work via `sys.monitoring`. Xian
 supports a pure-Python line-bucket tracer and a native exact-instruction
-tracer. Both prevent infinite loops and ensure deterministic stamp accounting.
+tracer. Both prevent infinite loops and ensure deterministic chi accounting.
 
 ## N
 
@@ -58,16 +58,16 @@ Object-Relational Mapping. In Xian, refers to the `Variable`, `Hash`, `ForeignVa
 ### Signer
 The original signer of a transaction, available as `ctx.signer`. This value never changes in a call chain -- even when contract A calls contract B, `ctx.signer` remains the address of the user who submitted the transaction.
 
-### Stamps
-The unit of computation cost on Xian, analogous to gas on Ethereum. Every operation (instruction execution, storage read, storage write) costs stamps. Stamps are purchased with XIAN at a rate of 20 stamps per XIAN.
+### Chi
+Xian's name for transaction execution energy and the unit of computation cost on the network, analogous to gas on Ethereum. Chi is not a separate token or an acronym. Every operation (instruction execution, storage read, storage write) costs chi. Chi are purchased with XIAN at a rate of 20 chi per XIAN.
 
 ## T
 
 ### XIAN
-The native currency of the Xian network. Used to pay for stamps (transaction fees), for transfers between addresses, and for staking.
+The native currency of the Xian network. Used to pay for chi (transaction fees), for transfers between addresses, and for staking.
 
 ### Transaction
-A signed message that instructs the network to execute a contract function with specific arguments. Contains the contract name, function name, keyword arguments, stamp limit, chain ID, nonce, and signature.
+A signed message that instructs the network to execute a contract function with specific arguments. Contains the contract name, function name, keyword arguments, chi limit, chain ID, nonce, and signature.
 
 ## V
 

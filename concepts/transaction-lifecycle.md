@@ -1,6 +1,6 @@
 # Transaction Lifecycle
 
-Every transaction on Xian follows a defined path from creation to finalization. Understanding this lifecycle helps you debug failed transactions, optimize stamp usage, and build reliable applications.
+Every transaction on Xian follows a defined path from creation to finalization. Understanding this lifecycle helps you debug failed transactions, optimize chi usage, and build reliable applications.
 
 ## Overview
 
@@ -19,7 +19,7 @@ Every transaction on Xian follows a defined path from creation to finalization. 
       |  4. Validate signature
       |  5. Verify chain_id matches
       |  6. Check nonce ordering
-      |  7. Verify sender has enough XIAN for stamps
+      |  7. Verify sender has enough XIAN for chi
       v
   Mempool
       |
@@ -32,9 +32,9 @@ Every transaction on Xian follows a defined path from creation to finalization. 
   FINALIZE_BLOCK
       |
       |  10. Execute contract function in sandbox
-      |  11. Meter contract execution (stamps)
+      |  11. Meter contract execution (chi)
       |  12. Apply state changes (or rollback on failure)
-      |  13. Deduct stamps from sender's XIAN balance
+      |  13. Deduct chi from sender's XIAN balance
       |  14. Collect events emitted by the contract
       v
   Commit
@@ -66,7 +66,7 @@ result = xian.send_tx(
     contract="currency",
     function="transfer",
     kwargs={"amount": 100, "to": "recipient_address"},
-    stamps=50000,
+    chi=50000,
 )
 ```
 
@@ -74,7 +74,7 @@ The payload contains:
 - `contract` -- the target contract name
 - `function` -- the exported function to call
 - `kwargs` -- keyword arguments for the function
-- `stamps` -- maximum stamps to spend
+- `chi` -- maximum chi to spend
 - `chain_id` -- network identifier (prevents cross-chain replay)
 - `nonce` -- sequential counter (prevents replay on the same chain)
 
@@ -98,7 +98,7 @@ Before entering the mempool, the transaction passes through validation:
 1. **Signature verification** -- the Ed25519 signature must be valid for the payload and sender's public key
 2. **Chain ID check** -- the transaction's chain_id must match the network
 3. **Nonce check** -- the nonce must be the next expected value for this sender
-4. **Balance check** -- the sender must have enough XIAN to cover the requested stamp limit
+4. **Balance check** -- the sender must have enough XIAN to cover the requested chi limit
 
 If any check fails, the transaction is rejected and never enters the mempool.
 Local pending-nonce reservations only happen after the transaction passes the
@@ -135,12 +135,12 @@ Per transaction, the execution flow is:
 1. **Sandbox setup** -- the contract runtime initializes with the sender's context (`ctx.caller`, `ctx.signer`)
 2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs
 3. **Metering** -- the selected tracer backend charges compute units via `sys.monitoring`
-4. **Storage operations** -- reads and writes are charged per byte (1 stamp/byte read, 25 stamps/byte write)
+4. **Storage operations** -- reads and writes are charged per byte (1 chi/byte read, 25 chi/byte write)
 5. **Block time injection** -- all transactions in the block observe the same
    consensus timestamp as `now`
 6. **Completion or failure**:
-   - **Success** -- state changes are buffered for commit, stamps consumed are recorded
-   - **Failure** (assertion, out of stamps, runtime error) -- state changes are rolled back, stamps are still charged
+   - **Success** -- state changes are buffered for commit, chi consumed are recorded
+   - **Failure** (assertion, out of chi, runtime error) -- state changes are rolled back, chi are still charged
 
 ### 15-17. Commit
 
@@ -165,16 +165,16 @@ After finalization, querying a transaction returns:
 | `hash` | Transaction hash |
 | `height` | Block height |
 | `status` | `0` (success) or `1` (failure) |
-| `stamps_used` | Actual stamps consumed |
+| `chi_used` | Actual chi consumed |
 | `result` | Return value from the contract function |
 | `state` | State changes made (key-value pairs) |
 | `events` | Events emitted by the contract |
 
 ## Failure Modes
 
-| Failure | When | State Changes | Stamps Charged |
+| Failure | When | State Changes | Chi Charged |
 |---------|------|---------------|----------------|
 | CHECK_TX rejection | Before mempool | None | None |
-| Assertion error | During execution | Rolled back | Yes (stamps consumed up to failure) |
-| Out of stamps | During execution | Rolled back | Yes (full stamp limit) |
-| Runtime error | During execution | Rolled back | Yes (stamps consumed up to failure) |
+| Assertion error | During execution | Rolled back | Yes (chi consumed up to failure) |
+| Out of chi | During execution | Rolled back | Yes (full chi limit) |
+| Runtime error | During execution | Rolled back | Yes (chi consumed up to failure) |

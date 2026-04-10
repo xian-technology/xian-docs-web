@@ -57,14 +57,14 @@ run through native `xian-zk` bindings inside the runtime.
 
 Local benchmark reference values from April 2026:
 
-- normal public transfer: `48` stamps
-- shielded exact withdraw with no new output: about `2,405` stamps
-- shielded deposit with 2 outputs: about `3,742` stamps
-- shielded transfer with 2 inputs / 2 outputs: about `4,062` stamps
-- relayed hidden-sender shielded transfer: about `5,726` stamps
+- normal public transfer: `48` chi
+- shielded exact withdraw with no new output: about `2,405` chi
+- shielded deposit with 2 outputs: about `3,742` chi
+- shielded transfer with 2 inputs / 2 outputs: about `4,062` chi
+- relayed hidden-sender shielded transfer: about `5,726` chi
 
 Those are still more expensive than a public transfer, but no longer in the
-earlier five-digit stamp range.
+earlier five-digit chi range.
 
 ## Before You Start
 

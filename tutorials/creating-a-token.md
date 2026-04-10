@@ -221,7 +221,7 @@ result = client.submit_contract(
         "logo_svg": "",
         "website": "https://example.invalid",
     },
-    stamps=500_000,
+    chi=500_000,
 )
 ```
 

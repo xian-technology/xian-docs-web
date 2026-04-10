@@ -204,7 +204,7 @@ result = client.send_tx(
     contract="currency",
     function="transfer",
     kwargs={"amount": 100, "to": "recipient_public_key"},
-    stamps=50_000,
+    chi=50_000,
     mode="checktx",
     wait_for_tx=True,
 )
@@ -236,8 +236,8 @@ print(result.tx_hash)
 print(result.receipt)
 ```
 
-If `stamps` is omitted, the SDK simulates the transaction first and adds a
-small configurable headroom to the estimated stamp usage before submission.
+If `chi` is omitted, the SDK simulates the transaction first and adds a
+small configurable headroom to the estimated chi usage before submission.
 
 You can set default submission behavior once through
 `XianClientConfig.submission` instead of repeating the same options on every
@@ -287,14 +287,14 @@ result = client.simulate(
 )
 
 print(result["status"])
-print(result["stamps_used"])
+print(result["chi_used"])
 print(result["state"])
 ```
 
 The dry-run result currently comes from the node simulator and uses:
 
 - `status`
-- `stamps_used`
+- `chi_used`
 - `state`
 - `result`
 - `payload`
@@ -305,7 +305,7 @@ layer rather than an unrestricted public endpoint.
 
 Node operators can also refuse or cap simulations through
 `simulation_enabled`, `simulation_max_concurrency`, `simulation_timeout_ms`,
-and `simulation_max_stamps`, so client code should expect structured failures
+and `simulation_max_chi`, so client code should expect structured failures
 when a node disables or limits the simulator.
 
 ### call
@@ -344,7 +344,7 @@ result = client.submit_contract(
     name="con_counter",
     code=code,
     args={},
-    stamps=500_000,
+    chi=500_000,
 )
 ```
 
@@ -358,7 +358,7 @@ Also available:
 - `get_tx(tx_hash)`
 - `wait_for_tx(tx_hash)`
 - `refresh_nonce()`
-- `estimate_stamps(contract, function, kwargs)`
+- `estimate_chi(contract, function, kwargs)`
 - `get_nodes()`
 - `get_genesis()`
 - `get_chain_id()`

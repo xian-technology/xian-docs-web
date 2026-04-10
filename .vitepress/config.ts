@@ -116,7 +116,7 @@ export default defineConfig({
             { text: 'Overview', link: '/smart-contracts/testing/' },
             { text: 'Unit Testing', link: '/smart-contracts/testing/unit-testing' },
             { text: 'Return Values & Events', link: '/smart-contracts/testing/return-values' },
-            { text: 'Measuring Stamp Costs', link: '/smart-contracts/testing/stamp-costs' },
+            { text: 'Measuring Chi Costs', link: '/smart-contracts/testing/chi-costs' },
             { text: 'Multi-Contract Testing', link: '/smart-contracts/testing/multi-contract' }
           ]
         },
@@ -142,7 +142,7 @@ export default defineConfig({
             { text: 'Time & Block Policy', link: '/concepts/time-and-blocks' },
             { text: 'The ABCI Layer', link: '/concepts/abci' },
             { text: 'State Model', link: '/concepts/state-model' },
-            { text: 'Stamps & Metering', link: '/concepts/stamps' },
+            { text: 'Chi & Metering', link: '/concepts/chi' },
             { text: 'Deterministic Execution', link: '/concepts/deterministic-execution' }
           ]
         }
@@ -187,7 +187,7 @@ export default defineConfig({
             { text: 'REST API', link: '/api/rest' },
             { text: 'WebSocket Subscriptions', link: '/api/websockets' },
             { text: 'GraphQL (BDS)', link: '/api/graphql' },
-            { text: 'Estimating Stamps', link: '/api/dry-runs' }
+            { text: 'Estimating Chi', link: '/api/dry-runs' }
           ]
         }
       ],
@@ -242,7 +242,7 @@ export default defineConfig({
             { text: 'Overview', link: '/reference/' },
             { text: 'Cheat Sheet', link: '/reference/cheat-sheet' },
             { text: 'Submission Internals', link: '/reference/submission-internals' },
-            { text: 'Stamp Cost Table', link: '/reference/stamp-costs' },
+            { text: 'Chi Cost Table', link: '/reference/chi-costs' },
             { text: 'Error Reference', link: '/reference/errors' },
             { text: 'Glossary', link: '/reference/glossary' }
           ]

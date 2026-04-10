@@ -278,7 +278,7 @@ Docs updated:
 - `smart-contracts/context.md`
 - `reference/cheat-sheet.md`
 - `reference/submission-internals.md`
-- `reference/stamp-costs.md`
+- `reference/chi-costs.md`
 
 What was documented:
 

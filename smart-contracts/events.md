@@ -42,7 +42,7 @@ def transfer(amount: float, to: str):
     Transfer({"from": ctx.caller, "to": to, "amount": amount})
 ```
 
-The event is emitted only if the transaction succeeds. If the transaction fails (exception, out of stamps, etc.), all events from that transaction are discarded along with the state changes.
+The event is emitted only if the transaction succeeds. If the transaction fails (exception, out of chi, etc.), all events from that transaction are discarded along with the state changes.
 
 ## Complete Example: Token with Events
 
@@ -106,7 +106,7 @@ def transfer_from(amount: float, to: str, main_account: str):
 - **Types must be** `str`, `int`, `float`, `bool`, or `decimal` (ContractingDecimal).
 - **At least one parameter** is required per event.
 - **Non-indexed is the default**. Only indexed fields need `indexed(...)` or `idx: True`.
-- **Events cost stamps** — both indexed and non-indexed parameters incur write costs during execution (25 stamps per byte).
+- **Events cost chi** — both indexed and non-indexed parameters incur write costs during execution (25 chi per byte).
 - **Events are atomic** — if the transaction fails, all events are rolled back.
 - **Event names are not globally unique**. Consumers should key by both `contract` and `event`.
 
@@ -118,7 +118,7 @@ Contract code
   ▼
 LogEvent.write_event()
   │  Validates types, sizes, indexed count
-  │  Charges stamp cost
+  │  Charges chi cost
   │  Appends to driver.log_events
   ▼
 Executor collects events
@@ -215,6 +215,6 @@ Events and state changes serve different purposes:
 | **Persistence** | In blocks and indexes, not in contract state | Written to contract storage |
 | **Queryable** | By event name and indexed params | By state key |
 | **Use case** | Notifications, activity feeds, audit logs | Account balances, ownership, contract data |
-| **Cost** | 25 stamps/byte | 25 stamps/byte |
+| **Cost** | 25 chi/byte | 25 chi/byte |
 
 Use events when external observers need to know something happened. Use state when the contract itself needs to read the value later.

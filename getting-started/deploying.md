@@ -29,7 +29,7 @@ def balance_of(address: str) -> float:
 result = client.submit_contract(
     name="con_example",
     code=code,
-    stamps=500_000,
+    chi=500_000,
 )
 ```
 

@@ -138,14 +138,14 @@ through the runtime `zk` bridge. That was the change that materially lowered
 shielded transaction cost.
 
 Using the reproducible benchmark in
-`xian-abci/scripts/benchmark_shielded_stamps.py`, the local April 2026 numbers
+`xian-abci/scripts/benchmark_shielded_chi.py`, the local April 2026 numbers
 for the current implementation are roughly:
 
-- shielded deposit with 2 outputs: `3,742` stamps
-- shielded transfer with 2 inputs / 2 outputs: `4,062` stamps
-- shielded withdraw with 1 input / 1 output: `3,479` stamps
-- exact withdraw with no new output note: `2,405` stamps
-- relayed hidden-sender transfer: `5,726` stamps
+- shielded deposit with 2 outputs: `3,742` chi
+- shielded transfer with 2 inputs / 2 outputs: `4,062` chi
+- shielded withdraw with 1 input / 1 output: `3,479` chi
+- exact withdraw with no new output note: `2,405` chi
+- relayed hidden-sender transfer: `5,726` chi
 
 Those are still above a plain public transfer, but they are dramatically lower
 than the earlier five-digit shielded costs from the all-Python contract path.

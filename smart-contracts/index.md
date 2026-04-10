@@ -2,7 +2,7 @@
 
 Xian smart contracts are written in Python, but not in unrestricted CPython.
 They run inside a deterministic sandbox with a small, explicit language
-surface, persistent state primitives, and stamp metering.
+surface, persistent state primitives, and chi metering.
 
 ## What Makes Xian Contracts Different
 
@@ -12,7 +12,7 @@ surface, persistent state primitives, and stamp metering.
   make validator results diverge.
 - **Persistent state primitives**: `Variable`, `Hash`, `ForeignVariable`,
   `ForeignHash`, and `LogEvent` are the storage/event building blocks.
-- **Metered execution**: compute and storage both consume stamps.
+- **Metered execution**: compute and storage both consume chi.
 - **Explicit imports**: contracts can import deployed contracts and a small
   runtime stdlib, not arbitrary Python modules.
 

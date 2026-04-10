@@ -1,13 +1,13 @@
-# Stamp Cost Table
+# Chi Cost Table
 
-This page provides a detailed reference for stamp costs across all operation types.
+This page provides a detailed reference for chi costs across all operation types.
 
 ## Storage Costs
 
 | Operation | Cost | Unit |
 |-----------|------|------|
-| Storage read | 1 | stamp per byte (key + value) |
-| Storage write | 25 | stamps per byte (key + value) |
+| Storage read | 1 | chi per byte (key + value) |
+| Storage write | 25 | chi per byte (key + value) |
 
 Byte count includes both the encoded key (e.g., `currency.balances:alice`) and the encoded value (e.g., `1000000`).
 
@@ -15,23 +15,23 @@ Byte count includes both the encoded key (e.g., `currency.balances:alice`) and t
 
 | Item | Value |
 |------|-------|
-| Base transaction cost | 5 stamps |
-| Stamp-to-XIAN conversion | 20 stamps = 1 XIAN |
+| Base transaction cost | 5 chi |
+| Chi-to-XIAN conversion | 20 chi = 1 XIAN |
 
 ## Limits
 
 | Limit | Value |
 |-------|-------|
-| Maximum stamps per transaction | 6,500,000 |
+| Maximum chi per transaction | 6,500,000 |
 | Maximum line events per transaction (`python_line_v1`) | 800,000 |
 | Maximum instruction events per transaction (`native_instruction_v1`) | 3,250,000 |
 | Maximum write data per transaction | 128 KB |
-| Default stamp allocation | 1,000,000 |
+| Default chi allocation | 1,000,000 |
 
-## Stamp Formula
+## Chi Formula
 
 ```
-stamps_used = (raw_compute_cost // 1000) + 5 + storage_read_cost + storage_write_cost
+chi_used = (raw_compute_cost // 1000) + 5 + storage_read_cost + storage_write_cost
 ```
 
 Where:
@@ -45,7 +45,7 @@ Where:
 Each Python bytecode instruction has a fixed cost in compute units (CU). The
 native tracer charges those instructions exactly; the pure-Python tracer
 precomputes line buckets from the same opcode schedule. Both are converted to
-stamps via `raw_cost // 1000`.
+chi via `raw_cost // 1000`.
 
 | Cost Range (CU) | Instructions |
 |-----------------|--------------|
@@ -68,8 +68,8 @@ counter.get()
 ```
 
 - Opcode cost: ~20-50 CU (function call + attribute access)
-- Storage read: key `con_x.counter` (12 bytes) + value `42` (2 bytes) = 14 bytes = 14 stamps
-- Total: approximately 14-15 stamps
+- Storage read: key `con_x.counter` (12 bytes) + value `42` (2 bytes) = 14 bytes = 14 chi
+- Total: approximately 14-15 chi
 
 ### Simple Hash Write
 
@@ -78,8 +78,8 @@ balances["alice"] = 1000
 ```
 
 - Opcode cost: ~20-50 CU
-- Storage write: key `con_x.balances:alice` (20 bytes) + value `1000` (4 bytes) = 24 bytes * 25 = 600 stamps
-- Total: approximately 600-601 stamps
+- Storage write: key `con_x.balances:alice` (20 bytes) + value `1000` (4 bytes) = 24 bytes * 25 = 600 chi
+- Total: approximately 600-601 chi
 
 ### Token Transfer (Two Reads + Two Writes)
 
@@ -91,11 +91,11 @@ def transfer(to: str, amount: float):
     balances[to] += amount
 ```
 
-- 2 storage reads: ~30-60 stamps
-- 2 storage writes: ~1,200-1,400 stamps
+- 2 storage reads: ~30-60 chi
+- 2 storage writes: ~1,200-1,400 chi
 - Opcodes: ~100-200 CU
-- Base cost: 5 stamps
-- Total: approximately 1,300-1,700 stamps
+- Base cost: 5 chi
+- Total: approximately 1,300-1,700 chi
 
 ## Cost Optimization Tips
 
@@ -106,13 +106,13 @@ def transfer(to: str, amount: float):
 | Use `default_value` in Hash declarations | Avoids unnecessary reads that return None |
 | Minimize writes in loops | Each write is 25x more expensive than a read |
 | Batch cross-contract calls | Reduces function call overhead |
-| Avoid storing large strings or lists | Every byte costs 25 stamps to write |
+| Avoid storing large strings or lists | Every byte costs 25 chi to write |
 
 ## XIAN Cost Examples
 
-At 20 stamps per XIAN:
+At 20 chi per XIAN:
 
-| Operation | Stamps | XIAN Cost |
+| Operation | Chi | XIAN Cost |
 |-----------|--------|----------|
 | Simple read | ~15 | ~0.75 |
 | Single write | ~600 | ~30 |

@@ -28,11 +28,11 @@ For numeric values, this means:
 - keep values JSON-like where possible
 - avoid storing very large blobs
 - remember that storage cost is byte-based
-- use shorter key and field names when stamp efficiency matters
+- use shorter key and field names when chi efficiency matters
 
 ## Read/Write Cost Reminder
 
-- reads: `1` stamp per byte
-- writes: `25` stamps per byte
+- reads: `1` chi per byte
+- writes: `25` chi per byte
 
 That byte count includes both key and value.

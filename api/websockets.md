@@ -46,7 +46,7 @@ the raw transaction could be decoded. Each tx summary currently includes:
 - `contract`
 - `function`
 - `sender`
-- `stamps_supplied`
+- `chi_supplied`
 
 ## State Subscriptions
 

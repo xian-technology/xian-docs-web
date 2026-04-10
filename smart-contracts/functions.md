@@ -174,7 +174,7 @@ Failed assertions:
 
 - abort execution
 - roll back writes and events from that transaction
-- still consume stamps up to the failure point
+- still consume chi up to the failure point
 
 ## Disallowed Function Patterns
 

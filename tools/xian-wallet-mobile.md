@@ -341,7 +341,7 @@ Current important calls include:
 
 - `getBalance` - `/get/{contract}.balances:{address}` ABCI query
 - `getChainId` - `/status` endpoint
-- `estimateStamps` - `/simulate` ABCI query
+- `estimateChi` - `/simulate` ABCI query
 - `sendTransaction` - builds, signs, and broadcasts through the shared Xian JS client
 - `getTransactionHistory` - `/txs_by_sender/{address}` ABCI query
 - `waitForTx` - polls `/tx?hash=` until finalized
@@ -371,14 +371,14 @@ Same as browser wallet:
 - Token selector - bottom sheet picker with icon, symbol, name
 - Recipient - inline contacts icon button, opens contact picker modal
 - Amount - inline MAX badge
-- Stamp estimation before review
+- Chi estimation before review
 - Result with TX hash + explorer link
 
 **Advanced transaction:**
 
 - Contract input - auto-loads available functions as scrollable chips
 - Function selection - auto-populates typed arguments
-- Manual or auto stamp estimation
+- Manual or auto chi estimation
 
 ### Gestures
 

@@ -202,7 +202,7 @@ Current keys:
 simulation_enabled = true
 simulation_max_concurrency = 2
 simulation_timeout_ms = 3000
-simulation_max_stamps = 1000000
+simulation_max_chi = 1000000
 ```
 
 What they mean:
@@ -211,7 +211,7 @@ What they mean:
 - `simulation_max_concurrency`: maximum concurrent simulation workers accepted
   by this node
 - `simulation_timeout_ms`: wall-clock timeout for one simulation worker
-- `simulation_max_stamps`: readonly stamp budget cap used for simulation
+- `simulation_max_chi`: readonly chi budget cap used for simulation
 
 ### How To Set Readonly Simulation
 
@@ -223,14 +223,14 @@ uv run xian network create local-dev --chain-id xian-local-1 \
   --simulation-enabled \
   --simulation-max-concurrency 2 \
   --simulation-timeout-ms 3000 \
-  --simulation-max-stamps 1000000
+  --simulation-max-chi 1000000
 
 uv run xian network join validator-1 --network mainnet \
   --template embedded-backend \
   --simulation-enabled \
   --simulation-max-concurrency 2 \
   --simulation-timeout-ms 3000 \
-  --simulation-max-stamps 1000000
+  --simulation-max-chi 1000000
 ```
 
 Those values are written into the node profile and then materialized by
@@ -241,7 +241,7 @@ Those values are written into the node profile and then materialized by
 simulation_enabled = true
 simulation_max_concurrency = 2
 simulation_timeout_ms = 3000
-simulation_max_stamps = 1000000
+simulation_max_chi = 1000000
 ```
 
 Operational guidance:
@@ -414,7 +414,7 @@ These are the current operator-relevant runtime keys from the rendered
 | `simulation_enabled` | `true` | enable readonly transaction simulation | template/profile, rendered config, or `xian-configure-node` |
 | `simulation_max_concurrency` | `2` | concurrent readonly simulation workers | template/profile, rendered config, or `xian-configure-node` |
 | `simulation_timeout_ms` | `3000` | wall-clock timeout for one readonly simulation | template/profile, rendered config, or `xian-configure-node` |
-| `simulation_max_stamps` | `1000000` | stamp budget cap used by readonly simulation | template/profile, rendered config, or `xian-configure-node` |
+| `simulation_max_chi` | `1000000` | chi budget cap used by readonly simulation | template/profile, rendered config, or `xian-configure-node` |
 | `parallel_execution_enabled` | `false` | enable speculative parallel execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `parallel_execution_workers` | `0` | worker count for speculative execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
 | `parallel_execution_min_transactions` | `8` | threshold before parallel planning is attempted | template/profile, rendered config, `xian-configure-node`, or localnet env |

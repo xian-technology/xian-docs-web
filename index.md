@@ -26,7 +26,7 @@ features:
     linkText: Write contracts
   - icon: 💡
     title: Core Concepts
-    details: Understand transactions, consensus, state, stamps, and deterministic execution under the hood.
+    details: Understand transactions, consensus, state, chi, and deterministic execution under the hood.
     link: /concepts/
     linkText: Explore concepts
   - icon: 🖥️
@@ -36,7 +36,7 @@ features:
     linkText: Run a node
   - icon: 🔌
     title: API & Integration
-    details: Connect via REST, WebSocket, and GraphQL. Estimate stamps and subscribe to live events.
+    details: Connect via REST, WebSocket, and GraphQL. Estimate chi and subscribe to live events.
     link: /api/
     linkText: View APIs
   - icon: 🛠️
@@ -77,7 +77,7 @@ features:
   <div class="home-links">
     <a href="/reference/cheat-sheet">Cheat Sheet</a>
     <a href="/reference/errors">Error Reference</a>
-    <a href="/reference/stamp-costs">Stamp Cost Table</a>
+    <a href="/reference/chi-costs">Chi Cost Table</a>
     <a href="/reference/glossary">Glossary</a>
   </div>
 </div>
