@@ -26,6 +26,7 @@ uv run xian solution-pack list
 uv run xian solution-pack show credits-ledger
 uv run xian solution-pack starter credits-ledger
 uv run xian solution-pack starter registry-approval --flow remote
+uv run xian solution-pack starter stable-protocol --flow remote
 ```
 
 `solution-pack show` returns the full machine-readable pack metadata. `starter`

@@ -7,7 +7,8 @@ It is published as:
 
 - [`xian-technology/xian-stable-protocol`](https://github.com/xian-technology/xian-stable-protocol)
 
-It is not a toy token example. It is a multi-contract protocol slice with:
+It is a full multi-contract protocol slice, not a toy token example. The pack
+includes:
 
 - a controller-minted stable asset
 - a multi-reporter oracle
@@ -20,30 +21,27 @@ It is not a toy token example. It is a multi-contract protocol slice with:
 
 ## Current Status
 
-This pack is usable **today** as a manually deployed, locally tested reference
-protocol.
+This pack is now integrated into the Xian stack as a first-class solution pack.
 
-What that means in practice:
+What is in place:
 
-- the contracts are implemented
-- the repository packages cleanly
-- the standalone contract suite passes
-- the governance model matches Xian's current contract-call governance surface
-- the protocol can be deployed manually by an operator who is comfortable
-  deploying and wiring multiple contracts
+- `xian-cli` starter flows for local and remote posture selection
+- canonical contract assets mirrored in `xian-configs`
+- a real bootstrap script in `xian-stable-protocol`
+- a documented remote operator posture in `xian-deploy`
+- a passing standalone contract suite
 
-What it does **not** mean:
+What is still missing before calling it production-hardened:
 
-- there is no `xian-cli` starter flow yet
-- there is no `xian-deploy` preset yet
-- there are no live-network integration tests yet
-- there is no invariant or fuzz-testing harness yet
-- the oracle is still governed-reporter based, not a stronger attested feed
+- live-network integration tests
+- invariant and fuzz testing
+- stronger oracle sourcing and attestation
+- keeper automation and fuller operational runbooks
 
 So the right classification is:
 
-- usable as a reference implementation and advanced starting point: yes
-- turnkey production protocol: no
+- packaged reference product in the Xian stack: yes
+- turnkey autonomous production protocol: no
 
 ## When To Use It
 
@@ -62,21 +60,37 @@ This pack is a strong example of what Xian is good at:
 
 - explicit contract composition instead of a single oversized protocol contract
 - contract-call governance through chain-native `members` and `governance`
-- straightforward Python-first testing and deployment workflows
+- Python-first deployment and testing workflows
 - indexable protocol events for explorers, read models, and risk dashboards
 - a clean line between authoritative on-chain state and off-chain projections
+
+## Stack Integration
+
+The canonical starter flows are now packaged in `xian-cli`:
+
+```bash
+cd ~/xian/xian-cli
+uv run xian solution-pack show stable-protocol
+uv run xian solution-pack starter stable-protocol
+uv run xian solution-pack starter stable-protocol --flow remote
+```
+
+The pack metadata points to:
+
+- `xian-configs/solution-packs/stable-protocol/` for the mirrored contract
+  assets and machine-readable starter manifest
+- `xian-stable-protocol/` for the bootstrap script and operator docs
+- `xian-deploy/docs/SOLUTION_PACKS.md` for the recommended `consortium-3`
+  remote posture
+
+The intended local template is `single-node-indexed`. The intended remote
+template is `consortium-3`.
 
 ## Contract Set
 
 ### `stable_token`
 
 The protocol stable asset.
-
-Main roles:
-
-- controller-minted token
-- controllers are expected to include `vaults` and `psm`
-- users can transfer, approve, and burn their own balances
 
 Relevant exports:
 
@@ -89,12 +103,6 @@ Relevant exports:
 ### `oracle`
 
 A governance-owned multi-reporter price oracle.
-
-Main roles:
-
-- reporter allowlist
-- per-asset freshness and quorum settings
-- medianized price selection
 
 Relevant exports:
 
@@ -109,19 +117,16 @@ Relevant exports:
 
 The CDP engine.
 
-Main roles:
-
-- vault-type registry
-- collateral deposit and withdrawal
-- borrowing and repayment
-- debt-share accounting and rate accrual
-- partial liquidation
-- liquidation auctions
-- bad-debt tracking and recapitalization
-
 Relevant exports:
 
 - `add_vault_type(...)`
+- `set_vault_type_fee(...)`
+- `set_vault_type_limits(...)`
+- `set_vault_type_ratios(...)`
+- `set_vault_type_auction_config(...)`
+- `set_vault_type_surplus_buffer_bps(...)`
+- `set_savings_contract(...)`
+- `set_treasury_address(...)`
 - `create_vault(...)`
 - `deposit_collateral(...)`
 - `withdraw_collateral(...)`
@@ -130,8 +135,10 @@ Relevant exports:
 - `close_vault(...)`
 - `get_liquidation_quote(...)`
 - `liquidate(...)`
+- `liquidate_fast(...)`
 - `open_liquidation_auction(...)`
 - `bid(...)`
+- `claim_refund(...)`
 - `settle_auction(...)`
 - `cover_bad_debt(...)`
 - `recapitalize(...)`
@@ -140,12 +147,6 @@ Relevant exports:
 ### `savings`
 
 A share-based savings vault for the stable asset.
-
-Main roles:
-
-- stable-asset deposits mint savings shares
-- fee inflows raise assets per share
-- savings shares are transferable
 
 Relevant exports:
 
@@ -159,20 +160,16 @@ Relevant exports:
 
 A peg stability module for reserve-backed mint and redeem flows.
 
-Main roles:
-
-- mint protocol stable against reserve assets
-- redeem protocol stable back into reserve assets
-- route peg-module fees to treasury
-
 Relevant exports:
 
 - `set_fees(...)`
+- `set_treasury_address(...)`
 - `quote_mint(...)`
 - `quote_redeem(...)`
 - `mint_stable(...)`
 - `redeem_stable(...)`
 - `set_paused(...)`
+- `get_state()`
 
 ## Governance Model
 
@@ -185,82 +182,64 @@ In production:
 - `governance` executes contract-call proposals once threshold is reached
 - protocol contracts transfer ownership to `governance`
 
-That means protocol risk changes are meant to happen through governance
-proposals such as:
-
-- `oracle.set_reporter(...)`
-- `oracle.set_asset_config(...)`
-- `vaults.set_vault_type_fee(...)`
-- `vaults.set_vault_type_ratios(...)`
-- `vaults.set_vault_type_limits(...)`
-- `psm.set_fees(...)`
-- `psm.set_paused(...)`
-
 The standalone repository includes `members_compat.s.py` and
 `governance_compat.s.py` only so the repo remains self-contained in local unit
 tests. The target runtime is still the real chain `members` / `governance`
 pair.
 
-## Manual Deployment Flow
+## Bootstrap
 
-This pack is not yet wrapped in a CLI starter. Today the intended use is manual
-deployment.
+The canonical operator path now lives in the protocol repository:
 
-Recommended order:
+```bash
+cd ~/xian/xian-stable-protocol
+uv sync --group dev --group deploy
+uv run pytest -q
+uv run python scripts/bootstrap_protocol.py
+```
 
-1. Use the chain's existing `members` and `governance` contracts.
-2. Deploy `stable_token`.
-3. Deploy the reserve-asset token used by the PSM.
-4. Deploy `oracle`.
-5. Deploy `savings`.
-6. Deploy `vaults`.
-7. Deploy `psm`.
-8. Grant stable-token controller rights to `vaults` and `psm`.
-9. Configure oracle reporters and publish initial prices.
-10. Add at least one vault type.
-11. Transfer protocol governance to `governance`.
+By default the bootstrap script:
 
-### Required Wiring
+- deploys the core protocol contracts if they are missing
+- deploys sample `collateral_token` and `reserve_token` contracts for local
+  use
+- enables `vaults` and `psm` as stable-token controllers
+- configures oracle reporters and an initial price
+- sets treasury and savings fee-routing targets
+- creates the default vault type only when vault type `1` is absent
 
-After deployment, the minimum wiring is:
+For remote bootstrap against already deployed collateral and reserve tokens:
+
+```bash
+uv run python scripts/bootstrap_protocol.py --skip-sample-tokens
+```
+
+To start governance handoff after verification:
+
+```bash
+uv run python scripts/bootstrap_protocol.py --start-governance-handoff
+```
+
+The bootstrap wallet should match the configured initial governor. After
+handoff starts, governance-managed changes should move to chain governance
+proposals instead of staying on the bootstrap key.
+
+## Required Wiring
+
+The minimum intended wiring is:
 
 ```python
 stable_token.set_controller(account='vaults', enabled=True)
 stable_token.set_controller(account='psm', enabled=True)
 
-oracle.set_asset_config(
-    asset='COL',
-    min_reporters_required=2,
-    max_price_age_seconds=3600,
-)
-oracle.set_reporter(account='oracle_reporter_1', enabled=True)
-oracle.set_reporter(account='oracle_reporter_2', enabled=True)
-
-vaults.add_vault_type(
-    collateral_contract_name='collateral_token',
-    oracle_key='COL',
-    min_collateral_ratio_bps=15000,
-    liquidation_ratio_bps=13000,
-    liquidation_bonus_bps=500,
-    debt_ceiling=1_000_000,
-    min_debt=10,
-    stability_fee_bps=500,
-    auction_duration_seconds=86400,
-)
+vaults.set_savings_contract(target_contract='savings')
+vaults.set_treasury_address(address='treasury')
+psm.set_treasury_address(address='treasury')
 ```
 
-After bootstrap, hand off governance:
-
-```python
-oracle.start_governance_transfer(new_governor='governance')
-vaults.start_governance_transfer(new_governor='governance')
-psm.start_governance_transfer(new_governor='governance')
-savings.start_governance_transfer(new_governor='governance')
-stable_token.start_governance_transfer(new_governor='governance')
-```
-
-Then the chain `governance` contract can call `accept_governance()` on each
-protocol contract through normal governance proposals.
+If `vaults` has no `savings_contract` and no `treasury_address`, or `psm` has
+no `treasury_address`, fees fall back to the current governor. That is valid
+contract behavior, but it is not the intended deployed setup.
 
 ## How To Use It
 
@@ -281,19 +260,6 @@ vault_id = vaults.create_vault(
 )
 ```
 
-### Increase Or Decrease A Position
-
-Use:
-
-- `deposit_collateral(...)`
-- `withdraw_collateral(...)`
-- `borrow(...)`
-- `repay(...)`
-- `close_vault(...)`
-
-Repayment and close flows require the user to approve stable-token spend to
-`vaults`.
-
 ### Use The Savings Vault
 
 Users deposit the stable asset and receive shares:
@@ -301,12 +267,6 @@ Users deposit the stable asset and receive shares:
 ```python
 stable_token.approve(amount=500, to='savings')
 shares = savings.deposit(assets=500)
-```
-
-Withdraw later with:
-
-```python
-savings.withdraw(shares=shares)
 ```
 
 ### Use The Peg Stability Module
@@ -325,42 +285,16 @@ stable_token.approve(amount=500, to='psm')
 psm.redeem_stable(stable_amount=500)
 ```
 
-### Liquidation And Auctions
+## Remaining Gaps
 
-For a vault that drops below threshold:
+These are the meaningful remaining gaps before calling the protocol
+production-hardened:
 
-- call `get_liquidation_quote(...)`
-- if partial cure is possible, call `liquidate(...)`
-- otherwise open an auction with `open_liquidation_auction(...)`
-- place bids with `bid(...)`
-- finalize with `settle_auction(...)`
-
-Owner-side recovery paths also exist:
-
-- `cure_auction(...)`
-- `cancel_auction_if_safe(...)`
-
-## What Is Still Missing
-
-These are the meaningful gaps before calling the protocol production-ready:
-
-- deployment automation through `xian-cli` or `xian-deploy`
 - live integration tests against a real Xian node and network shape
 - invariant and fuzz testing for debt, liquidation, and auction accounting
 - a stronger oracle sourcing and attestation model
-- keeper automation and operational runbooks
+- keeper automation and fuller operational runbooks
 - final stable-asset branding and metadata decisions
-
-## What Has Been Verified
-
-At the time of writing:
-
-- the repository packages and tests cleanly
-- the standalone contract suite passes
-- governance ownership transfer and risk-parameter changes are tested against
-  Xian-governance-compatible semantics
-- the protocol surface covers issuance, repayment, savings, peg operations,
-  liquidation, auctions, bad debt, and recapitalization
 
 ## Related Docs
 
