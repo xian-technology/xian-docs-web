@@ -372,7 +372,10 @@ wallet can continue scanning and planning without rebuilding everything first.
 The browser and mobile wallet apps now treat this `state_snapshot` as a
 first-class backup primitive: users can store shielded snapshots in wallet
 settings, include them automatically in full encrypted wallet backups, and
-export individual shielded snapshots when needed.
+export individual shielded snapshots when needed. They can also check whether
+indexed shielded history already contains newer notes after a stored snapshot,
+which is the user-facing signal that a restore file is stale and should be
+refreshed before spending.
 
 `ShieldedWallet.sync_transactions(...)` now prefilters note payloads before full
 decryption. If you already materialized note records from indexed transactions,
@@ -694,8 +697,8 @@ assert exact_exit.output_payloads == []
 
 ## Remaining Product Gaps
 
-- import and validate ceremony-generated proving material instead of relying
-  only on the built-in single-party random setup path
+- define ceremony provenance, custody, and rotation policy for imported proving
+  material
 - define the network-level policy for who gets disclosed viewing access and how
   that is audited
 - ship a polished end-user wallet interface on top of the current `ShieldedWallet`

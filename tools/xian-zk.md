@@ -125,7 +125,10 @@ event/tag/transaction fan-out path.
 Browser and mobile wallet integrations can now treat `state_snapshot` as a
 first-class user backup. Stored shielded snapshots are included in full wallet
 backup exports, and users can also store, export, or remove shielded wallet
-snapshots directly through the wallet settings flows.
+snapshots directly through the wallet settings flows. Both wallet apps can now
+also check indexed shielded history after a stored snapshot so users can tell
+whether the chain has already advanced beyond that snapshot before attempting a
+restore or spend.
 
 ## Runtime Cost Direction
 
@@ -358,9 +361,39 @@ The built-in deployment generator is still a single-party random trusted setup.
 That is a real deployment path, but it is not a substitute for an MPC
 ceremony.
 
-If a network wants ceremony-grade trust reduction, the next step is importing
-externally generated proving material rather than treating the built-in random
-generator as an MPC flow.
+If a network wants ceremony-grade trust reduction, use the explicit import and
+validation flow rather than treating the built-in random generator as an MPC
+flow:
+
+```bash
+xian-zk-shielded-bundle validate-note --bundle ./ceremony-note-bundle.json
+xian-zk-shielded-bundle import-note \
+  --bundle ./ceremony-note-bundle.json \
+  --output-dir ./artifacts/note
+
+xian-zk-shielded-bundle validate-command --bundle ./ceremony-command-bundle.json
+xian-zk-shielded-bundle import-command \
+  --bundle ./ceremony-command-bundle.json \
+  --output-dir ./artifacts/command
+```
+
+The import flow enforces bundle-shape validation plus setup metadata checks. If
+`setup_mode` is not `insecure-dev` or `single-party`, the bundle must carry a
+non-empty `setup_ceremony` label so operators can track ceremony provenance in
+network rollout and rotation policy.
+
+## Prover Service Guardrails
+
+`xian-zk-prover-service` still assumes the prover is trusted with witness
+material, but it now has basic bind-safety guardrails:
+
+- loopback binds are allowed without extra flags
+- non-loopback binds are refused unless `--unsafe-allow-remote-host` is passed
+- non-loopback binds also require a non-empty `--auth-token`
+
+So the intended posture is still "local trusted prover first", with deliberate
+operator acknowledgement required before exposing the service to any remote
+network path.
 
 ## See Also
 
