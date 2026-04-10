@@ -701,6 +701,8 @@ assert exact_exit.output_payloads == []
   material
 - define the network-level policy for who gets disclosed viewing access and how
   that is audited
+- build a real network-origin privacy story beyond the current relayed
+  execution primitives
 - ship a polished end-user wallet interface on top of the current `ShieldedWallet`
   and `xian_zk` flow
 - improve indexer / app-facing read paths so large live pools do not depend only
