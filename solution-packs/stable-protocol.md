@@ -17,7 +17,8 @@ includes:
 - liquidation and auction flows
 - explicit bad-debt and recapitalization handling
 - a peg stability module
-- governance integration with Xian's `members` and `governance` contracts
+- governance integration with Xian's `masternodes` and `governance`
+  contracts
 
 ## Current Status
 
@@ -30,10 +31,12 @@ What is in place:
 - a real bootstrap script in `xian-stable-protocol`
 - a documented remote operator posture in `xian-deploy`
 - a passing standalone contract suite
+- a successful live bootstrap on a local indexed Xian network, including
+  governance handoff start
 
 What is still missing before calling it production-hardened:
 
-- live-network integration tests
+- an automated end-to-end integration harness in CI
 - invariant and fuzz testing
 - stronger oracle sourcing and attestation
 - keeper automation and fuller operational runbooks
@@ -59,7 +62,8 @@ This pattern fits when you want:
 This pack is a strong example of what Xian is good at:
 
 - explicit contract composition instead of a single oversized protocol contract
-- contract-call governance through chain-native `members` and `governance`
+- contract-call governance through chain-native `masternodes` and
+  `governance`
 - Python-first deployment and testing workflows
 - indexable protocol events for explorers, read models, and risk dashboards
 - a clean line between authoritative on-chain state and off-chain projections
@@ -178,14 +182,14 @@ protocol-local DAO.
 
 In production:
 
-- `members` supplies the weighted membership interface
+- `masternodes` supplies the weighted membership interface
 - `governance` executes contract-call proposals once threshold is reached
 - protocol contracts transfer ownership to `governance`
 
 The standalone repository includes `members_compat.s.py` and
 `governance_compat.s.py` only so the repo remains self-contained in local unit
-tests. The target runtime is still the real chain `members` / `governance`
-pair.
+tests. The target runtime is still the real chain `masternodes` /
+`governance` pair.
 
 ## Bootstrap
 
@@ -200,13 +204,16 @@ uv run python scripts/bootstrap_protocol.py
 
 By default the bootstrap script:
 
-- deploys the core protocol contracts if they are missing
-- deploys sample `collateral_token` and `reserve_token` contracts for local
-  use
-- enables `vaults` and `psm` as stable-token controllers
+- deploys `con_stable_token`, `con_oracle`, `con_savings`, `con_vaults`, and
+  `con_psm` if they are missing
+- deploys sample `con_collateral_token` and `con_reserve_token` contracts for
+  local use
+- enables `con_vaults` and `con_psm` as stable-token controllers
 - configures oracle reporters and an initial price
 - sets treasury and savings fee-routing targets
 - creates the default vault type only when vault type `1` is absent
+- validates that user-deployed contract names use the current chain-required
+  `con_` prefix before submitting anything
 
 For remote bootstrap against already deployed collateral and reserve tokens:
 
@@ -224,36 +231,39 @@ The bootstrap wallet should match the configured initial governor. After
 handoff starts, governance-managed changes should move to chain governance
 proposals instead of staying on the bootstrap key.
 
+Current Xian submission rules require user-deployed contracts to start with
+`con_`. The bootstrap defaults already use those names.
+
 ## Required Wiring
 
 The minimum intended wiring is:
 
 ```python
-stable_token.set_controller(account='vaults', enabled=True)
-stable_token.set_controller(account='psm', enabled=True)
+con_stable_token.set_controller(account='con_vaults', enabled=True)
+con_stable_token.set_controller(account='con_psm', enabled=True)
 
-vaults.set_savings_contract(target_contract='savings')
-vaults.set_treasury_address(address='treasury')
-psm.set_treasury_address(address='treasury')
+con_vaults.set_savings_contract(target_contract='con_savings')
+con_vaults.set_treasury_address(address='treasury')
+con_psm.set_treasury_address(address='treasury')
 ```
 
-If `vaults` has no `savings_contract` and no `treasury_address`, or `psm` has
-no `treasury_address`, fees fall back to the current governor. That is valid
-contract behavior, but it is not the intended deployed setup.
+If `con_vaults` has no `savings_contract` and no `treasury_address`, or
+`con_psm` has no `treasury_address`, fees fall back to the current governor.
+That is valid contract behavior, but it is not the intended deployed setup.
 
 ## How To Use It
 
 ### Open A Vault And Mint Stable
 
-1. Approve collateral to `vaults`.
+1. Approve collateral to `con_vaults`.
 2. Call `create_vault(...)`.
 3. The stable asset is minted directly to the vault owner.
 
 Typical flow:
 
 ```python
-collateral_token.approve(amount=1000, to='vaults')
-vault_id = vaults.create_vault(
+con_collateral_token.approve(amount=1000, to='con_vaults')
+vault_id = con_vaults.create_vault(
     vault_type_id=1,
     collateral_amount=100,
     debt_amount=50,
@@ -265,8 +275,8 @@ vault_id = vaults.create_vault(
 Users deposit the stable asset and receive shares:
 
 ```python
-stable_token.approve(amount=500, to='savings')
-shares = savings.deposit(assets=500)
+con_stable_token.approve(amount=500, to='con_savings')
+shares = con_savings.deposit(assets=500)
 ```
 
 ### Use The Peg Stability Module
@@ -274,15 +284,15 @@ shares = savings.deposit(assets=500)
 Mint stable from reserves:
 
 ```python
-reserve_token.approve(amount=1000, to='psm')
-psm.mint_stable(reserve_amount=1000)
+con_reserve_token.approve(amount=1000, to='con_psm')
+con_psm.mint_stable(reserve_amount=1000)
 ```
 
 Redeem stable back into reserves:
 
 ```python
-stable_token.approve(amount=500, to='psm')
-psm.redeem_stable(stable_amount=500)
+con_stable_token.approve(amount=500, to='con_psm')
+con_psm.redeem_stable(stable_amount=500)
 ```
 
 ## Remaining Gaps
@@ -290,7 +300,8 @@ psm.redeem_stable(stable_amount=500)
 These are the meaningful remaining gaps before calling the protocol
 production-hardened:
 
-- live integration tests against a real Xian node and network shape
+- an automated integration harness that boots a network and runs the protocol
+  flow in CI
 - invariant and fuzz testing for debt, liquidation, and auction accounting
 - a stronger oracle sourcing and attestation model
 - keeper automation and fuller operational runbooks
