@@ -1,31 +1,56 @@
 # Validator Responsibilities
 
-Validators are not just infrastructure operators. They are part of the
-replicated state machine and must preserve deterministic execution across the
-network.
+Validators are responsible for more than uptime. They are part of the
+replicated state machine, so operational discipline directly affects consensus.
 
 ## Core Responsibilities
 
-- run the supported software version and Python version
-- keep the node online and healthy
-- protect validator key material
-- monitor block height, peer connectivity, and RPC health
-- stay aligned with approved network configuration
+Validators are expected to:
 
-## Determinism Requirements
+- run the supported software versions for the network they joined
+- protect validator and operator key material
+- keep the node online, healthy, and correctly peered
+- monitor height, sync status, mempool health, and runtime metrics
+- apply approved network upgrades and recovery procedures in a coordinated way
 
-Validators must avoid:
+## Determinism Discipline
 
-- drifting to a different CPython minor version
-- patching contract-runtime code independently
-- running ad hoc forks of `xian-abci` or `xian-contracting`
+The exact alignment rules depend on the network's execution engine.
 
-Any of those can change bytecode metering or execution semantics and cause
-state divergence.
+Tracer-backed networks require validators to stay aligned on:
 
-## Operational Practice
+- `xian-abci` and `xian-contracting`
+- tracer mode
+- the supported CPython minor version
 
-- validate new runtime changes before rollout
-- use localnet or smoke coverage for pre-upgrade checks
-- keep snapshots and state handling disciplined
-- expose only the ports that your deployment model actually requires
+`xian_vm_v1` networks require validators to stay aligned on:
+
+- `xian-abci` and `xian-contracting`
+- the native VM runtime capability
+- `bytecode_version`
+- `gas_schedule`
+- native authority posture
+
+In both cases, ad hoc local runtime changes are dangerous.
+
+## Operational Safety
+
+Good validator posture includes:
+
+- testing changes in localnet or smoke flows before rollout
+- keeping snapshots, state-sync inputs, and patch bundles organized
+- exposing only the ports your deployment model actually needs
+- separating validator duties from optional service-node extras when necessary
+- watching for mismatches in execution, metrics, and indexed-service recovery
+
+## What Validators Should Not Do
+
+Validators should not:
+
+- patch consensus-sensitive runtime code independently
+- drift onto uncoordinated runtime versions
+- improvise execution-policy settings on a live network
+- treat optional dashboards, BDS, or relayers as if they were part of
+  consensus-critical state
+
+The safest posture is boring consistency.

@@ -1,470 +1,230 @@
 # Runtime Features
 
-This page is the operator-facing reference for Xian runtime settings that end
-up under `[xian]` and `[xian.bds]` in the rendered `config.toml`.
+This page explains the runtime behavior that ends up in the rendered
+`config.toml` under `[xian]`, `[xian.execution.engine]`, and `[xian.bds]`.
 
-Use it together with:
+Use it with:
 
-- [Configuration](/node/configuration) for the three config layers
-- [Protocol Governance & State Patches](/node/protocol-governance) for the
-  governed forward patching model
-- [Node Profiles](/node/profiles) for the high-level `xian-cli` JSON contract
-- [Starting, Stopping & Monitoring](/node/managing) for runtime inspection
+- [Configuration](/node/configuration) for the overall layer model
+- [Node Profiles](/node/profiles) for the high-level JSON contract
+- [Parallel Block Execution](/concepts/parallel-block-execution) for the
+  execution model
+- [The Xian VM](/concepts/xian-vm) for VM-native execution semantics
 
-## Where To Set Runtime Features
+## Where Runtime Features Live
 
-Not every runtime setting lives at the same layer.
+Different settings live at different layers.
 
-| Layer | What belongs there |
-|------|---------------------|
-| starter template / network manifest | network defaults such as `tracer_mode` and block policy |
-| node profile | node-local posture such as `service_node`, pruning, dashboard, monitoring, readonly simulation, and parallel execution |
-| rendered `config.toml` `[xian]` | materialized runtime settings such as readonly simulation, parallel execution, metrics, mempool nonce TTL, and BDS settings |
-| `xian-stack` env / localnet env | stack-managed overrides for localnet, Docker publish behavior, metrics, perf snapshots, and local development |
+| Layer | Typical settings |
+|------|------------------|
+| templates / manifests | block policy defaults, tracer defaults, image posture |
+| node profiles | service-node posture, logging, simulation, parallel execution, dashboard, monitoring |
+| rendered `config.toml` | effective runtime values, including execution engine policy |
+| `xian-stack` environment | localnet and Docker-specific overrides, especially for stack-managed services |
 
-Current important point:
+## Execution Engine
 
-- `tracer_mode` is part of the supported `xian-cli` template / manifest / profile
-  flow.
-- readonly simulation settings are now part of the supported `xian-cli`
-  template / profile flow too, and they remain node-local runtime posture
-- parallel execution settings are now part of the supported `xian-cli`
-  template / profile flow too, but they remain node-local settings rather than
-  network-manifest state.
+The most important runtime distinction is between the top-level tracer setting
+and the explicit execution-engine policy.
 
-That means:
+### Tracer-Backed Execution
 
-- use `xian network create ... --tracer-mode ...` or
-  `xian network join ... --tracer-mode ...` for tracer selection
-- use `xian network create/join ... --simulation-* ...` or template defaults
-  for node-local readonly simulation posture
-- use `xian network create/join ... --parallel-execution-* ...` or template
-  defaults for node-local parallel execution posture
-- use the rendered `config.toml`, `xian-configure-node`, or localnet
-  environment variables only when you need lower-level overrides
-
-Important boundary:
-
-- governed state patch bundles are first-class runtime inputs, but they are not
-  `config.toml` keys
-- validators load them from `config/state-patches/` and the runtime validates
-  them against the on-chain approved `bundle_hash`
-
-## Tracer Modes
-
-Xian currently supports two execution tracers:
-
-| Mode | Meaning | Typical use |
-|------|---------|-------------|
-| `python_line_v1` | pure-Python line-bucket metering with an `800,000` line-event ceiling | local development, easiest standalone install, conservative default |
-| `native_instruction_v1` | Rust-backed exact instruction metering with a `3,250,000` instruction-event ceiling | maintained node/runtime stacks, lower-overhead production-style execution |
-
-What matters operationally:
-
-- the tracer affects contract metering policy
-- validators in the same network should stay aligned on the same tracer mode
-- the maintained `xian-stack` node image includes the native tracer package
-- if you run `xian-abci` directly outside the maintained stack, native tracing
-  requires the native extra or the published `xian-tech-native-tracer` package
-  to be installed
-- `python_line_v1` keeps its performance profile by rejecting source shapes that
-  distort line buckets, including ternary expressions, semicolons, and
-  one-line compound statements
-- `native_instruction_v1` is both more precise and lower-overhead, but it is a
-  consensus-policy choice because its metering semantics differ from the
-  Python tracer
-
-### How To Set The Tracer
-
-Supported high-level path:
-
-```bash
-uv run xian network create local-dev --chain-id xian-local-1 \
-  --template single-node-dev \
-  --tracer-mode python_line_v1
-
-uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
-  --tracer-mode native_instruction_v1
-```
-
-That value is then materialized into the rendered CometBFT home:
+Tracer-backed networks still use the familiar top-level tracer mode:
 
 ```toml
 [xian]
 tracer_mode = "native_instruction_v1"
+
+[xian.execution.engine]
+mode = "native_instruction_v1"
+bytecode_version = ""
+gas_schedule = ""
+authority = ""
+shadow_tracer_mode = ""
 ```
 
-Current canonical template defaults show the intended posture:
+Supported tracer-backed modes are:
 
-- `single-node-dev` uses `python_line_v1`
-- `single-node-indexed`, `consortium-3`, and `embedded-backend` use
-  `native_instruction_v1`
+- `python_line_v1`
+- `native_instruction_v1`
+
+### VM-Native Execution
+
+`xian_vm_v1` uses explicit execution policy instead:
+
+```toml
+[xian.execution.engine]
+mode = "xian_vm_v1"
+bytecode_version = "xvm-1"
+gas_schedule = "xvm-gas-1"
+authority = "native"
+shadow_tracer_mode = ""
+```
+
+Important current rules:
+
+- `xian_vm_v1` requires `bytecode_version`
+- `xian_vm_v1` requires `gas_schedule`
+- `authority` must be `native`
+- `shadow_tracer_mode` must stay empty on the current supported branch
+
+The high-level `xian-cli` profile flow currently exposes tracer selection and
+other runtime posture, but the full VM execution policy is still a lower-level
+runtime concern handled through rendered config, helper tooling, or localnet
+environment controls.
 
 ## Application Logging
 
-Xian also has its own application logger for block execution, mempool
-validation, simulation, and service-node runtime behavior.
+Xian has its own application logger, separate from CometBFT logging.
 
-Current keys:
+Relevant `[xian]` keys:
 
-```toml
-[xian]
-transaction_trace_logging = false
-app_log_level = "INFO"
-app_log_json = false
-app_log_rotation_hours = 1
-app_log_retention_days = 7
-```
+- `transaction_trace_logging`
+- `app_log_level`
+- `app_log_json`
+- `app_log_rotation_hours`
+- `app_log_retention_days`
 
-What they mean:
+Use these for:
 
-- `transaction_trace_logging`: emit per-transaction debug summaries during
-  block execution
-- `app_log_level`: minimum level written to stderr and the rotated file sink
-- `app_log_json`: emit structured JSON logs instead of the plain text format
-- `app_log_rotation_hours`: rotate the Xian application log file on this
-  interval
-- `app_log_retention_days`: keep rotated Xian application logs for this many
-  days
+- compact per-transaction debugging
+- structured JSON logs
+- rotated application log retention under `.cometbft/xian/logs`
 
-Operational guidance:
-
-- the Xian application logger is separate from CometBFT's own `log_level`
-- Xian application logs are written under `.cometbft/xian/logs`
-- retention is enforced by the logger itself, including compressed rotated
-  archives
-- both stderr and the rotated file sink are queued asynchronously to reduce
-  execution-path blocking on log I/O
-- keep `transaction_trace_logging=false` unless you are actively debugging a
-  contract or runtime path
-- `transaction_trace_logging=true` only emits per-transaction summaries when
-  `app_log_level` includes `DEBUG`
-- full serialized per-transaction results are emitted only when
-  `transaction_trace_logging=true` and `app_log_level=TRACE`
-- prefer `app_log_json=true` when shipping logs into a structured collector
-
-### Recommended Logging Postures
-
-Use these as the current practical defaults:
-
-| Goal | Recommended settings |
-|------|----------------------|
-| normal validator or service-node operation | `app_log_level="INFO"`, `transaction_trace_logging=false`, `app_log_json=false` unless you already ship JSON logs |
-| active incident investigation | `app_log_level="DEBUG"`, `transaction_trace_logging=true` |
-| short-lived deep tx debugging | `app_log_level="TRACE"`, `transaction_trace_logging=true` |
-
-Important boundary:
-
-- `DEBUG` gives you compact per-tx summaries
-- `TRACE` is the expensive mode that also emits full serialized tx-result payloads
-- do not leave `TRACE` enabled on busy production nodes unless you really mean to pay for the extra log volume
-
-### How To Set Application Logging
-
-Supported high-level path:
-
-```bash
-uv run xian network create local-dev --chain-id xian-local-1 \
-  --template single-node-dev \
-  --app-log-level INFO \
-  --app-log-rotation-hours 1 \
-  --app-log-retention-days 7
-
-uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
-  --app-log-level DEBUG \
-  --transaction-trace-logging \
-  --app-log-json
-```
-
-Those values are written into the node profile and then materialized by
-`xian node init` into the rendered CometBFT home:
-
-```toml
-[xian]
-transaction_trace_logging = true
-app_log_level = "DEBUG"
-app_log_json = true
-app_log_rotation_hours = 1
-app_log_retention_days = 7
-```
+For normal operation, keep transaction-level tracing off unless you are
+debugging a specific runtime path.
 
 ## Readonly Simulation
 
-Xian also has a readonly transaction simulator behind the `simulate_tx` query
-path.
+Readonly transaction simulation is a node-local service posture, not a
+consensus rule.
 
-Current keys:
+Relevant `[xian]` keys:
 
-```toml
-[xian]
-simulation_enabled = true
-simulation_max_concurrency = 2
-simulation_timeout_ms = 3000
-simulation_max_chi = 1000000
-```
+- `simulation_enabled`
+- `simulation_max_concurrency`
+- `simulation_timeout_ms`
+- `simulation_max_chi`
 
-What they mean:
+Operationally:
 
-- `simulation_enabled`: turn readonly transaction simulation on or off
-- `simulation_max_concurrency`: maximum concurrent simulation workers accepted
-  by this node
-- `simulation_timeout_ms`: wall-clock timeout for one simulation worker
-- `simulation_max_chi`: readonly chi budget cap used for simulation
-
-### How To Set Readonly Simulation
-
-Supported high-level path:
-
-```bash
-uv run xian network create local-dev --chain-id xian-local-1 \
-  --template single-node-dev \
-  --simulation-enabled \
-  --simulation-max-concurrency 2 \
-  --simulation-timeout-ms 3000 \
-  --simulation-max-chi 1000000
-
-uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
-  --simulation-enabled \
-  --simulation-max-concurrency 2 \
-  --simulation-timeout-ms 3000 \
-  --simulation-max-chi 1000000
-```
-
-Those values are written into the node profile and then materialized by
-`xian node init` into the rendered CometBFT home:
-
-```toml
-[xian]
-simulation_enabled = true
-simulation_max_concurrency = 2
-simulation_timeout_ms = 3000
-simulation_max_chi = 1000000
-```
-
-Operational guidance:
-
-- simulation is free compute, so treat it as a protected API capability
-- the node executes simulation in a bounded subprocess worker, not inside the
-  main validator execution process
-- keep public access behind a gateway or dedicated service-node tier
-- use low concurrency and short timeouts on validator RPC endpoints
-- raise the budget only when your client workflows need it
-- expect structured failure results when simulation is disabled, saturated, or
-  timed out
+- simulation runs in bounded worker processes
+- it is meant for SDKs, wallets, and developer tooling
+- it should not be treated as free unbounded public compute
 
 ## Parallel Execution
 
-Xian also has speculative parallel block execution in the runtime.
+Xian supports speculative parallel block execution while still committing the
+canonical serial-equivalent result.
 
-Implementation boundary:
+Relevant `[xian]` keys:
 
-- `xian-contracting` does not execute multiple contracts concurrently inside a single Python process
-- `xian-contracting` owns the native speculative execution controller and
-  process-pool worker model
-- `xian-abci` uses that controller for block execution and adds
-  transaction-specific runtime wiring
-- accepted results are still validated and applied in canonical block order
+- `parallel_execution_enabled`
+- `parallel_execution_workers`
+- `parallel_execution_min_transactions`
 
-For the full model, see
-[Parallel Block Execution](/concepts/parallel-block-execution).
+Practical guidance:
 
-Current keys:
+- enable it deliberately, not blindly
+- treat it as a rollout-managed operator feature
+- validate it against your actual workload
+- remember that it is process-level speculation with serial fallback, not
+  unrestricted shared-memory concurrency
 
-```toml
-[xian]
-parallel_execution_enabled = false
-parallel_execution_workers = 0
-parallel_execution_min_transactions = 8
-```
+The maintained `xian-cli` templates currently default this posture
+conservatively, while lower-level raw `xian-abci` defaults may differ. The
+effective value is whatever ends up in the rendered config for the node you
+actually start.
 
-What they mean:
+## Metrics And Health
 
-- `parallel_execution_enabled`: turn speculative parallel execution on or off
-- `parallel_execution_workers`: number of worker processes used for speculative
-  execution
-- `parallel_execution_min_transactions`: minimum block size before speculative
-  parallel execution is attempted
+Relevant `[xian]` keys:
 
-### How To Set Parallel Execution
+- `metrics_enabled`
+- `metrics_host`
+- `metrics_port`
+- `metrics_bds_refresh_seconds`
+- `pending_nonce_reservation_ttl_seconds`
 
-Supported high-level path:
+These control the Xian application metrics endpoint and some node-local runtime
+bookkeeping behavior.
 
-```bash
-uv run xian network create local-dev --chain-id xian-local-1 \
-  --template single-node-dev \
-  --parallel-execution-enabled \
-  --parallel-execution-workers 4 \
-  --parallel-execution-min-transactions 12
+The app metrics endpoint is separate from CometBFT's built-in metrics exporter.
 
-uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
-  --parallel-execution-enabled \
-  --parallel-execution-workers 4 \
-  --parallel-execution-min-transactions 12
-```
+## Service-Node / BDS Runtime
 
-Those values are written into the node profile and then materialized by
-`xian node init` into the rendered CometBFT home:
+When a node is run in service-node mode, the optional indexed stack becomes
+relevant.
 
-```toml
-[xian]
-parallel_execution_enabled = true
-parallel_execution_workers = 4
-parallel_execution_min_transactions = 12
-```
+Important `[xian.bds]` families:
 
-This is still a node-local posture. If you want a consistent fleet-wide
-default, standardize it through the canonical template you use for the network.
+- connection settings for Postgres
+- pool sizing
+- statement timeout
+- spool location
+- warning thresholds for queued or disk-heavy recovery conditions
 
-Lower-level paths still exist when you need them:
+These settings matter for indexed reads, recovery, and GraphQL. They do not
+change consensus behavior.
 
-1. edit the rendered `config.toml` after `xian node init`
-2. use the lower-level `xian-abci` helper: `xian-configure-node`
-3. for `xian-stack` localnet, use the localnet environment variables:
+## Runtime Key Reference
 
-```bash
-export XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED=1
-export XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS=4
-export XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS=12
-```
+### Core `[xian]` Keys
 
-Operational guidance:
+| Key | Purpose |
+|-----|---------|
+| `block_service_mode` | service-node / indexed-stack posture |
+| `pruning_enabled` | enable block-history pruning |
+| `blocks_to_keep` | retain-height window when pruning is enabled |
+| `tracer_mode` | top-level tracer selection for tracer-backed runtimes |
+| `metrics_enabled`, `metrics_host`, `metrics_port`, `metrics_bds_refresh_seconds` | Xian application metrics |
+| `transaction_trace_logging`, `app_log_*` | Xian application logging |
+| `simulation_*` | readonly simulation controls |
+| `parallel_execution_*` | speculative parallel execution controls |
+| `pending_nonce_reservation_ttl_seconds` | local pending-nonce reservation TTL |
 
-- treat this as a rollout-managed runtime feature for validator fleets
-- parallel execution is speculative and must remain serial-equivalent
-- it is real process-level parallelism, not in-process concurrent mutation
-- same-sender reuse, exact-key conflicts, and tracked prefix-scan conflicts
-  are either respeculated in later waves or fall back to serial execution
-- additive reward deltas can overlap safely, but reads or ordinary overwrites of
-  those keys still force serial fallback
-- enable it only after testing your actual workload
-- if speculation fails at the executor level, the node drops back to ordinary
-  serial block execution
-- verify behavior through `xian node health`, `/perf_status`, the dashboard, and
-  the parallel execution metrics
+### `[xian.execution.engine]` Keys
 
-Dashboard behavior:
+| Key | Purpose |
+|-----|---------|
+| `mode` | selected execution engine |
+| `bytecode_version` | VM bytecode policy for `xian_vm_v1` |
+| `gas_schedule` | VM gas schedule id for `xian_vm_v1` |
+| `authority` | authoritative executor selection; currently `native` for `xian_vm_v1` |
+| `shadow_tracer_mode` | legacy rollout field; keep empty on the current `xian_vm_v1` path |
 
-- the dashboard `Execution Health -> Parallel` row now shows `activated` as soon
-  as the node config has parallel execution enabled
-- if no eligible block has used it yet, the row shows the configured worker
-  count, minimum transaction threshold, and `waiting for eligible block`
-- when a recent block used the feature, the same row appends the speculative
-  accepted, serial-prefiltered, and serial-fallback counts from that block
+### `[xian.bds]` Keys
 
-Inspection surfaces:
+| Key family | Purpose |
+|------------|---------|
+| `dsn`, `host`, `port`, `database`, `user`, `password` | Postgres connectivity |
+| `pool_min_size`, `pool_max_size` | connection pool sizing |
+| `statement_timeout_ms`, `application_name` | query/runtime behavior |
+| `spool_dir`, `spool_warn_entries`, `spool_warn_bytes`, `disk_free_warn_bytes` | recovery spool and warning thresholds |
 
-- `/perf_status` always includes the configured top-level posture:
-  `parallel_execution_enabled`, `parallel_execution_workers`, and
-  `parallel_execution_min_transactions`
-- when a recent block actually used the executor, the block metadata under
-  `recent_blocks[].metadata` also includes:
-  `parallel_enabled`, `parallel_worker_count`,
-  `parallel_planned_stage_count`,
-  `parallel_planned_parallelizable_transactions`,
-  `parallel_speculative_wave_count`, `parallel_speculative_accepted`,
-  `parallel_serial_prefiltered`, and `parallel_serial_fallbacks`
-- the dashboard `Execution Health -> Parallel` row is derived from those same
-  values, so `/perf_status` is the machine-facing source of truth and the
-  dashboard is the operator-facing summary
+## Stack / Localnet Environment Knobs
 
-Representative benchmark harness:
+The Docker stack exposes additional environment knobs for localnet and
+stack-managed runs.
 
-```bash
-uv run python tests/performance/benchmark_parallel_tps.py \
-  --tx-count 256 \
-  --rounds 50000 \
-  --iterations 3 \
-  --workers 8 \
-  --warmup-transactions 16
-```
-
-Representative local result on the current implementation:
-
-- serial mean about `430.62 TPS`
-- parallel mean about `1582.88 TPS`
-- mean speedup about `3.68x`
-
-Treat those as execution-path comparison numbers, not as an end-to-end network
-TPS promise.
-
-## Core `[xian]` Runtime Keys
-
-These are the current operator-relevant runtime keys from the rendered
-`config.toml`.
-
-| Key | Default | Purpose | Preferred control layer |
-|-----|---------|---------|-------------------------|
-| `block_service_mode` | `false` | turns on service-node / BDS-oriented runtime behavior | derived from `service_node`; avoid editing directly for stack-managed nodes |
-| `pruning_enabled` | `false` | enables block-history pruning | template/profile or rendered config |
-| `blocks_to_keep` | `100000` | retain-height window when pruning is enabled | template/profile or rendered config |
-| `tracer_mode` | `python_line_v1` | contract metering backend | manifest/template/profile or rendered config |
-| `metrics_enabled` | `true` | enable the Xian Prometheus endpoint | rendered config or stack env |
-| `metrics_host` | `127.0.0.1` | listen host for the Xian metrics endpoint | rendered config; stack-managed nodes may override binding behavior |
-| `metrics_port` | `9108` | listen port for the Xian metrics endpoint | rendered config or stack env |
-| `metrics_bds_refresh_seconds` | `5.0` | refresh interval for BDS-derived metrics | rendered config |
-| `transaction_trace_logging` | `false` | emit per-transaction debug summaries during block execution | template/profile, rendered config, or `xian-configure-node` |
-| `app_log_level` | `INFO` | Xian application log level for stderr and rotated files | template/profile, rendered config, or `xian-configure-node` |
-| `app_log_json` | `false` | emit Xian application logs as structured JSON | template/profile, rendered config, or `xian-configure-node` |
-| `app_log_rotation_hours` | `1` | Xian application log rotation interval in hours | template/profile, rendered config, or `xian-configure-node` |
-| `app_log_retention_days` | `7` | Xian application log retention window in days | template/profile, rendered config, or `xian-configure-node` |
-| `simulation_enabled` | `true` | enable readonly transaction simulation | template/profile, rendered config, or `xian-configure-node` |
-| `simulation_max_concurrency` | `2` | concurrent readonly simulation workers | template/profile, rendered config, or `xian-configure-node` |
-| `simulation_timeout_ms` | `3000` | wall-clock timeout for one readonly simulation | template/profile, rendered config, or `xian-configure-node` |
-| `simulation_max_chi` | `1000000` | chi budget cap used by readonly simulation | template/profile, rendered config, or `xian-configure-node` |
-| `parallel_execution_enabled` | `false` | enable speculative parallel execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
-| `parallel_execution_workers` | `0` | worker count for speculative execution | template/profile, rendered config, `xian-configure-node`, or localnet env |
-| `parallel_execution_min_transactions` | `8` | threshold before parallel planning is attempted | template/profile, rendered config, `xian-configure-node`, or localnet env |
-| `pending_nonce_reservation_ttl_seconds` | `60.0` | local mempool reservation TTL before stale pending nonces stop blocking retries; reservations are created only after signature, chain-id, and payload-shape validation succeeds | rendered config or `xian-configure-node` |
-
-## `[xian.bds]` Service-Node Keys
-
-These keys matter when `service_node=true` and the runtime is operating with
-the optional indexed read stack.
-
-| Key | Purpose | Preferred control layer |
-|-----|---------|-------------------------|
-| `dsn` / `host` / `port` / `database` / `user` / `password` | PostgreSQL connection settings | stack env or direct rendered config |
-| `pool_min_size` / `pool_max_size` | asyncpg pool sizing | stack env or direct rendered config |
-| `statement_timeout_ms` | PostgreSQL statement timeout | stack env or direct rendered config |
-| `application_name` | PostgreSQL application identifier | stack env or direct rendered config |
-| `spool_dir` | durable BDS spool path | stack env or direct rendered config |
-| `spool_warn_entries` / `spool_warn_bytes` | warning thresholds for queued spool data | stack env or direct rendered config |
-| `disk_free_warn_bytes` | free-disk warning threshold for the BDS spool host | stack env or direct rendered config |
-
-For the maintained `xian-cli` + `xian-stack` flow:
-
-- use `service_node=true` in the node profile to request the indexed stack
-- let `xian-stack` provide the default BDS connection wiring
-- use stack env only when you need to override the defaults explicitly
-
-## Stack Environment Knobs
-
-The Docker-backed stack has its own environment surface on top of the rendered
-CometBFT home.
-
-Current important runtime-related knobs include:
+Important examples:
 
 - `XIAN_TRACER_MODE`
 - `XIAN_LOCALNET_TRACER_MODE`
+- `XIAN_LOCALNET_EXECUTION_MODE`
+- `XIAN_LOCALNET_EXECUTION_BYTECODE_VERSION`
+- `XIAN_LOCALNET_EXECUTION_GAS_SCHEDULE`
+- `XIAN_LOCALNET_EXECUTION_AUTHORITY`
+- `XIAN_LOCALNET_EXECUTION_SHADOW_TRACER_MODE`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS`
 - `XIAN_APP_METRICS_ENABLED`
 - `XIAN_APP_METRICS_HOST`
 - `XIAN_APP_METRICS_PORT`
-- `XIAN_APP_METRICS_BDS_REFRESH_SECONDS`
 - `XIAN_PERF_ENABLED`
 - `XIAN_PERF_RECENT_BLOCKS`
 
-Use these when you are:
-
-- running localnet
-- debugging stack-managed runtime behavior
-- overriding Docker-side publish and bind defaults for a specific workspace
-
-For normal node operations, prefer templates, manifests, profiles, and the
-rendered `config.toml` first.
+Use those primarily for localnet, stack debugging, or deliberate Docker-side
+overrides. For normal operator workflows, prefer manifests, profiles, and the
+rendered config first.

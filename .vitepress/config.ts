@@ -141,6 +141,8 @@ export default defineConfig({
             { text: 'Consensus & Finality', link: '/concepts/consensus' },
             { text: 'Time & Block Policy', link: '/concepts/time-and-blocks' },
             { text: 'The ABCI Layer', link: '/concepts/abci' },
+            { text: 'The Xian VM', link: '/concepts/xian-vm' },
+            { text: 'Shielded & ZK Stack', link: '/concepts/shielded-zk-stack' },
             { text: 'State Model', link: '/concepts/state-model' },
             { text: 'Chi & Metering', link: '/concepts/chi' },
             { text: 'Deterministic Execution', link: '/concepts/deterministic-execution' }

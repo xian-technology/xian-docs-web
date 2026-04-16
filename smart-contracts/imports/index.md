@@ -10,7 +10,7 @@ Contracts can depend on other deployed contracts.
 - dynamic probes: `importlib.exists("con_example")`, `importlib.has_export("con_example", "transfer")`
 - flexible targets: `importlib.owner_of(...)` and `importlib.enforce_interface(...)` accept either a contract name string or an imported contract module
 - contract metadata: `importlib.contract_info(...)` returns canonical runtime metadata for a deployed contract
-- code verification: `importlib.code_hash(...)` returns the canonical SHA3-256 hash of stored contract source or runtime code
+- code verification: `importlib.code_hash(...)` returns the canonical SHA3-256 hash of stored contract source or the stored execution artifact (`__code__` or `__xian_ir_v1__`, depending on runtime path)
 
 ## Important Restriction
 

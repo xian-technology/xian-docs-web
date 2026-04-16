@@ -33,6 +33,10 @@ result = client.submit_contract(
 )
 ```
 
+For tracer-backed networks, submitting canonical source is the normal path.
+For `xian_vm_v1` networks, submit valid `deployment_artifacts` as well, because
+native deployment validates and executes the VM artifact path explicitly.
+
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts
 should keep the `con_` prefix, so names like `con_example_token` are valid

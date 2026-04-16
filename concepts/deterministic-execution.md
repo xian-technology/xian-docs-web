@@ -1,219 +1,173 @@
 # Deterministic Execution
 
-Every validator in the Xian network must produce exactly the same state after executing the same block of transactions. If even one byte differs, the `app_hash` will not match and consensus fails. This page explains how Xian achieves determinism in a Python execution environment.
+Every validator in a Xian network must produce the same post-block state from
+the same ordered transactions. If one validator diverges, its `app_hash` no
+longer matches the rest of the network.
+
+This page explains how Xian keeps execution deterministic even though contracts
+are authored in Python.
 
 ## Why Determinism Matters
 
-Xian is a replicated state machine. Every validator independently executes every transaction and must arrive at the same result. If execution were non-deterministic (different results on different machines), validators would disagree on the state, and the network would halt.
+Xian is a replicated state machine. Each validator independently executes the
+same block. If execution semantics differ, consensus breaks at the application
+layer even when block ordering itself is correct.
 
-Non-deterministic behavior in typical Python programs comes from:
-- Floating-point rounding across CPU architectures
-- Dictionary ordering (not an issue since Python 3.7)
-- System calls (time, random, file I/O, network)
-- Thread scheduling
+Typical sources of nondeterminism in ordinary software include:
 
-Xian eliminates all of these sources.
+- local time
+- system randomness
+- file and network I/O
+- floating-point edge cases
+- runtime-version drift
+- hidden mutable process-global state
 
-## How Determinism Is Achieved
+Xian removes or controls those sources explicitly.
 
-### Sandboxed Execution
+## Execution Engines Must Agree
 
-Contracts run in a restricted Python sandbox. The following are forbidden:
+Xian separates contract authorship from contract execution.
 
-- File I/O (`open`, `os`, `sys`, `pathlib`)
-- Network access (`socket`, `urllib`, `requests`)
-- Process management (`subprocess`, `multiprocessing`)
-- All standard library modules (except the Xian-provided runtime modules)
-- Classes, closures, generators, async/await, try/except
+That means the exact alignment rules depend on the selected execution engine:
 
-This eliminates the most common sources of non-determinism in Python programs.
+| Engine family | Validators must align on |
+|--------------|---------------------------|
+| tracer-backed Python runtimes | `xian-abci`, `xian-contracting`, tracer mode, and the supported CPython minor version |
+| `xian_vm_v1` | `xian-abci`, `xian-contracting`, native VM support, `bytecode_version`, `gas_schedule`, and authority |
 
-### Fresh Contract Modules Per Execution
+The principle is always the same: validators must execute the same machine
+contract for the same source and state.
 
-Contract modules are reloaded from chain state for each execution. Xian does
-not rely on CPython's normal `sys.modules` cache as durable contract state.
+## Sandboxed Contract Language
+
+Contracts run in a restricted Xian-defined Python subset.
+
+Forbidden categories include:
+
+- file I/O and network I/O
+- subprocess and OS access
+- unrestricted imports
+- dynamic code execution
+- classes, generators, async, and broad reflection
+
+This removes the most common ways ordinary Python code becomes machine-specific
+or environment-dependent.
+
+## Fresh Module Loads, Persistent Chain State
+
+Contract modules are loaded from chain state for execution. They are not used as
+durable mutable state containers across transactions.
 
 That means:
 
-- module-level Python globals do **not** persist across transactions
-- dynamic imports through `importlib.import_module(...)` also get a fresh
-  contract module view
-- after a contract is flushed and redeployed, execution uses the fresh stored
-  code, not a stale cached module object
+- module globals do not persist like normal application memory
+- durable contract state belongs in `Variable` and `Hash`
+- imports resolve against deployed contracts in state, not against arbitrary
+  Python packages
 
-Persistent state must live in `Variable` and `Hash`, not in ordinary Python
-globals.
+## Metering Is Deterministic Too
 
-### Deterministic Metering with `sys.monitoring`
+Chi accounting is part of execution semantics, so it must be deterministic.
 
-Xian uses Python's `sys.monitoring` API, but the current meter is not a Python
-callback on every executed opcode.
+Tracer-backed runtimes meter execution in one of two ways:
 
-Instead, Xian:
+- `python_line_v1` charges deterministic line buckets
+- `native_instruction_v1` charges exact executed Python bytecode instructions
 
-- registers only contract code objects
-- on `python_line_v1`, precomputes a deterministic bytecode-cost bucket for
-  each executable source line and charges that bucket when the interpreter
-  reports execution of that line
-- on `native_instruction_v1`, charges the exact executed bytecode instructions
-  inside a Rust extension
+`xian_vm_v1` meters directly at the VM and host-operation layer through the
+selected VM gas schedule.
 
-This preserves deterministic accounting while keeping validator performance
-practical on adversarial or very large loops.
+In all cases, the user-visible transaction chi budget remains the hard bound
+that determines whether execution succeeds or rolls back.
 
-Because the pure-Python tracer is line-bucket based, the contract linter also
-rejects source shapes that create poor bucket precision, including ternary
-expressions, semicolons, and one-line compound statements.
+## Host Effects Are Explicit
 
-The meter also has two separate safety layers:
+Contracts cannot touch the host environment directly.
 
-- a very high hard raw-cost ceiling inside the tracer, meant only to stop
-  obviously runaway execution
-- backend-specific event ceilings for `python_line_v1` and
-  `native_instruction_v1`
+Instead, Xian exposes explicit deterministic runtime operations for:
 
-In normal paid execution, the meaningful user-facing limit is still the
-transaction's supplied chi budget. The tracer hard ceiling is intentionally
-far above ordinary transaction execution so it does not become a hidden
-consensus-path cap for large but valid workloads.
+- storage reads and writes
+- event emission
+- cross-contract calls
+- context reads such as `now` and chain metadata
+- hashing, signature checks, and zk verification bridges
 
-Readonly simulation is different. Nodes can configure a smaller
-`simulation_max_chi` limit on purpose so free dry runs do not turn into
-unbounded public compute. That simulator-specific cap is an operational abuse
-control, not the normal paid-transaction metering rule.
+These are part of the Xian runtime contract. They are not arbitrary operating
+system syscalls.
 
-### No Syscalls in the Hot Path
+## Decimal, Time, and Randomness
 
-During contract execution, no system calls occur in the critical computation path. All I/O is limited to:
+Xian also replaces the most common semantic footguns with deterministic rules.
 
-- LMDB reads/writes (which are memory-mapped and deterministic)
-- The metering counter (an in-memory integer)
+### Decimal-Backed Values
 
-There are no calls to `time()`, `random()` (the system PRNG), or any OS facility during execution.
-
-### Memory Checks at Boundary, Not Per-Instruction
-
-Memory usage is checked at transaction boundaries rather than on every instruction. This simplifies the execution model and avoids the non-determinism that per-instruction memory tracking could introduce (different allocator behavior across platforms).
-
-### Same Python Version Requirement
-
-All validators must run the same version of CPython. The Python bytecode compiler can produce different bytecode across versions, which would lead to different instruction counts and costs. By pinning the Python version, all validators execute identical bytecode for the same contract source.
-
-### Integer Arithmetic for Costs
-
-All chi cost calculations use integer arithmetic. There is no floating-point math in the metering engine. This eliminates rounding differences across CPU architectures:
-
-```
-raw_cost = sum of integer opcode costs
-chi_used = (raw_cost // 1000) + 5  # integer division, no float
-```
-
-### Decimal Arithmetic for Contract Values
-
-Xian contract code uses normal Python `float` syntax in signatures and literals,
-but the runtime executes those values as `ContractingDecimal`, not as binary
+Contract `float` values are decimal-backed runtime values, not ordinary binary
 IEEE 754 floats.
 
-That means:
-
-- `amount: float` is the normal way to declare decimal-backed values in
-  contracts
-- a literal like `0.1` is preserved from source and compiled into a decimal
-  runtime value
-- values are stored and encoded deterministically as fixed decimal values
-
-This prevents the classic binary floating-point issue:
+That avoids the classic:
 
 ```python
 # Standard Python: 0.1 + 0.2 = 0.30000000000000004
 # Xian contracts:  0.1 + 0.2 = 0.3
 ```
 
-Current numeric policy:
+### Chain Time
 
-- up to `61` whole digits
-- up to `30` fractional digits
-- extra fractional digits are truncated toward zero
-- values outside the supported range raise an overflow error and abort execution
-
-This range is already wider than Ethereum-style `18` decimal token precision.
-
-### Deterministic JSON Encoding
-
-State values are serialized to JSON with deterministic properties:
-
-- Dictionary key order is preserved (guaranteed since Python 3.7)
-- No whitespace variation (compact format with `separators=(",", ":")`)
-- Special types (`ContractingDecimal`, `Datetime`, `bytes`) use fixed marker
-  formats
-- The same value always produces the same byte string
+`now` is the finalized block timestamp, not local wall-clock time.
 
 ### Deterministic Random
 
-The `random` module available in contracts is seeded from public execution
-context:
+The contract `random` module is seeded from public execution context such as:
 
 - `chain_id`
 - `block_num`
 - `block_hash`
-- a transaction-specific `__input_hash`
+- a transaction-specific input hash
 
-Every validator uses the same seed for the same transaction, producing the
-same pseudorandom sequence.
+That makes it deterministic across validators. It does not make it secret.
 
-### Deterministic Time
+## Deterministic Encoding
 
-The `now` variable in contracts is the finalized block timestamp agreed upon by
-consensus. It is not local system time. All validators see the same `now` for
-every transaction in the same block.
+State encoding is deterministic as well:
 
-The active block policy changes whether chain time advances during idle
-periods:
+- JSON is written in a stable compact form
+- special runtime types use fixed marker formats
+- the same logical value always produces the same stored bytes
 
-- `on_demand`: no idle empty blocks
-- `idle_interval`: an empty block after a configured idle period
-- `periodic`: scheduled empty blocks remain enabled
+This matters because storage encoding contributes directly to the committed app
+state.
 
-That policy affects time progression, not determinism.
+## What Usually Causes Divergence
 
-## What Happens If Determinism Breaks
+Real divergence risks tend to come from operator drift rather than exotic math.
 
-If a validator produces a different `app_hash` after executing a block:
+Common examples:
 
-1. CometBFT detects the mismatch when the validator proposes or votes on the next block
-2. The divergent validator is unable to participate in consensus
-3. The network continues with the 2/3+ majority that agrees
+- validators running different runtime versions
+- tracer-backed networks drifting on CPython minor version
+- validators selecting different execution policy
+- local forks of consensus-sensitive repos
+- corrupted or inconsistent local state
 
-Common causes of divergence in practice:
-- Running a different Python version than other validators
-- Modified contract runtime libraries
-- Corrupted LMDB state database
-- Hardware memory errors
+## If Determinism Breaks
 
-If the underlying bug is severe enough to stop the network from progressing,
-forward state patch governance is not enough on its own. Governance proposals
-still need a live chain to be approved and executed.
+When a validator no longer matches the network:
 
-That means the emergency order is:
+1. its application results diverge
+2. its `app_hash` no longer matches the validator majority
+3. it falls out of consensus until the runtime and state are corrected
 
-1. restore deterministic execution across validators first
-2. get the chain moving again
-3. then use a governed forward state patch if the live state still needs correction
-
-Forward patching reduces the need for historical rollbacks, but it does not
-replace the need for an operator-coordinated emergency procedure when consensus
-itself is broken.
+Forward state patches are useful after consensus is live. They do not replace
+the need to restore deterministic execution first.
 
 ## Summary
 
-| Source of Non-Determinism | How Xian Prevents It |
-|--------------------------|---------------------|
-| Floating-point rounding | `ContractingDecimal` for all contract values |
-| System time | `now` is the consensus block timestamp |
-| Random numbers | Seeded from public block context + transaction-specific input hash |
-| File/network I/O | Sandbox forbids all I/O |
-| Dictionary ordering | Python 3.7+ guarantees insertion order |
-| Memory allocation | Checked at boundary, not per-instruction |
-| Instruction counting | deterministic line buckets or exact native instruction metering, depending on the selected tracer mode |
-| Python version differences | All validators must run the same CPython version |
-| JSON serialization | Compact format, fixed type markers, no whitespace |
+| Source of nondeterminism | How Xian controls it |
+|--------------------------|----------------------|
+| local time | `now` is the finalized block timestamp |
+| system randomness | contract `random` is seeded from public chain context |
+| file/network I/O | forbidden by the sandbox |
+| floating-point drift | decimal-backed contract values |
+| hidden mutable process state | durable state lives in contract storage, not module globals |
+| runtime-version drift | validators must align on the selected execution engine and its supported runtime |
+| encoding differences | deterministic compact encoding rules |

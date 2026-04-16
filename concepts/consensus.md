@@ -7,38 +7,42 @@ Xian uses CometBFT for Byzantine Fault Tolerant consensus.
 - gossips transactions and blocks between peers
 - orders transactions into blocks
 - coordinates validator voting
-- gives instant finality once a block is committed
+- finalizes blocks once the validator threshold is reached
 
-## What Xian Adds on Top
+## What Xian Adds
 
-Xian does not replace consensus. It provides the deterministic application
-behind it:
+Xian provides the deterministic application behind that consensus engine:
 
 - contract execution
-- state storage
-- app-hash generation
-- contract/query APIs
+- state storage and app-hash generation
+- query surfaces
+- node-local runtime features such as simulation, metrics, and indexed services
 
 ## Finality Model
 
-Once a block is committed by the validator set, it is final. Xian does not use
-probabilistic reorg-style finality.
+Once a block is committed, it is final. Xian does not use probabilistic
+reorg-style finality.
 
 ## Block Time
 
 Contract time comes from the finalized block timestamp agreed by consensus.
+
 That means:
 
-- `now` in contracts is chain time, not local validator clock time
+- `now` in contracts is chain time, not a local validator clock
 - every transaction in the same block sees the same `now`
-- different block-production policies only change whether time advances during
-  idle periods
+- block policy only changes when new blocks appear during idle periods
 
 ## Version Discipline
 
 Consensus depends on validators producing the same application state. In Xian,
-that means validators must stay aligned on:
+validators must stay aligned on:
 
 - network configuration
 - `xian-abci` and `xian-contracting` versions
-- CPython minor version
+- the selected execution engine and its policy
+- the supported runtime for that engine
+
+For tracer-backed networks, that includes the aligned CPython minor version and
+tracer mode. For `xian_vm_v1`, that includes the native runtime plus the same
+`bytecode_version`, `gas_schedule`, and authority settings.
