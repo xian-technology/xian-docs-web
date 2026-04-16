@@ -134,6 +134,14 @@ There are two different snapshot concepts in the stack.
 `snapshot_url` is an operator bootstrap path. It restores a prepared node-home
 archive.
 
+This URL can point either to:
+
+- a snapshot archive directly, in which case the operator must supply an
+  explicit expected SHA256
+- a signed snapshot manifest JSON, in which case the node validates the
+  manifest signature, `chain_id`, and embedded archive hash against trusted
+  Ed25519 public keys before restoring the archive
+
 ### CometBFT State Sync
 
 CometBFT `[statesync]` settings are protocol-level sync controls that require:

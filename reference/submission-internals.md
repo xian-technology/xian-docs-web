@@ -96,3 +96,7 @@ The same contract also owns the narrow metadata mutation surface for:
 
 - `submission.change_developer(...)`
 - `submission.change_owner(...)`
+
+Ordinary contracts do not get a generic low-level metadata mutation escape
+hatch. Runtime owner and developer changes are intentionally routed through the
+built-in `submission` contract path.

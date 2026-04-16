@@ -76,6 +76,10 @@ uv run xian recovery apply ./recovery-plan.json validator-1 --yes
 - verifies the archive `sha256` when the plan provides one
 - optionally starts the node again with `--start-node`
 
+Recovery plans still use the explicit archive-hash model in the plan itself.
+Signed snapshot manifests are supported in the normal node bootstrap path, but
+they are not the recovery-plan artifact format.
+
 ## Example Workflow
 
 1. Agree off-chain on the recovery plan and artifact.

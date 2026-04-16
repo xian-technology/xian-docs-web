@@ -112,6 +112,8 @@ is known. That includes:
 - Prometheus and Grafana reachability when monitoring is enabled
 - state-sync readiness from the rendered CometBFT config
 - snapshot-bootstrap availability from the effective `snapshot_url`
+- trusted snapshot-manifest signing keys when the effective bootstrap source is
+  manifest-backed
 
 Use `--skip-live-checks` when you want the older artifact-only behavior for an
 offline preflight.
@@ -597,7 +599,9 @@ What they do not contain:
 - BDS/Postgres data
 
 Use `snapshot_url` restore when you already have a full prepared node-home
-archive.
+archive. In the normal node-profile flow this can now be either a direct
+archive URL with an explicit SHA256, or a signed snapshot manifest validated
+against trusted Ed25519 public keys.
 
 Use `xian-state-snapshot` plus CometBFT state sync when you want protocol-level
 application snapshot bootstrap.

@@ -12,6 +12,17 @@ This server can hold private keys and submit transactions.
 Use it as a local tool. Do not expose it publicly and do not point it at
 production wallets unless you have deliberately accepted that risk.
 
+Secret-bearing wallet tools are now disabled by default. To enable wallet
+creation/export, transaction submission helpers, signing, encryption, and
+decryption, set:
+
+```bash
+XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1
+```
+
+Without that opt-in, the MCP server still exposes the safer read/query/indexed
+inspection surface, but it rejects the unsafe wallet operations.
+
 ## Transport Modes
 
 It supports two transport styles:
@@ -25,14 +36,18 @@ It supports two transport styles:
 
 Current capability groups include:
 
-- create or import wallets, including HD-wallet flows
 - read balances, token holdings, contract state, and contract source
-- send transactions and token transfers
 - simulate transactions for chi estimation
 - read indexed blocks, transactions, events, and state history
 - inspect shielded wallet history and shielded output tags
-- sign, verify, encrypt, and decrypt messages
-- query DEX prices and execute buy/sell helper flows
+- verify messages and inspect DEX prices
+
+With `XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1`, it can also:
+
+- create or import wallets, including HD-wallet flows
+- send transactions and token transfers
+- sign, encrypt, and decrypt messages
+- execute DEX buy/sell helper flows
 
 The implementation sits on top of the maintained Xian SDKs rather than inventing
 its own chain protocol.

@@ -155,6 +155,14 @@ Runtime ownership can be transferred through `submission.change_owner(...)`.
 That updates `__owner__` / `ctx.owner`, not a contract's own `owner = Variable()`
 pattern.
 
+Runtime metadata changes stay on the built-in `submission` surface:
+
+- `submission.change_owner(...)`
+- `submission.change_developer(...)`
+
+Ordinary contracts do not get direct low-level mutation access to another
+contract's runtime metadata.
+
 ## Read / Write Patterns
 
 ```python

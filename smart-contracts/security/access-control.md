@@ -42,6 +42,10 @@ Use the runtime owner path when you want the execution engine itself to enforce
 who may call exported functions on that contract. Use an `owner = Variable()`
 pattern when you want application-defined ownership logic inside the contract.
 
+That runtime metadata mutation surface is intentionally restricted to the
+built-in `submission` contract path. Arbitrary contracts cannot directly
+rewrite another contract's runtime owner or developer metadata.
+
 ## Preventing Cross-Contract Calls
 
 Some functions should only be callable by end users (externally owned accounts), not by other contracts. Check that `ctx.caller` equals `ctx.signer`:

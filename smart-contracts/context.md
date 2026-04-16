@@ -96,6 +96,10 @@ def handoff(contract: str, new_owner: str):
 Changing the runtime owner affects runtime access control for owner-gated
 contracts. It does not rewrite a contract's own state variables.
 
+That metadata mutation surface is intentionally narrow: ordinary contracts do
+not get a generic ability to rewrite another contract's runtime owner or
+developer fields directly. Use the built-in `submission` path.
+
 ## Common Patterns
 
 ### Owner-only functions

@@ -21,6 +21,7 @@ They are written as JSON and validated on read. The current schema is explicit:
   "seeds": [],
   "genesis_url": null,
   "snapshot_url": null,
+  "snapshot_signing_keys": [],
   "service_node": false,
   "home": null,
   "pruning_enabled": false,
@@ -66,6 +67,8 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `service_node` | enables the optional indexed-service stack used for BDS-backed reads |
 | `operator_profile` | the intended operator posture inherited from the selected starter template |
 | `monitoring_profile` | the monitoring posture inherited from the selected starter template |
+| `snapshot_url` | optional remote bootstrap source; may point to a snapshot archive directly or to a signed snapshot manifest |
+| `snapshot_signing_keys` | trusted Ed25519 public keys used when `snapshot_url` points to a signed snapshot manifest |
 | `home` | explicit CometBFT home override |
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
@@ -147,6 +150,11 @@ idle. Contract `now` still comes from the finalized consensus block timestamp.
 Readonly simulation and speculative parallel execution are both node-local
 operator posture. They do not change consensus rules, but they do change how a
 node exposes free compute and how it schedules block execution work locally.
+
+When `snapshot_url` points to a signed snapshot manifest instead of a raw
+archive, the profile must also carry one or more trusted
+`snapshot_signing_keys`. The node validates the manifest signature, `chain_id`,
+and archive hash before restoring the referenced snapshot.
 
 Application logging is also node-local. It changes how much execution context
 the node records and how those logs are formatted and retained under
