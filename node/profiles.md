@@ -88,6 +88,10 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `intentkit_network_id` | selects the Xian network slot exposed to `xian-intentkit` |
 | `intentkit_*` | published local host/port settings for the stack-managed frontend and API |
 
+The explicit VM execution policy under `[xian.execution.engine]` is currently a
+lower-level runtime concern. It is rendered into `config.toml`, but it is not
+yet a first-class high-level field family in the normal profile JSON flow.
+
 For the remaining lower-level runtime keys that are **not** currently surfaced
 through the high-level profile flow, see
 [Runtime Features](/node/runtime-features).

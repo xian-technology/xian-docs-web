@@ -1,19 +1,20 @@
 # Upgrading
 
-Upgrades should keep all validator runtimes version-aligned. Xian relies on a
-shared CPython minor version for deterministic bytecode metering, so validators
-must upgrade in a coordinated way.
+Xian upgrades should preserve runtime alignment across the validator set. The
+details vary slightly by execution engine, but the operator goal is always the
+same: move validators onto the same supported runtime without introducing
+application divergence.
 
 ## Safe Upgrade Sequence
 
-1. Stop the node
-2. Update the repos or release artifact
-3. Pull the pinned immutable node image, or rebuild locally if the node profile
-   intentionally uses `node_image_mode=local_build`
-4. Run validation and smoke coverage
-5. Start the node again and verify status
+1. confirm the target version, image, or release bundle the network intends to
+   run
+2. stop the node cleanly
+3. update the workspace or pull the pinned immutable image
+4. validate the runtime locally
+5. start the node again and confirm status, height, and runtime health
 
-Example from a sibling workspace:
+Example sibling-workspace flow:
 
 ```bash
 cd ~/xian/xian-stack
@@ -24,20 +25,54 @@ cd ../xian-cli
 uv run xian node stop validator-1
 uv run xian node start validator-1
 uv run xian node status validator-1
+uv run xian node health validator-1
 ```
 
-## What to Keep Stable
+## What Must Stay Aligned
 
-- CPython minor version across validators
-- `xian-contracting` and `xian-abci` versions
-- canonical network bundle selection from `xian-configs`
-- the pinned node image digests in the manifest/profile for registry-backed
-  runtimes
-- the embedded release-manifest provenance block in canonical manifests and
-  profiles, so the node image and the component refs stay aligned
+Always keep aligned:
 
-## State and Config Safety
+- `xian-abci` and `xian-contracting`
+- canonical network manifests and pinned release images, when the network uses
+  them
+- the execution engine selected by the network
 
-- keep backups of the CometBFT home before high-risk upgrades
-- do not mutate canonical manifests ad hoc on validators
+For tracer-backed networks, also keep aligned:
+
+- tracer mode
+- supported CPython minor version
+
+For `xian_vm_v1`, also keep aligned:
+
+- native runtime support for the selected `bytecode_version`
+- native runtime support for the selected `gas_schedule`
+- native authority posture
+
+## Preflight Checks
+
+Before upgrading a validator fleet, use the maintained safety nets:
+
+- `make validate`
+- `make smoke`
+- `make smoke-cli`
+- localnet runs when the change touches execution, networking, or rollout logic
+
+If the target network uses VM-native execution, validate the VM path rather than
+assuming tracer-backed behavior is enough.
+
+## Config And State Safety
+
+- keep backups or restorable snapshots before high-risk upgrades
 - prefer schema-validated manifest/profile rewrites through `xian-cli`
+- avoid hand-editing canonical manifests on live validators
+- keep governed state-patch bundles separate from normal upgrade artifacts
+
+## After Restart
+
+After the node comes back:
+
+- confirm it is healthy and not stuck
+- confirm it is on the expected height and chain
+- confirm the runtime posture matches the intended execution engine
+- confirm any optional service-node components recover cleanly if they are part
+  of your deployment

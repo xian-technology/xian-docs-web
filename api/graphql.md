@@ -1,48 +1,63 @@
 # GraphQL (BDS)
 
-GraphQL is optional in the current stack.
+GraphQL in Xian is an optional convenience layer over the BDS Postgres
+database.
 
-It is available only when the Block Data Service (BDS) profile is running, in
-which case `xian-stack` starts:
+It is available only when the indexed service-node stack is running.
 
-- `postgres`
-- `postgraphile`
+## What It Runs On
 
-The GraphQL server is exposed on port `5000` by default.
+The maintained stack uses PostGraphile v5 over the BDS database.
 
-## What It Is
+That means GraphQL is:
 
-The current implementation uses PostGraphile v5 over the BDS Postgres
-database. It is useful for indexed, exploratory queries that are awkward
-through raw ABCI queries.
+- generated from the indexed database schema
+- useful for exploratory and history-heavy queries
+- outside the deterministic consensus path
 
-GraphQL is therefore a convenience layer over BDS, not the authoritative read
-contract. The authoritative indexed node-facing surface is still the ABCI query
-paths exposed by the validator when BDS is enabled.
+The default published port in the maintained stack is `5000`.
 
-Like BDS itself, GraphQL is eventually consistent with the latest finalized
-block rather than part of the consensus hot path.
-New finalized blocks are buffered and indexed asynchronously, and BDS catches
-up missing heights from CometBFT RPC in canonical order. The local spool
-remains available for offline recovery and maintenance workflows, but it is no
-longer the primary live-path durability mechanism.
+## What It Is Good For
+
+GraphQL is most useful when you want:
+
+- flexible filtering over indexed blocks, transactions, events, or state
+  history
+- one endpoint for explorer or analytics-style read patterns
+- a developer-friendly schema browser through GraphiQL / introspection
 
 ## What It Is Not
 
-- it is not part of the deterministic consensus path
-- it is not required to run a validator
-- it is not the primary read path for core node health or contract state
+GraphQL is not:
 
-## When to Use It
+- the authoritative source of current state
+- required to run a validator
+- a substitute for CometBFT RPC or direct ABCI query when you need the core
+  node contract
 
-Use GraphQL when:
+## Consistency Model
 
-- you are running the indexed BDS stack
-- you want richer filtering over indexed chain data
-- you want a developer-friendly read layer for explorers or analytics
+GraphQL inherits the indexed-read consistency model of BDS.
 
-Use the CometBFT RPC and dashboard APIs when:
+That means:
 
-- you need the canonical node RPC surface
-- you are not running BDS
-- you are reading raw contract state or core node status
+- blocks finalize first
+- BDS indexes them asynchronously
+- GraphQL reflects the indexed database once that work is done
+
+So it is normal for GraphQL to lag slightly behind the very latest finalized
+block during catch-up or recovery.
+
+## Practical Guidance
+
+- use CometBFT RPC and direct ABCI query for canonical state and submission
+  flows
+- use GraphQL when indexed querying is more important than absolute immediacy
+- inspect the generated schema directly instead of hard-coding assumptions about
+  every table-derived field name
+
+## Related Pages
+
+- [REST API](/api/rest)
+- [WebSocket Subscriptions](/api/websockets)
+- [Runtime Features](/node/runtime-features)

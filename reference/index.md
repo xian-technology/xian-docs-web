@@ -1,8 +1,22 @@
 # Reference
 
-Quick access to reference material for Xian contract development.
+Use the reference section when you already know what you are building and want
+fast answers instead of long walkthroughs.
 
-- [Error Reference](/reference/errors) -- where lint, runtime, and service errors come from
-- [Chi Cost Table](/reference/chi-costs) -- detailed breakdown of computation and storage costs
-- [Glossary](/reference/glossary) -- definitions of key terms
-- [Cheat Sheet](/reference/cheat-sheet) -- quick reference for contract syntax and APIs
+## Contract Development Reference
+
+- [Cheat Sheet](/reference/cheat-sheet) for syntax, storage, context, and
+  standard-library reminders
+- [Chi Cost Table](/reference/chi-costs) for detailed metering constants and
+  cost categories
+- [Error Reference](/reference/errors) for common lint, runtime, and submission
+  failures
+- [Contract Submission Internals](/reference/submission-internals) for the
+  actual deployment path and stored artifacts
+
+## General Reference
+
+- [Glossary](/reference/glossary) for terms used across the docs
+
+Read the tutorial and concepts sections first if you need explanation. Come
+back here when you need a compact lookup surface.

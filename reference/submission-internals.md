@@ -1,48 +1,59 @@
 # Contract Submission Internals
 
-Contract submission is an on-chain action, not a special side channel.
+Contract deployment in Xian is an ordinary on-chain action routed through the
+built-in `submission` contract.
 
 ## High-Level Flow
 
-1. the client prepares contract source and optional `constructor_args`
-2. the transaction calls the built-in `submission` contract
-3. `xian-contracting` normalizes source, lints it, compiles runtime code, and loads the child contract
-4. the child module body and constructor run under a deployment context
-5. the deployed source, runtime code, and provenance metadata are written to state
-6. `submission` emits `ContractDeployed`
+1. a client prepares contract source, constructor args, and optionally
+   `deployment_artifacts`
+2. the transaction calls `submission.submit_contract(...)`
+3. the runtime normalizes and lints the source
+4. if deployment artifacts are provided, the runtime validates them against the
+   canonical compiler output
+5. the child module body and constructor run under deployment context
+6. canonical source, execution artifacts, and metadata are written to chain
+   state
+7. `ContractDeployed` is emitted
+
+## Source Submission Vs Artifact Submission
+
+Xian supports both source-backed and artifact-backed deployment flows, but they
+are not identical.
+
+- tracer-backed execution can use the canonical source-backed path
+- `xian_vm_v1` requires valid `deployment_artifacts` for native deployment
+
+Those artifacts include the canonical source plus the VM artifact payload used
+by the native runtime.
 
 ## Important Constraints
 
-- user-submitted contract names should use the `con_` prefix
-- contract names must start with a lowercase ASCII letter
-- contract names may contain only lowercase ASCII letters, digits, and
-  underscores
-- the submitted source must pass the linter
+- user contracts should keep the `con_` prefix
+- contract names must use lowercase ASCII letters, digits, and underscores
 - imports resolve to deployed contracts, not Python packages
-- constructor arguments are provided as a dictionary
-- child deployments go through the same `submission.submit_contract(...)` entrypoint
-- raw submitted source is size-limited before analysis
-- runtime `owner` metadata must be omitted or set to a non-empty string
+- constructor args are supplied as a dictionary
+- source must pass the linter
+- child deployments use the same submission surface
 
 ## What Gets Stored
 
-Each deployed contract stores:
+Every deployed contract stores metadata such as:
 
-- `__source__`: canonical human-facing source
-- `__code__`: canonical runtime source
+- `__source__`
 - `__owner__`
 - `__developer__`
 - `__deployer__`
 - `__initiator__`
 - `__submitted__`
 
-`__source__` is normalized before storage, so comments are not preserved on
-chain.
+For execution artifacts:
 
-`__developer__` is the runtime field used for developer-reward attribution.
-When a transaction executes across multiple contracts, the developer-reward
-bucket is split across the participating contracts proportionally to metered
-execution cost and then paid to the current `__developer__` recipients.
+- `__xian_ir_v1__` is the persisted VM IR for `xian_vm_v1`
+- tracer-backed and tooling paths may also persist `__code__`
+
+`__source__` is the human-facing canonical source. It is normalized before
+storage.
 
 ## Deployment Context
 
@@ -55,43 +66,33 @@ During child module-body execution and `@construct`, the child sees:
 - `ctx.entry = <outer transaction entrypoint>`
 - `ctx.submission_name = <child contract>`
 
-This is true for direct submission and for factory deployment through another
-contract.
+That is true for direct deployment and for factory-style child deployment.
 
 ## Metering Notes
 
-Deployment is not just charged for the final state writes.
+Deployment is metered too. The cost is not only the final state writes.
 
-It also includes:
+Deployment accounting includes:
 
-- a fixed deployment-analysis surcharge
-- a per-byte surcharge based on canonical stored source
-- the normal write cost for `__source__`, `__code__`, and metadata
+- submission analysis and validation work
+- stored artifact size
+- metadata writes
+- constructor execution
 
-That makes repeated or large deployments economically bounded without adding a
-special-case runtime loophole for contract factories.
+This is why contract deployment is materially more expensive than a trivial
+state update.
 
-## Why Submission Matters
+## Why Submission Is Security-Sensitive
 
-Submission is security-sensitive because it sets the long-lived executable code
-for a contract name. That is why the linter, import restrictions, and runtime
-loader all participate in the submission path.
+Submission defines the long-lived executable identity behind a contract name.
 
-The name rule is intentionally strict because state keys use `.` and `:` as
-reserved separators. Allowing those characters inside contract names creates
-ambiguous keys and awkward import behavior.
+That is why the submission path participates in:
 
-It also owns the runtime metadata mutation surface for deployed contracts:
+- lint enforcement
+- canonical artifact generation and validation
+- contract metadata ownership and developer attribution
 
-- `submission.change_developer(contract, new_developer)`
-- `submission.change_owner(contract, new_owner)`
+The same contract also owns the narrow metadata mutation surface for:
 
-Those metadata updates are intentionally narrow:
-
-- `contract` must be a non-empty string
-- `new_developer` must be a non-empty string
-- `new_owner` must be a non-empty string
-
-`change_owner(...)` updates the runtime `__owner__` field that drives
-`ctx.owner` and runtime owner gating. It does not modify a contract's own
-application-level `owner = Variable()` or `metadata["owner"]` pattern.
+- `submission.change_developer(...)`
+- `submission.change_owner(...)`

@@ -1,23 +1,34 @@
-# Why Python for Smart Contracts?
+# Why Python?
 
-Most blockchain platforms require developers to learn a specialized contract
-language or a highly specialized tooling stack. Xian takes a different
-approach: contracts are written in Python so ordinary software teams can use
-decentralized infrastructure without first becoming language specialists.
+Xian uses Python as the contract authoring language because the main product
+goal is usable decentralized infrastructure, not language novelty.
 
-## Accessibility
+The core idea is simple: developers should be able to read and write contract
+logic with ordinary software literacy, while the platform still enforces
+deterministic execution, metering, and a narrow runtime boundary.
 
-Choosing Python as the contract language means:
+## Python Is The Frontend
 
-- **No new language to learn** -- if you already know Python, you can start writing contracts immediately
-- **Massive developer pool** -- millions of Python developers can onboard without a learning curve
-- **Rich ecosystem of knowledge** -- tutorials, books, courses, and community support already exist
-- **Familiar tooling** -- use your existing IDE, linter, and test framework
-- **Lower integration friction** -- contract logic can be understood and tested by the same teams that already build the surrounding application and backend systems
+In Xian, Python is the source language developers author. It is not an open
+invitation to run unrestricted CPython inside consensus.
 
-## Readability
+That distinction matters:
 
-Python's syntax is clean and explicit. Smart contracts are high-stakes code that must be auditable. Readable code is auditable code:
+- authors write Python-like contracts
+- the linter and compiler enforce the Xian subset
+- the runtime executes that subset deterministically
+- a network may use a tracer-backed Python engine or `xian_vm_v1` under the
+  hood
+
+So "Python contracts" in Xian means Python-authored, Xian-defined contract
+programs.
+
+## Why This Helps In Practice
+
+### Readability
+
+Contract code is security-sensitive. Readable code is easier to review, test,
+audit, and operate.
 
 ```python
 @export
@@ -28,88 +39,102 @@ def transfer(to: str, amount: float):
     balances[to] += amount
 ```
 
-Compare this to equivalent logic in Solidity, Rust, or assembly-like languages. The Python version is immediately understandable to anyone who can read code.
+The Xian version is intentionally close to the kind of code a normal backend
+team already reads every day.
 
-## Rapid Development
+### Shared Team Vocabulary
 
-Python's concise syntax and familiar tooling enable fast iteration:
+Python lowers the coordination cost between:
 
-- **No compilation step** -- contracts are submitted as source code and compiled on-chain
-- **No ABI generation** -- function signatures are extracted directly from Python source
-- **Interactive testing** -- `ContractingClient` provides a REPL-like experience for testing contracts locally
-- **Quick feedback loops** -- write, test, and deploy in minutes, not hours
+- contract authors
+- backend engineers
+- QA and test engineers
+- auditors and operators
 
-For Xian, this matters because the goal is not only “write contracts faster.”
-The goal is to make decentralized application infrastructure easier to
-understand, integrate, and operate for normal engineering teams.
+That matters when a team needs to understand both on-chain and off-chain logic
+as one system.
 
-## Deterministic Execution
+### Fast Feedback Loops
 
-The most common objection to Python for blockchain is non-determinism. Xian addresses this comprehensively:
+The developer workflow stays short:
 
-| Concern | Solution |
-|---------|----------|
-| Floating-point rounding | decimal-backed numeric execution for contract `float` values |
-| System time dependency | `now` is the consensus block timestamp |
-| Random number generation | Seeded from public execution context (deterministic across validators) |
-| File and network I/O | Completely forbidden in the sandbox |
-| Dictionary ordering | Guaranteed since Python 3.7 |
-| Standard library side effects | All stdlib imports forbidden; only Xian runtime modules available |
+- write contract source
+- lint and test it locally with `ContractingClient`
+- build or submit the deployment payload
+- inspect state, events, and receipts through the SDKs and APIs
 
-The metering engine uses `sys.monitoring`, but it does not call back into
-Python on every opcode. Instead, it precomputes deterministic bytecode-cost
-buckets for each executable source line and charges those buckets on line
-execution. That keeps accounting deterministic without collapsing validator
-performance on large or adversarial loops.
+You do not need a specialized contract compiler toolchain just to start
+learning the model.
 
-## Sandboxed Execution
+## Determinism Still Comes First
 
-Xian contracts run in a heavily restricted Python environment:
+Python only works here because Xian narrows it aggressively.
 
-- No file I/O, network access, or system calls
-- No classes, closures, generators, or async/await
-- No try/except (use `assert` for error handling)
-- No standard library access (only Xian-provided modules)
-- No dynamic code execution (`eval`, `exec`, `compile`)
-- All builtins are allowlisted
+The platform removes or constrains the parts of Python that are bad fits for
+deterministic consensus:
 
-This sandbox is enforced by both a static linter (at submission time) and runtime restrictions (during execution). The combination prevents contracts from accessing anything outside the deterministic execution environment.
+- no file or network I/O
+- no dynamic code execution
+- no unrestricted imports
+- no classes, generators, async, or broad reflection
+- no ordinary floating-point semantics in contract values
 
-## Tradeoffs
+Instead, Xian provides deterministic replacements and host-controlled context:
 
-Python is not the fastest language. Here is an honest assessment of the tradeoffs:
+- `now` is chain time
+- `random` is seeded from public execution context
+- contract `float` values are decimal-backed
+- storage, events, and cross-contract calls go through explicit runtime
+  constructs
 
-### Slower Than Compiled Languages
+## Python Does Not Lock Xian To One Runtime Forever
 
-Python is interpreted and slower than compiled languages like Rust, Go, or C++.
-However, Xian is not trying to win by being the fastest chain:
+One of the big advantages of the Xian design is that Python authorship and
+runtime execution are separate concerns.
 
-- **Many real workloads are state- and coordination-heavy** -- storage, validation, and network coordination often matter more than raw compute speed
-- **Metering limits total computation** -- deterministic chi limits cap expensive work regardless of language speed
-- **Operational clarity matters** -- easier contracts and easier tooling can be more valuable than squeezing out another benchmark win
-- **The product goal is usability** -- Xian is intended to be a flexible programmable backend, not a throughput-first chain
+Today the same contract language can map to:
 
-### Restricted Subset
+- tracer-backed Python execution, where validators align on tracer mode and
+  CPython minor version
+- `xian_vm_v1`, where validators align on a native runtime plus explicit
+  `bytecode_version` and `gas_schedule`
 
-Xian contracts use a restricted subset of Python. You cannot use:
+That gives Xian a path to more native execution and more stable machine-level
+semantics without forcing developers to abandon the authoring language.
 
-- Object-oriented programming (no classes)
-- Exception handling (no try/except)
-- Standard library modules
-- Closures and generators
+## Honest Tradeoffs
 
-This means some Python patterns you are accustomed to are not available. The restricted set is intentionally small to maintain auditability and security.
+Xian makes deliberate tradeoffs.
 
-### Interpreter Version Lock
+### It Is A Restricted Subset
 
-All validators must run the same CPython version to ensure identical bytecode
-compilation and instruction counting. This means the network upgrades Python
-versions through coordinated governance, not independently.
+This is not "run any Python you want."
 
-## The Bottom Line
+If a familiar Python feature would weaken determinism, auditability, or runtime
+clarity, Xian excludes it.
 
-Xian chooses developer accessibility, simple but powerful contracts, and
-software-friendly integration over raw performance positioning. The point is not
-to be the fastest chain; the point is to be the easiest useful programmable
-decentralized backend for teams that value clarity, flexibility, and ordinary
-software ergonomics.
+### Performance Is A Platform Concern, Not A Language Illusion
+
+Python source is chosen for readability and adoption. Performance comes from:
+
+- deterministic metering
+- explicit host operations
+- careful storage accounting
+- native components such as the tracer, verifier, and Xian VM runtime
+
+The point is not to pretend Python is magically as fast as low-level systems
+languages. The point is to keep contract authorship simple while letting the
+runtime evolve underneath.
+
+### Runtime Discipline Still Matters
+
+Validators must still stay aligned on the supported runtime for the network
+they are joining. The exact alignment rules depend on the execution engine, but
+the principle does not change: all validators must execute the same contract
+semantics.
+
+## Bottom Line
+
+Xian chooses Python because it makes decentralized application logic easier to
+understand, test, and integrate. The language stays familiar; the runtime stays
+strict. That combination is the product thesis.

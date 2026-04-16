@@ -1,88 +1,43 @@
-# xian-js Playground
+# Playgrounds
 
-The maintained browser-side playground today is the runnable
-`examples/browser-dapp/` app inside the `xian-js` repo.
+Xian currently has two maintained playground-style surfaces.
 
-It is not a separate repo. It is the current dapp-side example for exercising
-the public `@xian-tech/client` and `@xian-tech/provider` packages against a
-live node.
+## 1. Browser dApp Example In `xian-js`
 
-## What It Covers
+The `xian-js` repo ships a runnable browser dapp example that exercises:
 
-The playground currently includes:
+- RPC and dashboard configuration
+- provider discovery
+- injected-wallet flows
+- signing, sending, and simulation
+- live subscriptions
 
-- RPC URL, dashboard URL, chain ID, and private-key inputs
-- demo in-memory signer and provider initialization
-- wallet connect and wallet-info flows
-- injected provider registration into `window.xian`
-- rediscovery of an already injected wallet, including the browser extension
-- native token asset-watch requests
-- chain ID, nonce, and balance reads
-- message signing
-- wallet-managed tx preparation
-- explicit build, sign, and send flows
-- quick intent-based `sendCall(...)` flows
-- live block and balance subscriptions through the dashboard websocket
+Use it when you want to test the TypeScript client and provider contract from a
+real browser app.
 
-## Run It
+## 2. `xian-playground-web`
 
-From the `xian-js` repo:
+`xian-playground-web` is the dedicated contract playground for Xian.
 
-```bash
-cd ~/xian/xian-js
-npm install
-npm run build
-npm run dev --workspace example-browser-dapp
-```
+It lets users:
 
-Vite prints the local URL when it starts. On a normal local run it is usually
-`http://127.0.0.1:5173` or `http://localhost:5173`.
+- author contracts in the browser
+- lint them
+- deploy them into a per-session `xian-contracting` runtime
+- call exported functions
+- inspect and import/export session state
 
-Point the form at a running Xian node, for example:
+This is the maintained browser-first contract experimentation surface.
 
-- RPC: `http://127.0.0.1:26657`
-- dashboard: `http://127.0.0.1:8080`
+## Which One To Use
 
-## Use It With The Browser Wallet
+- use the `xian-js` browser dapp example when you are testing app and wallet
+  integration
+- use `xian-playground-web` when you want a contract-authoring and local-runtime
+  playground
 
-To test the injected-wallet path with the current browser wallet:
+## Related Tools
 
-```bash
-cd ~/xian/xian-js
-npm install
-npm run build
-
-cd ../xian-wallet-browser
-npm install
-npm run build --workspace xian-wallet-extension
-```
-
-Then:
-
-1. open `chrome://extensions`
-2. enable `Developer mode`
-3. click `Load unpacked`
-4. select `apps/wallet-extension/dist`
-5. open the playground
-6. click `Use Injected Wallet`
-
-That exercises the real `window.xian` provider path rather than the in-memory
-demo provider.
-
-## Contracting-Only Interactive Work
-
-There is still no maintained standalone contract-runtime playground repo in the
-current core workspace.
-
-For contract-only local development, use `xian-contracting` directly with
-`ContractingClient`:
-
-```python
-from contracting.client import ContractingClient
-
-client = ContractingClient()
-client.flush()
-```
-
-That gives you the real runtime, storage behavior, linting rules, and contract
-loading model used by the node stack.
+- [xian-js](/tools/xian-js)
+- [Contracting Hub](/tools/hub)
+- [Linter](/tools/linter)

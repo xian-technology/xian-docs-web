@@ -1,45 +1,63 @@
 # SDKs & Tools
 
-Xian provides a set of developer tools for building, testing, deploying, and
-integrating programmable decentralized networks and applications.
+Xian ships tooling for three distinct jobs:
 
-## Core Tools
+- building and testing contracts
+- integrating applications and wallets
+- operating higher-level services around a Xian network
 
-| Tool | Purpose |
-|------|---------|
-| [xian-js](/tools/xian-js) | JavaScript / TypeScript SDK for browser apps, wallets, providers, transaction building, and websocket subscriptions |
-| [xian-wallet-browser](/tools/xian-wallet-browser) | Browser wallet extension (Chrome/Brave/Edge) - multi-account HD wallet, dApp provider, local build/test flow, release zip |
-| [xian-wallet-mobile](/tools/xian-wallet-mobile) | Mobile wallet (React Native/Expo) - Android release flow plus iOS build/test path from the same codebase |
-| [xian-js Playground](/tools/playground) | Runnable browser dapp example for provider flows, injected-wallet discovery, tx preparation, quick sends, and websocket subscriptions |
-| [xian-py](/tools/xian-py) | Python SDK for services, workers, indexed reads, websocket watchers, and projector-backed integrations |
-| [xian-intentkit](/tools/xian-intentkit) | AI-agent stack with a web UI, Xian-native wallet and contract skills, autonomous task support, optional stack-managed deployment, and deployer-configurable pricing |
-| [xian-zk](/tools/xian-zk) | Shielded-note and shielded-command proving toolkit, wallet state helper, and deployment bundle generator |
-| [xian-linter](/tools/linter) | Static analysis to catch invalid code before deployment |
+## Core SDKs And Apps
 
-## Quick Start
+| Tool | Main use |
+|------|----------|
+| [xian-js](/tools/xian-js) | TypeScript client, provider contract, relayer clients, and browser integration |
+| [xian-wallet-browser](/tools/xian-wallet-browser) | browser wallet extension and injected provider |
+| [xian-wallet-mobile](/tools/xian-wallet-mobile) | mobile wallet application |
+| [xian-py](/tools/xian-py) | Python client, watchers, indexed reads, and relayer clients |
+| [xian-zk](/tools/xian-zk) | proving toolkit, shielded wallet model, bundle generation, local prover service |
+| [xian-intentkit](/tools/xian-intentkit) | agent-facing automation stack for Xian-native workflows |
 
-Install the JS / TS SDK workspace:
+## Developer Productivity Tools
 
-```bash
-cd ~/xian/xian-js
-npm install
-npm run validate
-```
+| Tool | Main use |
+|------|----------|
+| [Playgrounds](/tools/playground) | browser dapp example plus the dedicated contract playground |
+| [Contracting Hub](/tools/hub) | curated contract catalog, inspection, ratings, and deployment UI |
+| [Linter](/tools/linter) | static validation for contract source before deployment |
+| [MCP Server](/tools/mcp-server) | local AI-assistant bridge for wallets, reads, submissions, and DEX flows |
 
-Install the Python SDK:
+## Common Install Paths
 
-```bash
-pip install xian-tech-py
-```
-
-Install the contract engine (for local testing):
+TypeScript / browser tooling:
 
 ```bash
-pip install xian-tech-contracting
+npm install @xian-tech/client @xian-tech/provider
 ```
 
-Install the shielded proving toolkit:
+Python application SDK:
 
 ```bash
-pip install xian-tech-zk
+python -m pip install xian-tech-py
 ```
+
+Local contract runtime and testing:
+
+```bash
+python -m pip install xian-tech-contracting
+```
+
+Shielded proving toolkit:
+
+```bash
+python -m pip install xian-tech-zk
+```
+
+## How To Choose
+
+- use `xian-tech-contracting` when you are writing or testing contracts
+- use `xian-py` or `xian-js` when you are building apps, services, wallets, or
+  automations
+- use `xian-zk` when you are working with shielded-note or shielded-command
+  flows
+- use the hub, playground, or MCP server when you want a higher-level developer
+  surface instead of starting from raw SDK calls

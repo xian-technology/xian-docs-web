@@ -1,142 +1,129 @@
 # Chi & Metering
 
-Chi is Xian's name for transaction execution energy: the network's unit of computation, analogous to gas on Ethereum. It is not a separate token or an acronym. Every operation in a smart contract -- arithmetic, storage reads, storage writes, function calls -- costs chi. This prevents infinite loops, limits resource consumption, and compensates validators for execution work.
+Chi is Xian's execution-energy unit. It is the budget that limits computation,
+storage work, and other metered runtime behavior during a transaction.
+
+It is not a separate token. It is the unit Xian uses to price execution.
 
 ## How Chi Works
 
-When you submit a transaction, you specify a chi limit (the maximum chi you are willing to spend). The contract executes, and the actual chi consumed is deducted from your XIAN balance.
+When a transaction is submitted, it carries a chi limit.
 
-- If the contract completes within the chi limit, you pay only the chi actually used.
-- If the contract exceeds the chi limit, execution halts, all state changes are rolled back, and you pay the full chi limit.
+- if execution finishes within that limit, the transaction succeeds and the
+  chain charges the chi actually used
+- if execution exceeds the limit, execution aborts, state changes roll back,
+  and the submitted limit is what matters for failure accounting
 
-## Cost Constants
+## Core Constants
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| `READ_COST_PER_BYTE` | 1 | Chi charged per byte when reading from storage |
-| `WRITE_COST_PER_BYTE` | 25 | Chi charged per byte when writing to storage |
-| `CHI_PER_T` | 20 | Number of chi purchased by 1 XIAN. `T` stands for the native token. |
-| Base transaction cost | 5 | Flat chi cost added to every transaction |
+| Constant | Value | Meaning |
+|----------|-------|---------|
+| `READ_COST_PER_BYTE` | `1` | chi per stored byte read |
+| `WRITE_COST_PER_BYTE` | `25` | chi per stored byte written |
+| `CHI_PER_T` | `20` | chi purchased by one unit of the native token |
+| base transaction cost | `5` | flat chi charged on every transaction |
 
-## The Chi Formula
+## Base Formula
 
-The total chi cost of a transaction is computed as:
+Tracer-backed execution currently uses the familiar compute-to-chi conversion:
 
-```
+```text
 chi_used = (raw_compute_cost // 1000) + 5
 ```
 
-Where:
-- `raw_compute_cost` is the sum of all instruction costs (each Python opcode has a cost between 2 and 1610 compute units)
-- The `// 1000` division converts compute units to chi
-- `+ 5` is the base transaction cost
+Storage charges are then added on top based on the encoded key and value sizes.
 
-Storage costs are added on top of compute costs:
-- Each storage read adds `byte_count * 1` chi
-- Each storage write adds `byte_count * 25` chi
+For `xian_vm_v1`, the execution machine changes, but the same high-level idea
+does not: VM work, host operations, storage, transaction bytes, and return
+payload size are all metered explicitly against the transaction's chi budget.
 
-The byte count includes both the key and the value.
+## What Gets Metered
+
+### Computation
+
+Xian currently supports three metering backends:
+
+- `python_line_v1`: deterministic source-line buckets
+- `native_instruction_v1`: exact executed Python bytecode instructions
+- `xian_vm_v1`: VM-native gas schedule over VM operations and host calls
+
+The network chooses the execution engine and metering policy. Applications and
+validators do not get to improvise their own cost model.
+
+### Storage Reads
+
+Reading state costs `1` chi per byte of encoded key plus encoded value.
+
+### Storage Writes
+
+Writing state costs `25` chi per byte of encoded key plus encoded value.
+
+Writes are intentionally much more expensive than reads because they expand the
+durable chain state.
+
+### Cross-Contract Calls
+
+Cross-contract calls meter the called work too. In practice that means a single
+transaction can accumulate chi across multiple contracts if it touches multiple
+execution paths.
+
+### Proof Verification and Other Runtime Bridges
+
+Metered runtime bridges such as hashing, signature checks, and zk verification
+also contribute to total chi usage. In the VM-native path, these appear as
+explicit host operations instead of implicit Python work.
 
 ## Limits
 
 | Limit | Value |
-|-------|-------|
-| Maximum chi per transaction | 6,500,000 |
-| Maximum Python line events per transaction (`python_line_v1`) | 800,000 |
-| Maximum instruction events per transaction (`native_instruction_v1`) | 3,250,000 |
-| Maximum write per transaction | 128 KB |
-| Default chi allocation | 1,000,000 |
+|------|-------|
+| maximum chi per transaction | `6,500,000` |
+| maximum Python line events per transaction (`python_line_v1`) | `800,000` |
+| maximum instruction events per transaction (`native_instruction_v1`) | `3,250,000` |
+| maximum write per transaction | `128 KB` |
+| default chi allocation | `1,000,000` |
 
-If any limit is exceeded, the transaction fails and all state changes are reverted. The chi consumed up to the failure point are still charged.
+Those line/instruction ceilings are tracer-backend safety limits. VM-native
+execution uses its own gas schedule rather than those tracer-event counters.
 
-## Converting Chi to XIAN
+## Converting Chi To Native Token Cost
 
-Chi are purchased with XIAN, the native currency:
+Chi is priced through the chain's native token:
 
-```
-XIAN cost = chi_used / CHI_PER_T
-XIAN cost = chi_used / 20
+```text
+token_cost = chi_used / 20
 ```
 
 Examples:
 
-| Chi Used | XIAN Cost |
-|-------------|----------|
-| 100 | 5.0 |
-| 1,000 | 50.0 |
-| 10,000 | 500.0 |
-| 100,000 | 5,000.0 |
-| 1,000,000 | 50,000.0 |
+| Chi used | Token cost |
+|----------|------------|
+| `100` | `5.0` |
+| `1,000` | `50.0` |
+| `10,000` | `500.0` |
+| `100,000` | `5,000.0` |
+| `1,000,000` | `50,000.0` |
 
-## What Costs Chi
+## Why Chi Matters For Design
 
-### Computation
+Chi is not only a billing detail. It shapes how you design contracts:
 
-Xian has two supported metering backends:
+- long or repeated storage writes are expensive
+- repeated reads add up
+- deep multi-contract flows cost more than simple direct calls
+- proof-backed and privacy-preserving flows are expected to cost more than
+  trivial public transfers
 
-- `python_line_v1` precomputes a bytecode-cost bucket for each executable
-  source line and charges that bucket when the line executes
-- `native_instruction_v1` charges exact executed bytecode instructions
+## Practical Optimization Rules
 
-Both backends use the same opcode cost schedule, where common compute-unit
-costs range from `2` to `1610`. The network chooses one tracer mode and keeps
-validators aligned on it.
+- minimize storage writes
+- cache repeated reads in local variables
+- keep stored keys and values compact
+- avoid unnecessary cross-contract hops
+- simulate before submitting when the SDK supports it
 
-### Storage Reads
+## See Also
 
-Reading a value from state costs 1 chi per byte of the key and value combined:
-
-```python
-# Reading balances["alice"] where the stored value is "1000000"
-# Key: "con_token.balances:alice" (24 bytes)
-# Value: "1000000" (7 bytes)
-# Cost: 31 chi
-balance = balances["alice"]
-```
-
-### Storage Writes
-
-Writing a value costs 25 chi per byte:
-
-```python
-# Writing balances["alice"] = 999000
-# Key: "con_token.balances:alice" (24 bytes)
-# Value: "999000" (6 bytes)
-# Cost: 750 chi
-balances["alice"] = 999000
-```
-
-### Cross-Contract Calls
-
-Calling a function on another contract incurs the chi cost of executing that function, plus the overhead of the call itself.
-
-Developer rewards now follow that metered execution path too. The transaction's
-developer-reward bucket is split across the participating contracts in
-proportion to their metered execution cost, then aggregated back to the
-relevant `__developer__` recipients.
-
-The validator portion of tx fees also follows the current validator-governance
-model. It is no longer split equally per validator by default. The validator
-reward bucket is now distributed by each active validator's configured
-`validator_power`, and the payout is sent to that validator's `reward_key`.
-
-## Optimizing Chi Usage
-
-- **Minimize storage writes** -- writes cost 25x more than reads per byte
-- **Use shorter variable and key names** -- key length contributes to byte cost
-- **Cache reads in local variables** -- reading the same key twice costs chi twice
-- **Use `default_value`** -- avoids storing default entries explicitly
-- **Batch related operations** -- fewer cross-contract calls means less overhead
-
-## Chi in Practice
-
-A simple token transfer typically costs between 200 and 500 chi. A complex
-DEX swap involving multiple contracts might cost 2,000-10,000 chi. In that
-multi-contract case, developer rewards are not paid only to the entry
-contract's developer anymore; they are split across the participating contract
-developers by measured execution share. On the validator side, the validator
-slice is distributed by validator power rather than an equal per-node split.
-Contract deployment (submission) costs more because the entire source code is
-stored on-chain.
-
-You can estimate chi costs before submitting a transaction by using [dry runs](/api/dry-runs).
+- [Estimating Chi](/api/dry-runs)
+- [Chi Cost Table](/reference/chi-costs)
+- [The Xian VM](/concepts/xian-vm)

@@ -1,116 +1,125 @@
 # Architecture Overview
 
-The current Xian stack is split into a small set of focused repositories and a
-runtime topology built around CometBFT plus Python-heavy services.
+Xian is organized as a small set of focused repositories that together cover
+contract authoring, deterministic execution, node operations, SDKs, and
+optional higher-level services.
 
-The important framing is that Xian is not only a contract runtime. It is a
-full decentralized application platform with contract execution, node runtime,
-SDKs, deployment tooling, indexed reads, and monitoring surfaces.
+## Core Runtime Repositories
 
-## Core Repositories
+| Repo | Main role |
+|------|-----------|
+| `xian-contracting` | contract compiler, sandbox, storage model, metering, standard library bridges, local testing |
+| `xian-abci` | CometBFT application, block execution, query layer, snapshots, dashboard service |
+| `xian-configs` | canonical network manifests, contracts, templates, solution packs |
+| `xian-stack` | Docker images, Compose topology, localnet, monitoring, optional sidecars |
+| `xian-cli` | operator workflow surface for keys, manifests, node init/start/stop/health |
 
-| Repo | Role |
-|------|------|
-| `xian-contracting` | deterministic contract runtime, linter, storage, metering |
-| `xian-abci` | ABCI application, query layer, node services, optional dashboard |
-| `xian-configs` | canonical network manifests, contracts, and bundled assets |
-| `xian-stack` | Docker images, Compose topology, localnet, runtime backend |
-| `xian-cli` | operator control plane for keys, network join/create, node lifecycle |
-| `xian-py` | external Python SDK |
+## Developer and Application Repositories
 
-Related but non-core tooling:
+| Repo | Main role |
+|------|-----------|
+| `xian-py` | Python SDK for reads, submissions, watchers, indexed feeds, and shielded relayer clients |
+| `xian-js` | TypeScript client, provider contract, relayer clients, and browser dapp example |
+| `xian-wallet-browser` / `xian-wallet-mobile` | end-user wallet applications |
+| `xian-contracts` | maintained contract packages, including shielded-note and shielded-command contracts |
+| `xian-linter` | standalone lint service/package |
+| `xian-playground-web` | browser playground for authoring, linting, deploying, and calling contracts |
+| `xian-contracting-hub-web` | curated contract catalog and deployment UI |
+| `xian-mcp-server` | local MCP/HTTP bridge for AI-assisted Xian workflows |
 
-- `xian-linter` for standalone linting service mode
-- `xian-docs-web` for documentation
+## Execution Path
 
-## Runtime Layers
+At the protocol core, Xian looks like this:
 
 ```text
-applications / services / wallets / automation
+wallets / apps / services / agents
             |
-         xian-py
+      xian-py / xian-js
             |
-     CometBFT RPC / dashboard API
+   CometBFT RPC + dashboard APIs
             |
-        CometBFT
+         CometBFT
             |
             | ABCI
             v
          xian-abci
             |
             v
-     xian-contracting + LMDB
+     xian-contracting runtime
+            |
+            v
+      LMDB application state
 ```
 
-## Where Each Repo Fits
+CometBFT owns consensus, networking, and block ordering. `xian-abci` owns the
+application behavior behind that consensus boundary. `xian-contracting` owns
+contract semantics, storage, metering, and the standard-library bridge used by
+contracts.
 
-### xian-contracting
+## Contract Execution Layers
 
-Owns:
+There are two separate concerns to keep distinct:
 
-- sandboxed Python execution
-- chi metering
-- contract linter
-- LMDB-backed state driver
-- local testing surface via `ContractingClient`
+1. Contract authors write restricted Python source.
+2. The network chooses how that source is executed.
 
-### xian-abci
+Today Xian supports:
 
-Owns:
+- tracer-based Python execution with `python_line_v1`
+- tracer-based Python execution with `native_instruction_v1`
+- `xian_vm_v1`, which executes validated Xian VM artifacts through a native
+  runtime and explicit execution policy
 
-- `CHECK_TX`, `FINALIZE_BLOCK`, `COMMIT`, `QUERY`
-- transaction validation and nonce logic
-- event conversion into standard ABCI events
-- bounded dry-run simulation
-- optional dashboard and WebSocket observer service
+That means Python remains the contract language, while the execution machine is
+allowed to evolve without asking developers to rewrite contracts in a new
+language.
 
-### xian-configs
+## VM and ZK Building Blocks
 
-Owns canonical network assets:
+Two important subsystems live inside the broader runtime architecture.
 
-- `networks/<name>/manifest.json`
-- genesis bundles
-- canonical contract sources used by networks
+### Xian VM
 
-### xian-stack
+`xian-contracting` can lower contracts into versioned VM artifacts for
+`xian_vm_v1`. Those artifacts are validated during deployment and stored
+alongside human-facing source so the native runtime can execute a stable,
+Xian-defined machine contract instead of depending on CPython bytecode layout.
 
-Owns runtime packaging and topology:
+### Shielded / ZK Stack
 
-- immutable node images
-- Compose files
-- integrated and fidelity localnet modes
-- runtime defaults and resource limits
+The native verifier surface is intentionally narrow:
 
-### xian-cli
+- `zk.verify_groth16(...)`
+- `zk.verify_groth16_bn254(...)`
+- `zk.has_verifying_key(...)`
 
-Owns operator workflows:
+The proving and wallet side stays off-chain in `xian-zk`, while the on-chain
+layer lives in `xian-contracts` through `shielded-note-token`,
+`shielded-commands`, and adapter contracts.
 
-- validator key generation
-- `network create` and `network join`
-- node profiles and manifest resolution
-- `node init`, `start`, `stop`, `status`, `doctor`
+## Optional Services
 
-### xian-py
+Several services are useful in practice but are not part of consensus:
 
-Owns the external client-facing SDK:
+- dashboard HTTP and WebSocket APIs
+- BDS-backed indexed reads and recovery tooling
+- PostGraphile-based GraphQL over the BDS database
+- the stack-managed shielded relayer
+- stack-managed `xian-intentkit`
 
-- wallets
-- transaction construction/signing
-- read/query helpers
-- sync and async API surfaces
+These services improve operator UX, analytics, wallet sync, and application
+integration, but validators do not need them to agree on state.
 
-## Optional Runtime Services
+## How The Pieces Fit In Practice
 
-The stack also supports optional services that are outside the deterministic
-consensus path:
+- contract authors usually start with `xian-contracting` and `ContractingClient`
+- app developers use `xian-py`, `xian-js`, wallets, and the dashboard or indexed
+  APIs
+- node operators use `xian-cli`, `xian-stack`, `xian-abci`, and canonical assets
+  from `xian-configs`
+- privacy-sensitive applications additionally use `xian-zk`,
+  `zk_registry`, shielded contracts, and optionally the relayer surface
 
-- dashboard HTTP/WebSocket service
-- BDS indexed read stack with Postgres storage, automatic catch-up, and local
-  replay/reindex tooling
-- optional GraphQL/PostGraphile v5 convenience layer over that BDS database
-
-Those services improve observability and query ergonomics, but validators do
-not depend on them for consensus.
-
-This is part of the product thesis: Xian should be usable like a real software
-tool, not only as a bare execution engine.
+That combination is the practical Xian architecture: one contract language,
+multiple execution runtimes, and a surrounding stack that treats decentralized
+infrastructure like a real software platform instead of an isolated VM.

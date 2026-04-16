@@ -2,27 +2,76 @@
 
 ABCI is the boundary between CometBFT and the Xian application.
 
-In Xian, `xian-abci` implements the application side of that boundary and
-`CometBFT` owns consensus, networking, and block ordering.
+In practice:
 
-## Core Responsibilities
+- CometBFT orders transactions, runs the validator protocol, and commits blocks
+- `xian-abci` validates, executes, queries, snapshots, and exposes the
+  application behavior behind that consensus engine
 
-`xian-abci` handles:
+## What CometBFT Owns
 
-- `CHECK_TX` style validation before mempool admission
+CometBFT is responsible for:
+
+- peer networking
+- mempool propagation
+- block proposal and voting
+- final block commit
+- canonical RPC for blocks, transactions, and consensus status
+
+CometBFT does not understand contract semantics. It only knows how to drive a
+deterministic application through the ABCI contract.
+
+## What `xian-abci` Owns
+
+`xian-abci` is the application implementation for Xian. It handles:
+
+- mempool-side transaction checks
 - block execution in `FINALIZE_BLOCK`
-- state commit and app-hash generation
-- read-only queries
+- state commit and app-hash production
+- read-only query paths
+- application snapshot export/import
+- optional dashboard HTTP and WebSocket services
 
-## Important Behavior
+It also wires the execution runtime, whether that runtime is tracer-backed
+Python or `xian_vm_v1`.
 
-- successful transactions emit standard ABCI events for contract events
-- `simulate_tx` runs through a bounded subprocess worker attached to the app,
-  not through the deterministic consensus execution path
-- dashboard REST and WebSocket endpoints proxy or enrich CometBFT-facing data
+## Transaction Path Across The Boundary
+
+At a high level, one transaction moves through these stages:
+
+1. CometBFT receives and gossips the signed payload.
+2. `xian-abci` performs mempool validation such as payload shape, nonce rules,
+   and basic execution prechecks.
+3. CometBFT includes the transaction in an ordered block.
+4. `xian-abci` executes the block deterministically and produces state changes,
+   events, receipts, and the new app hash.
+5. CometBFT commits the block and finalizes the height.
+
+That separation is why Xian can evolve contract execution without replacing the
+consensus engine itself.
+
+## Query Surfaces
+
+The ABCI side is also where Xian exposes application queries.
+
+Important query families include:
+
+- current contract state and contract metadata
+- transaction simulation
+- indexed/BDS-backed history reads when the service-node stack is enabled
+- performance and runtime health summaries
+- application snapshot coordination
+
+The dashboard service sits next to this layer. It does not change consensus; it
+simply wraps or enriches CometBFT and ABCI-facing data for operator and
+explorer use.
 
 ## Why This Boundary Matters
 
-Consensus does not know contract semantics. CometBFT only needs a deterministic
-application that validates, executes, and commits the same state transitions on
-every validator.
+The ABCI split keeps responsibilities clear:
+
+- CometBFT gives Xian finality and validator coordination
+- Xian defines the application state machine
+
+That is why Xian can remain Python-authored and contract-focused while still
+using a mature BFT consensus engine underneath.

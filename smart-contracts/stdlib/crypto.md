@@ -1,6 +1,7 @@
 # Crypto
 
-The contract runtime exposes a small `crypto` module.
+The contract runtime exposes a small deterministic `crypto` module focused on
+Ed25519 verification and key-shape validation.
 
 ## Available Functions
 
@@ -11,14 +12,36 @@ crypto.key_is_valid(key)
 
 ## `crypto.verify(...)`
 
-Returns `True` when the Ed25519 signature matches the message and verification
-key.
+`crypto.verify(vk, msg, signature)` returns `True` when:
+
+- `vk` is a valid Ed25519 public key in lowercase hex
+- `signature` is a valid Ed25519 signature in hex
+- the signature matches the UTF-8 encoded `msg` string
+
+If verification fails, it returns `False`.
+
+Typical uses include:
+
+- permit-style approvals
+- signed off-chain authorizations
+- relayed action authorization patterns
 
 ## `crypto.key_is_valid(...)`
 
-Returns `True` when the provided hex key is a valid 64-character hex string.
+`crypto.key_is_valid(key)` is a lightweight shape check.
 
-## Typical Use
+It returns `True` only when the provided string is:
 
-Canonical permit-style flows use signature verification to authorize actions
-without requiring a direct transaction from the approving account.
+- exactly 64 hex characters
+- valid hexadecimal
+
+This is a format check, not a proof that the key controls funds or belongs to a
+specific account role.
+
+## Design Guidance
+
+- hash or serialize the exact message format before users sign it
+- keep message construction deterministic
+- use `crypto.key_is_valid(...)` for input validation, not for authorization
+- remember that signature verification is public and deterministic; there is no
+  private key handling inside the contract runtime

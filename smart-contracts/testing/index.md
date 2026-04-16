@@ -1,36 +1,50 @@
 # Testing
 
-Xian provides `ContractingClient` -- a local testing environment that lets you submit, execute, and inspect contracts without running a full node. It simulates the on-chain runtime with an in-memory state database.
+`ContractingClient` is the standard local test runtime for Xian contracts.
 
-## How It Works
+It lets you submit contracts, call exported functions, inspect state, and
+exercise contract interactions without running a full node.
 
-`ContractingClient` spins up a local instance of the Xian contract executor. You submit contracts as Python functions, call their exported functions, and inspect state changes -- all in a standard Python test file.
+## What It Gives You
+
+`ContractingClient` includes:
+
+- the contract linter
+- the local execution runtime
+- storage behavior close to the real chain model
+- support for multi-contract tests, events, and return-value inspection
 
 ```python
 from contracting.client import ContractingClient
 
 client = ContractingClient()
-client.flush()  # clear all state
+client.flush()
 
-# Submit a contract
-client.submit(my_contract_func, name="con_my_contract")
-
-# Get a handle and call functions
-contract = client.get_contract("con_my_contract")
-contract.transfer(to="bob", amount=100)
+client.submit(my_contract_func, name="con_example")
+contract = client.get_contract("con_example")
+result = contract.some_function()
 ```
 
-## Quick Links
+## What It Is Best For
 
-- [Unit Testing](/smart-contracts/testing/unit-testing) -- full guide to setting up tests with ContractingClient
-- [Return Values & Events](/smart-contracts/testing/return-values) -- inspecting function outputs and emitted events
-- [Multi-Contract Testing](/smart-contracts/testing/multi-contract) -- testing contracts that import each other
-- [Chi Costs](/smart-contracts/testing/chi-costs) -- measuring gas consumption in tests
+Use it for:
+
+- unit tests of contract logic
+- storage and event assertions
+- cross-contract integration tests
+- building deployment artifacts before submission to a live network
+
+## Related Guides
+
+- [Unit Testing](/smart-contracts/testing/unit-testing)
+- [Return Values & Events](/smart-contracts/testing/return-values)
+- [Multi-Contract Testing](/smart-contracts/testing/multi-contract)
+- [Measuring Chi Costs](/smart-contracts/testing/chi-costs)
 
 ## Installation
 
 ```bash
-pip install xian-tech-contracting
+python -m pip install xian-tech-contracting
 ```
 
-This gives you access to `ContractingClient`, the linter, and all runtime primitives (`Hash`, `Variable`, `ctx`, etc.).
+This installs the local contract runtime, linter, and testing client.

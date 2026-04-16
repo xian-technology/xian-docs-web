@@ -35,7 +35,7 @@ chi_used = (raw_compute_cost // 1000) + 5 + storage_read_cost + storage_write_co
 ```
 
 Where:
-- `raw_compute_cost` = sum of all opcode costs charged by the selected tracer backend
+- `raw_compute_cost` = sum of all compute costs charged by the selected runtime backend
 - `5` = base transaction cost
 - `storage_read_cost` = total bytes read * 1
 - `storage_write_cost` = total bytes written * 25
@@ -46,6 +46,11 @@ Each Python bytecode instruction has a fixed cost in compute units (CU). The
 native tracer charges those instructions exactly; the pure-Python tracer
 precomputes line buckets from the same opcode schedule. Both are converted to
 chi via `raw_cost // 1000`.
+
+For `xian_vm_v1`, the runtime no longer meters CPython bytecode directly. VM
+execution is charged through the VM gas schedule plus the same storage and
+payload-size accounting rules. The table below therefore describes the tracer-
+backed compute schedule, not every possible VM-native gas entry.
 
 | Cost Range (CU) | Instructions |
 |-----------------|--------------|

@@ -18,6 +18,10 @@ With metering enabled, contract calls use the same tracer mode that the runtime
 would use on-chain. On the default pure-Python backend that means deterministic
 line buckets; on the native backend it means exact instruction metering.
 
+This local testing path is primarily a tracer-backed measurement tool. VM-native
+networks still use the same chi budget concept, but `xian_vm_v1` meters through
+its VM gas schedule rather than the Python tracer callbacks described here.
+
 ## How Chi Are Calculated
 
 The chi cost of a transaction has three components:
@@ -44,6 +48,9 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 | Max chi per tx | 6,500,000 | Hard ceiling per transaction |
 | Max line events (`python_line_v1`) | 800,000 | Maximum line callbacks per transaction |
 | Max instruction events (`native_instruction_v1`) | 3,250,000 | Maximum native instruction callbacks per transaction |
+
+For `xian_vm_v1`, storage and payload accounting still matter, but compute is
+charged through the VM-native gas schedule instead of these tracer-event limits.
 
 ## Checking Chi Used
 

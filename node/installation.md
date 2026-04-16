@@ -111,6 +111,7 @@ python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitori
 If you need lower-level runtime tuning such as:
 
 - `python_line_v1` vs `native_instruction_v1`
+- `xian_vm_v1` execution policy
 - speculative parallel transaction execution
 - direct `[xian]` metrics or mempool settings
 
