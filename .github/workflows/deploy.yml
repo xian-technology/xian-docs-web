@@ -28,15 +28,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Package GitHub Pages artifact
-        run: |
-          tar --dereference --hard-dereference -cvf github-pages.tar -C .vitepress/dist .
-          gzip -9 github-pages.tar
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-pages-artifact@v4
         with:
-          name: github-pages
-          path: github-pages.tar.gz
-          retention-days: 1
+          path: .vitepress/dist
 
   deploy:
     environment:
