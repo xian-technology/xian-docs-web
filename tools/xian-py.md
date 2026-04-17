@@ -3,6 +3,10 @@
 `xian-py` is the external Python SDK for talking to a Xian node from
 applications, services, wallets, and automation workflows.
 
+If you want shell-first automation instead of Python code, use
+[`xian-cli`](/tools/xian-cli). The `xian client ...` namespace in `xian-cli`
+wraps the same SDK model for command-line usage.
+
 ## Installation
 
 Base install:

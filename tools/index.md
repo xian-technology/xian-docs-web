@@ -10,6 +10,7 @@ Xian ships tooling for three distinct jobs:
 
 | Tool | Main use |
 |------|----------|
+| [xian-cli](/tools/xian-cli) | operator CLI plus JSON-first wallet, query, and transaction automation |
 | [xian-js](/tools/xian-js) | TypeScript client, provider contract, relayer clients, and browser integration |
 | [xian-wallet-browser](/tools/xian-wallet-browser) | browser wallet extension and injected provider |
 | [xian-wallet-mobile](/tools/xian-wallet-mobile) | mobile wallet application |
@@ -40,6 +41,12 @@ Python application SDK:
 python -m pip install xian-tech-py
 ```
 
+CLI automation and operator tooling:
+
+```bash
+python -m pip install xian-tech-cli
+```
+
 Local contract runtime and testing:
 
 ```bash
@@ -55,8 +62,9 @@ python -m pip install xian-tech-zk
 ## How To Choose
 
 - use `xian-tech-contracting` when you are writing or testing contracts
+- use `xian-cli` when you want shell-first automation or operator workflows
 - use `xian-py` or `xian-js` when you are building apps, services, wallets, or
-  automations
+  library-level integrations
 - use `xian-zk` when you are working with shielded-note or shielded-command
   flows
 - use the hub, playground, or MCP server when you want a higher-level developer

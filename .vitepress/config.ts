@@ -198,6 +198,7 @@ export default defineConfig({
           text: 'SDKs & Tools',
           items: [
             { text: 'Overview', link: '/tools/' },
+            { text: 'xian-cli', link: '/tools/xian-cli' },
             { text: 'xian-js', link: '/tools/xian-js' },
             { text: 'xian-wallet-browser', link: '/tools/xian-wallet-browser' },
             { text: 'xian-wallet-mobile', link: '/tools/xian-wallet-mobile' },
