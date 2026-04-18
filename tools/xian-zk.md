@@ -244,6 +244,16 @@ Networks can now advertise one or more relayers in their manifest. The
 canonical field is `shielded_relayers`, while the older single-entry
 `shielded_relayer` field is still readable for compatibility.
 
+The canonical network manifests can also carry three privacy-specific policy
+surfaces alongside those relayer endpoints:
+
+- `privacy_artifact_catalog`: a checksum-pinned catalog of approved shielded
+  registry manifests for that network
+- `shielded_history_policy`: the network's compatibility and retention
+  commitment for `shielded_wallet_history`
+- `privacy_submission_policy`: the network's operator-facing relayer auth and
+  hidden-sender submission posture
+
 Example:
 
 ```json
@@ -270,6 +280,14 @@ The current CLI-side selection rule is intentionally simple: sort by
 `priority`, then `id`, then `base_url`, and expose the first entry as the
 primary relayer while keeping the full catalog available to tooling. The routed
 pool clients in `xian-py` and `xian-js` now use that same ordered catalog.
+
+If a public network actually enables shielded assets, the recommended posture
+is:
+
+- publish approved registry manifests through `privacy_artifact_catalog`
+- treat `shielded_history_policy` as a real operator commitment, not a hint
+- make the relayer auth and retention posture in
+  `privacy_submission_policy` match the deployed relayer configuration
 
 Current pool-client behavior is:
 

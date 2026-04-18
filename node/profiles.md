@@ -63,7 +63,7 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `stack_dir` | explicit `xian-stack` checkout used by the runtime backend |
 | `node_image_mode` | `registry` for pinned published images or `local_build` for workspace-built images |
 | `node_*_image` | immutable integrated/split image references used when `node_image_mode=registry` |
-| `node_release_manifest` | optional embedded provenance block copied from `xian-stack/release-manifest.json`, including the exact component Git refs and build toolchain used for a canonical published image |
+| `node_release_manifest` | optional embedded provenance block copied from `xian-stack/release-manifest.json`, including the exact component Git refs, digest-pinned base images, and checksum-pinned external build inputs used for a canonical published image |
 | `service_node` | enables the optional indexed-service stack used for BDS-backed reads |
 | `operator_profile` | the intended operator posture inherited from the selected starter template |
 | `monitoring_profile` | the monitoring posture inherited from the selected starter template |

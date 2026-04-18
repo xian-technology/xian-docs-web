@@ -20,6 +20,8 @@ Network manifests describe network-wide defaults such as:
 - block policy defaults
 - tracer-mode defaults
 - optional pinned release images and their provenance metadata
+- optional shielded/privacy packaging metadata such as approved privacy artifact
+  catalogs and shielded history commitments
 
 Canonical manifests live under `xian-configs/networks/<name>/manifest.json`.
 Reusable starter templates live under `xian-configs/templates/`.
@@ -28,6 +30,16 @@ The important distinction is:
 
 - templates are reusable starting points
 - manifests describe a specific network
+
+For canonical published networks, the manifest can also pin:
+
+- `node_release_manifest`: the exact repo refs and build inputs that produced
+  the published node images
+- `privacy_artifact_catalog`: a checksum-pinned catalog of approved shielded
+  registry manifests for that network
+- `shielded_history_policy`: the compatibility and retention commitment for the
+  `shielded_wallet_history` feed
+- `privacy_submission_policy`: operator-facing relayer and disclosure posture
 
 ## Node Profiles
 
@@ -126,6 +138,21 @@ It contains BDS/Postgres-related settings such as:
 - spool location and warning thresholds
 
 ## Snapshot Bootstrap Vs State Sync
+
+## Release Provenance In Manifests
+
+When a network pins published node images, `node_release_manifest` is the
+machine-readable provenance block that explains how those images were built.
+
+The current release manifest surface includes:
+
+- exact repo refs for the main runtime components
+- digest-pinned Python and Go base images
+- the CometBFT version plus a checksum-pinned source archive URL
+- the s6-overlay version plus architecture-specific SHA256 values
+
+That means the network manifest is no longer just saying "use this image." It
+also carries the pinned release inputs that produced that image.
 
 There are two different snapshot concepts in the stack.
 
