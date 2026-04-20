@@ -3,13 +3,15 @@
 `xian-js` is the JavaScript / TypeScript SDK workspace for integrating Xian
 from browser apps, wallets, dapps, and Node.js code that prefers TS.
 
-It currently ships two public packages:
+It currently ships three public packages:
 
 - `@xian-tech/client`: typed RPC client, tx helpers, Ed25519 signing helpers, and
   websocket subscriptions
 - `@xian-tech/provider`: browser wallet-provider contract and a simple in-memory
   provider implementation for demos, tests, injected-wallet discovery, and
   early integrations
+- `@xian-tech/types`: the shared transaction, signer, number, and broadcast-mode
+  types used by both public packages
 
 The browser wallet product line now lives in the sibling
 `xian-wallet-browser` repo, which consumes these SDK packages. The current
@@ -22,6 +24,7 @@ wallet product surface is documented here under
 
 - `@xian-tech/client`
 - `@xian-tech/provider`
+- `@xian-tech/types`
 
 The browser wallet product line is documented separately under
 [xian-wallet-browser](/tools/xian-wallet-browser). The source repo publishes
@@ -67,10 +70,20 @@ The provider package owns:
 - discovery helpers for late-loaded browser wallets
 - a dapp-facing wrapper around an injected provider
 
+### `@xian-tech/types`
+
+The types package owns the shared TypeScript contracts used across the JS
+workspace:
+
+- transaction payload and envelope types
+- signer interfaces
+- broadcast-mode and numeric helper types
+
 That gives Xian a clean split between:
 
 - low-level network and tx logic in `@xian-tech/client`
 - wallet-provider integration in `@xian-tech/provider`
+- shared transaction and signer types in `@xian-tech/types`
 - browser wallet product code in `xian-wallet-browser`
 
 ## Installing In Another JS Project
@@ -78,7 +91,7 @@ That gives Xian a clean split between:
 Install the packages directly from npm:
 
 ```bash
-npm install @xian-tech/client @xian-tech/provider
+npm install @xian-tech/client @xian-tech/provider @xian-tech/types
 ```
 
 For local development against the monorepo itself, you can still work from the
@@ -141,6 +154,20 @@ import {
 } from "@xian-tech/provider";
 ```
 
+When you want the shared core types directly, import them from
+`@xian-tech/types`:
+
+```ts
+import type {
+  BroadcastMode,
+  XianNumber,
+  XianSignedTransaction,
+  XianSigner,
+  XianTxPayload,
+  XianUnsignedTransaction,
+} from "@xian-tech/types";
+```
+
 ## Ed25519 Signers
 
 `xian-js` includes a built-in Ed25519 signer primarily for:
@@ -195,6 +222,7 @@ Constructor fields:
 - `chainId`: optional; if omitted, the client fetches it from `/genesis`
 - `fetchFn`: optional custom fetch implementation
 - `webSocketFactory`: optional custom websocket factory
+- `requestTimeoutMs`: optional default HTTP timeout; defaults to `30_000`
 
 ## Common Read Methods
 
@@ -378,6 +406,11 @@ const sub = client.watch.state(
   (message) => {
     console.log(message.key, message.value);
   },
+  {
+    onError(error) {
+      console.error("watch error", error);
+    },
+  },
 );
 ```
 
@@ -399,6 +432,9 @@ await sub.unsubscribe();
 ```
 
 `dashboardUrl` must be configured on the client for websocket usage.
+Malformed websocket payloads and async listener failures are surfaced through
+that optional `onError` callback instead of becoming unhandled promise
+rejections.
 
 ## Provider Contract
 

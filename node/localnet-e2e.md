@@ -64,10 +64,12 @@ The phases intentionally build on each other:
 7. trigger conflicting and invalid transactions intentionally
 8. deploy and exercise the DEX contract pack
 9. hammer readonly simulation and capture approximate simulator QPS
-10. intentionally let BDS fall behind by stopping Postgres, generate live
-    chain traffic, then verify BDS catches back up
+10. intentionally let the primary BDS service fall behind by stopping
+    Postgres, generate live chain traffic, then verify it catches back up
 11. validate retrieval through indexed BDS reads, `abci_query`, `xian-py`
-   watchers, and raw websocket tx subscriptions
+   watchers, raw websocket tx subscriptions, paginated `/keys/<prefix>`
+   retrieval, and a secondary BDS reindex/restart path fed from retained block
+   history
 12. run a dedicated determinism check by comparing recent app hashes, sampled
     state, and simulation outputs across validators
 13. vote a validator power change, remove a validator, and add it back through
@@ -159,6 +161,12 @@ already-running localnet.
   Postgres returns. On the current service-node implementation, `queue_depth`
   can stay nonzero in steady state, so the meaningful recovery signals are the
   indexed height, spool state, and DB health.
+- The harness also validates a secondary BDS rebuild path outside the live
+  service-node process. That makes the retrieval phase cover both live catch-up
+  and explicit reindex/restart recovery from retained block history.
+- The secondary BDS path is no longer just a one-shot sync. The current run
+  also stops that rebuilt instance, lets the chain advance, then restarts it
+  again to verify delayed catch-up from retained history.
 - The localnet validator image must include `xian-zk`, not just the Python-side
   prover utilities. The shielded phase verifies proofs inside the validator
   runtime.
@@ -174,6 +182,10 @@ already-running localnet.
   those values.
 - Keep the logging phase short. `TRACE` is intentionally expensive and exists
   for debugging, not for steady-state operation.
+- Localnet Compose waits for `service_healthy`, not just `service_started`.
+  Treat a running container as not ready until the health checks pass.
+- `make localnet-clean` now requires `FORCE=1` because it deletes all localnet
+  keys, state, and generated Compose files.
 
 ## What To Review After A Run
 

@@ -40,7 +40,6 @@ mode = "native_instruction_v1"
 bytecode_version = ""
 gas_schedule = ""
 authority = ""
-shadow_tracer_mode = ""
 ```
 
 Supported tracer-backed modes are:
@@ -58,7 +57,6 @@ mode = "xian_vm_v1"
 bytecode_version = "xvm-1"
 gas_schedule = "xvm-gas-1"
 authority = "native"
-shadow_tracer_mode = ""
 ```
 
 Important current rules:
@@ -66,7 +64,8 @@ Important current rules:
 - `xian_vm_v1` requires `bytecode_version`
 - `xian_vm_v1` requires `gas_schedule`
 - `authority` must be `native`
-- `shadow_tracer_mode` must stay empty on the current supported branch
+- the older `shadow_tracer_mode` rollout field is not part of the current
+  supported config surface
 
 The high-level `xian-cli` profile flow currently exposes tracer selection and
 other runtime posture, but the full VM execution policy is still a lower-level
@@ -150,6 +149,8 @@ These control the Xian application metrics endpoint and some node-local runtime
 bookkeeping behavior.
 
 The app metrics endpoint is separate from CometBFT's built-in metrics exporter.
+When BDS is enabled, the app metrics exporter also mirrors the queue, lag,
+storage, and connection-pool posture from `/bds_status`.
 
 ## Service-Node / BDS Runtime
 
@@ -161,11 +162,18 @@ Important `[xian.bds]` families:
 - connection settings for Postgres
 - pool sizing
 - statement timeout
+- application name
 - spool location
 - warning thresholds for queued or disk-heavy recovery conditions
 
 These settings matter for indexed reads, recovery, and GraphQL. They do not
 change consensus behavior.
+
+Operationally, the live path now keeps newly finalized blocks in an in-memory
+pending buffer and only persists them once any missing earlier heights have
+been recovered from RPC. The local spool is still useful for offline
+maintenance and explicit recovery workflows, but it is no longer the primary
+live-path durability mechanism.
 
 ## Runtime Key Reference
 
@@ -191,7 +199,6 @@ change consensus behavior.
 | `bytecode_version` | VM bytecode policy for `xian_vm_v1` |
 | `gas_schedule` | VM gas schedule id for `xian_vm_v1` |
 | `authority` | authoritative executor selection; currently `native` for `xian_vm_v1` |
-| `shadow_tracer_mode` | legacy rollout field; keep empty on the current `xian_vm_v1` path |
 
 ### `[xian.bds]` Keys
 
@@ -215,7 +222,6 @@ Important examples:
 - `XIAN_LOCALNET_EXECUTION_BYTECODE_VERSION`
 - `XIAN_LOCALNET_EXECUTION_GAS_SCHEDULE`
 - `XIAN_LOCALNET_EXECUTION_AUTHORITY`
-- `XIAN_LOCALNET_EXECUTION_SHADOW_TRACER_MODE`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS`
@@ -224,6 +230,11 @@ Important examples:
 - `XIAN_APP_METRICS_PORT`
 - `XIAN_PERF_ENABLED`
 - `XIAN_PERF_RECENT_BLOCKS`
+
+The older `XIAN_LOCALNET_EXECUTION_SHADOW_TRACER_MODE` compatibility input may
+still appear in some stack paths, but any non-empty value is rejected by the
+current `xian-abci` branch and should not be used as a supported runtime
+setting.
 
 Use those primarily for localnet, stack debugging, or deliberate Docker-side
 overrides. For normal operator workflows, prefer manifests, profiles, and the

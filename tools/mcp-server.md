@@ -23,6 +23,10 @@ XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1
 Without that opt-in, the MCP server still exposes the safer read/query/indexed
 inspection surface, but it rejects the unsafe wallet operations.
 
+Those unsafe tools are also omitted from `tools/list` and the HTTP `/tools`
+discovery surface until you opt in, so downstream tool-calling systems only
+see the read-safe default surface.
+
 ## Transport Modes
 
 It supports two transport styles:
@@ -31,6 +35,11 @@ It supports two transport styles:
 |------|----------|
 | MCP over stdio | desktop assistants and MCP-native clients |
 | HTTP / REST | web apps, custom tool-calling loops, and automation |
+
+In HTTP mode, the same tool registry is exposed as:
+
+- `GET /tools` for discovery
+- `POST /tools/{name}` for invocation
 
 ## What It Can Do
 

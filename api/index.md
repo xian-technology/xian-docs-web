@@ -27,6 +27,24 @@ Use optional convenience surfaces when you want ergonomics:
 - dashboard WebSocket for live block and event subscriptions
 - GraphQL for richer indexed queries over BDS data
 
+## Exposure Model In The Maintained Stack
+
+The maintained `xian-stack` runtime keeps these surfaces private by default:
+
+- CometBFT RPC
+- CometBFT and Xian metrics
+- dashboard REST / WebSocket
+- GraphQL / PostGraphile
+
+Public exposure is explicit and split by job:
+
+- `public-rpc`: live node RPC, broadcast, tx lookup, raw `abci_query`
+- `public-query`: BDS / GraphQL indexed reads only
+- `public-metrics`: Prometheus endpoints
+
+`public-query` does not imply `public-rpc`. That separation lets operators keep
+analytics and explorer traffic away from the live validator RPC path.
+
 ## Current-State Vs Indexed Reads
 
 Keep this split clear:
@@ -50,6 +68,7 @@ Keep this split clear:
 ```text
 GET http://localhost:26657/status
 GET http://localhost:26657/abci_query?path="/get/currency.balances:alice"
+GET http://localhost:26657/abci_query?path="/keys/currency.balances/limit=50"
 GET http://localhost:8080/api/status
 GET http://localhost:8080/api/abci_query/contract_info/currency
 GET http://localhost:8080/api/abci_query/blocks/limit=20/offset=0

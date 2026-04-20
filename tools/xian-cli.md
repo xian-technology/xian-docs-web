@@ -4,7 +4,7 @@
 roles:
 
 - operator workflows such as node setup, network manifests, profile handling,
-  health checks, and recovery
+  health checks, snapshots, solution packs, and recovery
 - client automation through `xian client ...`, backed directly by `xian-py`
 
 If you are writing Python application code, use [`xian-py`](/tools/xian-py).
@@ -33,14 +33,54 @@ The installed command is `xian`.
 
 Top-level namespaces:
 
+- `xian keys ...`
 - `xian network ...`
 - `xian node ...`
+- `xian snapshot ...`
 - `xian recovery ...`
 - `xian doctor ...`
+- `xian solution-pack ...`
 - `xian client ...`
 
 The `client` namespace is the JSON-first surface for wallet, query, and
 transaction automation.
+
+## Operator Workflows
+
+Use the non-`client` namespaces when you are shaping manifests and profiles or
+inspecting a running node.
+
+Current high-value flows include:
+
+- `xian network create ...` for local or private network manifests
+- `xian network join ...` for generating a local node profile from a canonical
+  network manifest
+- `xian node init|start|stop|status|health|endpoints ...` for local lifecycle
+  and inspection
+- `xian snapshot restore ...` and `xian recovery apply ...` for restore and
+  recovery workflows
+- `xian solution-pack ...` when you want a guided starter flow built on the
+  canonical configs
+
+`--dry-run` is available on `network create`, `network join`, and recovery-plan
+application so you can validate inputs and inspect the planned artifact paths
+before anything is written to disk.
+
+`xian-cli` is also manifest-aware. When a canonical network manifest includes
+pinned node images and release provenance, `network join` carries that posture
+into the generated local profile. The broader network-manifest metadata,
+including shielded/privacy operator policy, stays available as first-class
+manifest data instead of being reduced to ad hoc local flags.
+
+## Node Status And Health
+
+Use `xian node status <name>` for the human-facing runtime summary. It includes
+the age of the latest observed block so a stalled node is obvious even when the
+RPC is still technically reachable.
+
+Use `xian node health <name>` for machine-readable checks. On service-node
+profiles it surfaces the effective snapshot bootstrap source plus BDS lag,
+spool, and database posture.
 
 ## When To Use `xian client`
 

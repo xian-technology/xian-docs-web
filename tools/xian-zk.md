@@ -141,11 +141,11 @@ Using the reproducible benchmark in
 `xian-abci/scripts/benchmark_shielded_chi.py`, the local April 2026 numbers
 for the current implementation are roughly:
 
-- shielded deposit with 2 outputs: `3,742` chi
-- shielded transfer with 2 inputs / 2 outputs: `4,062` chi
-- shielded withdraw with 1 input / 1 output: `3,479` chi
-- exact withdraw with no new output note: `2,405` chi
-- relayed hidden-sender transfer: `5,726` chi
+- shielded deposit with 2 outputs: `3,347` chi
+- shielded transfer with 2 inputs / 2 outputs: `3,600` chi
+- shielded withdraw with 1 input / 1 output: `3,128` chi
+- exact withdraw with no new output note: `2,175` chi
+- relayed hidden-sender transfer: `5,288` chi
 
 Those are still above a plain public transfer, but they are dramatically lower
 than the earlier five-digit shielded costs from the all-Python contract path.

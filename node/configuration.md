@@ -100,7 +100,6 @@ mode = "python_line_v1"
 bytecode_version = ""
 gas_schedule = ""
 authority = ""
-shadow_tracer_mode = ""
 ```
 
 For tracer-backed runtimes, `mode` matches the selected tracer-backed engine
@@ -114,7 +113,6 @@ mode = "xian_vm_v1"
 bytecode_version = "xvm-1"
 gas_schedule = "xvm-gas-1"
 authority = "native"
-shadow_tracer_mode = ""
 ```
 
 On the current supported branch:
@@ -122,7 +120,8 @@ On the current supported branch:
 - `bytecode_version` is required for `xian_vm_v1`
 - `gas_schedule` is required for `xian_vm_v1`
 - `authority` must be `native`
-- `shadow_tracer_mode` must stay empty
+- the older `shadow_tracer_mode` rollout field is not part of the current
+  supported config surface
 
 ### `[xian.bds]`
 
@@ -136,8 +135,6 @@ It contains BDS/Postgres-related settings such as:
 - statement timeout
 - application name
 - spool location and warning thresholds
-
-## Snapshot Bootstrap Vs State Sync
 
 ## Release Provenance In Manifests
 
@@ -153,6 +150,8 @@ The current release manifest surface includes:
 
 That means the network manifest is no longer just saying "use this image." It
 also carries the pinned release inputs that produced that image.
+
+## Snapshot Bootstrap Vs State Sync
 
 There are two different snapshot concepts in the stack.
 
@@ -208,6 +207,33 @@ In practice:
 See [Runtime Features](/node/runtime-features) for the operator-facing meaning
 of those settings.
 
+## Stack-Managed Exposure Defaults
+
+The maintained `xian-stack` backend now defaults to fail-closed host
+publishing:
+
+- CometBFT P2P remains public-facing by default on `26656`
+- CometBFT RPC defaults to `127.0.0.1:26657`
+- CometBFT metrics defaults to `127.0.0.1:26660`
+- Xian app metrics defaults to `127.0.0.1:9108`
+- dashboard defaults to `127.0.0.1:8080`
+- PostGraphile defaults to `127.0.0.1:5000`
+
+Public exposure is explicit through the stack backend:
+
+- `--public-rpc` or `XIAN_PUBLIC_RPC_ENABLED=1`
+- `--public-metrics` or `XIAN_PUBLIC_METRICS_ENABLED=1`
+- `--public-query` or `XIAN_PUBLIC_QUERY_ENABLED=1`
+
+`public-query` is intentionally separate from `public-rpc`. It publishes the
+read-only indexed surface for BDS / GraphQL. It does not also expose the live
+node RPC.
+
+For local workflows, `xian-stack` now generates `.stack-secrets.env` on first
+use. That file holds local BDS and PostGraphile passwords and should stay
+untracked. For BDS-enabled runs, PostGraphile now uses its own dedicated
+read-only database role instead of the primary BDS owner account.
+
 ## Common Ports
 
 | Port | Purpose |
@@ -223,3 +249,7 @@ of those settings.
 
 Additional sidecars such as the shielded relayer or `xian-intentkit` use their
 own published ports when enabled.
+
+Those port numbers describe the service sockets, not a guarantee that the
+service is Internet-facing. In the maintained stack, only CometBFT P2P is
+public by default.
