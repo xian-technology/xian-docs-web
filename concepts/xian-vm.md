@@ -56,7 +56,6 @@ mode = "xian_vm_v1"
 bytecode_version = "xvm-1"
 gas_schedule = "xvm-gas-1"
 authority = "native"
-shadow_tracer_mode = ""
 ```
 
 On the current supported branch:
@@ -64,7 +63,8 @@ On the current supported branch:
 - `xian_vm_v1` requires `bytecode_version`
 - `xian_vm_v1` requires `gas_schedule`
 - `authority` must be `native`
-- `shadow_tracer_mode` must stay empty
+- the older `shadow_tracer_mode` rollout field is not part of the current
+  supported config surface
 
 This makes the execution contract explicit instead of hiding it behind one
 tracer string.

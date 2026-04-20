@@ -39,6 +39,8 @@ uv run xian node health validator-1
 - the resolved manifest and profile paths
 - the `xian-stack` backend state when available
 - optional live RPC reachability
+- the age of the latest observed block so a stalled chain is visible even when
+  the RPC is still reachable
 - the configured image mode plus registry image digests when the profile uses published images
 - the embedded release-manifest provenance block for canonical images, including component Git refs and build toolchain
 - the actual running container image names seen by Docker when the backend is reachable
@@ -52,7 +54,7 @@ uv run xian node health validator-1
 - backend state as `healthy`, `degraded`, or `stopped`
 - RPC reachability and current sync detail
 - CometBFT and Xian metrics reachability
-- BDS queue, spool, lag, and database status when `service_node` is enabled
+- BDS queue, pool, spool, lag, and database status when `service_node` is enabled
 - optional dashboard / Prometheus / Grafana reachability when enabled
 - optional `xian-intentkit` frontend and API reachability when enabled
 - optional disk-pressure checks through the local `xian-stack` storage report
@@ -209,6 +211,30 @@ For BDS-enabled integrated runs:
 python3 ./scripts/backend.py start --service-node --monitoring
 python3 ./scripts/backend.py endpoints --service-node --monitoring
 python3 ./scripts/backend.py health --service-node --monitoring --no-check-disk
+```
+
+The maintained stack now defaults to a fail-closed network posture:
+
+- CometBFT RPC binds to `127.0.0.1` unless you pass `--public-rpc`
+- CometBFT and Xian metrics bind to `127.0.0.1` unless you pass
+  `--public-metrics`
+- PostGraphile binds to `127.0.0.1` unless you run a service node and pass
+  `--public-query`
+- local BDS and PostGraphile credentials are generated once into
+  `xian-stack/.stack-secrets.env`
+
+That split is intentional. `--public-query` publishes the read-only indexed
+surface. It does not also publish live CometBFT RPC, mempool access, or raw
+ABCI submission endpoints.
+
+Examples:
+
+```bash
+# Public read/query surface on a service node.
+python3 ./scripts/backend.py start --service-node --public-query
+
+# Explicit public RPC and metrics on a non-service node.
+python3 ./scripts/backend.py start --no-service-node --public-rpc --public-metrics
 ```
 
 Host-side storage inspection from `xian-stack`:
@@ -487,8 +513,8 @@ What the dashboard adds without duplicating the main node cards:
 - recent indexed event browsing on service nodes with BDS enabled
 - execution health from `/perf_status`, plus explicit visibility when advanced
   perf capture is disabled
-- BDS lag, pending-buffer depth, spool state, filesystem-free space, and alerts
-  from `/bds_status`
+- BDS lag, pending-buffer depth, pool utilization, spool state,
+  filesystem-free space, and alerts from `/bds_status`
 - click-to-copy middle truncation for long node identity values in the
   dashboard cards
 - peer switching that keeps the dashboard scoped to a selected node, including

@@ -37,7 +37,16 @@ from xian_py import (
     AsyncTokenClient,
     ContractClient,
     EventClient,
+    RetryEvent,
     RetryPolicy,
+    ShieldedRelayerAsyncClient,
+    ShieldedRelayerAsyncPoolClient,
+    ShieldedRelayerCatalogEntry,
+    ShieldedRelayerClient,
+    ShieldedRelayerInfo,
+    ShieldedRelayerJob,
+    ShieldedRelayerPoolClient,
+    ShieldedRelayerQuote,
     StateKeyClient,
     SubmissionConfig,
     TokenClient,
@@ -124,6 +133,7 @@ Constructor parameters:
 - optional `wallet`
 
 If `chain_id` is omitted, the client fetches it from the node.
+If you pass `chain_id` explicitly, it must be a non-empty string.
 
 `Xian` keeps a persistent background event loop and HTTP session for the life of
 the client. Prefer using it as a context manager or calling `close()` when you
@@ -158,6 +168,10 @@ with Xian("http://127.0.0.1:26657", config=config) as client:
 Retry policy applies only to read-side operations such as status queries,
 ABCI reads, tx lookup, and watcher polling. Transaction broadcasts are not
 retried automatically.
+
+If you need retry visibility, attach `RetryPolicy(on_retry=...)`. The callback
+receives a typed `RetryEvent` with the operation kind, the failed attempt
+number, the next backoff delay, and the triggering exception.
 
 ## Async Client
 
@@ -413,13 +427,40 @@ inspection so a just-finalized transaction can still be recovered by hash.
 
 `get_bds_status()` returns a typed `BdsStatus` model. The main high-signal
 fields are `indexed_height`, `current_block_height`, `height_lag`,
+`catching_up`, `spool_pending_count`, and `alerts`.
 
 `list_shielded_wallet_history(tag_value, ...)` is the higher-level shielded
 light-wallet recovery feed. It returns the canonical note-commitment sequence
 in note-index order and only exposes `output_payload` for outputs whose indexed
 tag matches the requested wallet tag. Use `after_note_index` as the resumable
 cursor.
-`catching_up`, `spool_pending_count`, and `alerts`.
+
+## Shielded Relayer Clients
+
+Use the dedicated relayer clients when you are working with proof-bound
+shielded submission flows instead of hand-rolling raw HTTP calls:
+
+```python
+from xian_py import ShieldedRelayerAsyncClient
+
+async with ShieldedRelayerAsyncClient(
+    "http://127.0.0.1:8090",
+    auth_token="secret",
+) as relayer:
+    info = await relayer.get_info()
+    quote = await relayer.get_quote(
+        kind="shielded_note_relay_transfer",
+        contract="con_shielded_note_token",
+    )
+```
+
+Use `ShieldedRelayerAsyncPoolClient` or `ShieldedRelayerPoolClient` when you
+have a catalog of candidate relayers and want priority-ordered failover across
+them.
+
+If you inject your own `aiohttp` session, the SDK leaves that session under
+caller ownership. If the relayer client creates the session itself, `close()`
+or the async context manager cleans it up.
 
 ## Watching Blocks And Events
 

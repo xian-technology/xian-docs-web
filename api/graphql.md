@@ -15,7 +15,18 @@ That means GraphQL is:
 - useful for exploratory and history-heavy queries
 - outside the deterministic consensus path
 
-The default published port in the maintained stack is `5000`.
+The maintained stack publishes it on port `5000` when enabled.
+
+## Deployment Posture
+
+In the maintained `xian-stack` runtime:
+
+- GraphQL is available only on service nodes
+- it binds to `127.0.0.1` by default
+- public exposure is explicit through `--public-query` or
+  `XIAN_PUBLIC_QUERY_ENABLED=1`
+- it runs against a dedicated read-only Postgres role, not the primary BDS
+  owner account
 
 ## What It Is Good For
 

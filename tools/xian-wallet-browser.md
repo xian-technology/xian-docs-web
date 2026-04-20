@@ -200,6 +200,10 @@ Key derivation is deterministic:
 4. Review - chi are estimated automatically via `/simulate`
 5. Send - shows result with TX hash linked to the explorer
 
+The popup validates obviously malformed recipient and amount inputs before
+submission and keeps node-side failures visible in the result flow instead of
+failing silently.
+
 **Advanced transaction:**
 
 - Enter contract name - functions auto-load from the node
@@ -211,9 +215,11 @@ Key derivation is deterministic:
 
 Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 
-- Incoming / outgoing indicators
-- Success / fail badges
-- Tap for details - hash, block, chi, time, explorer link
+- Classified rows for sends, approvals, token creation, DEX buys/sells/swaps,
+  liquidity add/remove, and generic contract calls
+- Success / fail badges plus distinct icons and color accents per activity type
+- Tap for details - decoded arguments, hash, block, chi, time, and explorer link
+- Clear fetch-error state with retry when the history query fails
 
 ### Asset Management
 
@@ -256,9 +262,11 @@ The extension injects a `window.xian` provider conforming to `@xian-tech/provide
 - `xian_requestAccounts` - connect and get accounts
 - `xian_accounts` - list connected accounts
 - `xian_getWalletInfo` - wallet capabilities and state
+- `xian_watchAsset` - add a token to the wallet's tracked asset list
+- `xian_prepareTransaction` - let the wallet fill sender, chain, nonce, and default chi
+- `xian_sendCall` - intent-first prepare + sign + broadcast in one request
 - `xian_sendTransaction` / `xian_signTransaction` - transaction flows
 - `xian_signMessage` - message signing
-- `wallet_watchAsset` - add tokens
 
 Approval requests are shown inline in the wallet (side panel mode) or in a
 dedicated popup window.

@@ -103,6 +103,8 @@ Examples:
 
 ```text
 GET /api/abci_query/get/currency.balances:alice
+GET /api/abci_query/keys/currency.balances/limit=100
+GET /api/abci_query/keys/currency.balances/limit=100/after=alice
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/contract/currency
 GET /api/abci_query/contracts/limit=50/offset=0/sort=submitted_at/order=desc
@@ -113,6 +115,11 @@ GET /api/abci_query/contract_vars/currency
 GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
 ```
+
+For paginated key scans over a contract hash prefix, the `/keys/...` form
+returns the suffixes under that prefix together with `limit`, `after`,
+`next_after`, and `has_more`. Use `next_after` as the cursor when you need to
+walk large hashes without loading every key at once.
 
 ## Monitoring Summary
 
@@ -231,11 +238,13 @@ GET /api/abci_query/state_changes_for_patch/<hash>
 Operator-oriented BDS inspection:
 
 - `/bds_status` reports worker state, queue depth, spool size, indexed head,
-  lag relative to the node's current block height, filesystem storage metrics,
-  and warning/error alerts.
+  lag relative to the node's current block height, connection-pool posture,
+  filesystem storage metrics, and warning/error alerts.
 - `catching_up` is the meaningful “still behind” signal. `queue_depth` may stay
   nonzero while the service is otherwise caught up, so treat indexed height,
   spool state, DB health, and `catching_up` as the primary recovery signals.
+- when present, the nested `pool` object reports `size`, `idle`, `in_use`,
+  `min_size`, `max_size`, and `utilization`
 - `/bds_spool` lists the block payloads currently present on the local spool
   for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,

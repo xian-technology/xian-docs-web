@@ -372,6 +372,7 @@ Same as browser wallet:
 - Recipient - inline contacts icon button, opens contact picker modal
 - Amount - inline MAX badge
 - Chi estimation before review
+- Local validation before review so obviously malformed sends are blocked early
 - Result with TX hash + explorer link
 
 **Advanced transaction:**
@@ -392,9 +393,11 @@ Same as browser wallet:
 
 Transaction history with:
 
-- Direction indicators (incoming green / outgoing red)
-- Success / fail badges
-- Tap for detail view with explorer link
+- Classified rows for sends, approvals, token creation, DEX buys/sells/swaps,
+  liquidity add/remove, and generic contract calls
+- Success / fail badges with distinct icons and accents per activity type
+- Tap for detail view with decoded arguments, chi, block, error text, and explorer link
+- Clear retry path when the transaction-history fetch fails
 - Pull-to-refresh
 
 ### Settings
