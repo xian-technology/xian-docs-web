@@ -7,11 +7,11 @@ hidden under `.meta/` so they are not shipped as public pages.
 ## Quick Start
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Use `npm run build` before pushing docs changes.
+Use the validation commands below before pushing docs changes.
 
 ## Principles
 
@@ -34,7 +34,8 @@ Use `npm run build` before pushing docs changes.
 ## Validation
 
 ```bash
-npm install
+npm ci
+npm audit --audit-level=high --omit=dev
 npm run build
 ```
 

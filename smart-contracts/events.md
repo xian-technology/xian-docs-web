@@ -106,7 +106,7 @@ def transfer_from(amount: float, to: str, main_account: str):
 - **Types must be** `str`, `int`, `float`, `bool`, or `decimal` (ContractingDecimal).
 - **At least one parameter** is required per event.
 - **Non-indexed is the default**. Only indexed fields need `indexed(...)` or `idx: True`.
-- **Events cost chi** — both indexed and non-indexed parameters incur write costs during execution (25 chi per byte).
+- **Events cost chi** - both indexed and non-indexed parameters incur write-meter costs during execution (25 meter units per encoded byte on tracer-backed execution).
 - **Events are atomic** — if the transaction fails, all events are rolled back.
 - **Event names are not globally unique**. Consumers should key by both `contract` and `event`.
 
@@ -215,6 +215,6 @@ Events and state changes serve different purposes:
 | **Persistence** | In blocks and indexes, not in contract state | Written to contract storage |
 | **Queryable** | By event name and indexed params | By state key |
 | **Use case** | Notifications, activity feeds, audit logs | Account balances, ownership, contract data |
-| **Cost** | 25 chi/byte | 25 chi/byte |
+| **Cost** | write-meter cost | write-meter cost |
 
 Use events when external observers need to know something happened. Use state when the contract itself needs to read the value later.

@@ -46,9 +46,11 @@ The core linter returns structured `LintError` objects with:
 
 ## Using The Standalone HTTP Service
 
-Install the server extras:
+Install the base package for inline use, or the server extra for the HTTP
+service:
 
 ```bash
+pip install xian-tech-linter
 pip install "xian-tech-linter[server]"
 ```
 
@@ -60,6 +62,12 @@ xian-linter
 
 The default listen address is `http://localhost:8000`.
 
+You can also run the ASGI app explicitly:
+
+```bash
+uvicorn xian_linter.server:create_app --factory --host 0.0.0.0 --port 8000
+```
+
 ## HTTP Endpoints
 
 The service accepts raw, base64, or gzip request bodies:
@@ -67,6 +75,14 @@ The service accepts raw, base64, or gzip request bodies:
 - `POST /lint`
 - `POST /lint_base64`
 - `POST /lint_gzip`
+
+Request bodies are capped at `1,000,000` bytes before decoding. All endpoints
+also accept an optional comma-separated `whitelist_patterns` query parameter
+when a controlled integration needs to allow additional PyFlakes names:
+
+```text
+POST /lint?whitelist_patterns=my_helper,con_*
+```
 
 ### Raw Source Example
 
@@ -115,12 +131,14 @@ The HTTP service returns:
 }
 ```
 
-`xian-linter` may also include PyFlakes warnings with code `W001`.
+`xian-linter` may also include PyFlakes warnings with code `W001`. Processing
+errors from the wrapper itself are returned as `E000`.
 
 ## Error Codes
 
 | Code | Meaning |
 |------|---------|
+| `E000` | standalone wrapper processing error |
 | `E001` | illegal syntax form |
 | `E002` | name starts or ends with underscore |
 | `E003` | import inside a function |
@@ -141,6 +159,10 @@ The HTTP service returns:
 | `E018` | invalid exported return annotation |
 | `E019` | nested function |
 | `E020` | syntax error |
+| `E021` | invalid decorator arguments |
+| `E022` | syntax not supported by the active validation profile |
+| `E023` | builtin not supported by the active validation profile |
+| `W001` | PyFlakes warning from the standalone service |
 
 See [Valid Code & Restrictions](/smart-contracts/valid-code) for the current
 language surface.

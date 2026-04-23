@@ -17,6 +17,7 @@ http://<dashboard-host>:8080
 - `GET /api/status`
 - `GET /api/net_info`
 - `GET /api/validators`
+- `GET /api/validator_dashboard`
 - `GET /api/consensus`
 - `GET /api/monitoring`
 
@@ -107,13 +108,21 @@ GET /api/abci_query/keys/currency.balances/limit=100
 GET /api/abci_query/keys/currency.balances/limit=100/after=alice
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/contract/currency
+GET /api/abci_query/contract_source/currency
 GET /api/abci_query/contracts/limit=50/offset=0/sort=submitted_at/order=desc
 GET /api/abci_query/contract_info/currency
 GET /api/abci_query/contract_code/currency
 GET /api/abci_query/contract_methods/currency
 GET /api/abci_query/contract_vars/currency
+GET /api/abci_query/health
 GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
+GET /api/abci_query/masternodes_policy
+GET /api/abci_query/masternodes_active
+GET /api/abci_query/masternodes_candidates
+GET /api/abci_query/masternodes_validator/<address>
+GET /api/abci_query/masternodes_pending_unbonds/<address>
+GET /api/abci_query/masternodes_open_votes/limit=50/offset=0
 ```
 
 For paginated key scans over a contract hash prefix, the `/keys/...` form
@@ -212,12 +221,17 @@ GET /api/abci_query/block/123
 GET /api/abci_query/block_by_hash/<hash>
 GET /api/abci_query/tx/<hash>
 GET /api/abci_query/txs_for_block/123
+GET /api/abci_query/addresses/limit=50/offset=0
 GET /api/abci_query/txs_by_sender/<address>/limit=50/offset=0
 GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
 GET /api/abci_query/contract_summary/<contract>
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
 GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
+GET /api/abci_query/token_balances/<address>/limit=100/offset=0
+GET /api/abci_query/token_balances/<address>/limit=100/offset=0/include_zero=true
+GET /api/abci_query/shielded_output_tags/<tag>/limit=50/offset=0
+GET /api/abci_query/shielded_output_tags/<tag>/limit=50/after_id=500/kind=sync_hint
 GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0
 GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0/kind=sync_hint
 GET /api/abci_query/recent_events/limit=50/offset=0
@@ -249,6 +263,12 @@ Operator-oriented BDS inspection:
   for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,
   including recent block timing and tracer metadata.
+- `/token_balances/<address>` returns the BDS-backed token portfolio for one
+  address. By default it omits zero balances; add `include_zero=true` when you
+  need the full indexed token set for that address.
+- `/shielded_wallet_history/<tag>` is the preferred shielded light-wallet sync
+  feed. `/shielded_output_tags/<tag>` is the lower-level tag index used by
+  tooling that needs direct access to tagged output rows.
 
 Cursor-based event consumption:
 

@@ -281,7 +281,7 @@ The dedicated DEX tools are:
 - `xian_dex_quote`
 - `xian_dex_trade`
 
-They are intentionally narrow and match the current live Xian DEX contracts:
+They are intentionally narrow and match the maintained Xian DEX contracts:
 
 - `con_dex`
 - `con_pairs`
@@ -478,10 +478,10 @@ The stack-owned passthrough values are:
 
 Those values are written into the selected IntentKit network slot.
 
-## Current Xian Mainnet Example
+## Price Feed Example
 
-For the current live Xian network deployment, the bridged Solana token example
-is:
+For a deployment that prices XIAN through a bridged Solana token, configure the
+passthrough values explicitly:
 
 ```bash
 XIAN_INTENTKIT_PRICE_STRATEGY=solana_jupiter

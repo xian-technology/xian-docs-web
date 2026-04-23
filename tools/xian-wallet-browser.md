@@ -9,7 +9,7 @@ Xian tokens. It runs in Chrome, Brave, Edge, and other Chromium-based browsers.
 
 ### From GitHub Release
 
-1. Download the latest `xian-wallet-browser-vX.Y.Z.zip` from
+1. Download the latest `xian-wallet-extension-X.Y.Z.zip` from
    [Releases](https://github.com/xian-technology/xian-wallet-browser/releases).
 2. Unzip the archive.
 3. Open `chrome://extensions` in your browser.
@@ -148,7 +148,7 @@ The workspace is split into two packages:
 
 `@xian-tech/wallet-core` owns:
 
-- **Key derivation** - BIP39 seed phrase generation and custom indexed derivation (`SHA256(seed + "xian-wallet-seed-v1" + uint32BE(index))`)
+- **Key derivation** - BIP39 seed phrase generation and custom indexed derivation
 - **Encryption** - AES-256-GCM with PBKDF2 (250,000 iterations) for private key and mnemonic storage
 - **Multi-account** - derive multiple addresses from a single seed, each with its own encrypted private key
 - **Controller** - wallet state management, account switching, approval lifecycle, network presets, transaction flow
@@ -244,8 +244,16 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 
 ### Backup
 
-- **Export** - enter password, downloads a JSON file containing the seed/key, account names, network presets, and watched assets
+- **Export** - enter password, downloads a JSON file containing the seed/key, account names, active account, network presets, watched assets, and shielded wallet state snapshots when present
 - **Import** - upload a previously exported JSON, enter a new password to encrypt
+
+### Shielded Wallet Snapshots
+
+- Store shielded wallet state snapshots from settings
+- Export, import, or remove stored snapshots without replacing the whole wallet
+- Include stored snapshots in full wallet backup exports
+- Check indexed `shielded_wallet_history` after a snapshot when the connected
+  node exposes the BDS shielded-history surface
 
 ### Security
 
@@ -279,10 +287,10 @@ Events: `accountsChanged`, `chainChanged`, `connect`, `disconnect`.
 
 ```bash
 # Type-check
-npm run -w apps/wallet-extension typecheck
+npm run typecheck --workspace xian-wallet-extension
 
 # Build
-npm run -w apps/wallet-extension build
+npm run build --workspace xian-wallet-extension
 
 # Run tests
 npx vitest run

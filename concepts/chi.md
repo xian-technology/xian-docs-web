@@ -18,8 +18,10 @@ When a transaction is submitted, it carries a chi limit.
 
 | Constant | Value | Meaning |
 |----------|-------|---------|
-| `READ_COST_PER_BYTE` | `1` | chi per stored byte read |
-| `WRITE_COST_PER_BYTE` | `25` | chi per stored byte written |
+| `READ_COST_PER_BYTE` | `1` | tracer meter unit per stored byte read |
+| `WRITE_COST_PER_BYTE` | `25` | tracer meter units per stored byte written |
+| `TRANSACTION_BYTES_COST_PER_BYTE` | `1` | tracer meter unit per submitted transaction byte |
+| `RETURN_VALUE_COST_PER_BYTE` | `1` | tracer meter unit per returned byte |
 | `CHI_PER_T` | `20` | chi purchased by one unit of the native token |
 | base transaction cost | `5` | flat chi charged on every transaction |
 
@@ -28,14 +30,18 @@ When a transaction is submitted, it carries a chi limit.
 Tracer-backed execution currently uses the familiar compute-to-chi conversion:
 
 ```text
-chi_used = (raw_compute_cost // 1000) + 5
+chi_used = (raw_meter_cost // 1000) + 5
 ```
 
-Storage charges are then added on top based on the encoded key and value sizes.
+`raw_meter_cost` includes compute, storage, submitted transaction bytes,
+returned value bytes, and metered runtime bridge work. The final receipt value
+is capped by the chi budget supplied on the transaction.
 
 For `xian_vm_v1`, the execution machine changes, but the same high-level idea
 does not: VM work, host operations, storage, transaction bytes, and return
 payload size are all metered explicitly against the transaction's chi budget.
+The VM has its own host-operation gas schedule instead of reusing every tracer
+constant one-for-one.
 
 ## What Gets Metered
 
@@ -52,11 +58,15 @@ validators do not get to improvise their own cost model.
 
 ### Storage Reads
 
-Reading state costs `1` chi per byte of encoded key plus encoded value.
+Tracer-backed execution charges `1` meter unit per byte of encoded key plus
+encoded value. VM-native execution charges reads through the VM host-operation
+schedule.
 
 ### Storage Writes
 
-Writing state costs `25` chi per byte of encoded key plus encoded value.
+Writing state costs `25` meter units per byte of encoded key plus encoded
+value in both the tracer-backed policy and the current VM host-operation
+schedule.
 
 Writes are intentionally much more expensive than reads because they expand the
 durable chain state.
@@ -77,14 +87,19 @@ explicit host operations instead of implicit Python work.
 
 | Limit | Value |
 |------|-------|
-| maximum chi per transaction | `6,500,000` |
+| runtime raw safety ceiling | `50,000,000,000` raw units |
 | maximum Python line events per transaction (`python_line_v1`) | `800,000` |
 | maximum instruction events per transaction (`native_instruction_v1`) | `3,250,000` |
-| maximum write per transaction | `128 KB` |
+| maximum write per transaction | `128 KiB` |
+| maximum returned value size | `128 KiB` |
+| maximum submitted contract source | `64 KiB` |
+| maximum sequence or binary allocation | `128 KiB` |
 | default chi allocation | `1,000,000` |
 
 Those line/instruction ceilings are tracer-backend safety limits. VM-native
 execution uses its own gas schedule rather than those tracer-event counters.
+The raw safety ceiling is a runtime overflow guard; ordinary transaction
+success is still bounded by the `chi` supplied by the sender.
 
 ## Converting Chi To Native Token Cost
 

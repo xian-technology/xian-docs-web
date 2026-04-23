@@ -136,7 +136,10 @@ Per transaction, the execution flow is:
 2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs
 3. **Metering** -- the selected execution policy charges compute units through
    tracer-backed Python execution or the native VM gas schedule
-4. **Storage operations** -- reads and writes are charged per byte (1 chi/byte read, 25 chi/byte write)
+4. **Storage operations** -- reads and writes are charged per byte according to
+   the selected execution policy; tracer-backed execution uses 1 meter unit per
+   byte read and 25 meter units per byte written, while VM-native execution
+   charges storage through the VM host-operation schedule
 5. **Block time injection** -- all transactions in the block observe the same
    consensus timestamp as `now`
 6. **Completion or failure**:

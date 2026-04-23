@@ -7,10 +7,13 @@ variable.
 
 ```python
 datetime.datetime(...)
+datetime.datetime.strptime(...)
 datetime.timedelta(...)
+datetime.WEEKS
 datetime.DAYS
 datetime.HOURS
 datetime.MINUTES
+datetime.SECONDS
 ```
 
 ## Example

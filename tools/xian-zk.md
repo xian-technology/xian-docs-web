@@ -3,8 +3,10 @@
 `xian-zk` is the current external proving, wallet, and deployment-tooling
 package for Xian's shielded note and shielded command flows.
 
-It is not part of the validator runtime. Validators only need the runtime-side
-`zk` verifier bridge. `xian-zk` is the off-chain package for:
+Validators that enable zk verification need the native `xian-zk` verifier
+bindings available in the node image because the runtime `zk` bridge calls into
+those bindings. They do not need wallet/prover tooling or proving keys in the
+consensus path. `xian-zk` is also the off-chain package for:
 
 - proving shielded deposit, transfer, and withdraw transitions
 - proving shielded command execution transitions

@@ -94,6 +94,7 @@ The `xian-py` repo includes pack-specific examples under:
 
 - `examples/credits_ledger/admin_job.py`
 - `examples/credits_ledger/api_service.py`
+- `examples/credits_ledger/projector_worker.py`
 - `examples/credits_ledger/event_worker.py`
 
 Those cover:

@@ -315,8 +315,11 @@ self-contained crypto polyfill:
 | Random | `react-native-get-random-values` (native RNG) |
 
 **Key derivation is identical** to the browser wallet:
-`SHA256(bip39_seed + "xian-wallet-seed-v1" + index)`. Seeds are interchangeable
-between browser and mobile wallets.
+
+- Index 0: `SHA256(bip39_seed + "xian-wallet-seed-v1")`
+- Index N > 0: `SHA256(bip39_seed + "xian-wallet-seed-v1" + uint32BE(N))`
+
+Seeds are interchangeable between browser and mobile wallets.
 
 **Note:** PBKDF2 uses 10,000 iterations on mobile vs 250,000 on browser. This
 means encrypted backups are not directly interchangeable. Export / import uses
@@ -340,7 +343,7 @@ yet modeled there.
 Current important calls include:
 
 - `getBalance` - `/get/{contract}.balances:{address}` ABCI query
-- `getChainId` - `/status` endpoint
+- `getChainId` - shared `@xian-tech/client` chain-id read from `/genesis`
 - `estimateChi` - `/simulate` ABCI query
 - `sendTransaction` - builds, signs, and broadcasts through the shared Xian JS client
 - `getTransactionHistory` - `/txs_by_sender/{address}` ABCI query
@@ -408,6 +411,9 @@ Transaction history with:
 - **Contacts** - add, delete
 - **Appearance** - quick actions position (top / bottom), hide labels
 - **Backup** - export via Share sheet, import
+- **Shielded snapshots** - save, export, import, remove, and compare stored
+  shielded wallet snapshots against indexed `shielded_wallet_history` when the
+  connected node exposes that BDS surface
 - **Explorer** - open in browser
 - **Lock / Remove** wallet
 
@@ -439,5 +445,6 @@ Stack screens: Send, Receive, TokenDetail, Networks, AdvancedTx.
 - **iOS** - same codebase; simulator, device, and Xcode archive flow are
   available from the Expo project
 - **Seed compatibility** - same derivation as browser wallet, seeds work in both
-- **Backup compatibility** - JSON structure is compatible, but backup material is
+- **Backup compatibility** - JSON structure is compatible, including stored
+  shielded wallet state snapshots when present, but backup material is
   re-encrypted for the target platform during import

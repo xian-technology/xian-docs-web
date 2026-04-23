@@ -24,11 +24,12 @@ its VM gas schedule rather than the Python tracer callbacks described here.
 
 ## How Chi Are Calculated
 
-The chi cost of a transaction has three components:
+The tracer-backed chi cost of a transaction has these components:
 
 1. **Compute costs** -- each Python opcode has a cost (2-1610 compute units)
-2. **Read costs** -- 1 chi per byte of key + value read from storage
-3. **Write costs** -- 25 chi per byte of key + value written to storage
+2. **Read costs** -- 1 meter unit per byte of key + value read from storage
+3. **Write costs** -- 25 meter units per byte of key + value written to storage
+4. **Payload costs** -- submitted transaction bytes and returned value bytes are metered
 
 The raw compute units are converted to chi using the formula:
 
@@ -42,15 +43,19 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `READ_COST_PER_BYTE` | 1 | Chi per byte for storage reads |
-| `WRITE_COST_PER_BYTE` | 25 | Chi per byte for storage writes |
+| `READ_COST_PER_BYTE` | 1 | tracer meter unit per byte for storage reads |
+| `WRITE_COST_PER_BYTE` | 25 | tracer meter units per byte for storage writes |
 | `CHI_PER_T` | 20 | How many chi one XIAN buys. `T` stands for the native token. |
-| Max chi per tx | 6,500,000 | Hard ceiling per transaction |
+| Runtime raw safety ceiling | 50,000,000,000 raw units | overflow guard before the submitted chi budget cap |
 | Max line events (`python_line_v1`) | 800,000 | Maximum line callbacks per transaction |
 | Max instruction events (`native_instruction_v1`) | 3,250,000 | Maximum native instruction callbacks per transaction |
+| Max write data | 128 KiB | Maximum write data per transaction |
+| Max return value | 128 KiB | Maximum serialized return payload |
 
 For `xian_vm_v1`, storage and payload accounting still matter, but compute is
 charged through the VM-native gas schedule instead of these tracer-event limits.
+The current VM host-operation schedule has its own read charge and shares the
+same `25` units-per-byte write cost.
 
 ## Checking Chi Used
 

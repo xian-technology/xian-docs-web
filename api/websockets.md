@@ -186,6 +186,19 @@ Response:
 {"action": "unsubscribe_all"}
 ```
 
+## Limits
+
+The dashboard applies explicit WebSocket limits so one browser cannot exhaust
+the service:
+
+| Limit | Default | CLI flag |
+|-------|---------|----------|
+| concurrent WebSocket clients | `100` | `--max-ws-clients` |
+| state subscriptions per client | `64` | `--max-state-subs-per-client` |
+| event subscriptions per client | `32` | `--max-event-subs-per-client` |
+| inbound message size | `64 KiB` | `--max-ws-message-bytes` |
+| queued outbound messages per client | `128` | `--max-ws-outbound-queue` |
+
 ## Full Example: Wallet Balance Watcher
 
 ```javascript

@@ -99,6 +99,12 @@ The protocol stable asset.
 Relevant exports:
 
 - `set_controller(...)`
+- `total_supply_of()`
+- `balance_of(...)`
+- `allowance(...)`
+- `approve(...)`
+- `transfer(...)`
+- `transfer_from(...)`
 - `mint(...)`
 - `burn(...)`
 - `start_governance_transfer(...)`
@@ -129,6 +135,8 @@ Relevant exports:
 - `set_vault_type_ratios(...)`
 - `set_vault_type_auction_config(...)`
 - `set_vault_type_surplus_buffer_bps(...)`
+- `set_vault_type_active(...)`
+- `set_paused(...)`
 - `set_savings_contract(...)`
 - `set_treasury_address(...)`
 - `create_vault(...)`
@@ -142,11 +150,17 @@ Relevant exports:
 - `liquidate_fast(...)`
 - `open_liquidation_auction(...)`
 - `bid(...)`
+- `cure_auction(...)`
+- `cancel_auction_if_safe(...)`
 - `claim_refund(...)`
 - `settle_auction(...)`
 - `cover_bad_debt(...)`
 - `recapitalize(...)`
 - `sweep_surplus(...)`
+- `get_vault(...)`
+- `get_auction(...)`
+- `get_vault_type(...)`
+- `get_collateralization_bps(...)`
 
 ### `savings`
 
@@ -156,9 +170,16 @@ Relevant exports:
 
 - `deposit(...)`
 - `withdraw(...)`
+- `total_supply()`
+- `total_assets()`
+- `balance_of(...)`
+- `allowance(...)`
 - `share_price()`
 - `preview_deposit(...)`
 - `preview_redeem(...)`
+- `transfer(...)`
+- `approve(...)`
+- `transfer_from(...)`
 
 ### `psm`
 

@@ -32,7 +32,7 @@ For numeric values, this means:
 
 ## Read/Write Cost Reminder
 
-- reads: `1` chi per byte
-- writes: `25` chi per byte
+- tracer-backed reads: `1` meter unit per byte
+- tracer-backed writes: `25` meter units per byte
 
 That byte count includes both key and value.

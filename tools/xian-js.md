@@ -120,15 +120,22 @@ import {
   TxTimeoutError,
   WatchApi,
   XianClient,
+  XianClientError,
+  XianShieldedRelayerClient,
+  XianShieldedRelayerPoolClient,
   canonicalizeRuntime,
   decodeRuntime,
   encodeRuntime,
   generatePrivateKey,
   isValidEd25519Key,
   isValidEd25519Signature,
+  normalizeShieldedRelayerCatalogEntry,
   parseXianNumber,
   publicKeyFromPrivateKey,
+  shieldedSyncHintFromViewingPrivateKey,
+  shieldedSyncHintFromViewingPublicKey,
   signMessage,
+  sortShieldedRelayerCatalog,
   sortKeysDeep,
   verifyMessage,
 } from "@xian-tech/client";
@@ -243,13 +250,19 @@ await client.getNonce(address);
 await client.getState("currency", "balances", [address]);
 await client.getBalance(address);
 await client.getTokenMetadata("currency");
+await client.getTokenBalances(address, { limit: 100, includeZero: false });
 await client.getChiRate();
 await client.getContract("currency");
 await client.getContractCode("currency");
+await client.getContractMethods("currency");
+await client.getShieldedWalletHistory(tagValue, { afterNoteIndex: 0 });
 ```
 
 `getBalance(...)` first tries the readonly `balance_of` simulation path and
 falls back to the direct state key if the simulation path fails.
+
+`getTokenBalances(...)` and `getShieldedWalletHistory(...)` require the
+BDS-backed ABCI query surface on the connected node.
 
 ## Simulation And Estimation
 
@@ -435,6 +448,30 @@ await sub.unsubscribe();
 Malformed websocket payloads and async listener failures are surfaced through
 that optional `onError` callback instead of becoming unhandled promise
 rejections.
+
+## Shielded Relayer Clients
+
+Use the relayer clients for proof-bound shielded submissions instead of
+hand-rolling HTTP calls:
+
+```ts
+import { XianShieldedRelayerClient } from "@xian-tech/client";
+
+const relayer = new XianShieldedRelayerClient({
+  relayerUrl: "http://127.0.0.1:8090",
+  authToken: "local-dev-token",
+});
+
+const info = await relayer.getInfo();
+const quote = await relayer.getQuote({
+  kind: "shielded_note_relay_transfer",
+  contract: "con_private_usd",
+});
+```
+
+`XianShieldedRelayerPoolClient` accepts an ordered relayer catalog and follows
+the same route semantics as `xian-py`: info and quote calls can fail over, while
+submissions and job lookup stay routed to the relayer selected by the proof.
 
 ## Provider Contract
 

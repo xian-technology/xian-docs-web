@@ -16,7 +16,7 @@ The linter enforces that restricted subset before code is accepted.
 | functions | `def f():` | top-level only |
 | `return` | `return value` | |
 | `assert` | `assert ok, "message"` | main validation pattern |
-| collections | `list`, `dict`, `set`, `tuple` | |
+| collections | `list`, `dict`, `tuple`, `set()`, `frozenset()` | set literals and set comprehensions are blocked |
 | list comprehensions | `[x for x in items]` | generator expressions are not allowed |
 | subscripts / slices | `x[0]`, `x[1:3]` | |
 | imports | `import currency` | module-level only for deployed contracts |
@@ -25,7 +25,7 @@ The linter enforces that restricted subset before code is accepted.
 
 | Feature | Error Code | Why |
 |---------|------------|-----|
-| `try/except`, `with`, `lambda`, ternary expressions, `yield`, `yield from`, `nonlocal`, `@`, semicolons, one-line compound statements | `E001` | blocked syntax in the sandbox or rejected to keep line-bucket metering predictable |
+| `try/except`, `with`, `lambda`, ternary expressions, `yield`, `yield from`, `nonlocal`, `@`, set literals, set comprehensions, semicolons, one-line compound statements | `E001` | blocked syntax in the sandbox or rejected to keep line-bucket metering predictable |
 | names starting or ending with `_` | `E002` | blocks Python internals / escape paths |
 | import inside a function | `E003` | imports must be explicit and module-level |
 | `from x import y` | `E004` | use `import x` then `x.y` |
@@ -46,6 +46,8 @@ The linter enforces that restricted subset before code is accepted.
 | nested function definition | `E019` | avoids closures and hidden state |
 | parse error | `E020` | ordinary syntax error |
 | invalid decorator arguments | `E021` | `@export` only supports `typecheck=True/False`; `@construct` takes no arguments |
+| profile-blocked syntax | `E022` | rejected by the active validation profile |
+| profile-blocked builtin | `E023` | builtin is not supported by the active validation profile |
 
 ## Allowed Builtins
 
@@ -78,7 +80,7 @@ The same allowlist applies to exported arguments and exported return
 annotations:
 
 ```python
-str, int, float, bool, dict, list, Any
+str, int, float, bool, bytes, bytearray, dict, list, set, frozenset, Any
 datetime.datetime, datetime.timedelta
 ```
 

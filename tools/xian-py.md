@@ -27,48 +27,73 @@ pip install "xian-tech-py[eth]"  # Ethereum wallet helpers
 
 ## Public API
 
-The intended top-level imports are:
+The intended top-level imports include:
 
 ```python
 from xian_py import (
+    AbciError,
     AsyncContractClient,
     AsyncEventClient,
     AsyncStateKeyClient,
     AsyncTokenClient,
+    BdsStatus,
     ContractClient,
+    DeveloperRewardSummary,
     EventClient,
+    EventProjector,
+    EventProjectorError,
+    EventSource,
+    IndexedBlock,
+    IndexedEvent,
+    IndexedTransaction,
+    LiveEvent,
+    NodeStatus,
+    PerformanceStatus,
     RetryEvent,
     RetryPolicy,
+    RpcError,
+    ShieldedOutputTag,
     ShieldedRelayerAsyncClient,
     ShieldedRelayerAsyncPoolClient,
     ShieldedRelayerCatalogEntry,
     ShieldedRelayerClient,
     ShieldedRelayerInfo,
+    ShieldedRelayerInfoPolicy,
+    ShieldedRelayerInfoResult,
     ShieldedRelayerJob,
+    ShieldedRelayerJobResult,
     ShieldedRelayerPoolClient,
     ShieldedRelayerQuote,
+    ShieldedRelayerQuoteResult,
+    SimulationError,
+    SQLiteProjectionState,
     StateKeyClient,
+    StateEntry,
     SubmissionConfig,
+    TokenBalance,
+    TokenBalancePage,
     TokenClient,
+    TransactionError,
+    TransactionReceipt,
+    TransactionSubmission,
     TransportConfig,
+    TransportError,
+    TxTimeoutError,
     Wallet,
     WatcherConfig,
     Xian,
     XianAsync,
     XianClientConfig,
     XianException,
-    NodeStatus,
-    TransactionReceipt,
-    TransactionSubmission,
-    PerformanceStatus,
-    BdsStatus,
+    indexed_event_sort_key,
+    merged_event_payload,
     run_sync,
     to_contract_time,
 )
 ```
 
 `HDWallet` and `EthereumWallet` live in `xian_py.wallet`; they are optional
-helpers, not part of the small top-level API.
+helpers, not part of the top-level API.
 
 `Xian` and `XianAsync` require an Ed25519 Xian signer. `EthereumWallet` is a
 separate helper for Ethereum-style account workflows and is not valid for
@@ -384,6 +409,7 @@ Also available:
 - `get_perf_status()`
 - `get_bds_status()`
 - `get_developer_rewards(recipient_key)`
+- `get_token_balances(address=None, limit=..., offset=..., include_zero=False)`
 - `list_blocks(limit=..., offset=...)`
 - `get_block(height)`
 - `get_block_by_hash(block_hash)`
@@ -392,6 +418,7 @@ Also available:
 - `list_txs_by_sender(sender, limit=..., offset=...)`
 - `list_txs_by_contract(contract, limit=..., offset=...)`
 - `list_shielded_wallet_history(tag_value, kind=..., limit=..., after_note_index=...)`
+- `list_shielded_output_tags(tag_value, kind=..., limit=..., offset=..., after_id=...)`
 - `get_events_for_tx(tx_hash)`
 - `list_events(contract, event, limit=..., offset=..., after_id=...)`
 - `get_state_history(key, limit=..., offset=...)`
@@ -399,6 +426,7 @@ Also available:
 - `get_state_for_block(block_ref)`
 - `watch_blocks(start_height=..., poll_interval_seconds=...)`
 - `watch_events(contract, event, after_id=..., limit=..., poll_interval_seconds=...)`
+- `watch_live_events(contract, event, poll_interval_seconds=...)`
 
 `get_developer_rewards(recipient_key)` uses the BDS aggregate query surface and
 returns the cumulative indexed `developer_reward` total for that recipient,
@@ -429,11 +457,19 @@ inspection so a just-finalized transaction can still be recovered by hash.
 fields are `indexed_height`, `current_block_height`, `height_lag`,
 `catching_up`, `spool_pending_count`, and `alerts`.
 
+`get_token_balances(address=None, ...)` returns the BDS-backed token portfolio
+for an address. If `address` is omitted, the client uses the active wallet
+address. Set `include_zero=True` when you need zero-balance indexed tokens too.
+
 `list_shielded_wallet_history(tag_value, ...)` is the higher-level shielded
 light-wallet recovery feed. It returns the canonical note-commitment sequence
 in note-index order and only exposes `output_payload` for outputs whose indexed
 tag matches the requested wallet tag. Use `after_note_index` as the resumable
 cursor.
+
+`list_shielded_output_tags(tag_value, ...)` exposes the lower-level tagged
+output index directly. Prefer `list_shielded_wallet_history(...)` for wallet
+sync and recovery unless you specifically need tag-index rows.
 
 ## Shielded Relayer Clients
 
@@ -499,6 +535,10 @@ Resume by storing the last seen event `id` and passing it back as `after_id`.
 
 Event watching requires BDS to be enabled on the node because the event stream
 comes from indexed reads rather than direct raw state queries.
+
+For raw live WebSocket delivery without the indexed catch-up cursor, use
+`watch_live_events(contract, event, ...)`. Application workers that need
+resumability should prefer `watch_events(...)`.
 
 The default watcher batch size and poll interval come from
 `XianClientConfig.watcher`.
