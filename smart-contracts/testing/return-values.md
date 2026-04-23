@@ -78,7 +78,17 @@ client = ContractingClient()
 client.flush()
 client.submit(token_with_events, name="con_token")
 token = client.get_contract("con_token")
+
+output = token.transfer(to="alice", amount=100, return_full_output=True)
+
+assert output["status_code"] == 0
+assert output["result"] is None
+assert output["events"][0]["event"] == "Transfer"
+assert output["events"][0]["data"]["to"] == "alice"
 ```
+
+When `return_full_output=True` is passed to a contract call, failed calls return
+the failure output dictionary instead of raising `AssertionError`.
 
 ## Testing Return Values in Assertions
 

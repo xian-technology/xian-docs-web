@@ -421,7 +421,7 @@ contracts can spend only that exact public budget during the active execution.
 For a real deployment, use the CLI instead of the deterministic dev bundle:
 
 ```bash
-uv run xian-zk-shielded-bundle \
+uv run xian-zk-shielded-bundle generate-note \
   --output-dir ./artifacts/private-usd-mainnet \
   --contract-name con_private_usd \
   --vk-id-prefix private-usd-mainnet-20260327

@@ -59,6 +59,19 @@ list map max min oct ord pow range reversed round set sorted str sum tuple zip
 
 Everything else is treated as forbidden.
 
+## Allocation Guards
+
+Allowed builtins are still bounded by deterministic runtime limits:
+
+- `range(...)` may create at most `131,072` entries.
+- `bytes(n)` and `bytearray(n)` may allocate at most `131,072` bytes.
+- string, bytes, bytearray, list, and tuple repetition with `*` may not exceed the same sequence or byte limits.
+- returned contract values may not exceed `131,072` bytes when serialized.
+- submitted contract source may not exceed `65,536` bytes.
+
+Numeric multiplication is unaffected. These guards prevent contracts from
+allocating large in-memory objects while keeping validation deterministic.
+
 ## Allowed Export Signature Annotations
 
 The same allowlist applies to exported arguments and exported return

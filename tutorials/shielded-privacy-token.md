@@ -58,10 +58,11 @@ run through native `xian-zk` bindings inside the runtime.
 Local benchmark reference values from April 2026:
 
 - normal public transfer: `48` chi
-- shielded exact withdraw with no new output: about `2,405` chi
-- shielded deposit with 2 outputs: about `3,742` chi
-- shielded transfer with 2 inputs / 2 outputs: about `4,062` chi
-- relayed hidden-sender shielded transfer: about `5,726` chi
+- shielded exact withdraw with no new output: about `2,175` chi
+- shielded withdraw with 1 input / 1 new output: about `3,128` chi
+- shielded deposit with 2 outputs: about `3,347` chi
+- shielded transfer with 2 inputs / 2 outputs: about `3,600` chi
+- relayed hidden-sender shielded transfer: about `5,288` chi
 
 Those are still more expensive than a public transfer, but no longer in the
 earlier five-digit chi range.
@@ -130,7 +131,7 @@ The shielded token needs one verifying key for each shielded action:
 For a real deployment, generate a random bundle and registry manifest once:
 
 ```bash
-uv run xian-zk-shielded-bundle \
+uv run xian-zk-shielded-bundle generate-note \
   --output-dir ./artifacts/private-usd-mainnet \
   --contract-name con_private_usd \
   --vk-id-prefix private-usd-mainnet-20260327
