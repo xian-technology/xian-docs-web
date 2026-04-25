@@ -79,7 +79,7 @@ LOCALNET_DEX_EMIT_TEST_SWAP=1 make localnet-dex-bootstrap
 Override the DEX contract source directory:
 
 ```bash
-XIAN_DEX_CONTRACTS_DIR=../xian-contracts/contracts/dex/src make localnet-dex-bootstrap
+XIAN_DEX_CONTRACTS_DIR=../xian-dex/src make localnet-dex-bootstrap
 ```
 
 ## Automation Prerequisites
