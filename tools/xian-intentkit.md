@@ -156,6 +156,18 @@ example:
 
 This is the recommended pattern for near-real-time Xian automation.
 
+For local DEX event testing, the node must actually have the DEX deployed.
+Base local networks do not include it by default. Use the stack DEX bootstrap
+to deploy `con_pairs`, `con_dex`, and a demo liquid pair before creating DEX
+event tasks:
+
+```bash
+XIAN_DEX_BOOTSTRAP_RPC_URL=http://127.0.0.1:26657 make localnet-dex-bootstrap
+```
+
+See [Local DEX Bootstrap](/node/local-dex-bootstrap) for the full localnet and
+single-node commands.
+
 ## A Good Default Pattern
 
 For a normal autonomous Xian trading or monitoring agent, the recommended
@@ -191,6 +203,16 @@ concerns:
 The current system is capable enough for real autonomous workflows, but
 production safety still comes mostly from good wallet discipline and a narrow
 skill/config surface.
+
+## When Not To Use An Agent
+
+If the desired action is fully deterministic, such as “when this DEX pair moves
+by this threshold, submit this exact bounded trade,” prefer
+[`xian-dex-automation`](/tools/xian-dex-automation). That service uses explicit
+rules, dry-run mode, persisted cursors, and a dedicated automation wallet.
+
+Use IntentKit when the workflow benefits from model judgment, natural-language
+instructions, multi-tool reasoning, summaries, or external communication.
 
 ## What The Stack Integration Does
 

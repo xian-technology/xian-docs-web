@@ -57,6 +57,8 @@ Current high-value flows include:
   network manifest
 - `xian node init|start|stop|status|health|endpoints ...` for local lifecycle
   and inspection
+- `--enable-intentkit` and `--enable-dex-automation` on `network create` /
+  `network join` when the node should manage those optional sidecars
 - `xian snapshot restore ...` and `xian recovery apply ...` for restore and
   recovery workflows
 - `xian solution-pack ...` when you want a guided starter flow built on the

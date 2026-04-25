@@ -85,6 +85,10 @@ deterministic validator path.
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
 - [Runtime Features](/node/runtime-features): execution-engine policy, tracer
   modes, readonly simulation, parallel execution, and the current runtime keys
+- [Local DEX Bootstrap](/node/local-dex-bootstrap): opt-in local deployment of
+  `con_pairs`, `con_dex`, and a demo liquid pair for DEX UI and event testing
+- [xian-dex-automation](/tools/xian-dex-automation): optional deterministic
+  DEX event automation sidecar for stack-managed nodes
 - [5-Validator Localnet E2E](/node/localnet-e2e): the canonical whole-stack local
   validation run across validators, BDS, governance, DEX, logging, and
   shielded-note flows

@@ -218,6 +218,7 @@ publishing:
 - Xian app metrics defaults to `127.0.0.1:9108`
 - dashboard defaults to `127.0.0.1:8080`
 - PostGraphile defaults to `127.0.0.1:5000`
+- `xian-dex-automation` defaults to `127.0.0.1:38280` when enabled
 
 Public exposure is explicit through the stack backend:
 
@@ -246,6 +247,7 @@ read-only database role instead of the primary BDS owner account.
 | `9090` | optional Prometheus |
 | `3000` | optional Grafana |
 | `5000` | optional GraphQL / PostGraphile |
+| `38280` | optional `xian-dex-automation` admin UI and API |
 
 Additional sidecars such as the shielded relayer or `xian-intentkit` use their
 own published ports when enabled.

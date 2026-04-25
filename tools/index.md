@@ -17,6 +17,7 @@ Xian ships tooling for three distinct jobs:
 | [xian-py](/tools/xian-py) | Python client, watchers, indexed reads, and relayer clients |
 | [xian-zk](/tools/xian-zk) | proving toolkit, shielded wallet model, bundle generation, local prover service |
 | [xian-intentkit](/tools/xian-intentkit) | agent-facing automation stack for Xian-native workflows |
+| [xian-dex-automation](/tools/xian-dex-automation) | deterministic DEX event automation service for rule-based trades |
 
 ## Developer Productivity Tools
 
@@ -67,5 +68,7 @@ python -m pip install xian-tech-zk
   library-level integrations
 - use `xian-zk` when you are working with shielded-note or shielded-command
   flows
+- use `xian-dex-automation` when a DEX rule should execute predictably without
+  an AI model deciding the action
 - use the hub, playground, or MCP server when you want a higher-level developer
   surface instead of starting from raw SDK calls

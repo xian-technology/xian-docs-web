@@ -25,6 +25,10 @@ If the node profile enables `xian-intentkit`, `xian node start` also brings up
 the stack-managed IntentKit frontend, API, worker, scheduler, and support
 services as a separate Compose project.
 
+If the node profile enables `xian-dex-automation`, `xian node start` also
+brings up the deterministic DEX automation sidecar. The default admin UI/API is
+`http://127.0.0.1:38280`.
+
 ## Status
 
 ```bash
@@ -45,9 +49,11 @@ uv run xian node health validator-1
 - the embedded release-manifest provenance block for canonical images, including component Git refs and build toolchain
 - the actual running container image names seen by Docker when the backend is reachable
 - a compact summary of readiness, sync height, peer count, and optional
-  dashboard / monitoring / `xian-intentkit` reachability
+  dashboard / monitoring / `xian-intentkit` / `xian-dex-automation`
+  reachability
 - the effective local endpoint catalog for RPC, `abci_query`, metrics, and
-  optional dashboard / monitoring / `xian-intentkit` services
+  optional dashboard / monitoring / `xian-intentkit` /
+  `xian-dex-automation` services
 
 `node health` is the concise machine-readable live-health view. It adds:
 
@@ -57,6 +63,7 @@ uv run xian node health validator-1
 - BDS queue, pool, spool, lag, and database status when `service_node` is enabled
 - optional dashboard / Prometheus / Grafana reachability when enabled
 - optional `xian-intentkit` frontend and API reachability when enabled
+- optional `xian-dex-automation` sidecar reachability when enabled
 - optional disk-pressure checks through the local `xian-stack` storage report
 - rendered state-sync readiness from `config.toml`
 - the effective snapshot bootstrap URL
@@ -74,6 +81,8 @@ prints the expected entrypoints for:
 - dashboard and dashboard status when enabled
 - Prometheus and Grafana when monitoring is enabled
 - `xian-intentkit` frontend and API health URLs when enabled
+- `xian-dex-automation` admin UI, health, wallet, rules, and runs URLs when
+  enabled
 
 For stack-managed nodes, the endpoint catalog reflects the actual published
 Docker host ports of the running services when they differ from the profile
@@ -203,6 +212,15 @@ python3 ./scripts/backend.py start --service-node --intentkit --intentkit-networ
 python3 ./scripts/backend.py endpoints --service-node --intentkit --intentkit-network-id xian-mainnet
 python3 ./scripts/backend.py health --service-node --intentkit --intentkit-network-id xian-mainnet
 python3 ./scripts/backend.py stop --service-node --intentkit --intentkit-network-id xian-mainnet
+```
+
+With stack-managed `xian-dex-automation`:
+
+```bash
+python3 ./scripts/backend.py start --no-service-node --dex-automation
+python3 ./scripts/backend.py endpoints --no-service-node --dex-automation
+python3 ./scripts/backend.py health --no-service-node --dex-automation
+python3 ./scripts/backend.py stop --no-service-node --dex-automation
 ```
 
 For BDS-enabled integrated runs:

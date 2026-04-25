@@ -51,7 +51,11 @@ They are written as JSON and validated on read. The current schema is explicit:
   "intentkit_network_id": "xian-mainnet",
   "intentkit_host": "127.0.0.1",
   "intentkit_port": 38000,
-  "intentkit_api_port": 38080
+  "intentkit_api_port": 38080,
+  "dex_automation_enabled": false,
+  "dex_automation_host": "127.0.0.1",
+  "dex_automation_port": 38280,
+  "dex_automation_config": null
 }
 ```
 
@@ -90,6 +94,9 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `intentkit_enabled` | starts the optional stack-managed `xian-intentkit` deployment |
 | `intentkit_network_id` | selects the Xian network slot exposed to `xian-intentkit` |
 | `intentkit_*` | published local host/port settings for the stack-managed frontend and API |
+| `dex_automation_enabled` | starts the optional stack-managed `xian-dex-automation` service |
+| `dex_automation_host` / `dex_automation_port` | local admin UI and API bind settings for the automation sidecar |
+| `dex_automation_config` | optional path to a persistent automation YAML config; when omitted, `xian-stack` generates one under `.artifacts/dex-automation/` |
 
 The explicit VM execution policy under `[xian.execution.engine]` is currently a
 lower-level runtime concern. It is rendered into `config.toml`, but it is not
@@ -164,3 +171,8 @@ the node records and how those logs are formatted and retained under
 operator-facing enable flag, selected Xian network slot, and local published
 ports. The stack adapter generates the actual `xian-intentkit` env file from
 those profile fields plus the resolved RPC endpoint and chain ID of the node.
+
+`xian-dex-automation` posture is node-local too. The profile stores only the
+enable flag, local host/port, and optional config path. The stack adapter
+generates the default config and service-wallet key file under
+`xian-stack/.artifacts/dex-automation/` when no explicit config is supplied.
