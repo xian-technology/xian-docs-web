@@ -66,6 +66,7 @@ features:
   <p class="section-desc">Start from proven contract packages for common application patterns.</p>
   <div class="home-links">
     <a href="/solution-packs/credits-ledger">Credits Ledger</a>
+    <a href="/solution-packs/dex">DEX</a>
     <a href="/solution-packs/registry-approval">Registry &amp; Approval</a>
     <a href="/solution-packs/stable-protocol">Stable Protocol</a>
     <a href="/solution-packs/workflow-backend">Workflow Backend</a>

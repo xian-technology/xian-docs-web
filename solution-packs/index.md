@@ -24,6 +24,7 @@ Use:
 cd ~/xian/xian-cli
 uv run xian solution-pack list
 uv run xian solution-pack show credits-ledger
+uv run xian solution-pack show dex
 uv run xian solution-pack starter credits-ledger
 uv run xian solution-pack starter registry-approval --flow remote
 uv run xian solution-pack starter stable-protocol --flow remote
@@ -37,6 +38,7 @@ and step-by-step commands.
 ## Available Packs
 
 - [Credits Ledger Pack](/solution-packs/credits-ledger)
+- [DEX Pack](/solution-packs/dex)
 - [Registry / Approval Pack](/solution-packs/registry-approval)
 - [Stable Protocol Pack](/solution-packs/stable-protocol)
 - [Workflow Backend Pack](/solution-packs/workflow-backend)
@@ -46,9 +48,10 @@ and step-by-step commands.
 The initial pack set is:
 
 1. Credits Ledger Pack
-2. Registry / Approval Pack
-3. Stable Protocol Pack
-4. Workflow Backend Pack
+2. DEX Pack
+3. Registry / Approval Pack
+4. Stable Protocol Pack
+5. Workflow Backend Pack
 
 The goal is to prove Xian through concrete backend patterns rather than generic
 toy contracts.
@@ -56,6 +59,7 @@ toy contracts.
 Today the deepest packs are:
 
 - Credits Ledger, with a projected read model built from indexed chain events
+- DEX, with a pinned AMM contract bundle and local demo liquidity bootstrap
 - Registry / Approval, with an event-triggered projection hydrated from
   authoritative contract reads
 - Stable Protocol, with governance-owned protocol contracts, vaults, auctions,

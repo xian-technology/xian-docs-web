@@ -21,7 +21,9 @@ For local development it can also deploy:
 - a seeded `currency` / `con_dex_demo_token` pool
 
 The bootstrap is idempotent. Rerunning it skips contracts that already exist and
-skips the demo pool when it already has reserves.
+skips the demo pool when it already has reserves. By default the stack reads the
+hash-pinned DEX bundle from
+`xian-configs/solution-packs/dex/contract-bundle.json`.
 
 ## Multi-Node Localnet
 
@@ -76,7 +78,13 @@ Emit one small swap event after deployment:
 LOCALNET_DEX_EMIT_TEST_SWAP=1 make localnet-dex-bootstrap
 ```
 
-Override the DEX contract source directory:
+Use a different hash-pinned DEX bundle:
+
+```bash
+XIAN_DEX_BUNDLE=../xian-configs/solution-packs/dex/contract-bundle.json make localnet-dex-bootstrap
+```
+
+For development only, override the raw DEX contract source directory:
 
 ```bash
 XIAN_DEX_CONTRACTS_DIR=../xian-dex/src make localnet-dex-bootstrap

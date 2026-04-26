@@ -40,6 +40,7 @@ Top-level namespaces:
 - `xian recovery ...`
 - `xian doctor ...`
 - `xian solution-pack ...`
+- `xian contract bundle ...`
 - `xian client ...`
 
 The `client` namespace is the JSON-first surface for wallet, query, and
@@ -63,6 +64,8 @@ Current high-value flows include:
   recovery workflows
 - `xian solution-pack ...` when you want a guided starter flow built on the
   canonical configs
+- `xian contract bundle validate ...` when you need to verify hash-pinned
+  contract bundle sources before bootstrap
 
 `--dry-run` is available on `network create`, `network join`, and recovery-plan
 application so you can validate inputs and inspect the planned artifact paths
