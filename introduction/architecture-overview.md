@@ -22,7 +22,57 @@ The network catalog has three separate responsibilities:
 - `xian-configs` owns reproducible network, module, and solution assets
 - tooling and runtime repositories consume those assets to create or run nodes
 
-![Xian module, solution, localnet, CLI, and sidecar structure](/diagrams/xian-system-structure.svg)
+```mermaid
+flowchart LR
+  subgraph Source["Source owner repositories"]
+    DexRepo["xian-dex"]
+    ContractsRepo["xian-contracts"]
+    AppRepos["Application and service repos"]
+  end
+
+  subgraph Catalog["xian-configs catalog"]
+    Networks["Network manifests"]
+    Templates["Network templates"]
+    Genesis["Genesis contract presets"]
+    Modules["Modules"]
+    Solutions["Solutions"]
+    Bundles["Hash-pinned contract bundles"]
+  end
+
+  subgraph Tooling["Operator and runtime tooling"]
+    CLI["xian-cli"]
+    Stack["xian-stack"]
+    Deploy["xian-deploy"]
+    ABCI["xian-abci genesis builder and node app"]
+  end
+
+  subgraph Runtime["Running environments"]
+    Localnet["Localnet"]
+    Node["Stack-managed node"]
+    Remote["Remote deployment"]
+    Sidecars["Optional sidecars"]
+  end
+
+  DexRepo --> Modules
+  ContractsRepo --> Genesis
+  ContractsRepo --> Solutions
+  AppRepos --> Solutions
+  Modules --> Bundles
+  Solutions --> Modules
+  Networks --> Genesis
+  Templates --> CLI
+  Networks --> CLI
+  Modules --> CLI
+  Solutions --> CLI
+  CLI --> Stack
+  CLI --> Deploy
+  Stack --> ABCI
+  Deploy --> ABCI
+  ABCI --> Localnet
+  Stack --> Node
+  Stack --> Sidecars
+  Deploy --> Remote
+```
 
 The current maintained inventory is:
 
@@ -82,24 +132,24 @@ artifacts.
 
 At the protocol core, Xian looks like this:
 
-```text
-wallets / apps / services / agents
-            |
-      xian-py / xian-js
-            |
-   CometBFT RPC + dashboard APIs
-            |
-         CometBFT
-            |
-            | ABCI
-            v
-         xian-abci
-            |
-            v
-     xian-contracting runtime
-            |
-            v
-      LMDB application state
+```mermaid
+flowchart TD
+  Apps["Wallets, apps, services, agents"]
+  SDKs["xian-py and xian-js"]
+  APIs["CometBFT RPC and dashboard APIs"]
+  Comet["CometBFT consensus"]
+  Boundary["ABCI boundary"]
+  ABCI["xian-abci"]
+  Runtime["xian-contracting runtime"]
+  State["LMDB application state"]
+
+  Apps --> SDKs
+  SDKs --> APIs
+  APIs --> Comet
+  Comet --> Boundary
+  Boundary --> ABCI
+  ABCI --> Runtime
+  Runtime --> State
 ```
 
 CometBFT owns consensus, networking, and block ordering. `xian-abci` owns the

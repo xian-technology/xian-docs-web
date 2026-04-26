@@ -52,6 +52,30 @@ The current model is a dedicated automation wallet:
 4. keep dry-run mode enabled until the rule output is correct
 5. set `wallet.execute: true` only when the automation should trade
 
+```mermaid
+flowchart TD
+  Events["Indexed DEX events and current pair state"]
+  Watcher["Event watcher with persisted cursor"]
+  Rules["Explicit YAML rules"]
+  Evaluator["Deterministic rule evaluator"]
+  DryRun{"wallet.execute enabled?"}
+  Audit["Audit log and dry-run run record"]
+  Wallet["Dedicated automation wallet"]
+  Submit["Signed swap or liquidity transaction"]
+  Chain["Xian node RPC"]
+
+  Events --> Watcher
+  Watcher --> Evaluator
+  Rules --> Evaluator
+  Evaluator --> DryRun
+  DryRun -->|no| Audit
+  DryRun -->|yes| Wallet
+  Wallet --> Submit
+  Submit --> Chain
+  Chain --> Events
+  Submit --> Audit
+```
+
 The user's main wallet never leaves the wallet extension or mobile wallet.
 
 For a broader consumer product, the safer long-term model is an on-chain

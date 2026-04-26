@@ -14,6 +14,22 @@ application divergence.
 4. validate the runtime locally
 5. start the node again and confirm status, height, and runtime health
 
+```mermaid
+flowchart TD
+  Target["Confirm target version, image, or release bundle"]
+  Stop["Stop node cleanly"]
+  Update["Update workspace or pull pinned image"]
+  Validate["Run local validation and smoke checks"]
+  Start["Start node"]
+  Confirm["Confirm height, health, and runtime posture"]
+
+  Target --> Stop
+  Stop --> Update
+  Update --> Validate
+  Validate --> Start
+  Start --> Confirm
+```
+
 Example sibling-workspace flow:
 
 ```bash

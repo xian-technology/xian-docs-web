@@ -66,6 +66,30 @@ In a normal operator or user workflow, the sequence is:
 8. create one or more autonomous tasks
 9. monitor the resulting autonomous chats and tool calls
 
+```mermaid
+flowchart TD
+  Node["Reachable Xian node or service node"]
+  IntentKit["xian-intentkit frontend and API"]
+  Agent["Agent with purpose, model, wallet, and skills"]
+  Task{"Task trigger"}
+  Scheduled["Scheduled check"]
+  Event["Indexed Xian event"]
+  Plan["Agent decides tool sequence"]
+  Tools["Xian, DEX, and notification skills"]
+  Review["Autonomous chat and tool-call review"]
+
+  Node --> IntentKit
+  IntentKit --> Agent
+  Agent --> Task
+  Task --> Scheduled
+  Task --> Event
+  Scheduled --> Plan
+  Event --> Plan
+  Plan --> Tools
+  Tools --> Node
+  Tools --> Review
+```
+
 For node operators using the stack-managed integration, the usual entrypoint is:
 
 ```bash

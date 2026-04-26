@@ -26,3 +26,21 @@ Use a module when you want to install a reusable contract/protocol set.
 
 Use a solution when you want the surrounding workflow: recommended template,
 install order, service expectations, examples, and docs.
+
+```mermaid
+flowchart TD
+  Template["Recommended network template"]
+  Module["One or more installable modules"]
+  Service["Optional service or sidecar"]
+  Examples["SDK and application examples"]
+  Docs["Operator and application docs"]
+  Solution["Solution"]
+  Starter["xian solution starter"]
+
+  Template --> Solution
+  Module --> Solution
+  Service --> Solution
+  Examples --> Solution
+  Docs --> Solution
+  Solution --> Starter
+```

@@ -28,6 +28,22 @@ export default defineConfig({
       chunkSizeWarningLimit: 800
     }
   },
+  markdown: {
+    config(md) {
+      const defaultFence = md.renderer.rules.fence
+      md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+        const token = tokens[idx]
+        const language = token.info.trim().split(/\s+/)[0]
+        if (language === 'mermaid') {
+          return `<MermaidDiagram code="${encodeURIComponent(token.content)}"></MermaidDiagram>\n`
+        }
+        if (defaultFence) {
+          return defaultFence(tokens, idx, options, env, self)
+        }
+        return self.renderToken(tokens, idx, options)
+      }
+    }
+  },
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
     ['style', {}, '.VPNav{background-color:var(--vp-c-bg,#fff)!important;transition:none!important}']

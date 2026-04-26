@@ -50,6 +50,32 @@ The runner writes:
 
 The phases intentionally build on each other:
 
+```mermaid
+flowchart TD
+  P00["00 Bootstrap 5 validators and BDS service node"]
+  P01["01 Health, peers, validator count, app hashes"]
+  P02["02 xian-py smoke"]
+  P03["03 Contract orchestration and nested dispatch"]
+  P04["04 Periodic load"]
+  P05["05 Burst load"]
+  P06["06 Conflict and invalid transactions"]
+  P07["07 DEX mixed trading"]
+  P08["08 Readonly simulator load"]
+  P09["09 BDS catch-up after outage"]
+  P10["10 Retrieval and reindex surfaces"]
+  P11["11 Determinism checks"]
+  P12["12 Validator governance"]
+  P13["13 Governed state patch"]
+  P14["14 Logging posture"]
+  P15["15 Shielded note token"]
+  P16["16 Parallel execution"]
+  P17["17 Chaos convergence"]
+  P18["18 Soak and abuse coverage"]
+
+  P00 --> P01 --> P02 --> P03 --> P04 --> P05 --> P06 --> P07 --> P08 --> P09
+  P09 --> P10 --> P11 --> P12 --> P13 --> P14 --> P15 --> P16 --> P17 --> P18
+```
+
 1. bootstrap a fresh 5-validator network with the native tracer and a BDS-enabled
    service node
 2. verify health, peer connectivity, validator count, and recent app-hash

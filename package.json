@@ -9,6 +9,11 @@
   },
   "license": "ISC",
   "dependencies": {
+    "mermaid": "^11.14.0",
     "vitepress": "^2.0.0-alpha.16"
+  },
+  "overrides": {
+    "postcss": "^8.5.12",
+    "uuid": "^14.0.0"
   }
 }

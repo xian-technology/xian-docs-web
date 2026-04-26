@@ -25,6 +25,26 @@ skips the demo pool when it already has reserves. By default the stack reads the
 hash-pinned DEX bundle from
 `xian-configs/modules/dex/contract-bundle.json`.
 
+```mermaid
+flowchart TD
+  Bundle["xian-configs/modules/dex/contract-bundle.json"]
+  Node["Running localnet or single stack node"]
+  Bootstrap["localnet-dex-bootstrap or xian module install dex"]
+  Check["Check existing contracts and pool reserves"]
+  Contracts["Deploy con_pairs, con_dex, and optional helper"]
+  Demo["Optional demo token, LP token, and XIAN/XDT pool"]
+  Event["Optional test Swap event"]
+  Consumers["DEX UI and event automation"]
+
+  Bundle --> Bootstrap
+  Node --> Bootstrap
+  Bootstrap --> Check
+  Check --> Contracts
+  Contracts --> Demo
+  Demo --> Event
+  Event --> Consumers
+```
+
 ## Multi-Node Localnet
 
 From `xian-stack`:

@@ -24,6 +24,26 @@ The supported workflow today is:
 5. Start and stop the runtime through `xian-stack`
 6. Use `xian node status`, `xian node endpoints`, `xian node health`, monitoring, and the optional dashboard for inspection
 
+```mermaid
+flowchart TD
+  Templates["Inspect templates"]
+  Keys["Generate validator keys when needed"]
+  Profile["Create or join a network manifest and node profile"]
+  Init["xian node init renders the CometBFT home"]
+  Start["xian node start delegates runtime to xian-stack"]
+  Observe["Inspect status, endpoints, health, monitoring, and dashboard"]
+  Remote["Prepare remote host material"]
+  Deploy["xian-deploy bootstrap, health, recovery, and runbooks"]
+
+  Templates --> Keys
+  Keys --> Profile
+  Profile --> Init
+  Init --> Start
+  Start --> Observe
+  Profile --> Remote
+  Remote --> Deploy
+```
+
 For remote Linux hosts, keep the local `xian-cli` network/profile flow, then
 use `xian-deploy` for bootstrap, deployment, remote health, and recovery
 runbooks.

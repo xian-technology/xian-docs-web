@@ -72,6 +72,34 @@ All proposals follow this flow:
 5. Each later `vote(proposal_id, support)` updates the proposal and may
    finalize it immediately.
 
+```mermaid
+flowchart TD
+  Member["Current governance member"]
+  Propose["Submit contract-call or state-patch proposal"]
+  Snapshot["Snapshot members, weights, expiry, and threshold"]
+  Vote["Vote yes or no"]
+  Decision{"Approved, rejected, or expired?"}
+  Call["Contract-call proposal executes immediately"]
+  Schedule["State patch is approved and scheduled"]
+  Bundle{"Each validator has the matching local bundle?"}
+  Apply["Apply bundle during finalize_block at activation height"]
+  Terminal["Rejected or expired terminal state"]
+  Waiting["Proposal remains pending"]
+
+  Member --> Propose
+  Propose --> Snapshot
+  Snapshot --> Vote
+  Vote --> Decision
+  Decision -->|pending| Waiting
+  Waiting --> Vote
+  Decision -->|rejected or expired| Terminal
+  Decision -->|approved contract_call| Call
+  Decision -->|approved state_patch| Schedule
+  Schedule --> Bundle
+  Bundle -->|yes| Apply
+  Bundle -->|no| Terminal
+```
+
 Important current behavior:
 
 - thresholds are snapshotted when the proposal is created

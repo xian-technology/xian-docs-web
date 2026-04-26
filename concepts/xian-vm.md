@@ -46,6 +46,29 @@ include:
 The runtime validates those artifacts against the canonical compiler output
 before deployment so forged or mismatched bundles are rejected.
 
+```mermaid
+flowchart TD
+  Source["Restricted Python contract source"]
+  Compiler["Canonical Xian compiler"]
+  Artifacts["deployment_artifacts"]
+  SourceArtifact["Stored __source__"]
+  IR["Stored __xian_ir_v1__"]
+  Validate["Runtime artifact validation"]
+  VM["Native xian_vm_v1 execution"]
+  Host["Deterministic host operations"]
+  State["Xian state, events, and imports"]
+
+  Source --> Compiler
+  Compiler --> Artifacts
+  Artifacts --> SourceArtifact
+  Artifacts --> IR
+  SourceArtifact --> Validate
+  IR --> Validate
+  Validate --> VM
+  VM --> Host
+  Host --> State
+```
+
 ## Execution Policy
 
 VM-native execution is selected through the explicit execution-engine policy:

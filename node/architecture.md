@@ -20,10 +20,21 @@ deterministic core, operator UX, and runtime backend stay cleanly separated.
 
 The default runtime is a single node container:
 
-```text
-operator -> xian-cli -> xian-stack backend -> integrated node container
-                                            |- xian-abci
-                                            `- CometBFT
+```mermaid
+flowchart LR
+  Operator["Operator"]
+  CLI["xian-cli"]
+  Stack["xian-stack backend"]
+  Container["Integrated node container"]
+  ABCI["xian-abci"]
+  Comet["CometBFT"]
+
+  Operator --> CLI
+  CLI --> Stack
+  Stack --> Container
+  Container --> ABCI
+  Container --> Comet
+  Comet <--> ABCI
 ```
 
 This is the preferred operational default because it is simpler to run and
@@ -34,10 +45,19 @@ supervision.
 
 The optional fidelity profile splits the node:
 
-```text
-operator -> xian-stack backend -> abci-app container
-                               -> cometbft container
-                               -> optional dashboard container
+```mermaid
+flowchart LR
+  Operator["Operator"]
+  Stack["xian-stack backend"]
+  ABCIContainer["abci-app container"]
+  CometContainer["cometbft container"]
+  Dashboard["Optional dashboard container"]
+
+  Operator --> Stack
+  Stack --> ABCIContainer
+  Stack --> CometContainer
+  Stack --> Dashboard
+  CometContainer <--> ABCIContainer
 ```
 
 Use this when you want process isolation that more closely resembles an

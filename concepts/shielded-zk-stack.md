@@ -16,6 +16,31 @@ real privacy-sensitive application flows.
 | shielded contracts | implement note pools, shielded commands, and app-specific adapters |
 | relayer layer | submits proof-bound private transactions without requiring the wallet to originate the public L1 submission directly |
 
+```mermaid
+flowchart TD
+  Wallet["Wallet or application"]
+  Toolkit["xian-zk prover, note tools, and wallet sync"]
+  Bundle["Verifying-key bundle"]
+  Registry["zk_registry in chain state"]
+  Proof["Proof, public inputs, encrypted outputs"]
+  Relayer["Optional relayer"]
+  Contract["Shielded contract or adapter"]
+  Verifier["Runtime zk verifier"]
+  State["Commitments, nullifiers, roots, and events"]
+
+  Wallet --> Toolkit
+  Toolkit --> Bundle
+  Bundle --> Registry
+  Toolkit --> Proof
+  Wallet --> Relayer
+  Relayer --> Contract
+  Proof --> Contract
+  Contract --> Verifier
+  Verifier --> Registry
+  Contract --> State
+  State --> Toolkit
+```
+
 ## Runtime Verifier
 
 The validator runtime exposes a narrow verifier surface:

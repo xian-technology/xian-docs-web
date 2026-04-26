@@ -70,6 +70,27 @@ Current high-value flows include:
 - `xian contract bundle validate ...` when you need to verify hash-pinned
   contract bundle sources before bootstrap
 
+```mermaid
+flowchart TD
+  Catalog["xian-configs templates, manifests, modules, and solutions"]
+  Network["xian network create or join"]
+  Profile["Local network and node profile files"]
+  Node["xian node init, start, status, health"]
+  Stack["xian-stack runtime backend"]
+  Snapshot["xian snapshot restore"]
+  Recovery["xian recovery apply"]
+  Client["xian client wallet, query, simulate, and tx"]
+  RPC["CometBFT RPC"]
+
+  Catalog --> Network
+  Network --> Profile
+  Profile --> Node
+  Node --> Stack
+  Snapshot --> Profile
+  Recovery --> Profile
+  Client --> RPC
+```
+
 `--dry-run` is available on `network create`, `network join`, and recovery-plan
 application so you can validate inputs and inspect the planned artifact paths
 before anything is written to disk.

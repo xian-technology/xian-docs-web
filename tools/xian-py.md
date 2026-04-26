@@ -735,6 +735,25 @@ This is the first example set that demonstrates the full backend pattern:
 - BDS-backed indexed events as the integration feed
 - a local projected read model for application-specific queries
 
+```mermaid
+flowchart TD
+  Admin["Admin bootstrap job"]
+  Contract["Xian contract state"]
+  Events["BDS indexed events"]
+  Projector["Projector worker"]
+  ReadModel["Local SQLite read model"]
+  API["FastAPI service"]
+  Client["Application client"]
+
+  Admin --> Contract
+  Contract --> Events
+  Events --> Projector
+  Projector --> ReadModel
+  API --> Contract
+  API --> ReadModel
+  Client --> API
+```
+
 ### Registry / Approval Solution Examples
 
 `examples/registry_approval/` adds the second reference solution and the second

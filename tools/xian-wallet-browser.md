@@ -107,6 +107,25 @@ shown only after the wallet is created, so the normal flow is:
 4. create the wallet
 5. record the recovery seed before closing the screen
 
+```mermaid
+flowchart TD
+  Launch["First wallet launch"]
+  Mode["Choose setup mode"]
+  Password["Enter wallet password"]
+  Network["Optional network override"]
+  Create["Create, restore, or import wallet"]
+  Seed["Record recovery seed when creating"]
+  Ready["Unlocked wallet with active network preset"]
+
+  Launch --> Mode
+  Mode --> Password
+  Password --> Network
+  Network --> Create
+  Create --> Seed
+  Seed --> Ready
+  Create --> Ready
+```
+
 The **Network settings** disclosure on the setup screen lets you override:
 
 - network label

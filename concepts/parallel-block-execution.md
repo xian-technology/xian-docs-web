@@ -38,6 +38,33 @@ So the model is:
 
 At a high level:
 
+```mermaid
+flowchart TD
+  Block["CometBFT finalizes block contents and order"]
+  Gate{"Parallel execution enabled and block large enough?"}
+  Serial["Execute remaining transactions serially"]
+  Wave["Build a speculative wave"]
+  Workers["Worker processes execute with auto_commit=false"]
+  Metadata["Return result plus read/write/prefix metadata"]
+  Accept["Accept conflict-free prefix in canonical order"]
+  Tail{"Tail still worth speculating?"}
+  Apply["Apply accepted results in block order"]
+  Commit["Normal LMDB batch commit and app_hash"]
+
+  Block --> Gate
+  Gate -->|no| Serial
+  Gate -->|yes| Wave
+  Wave --> Workers
+  Workers --> Metadata
+  Metadata --> Accept
+  Accept --> Tail
+  Tail -->|yes| Wave
+  Tail -->|no| Serial
+  Accept --> Apply
+  Serial --> Apply
+  Apply --> Commit
+```
+
 1. CometBFT finalizes the block contents and order.
 2. If parallel execution is enabled and the block is large enough, the native
    controller in `xian-contracting` builds a speculative wave and sends those

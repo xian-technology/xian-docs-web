@@ -4,50 +4,33 @@ Every transaction on Xian follows a defined path from creation to finalization. 
 
 ## Overview
 
-```
-  SDK (xian-py)
-      |
-      |  1. Create transaction payload
-      |  2. Sign with Ed25519 private key
-      v
-  CometBFT Node
-      |
-      |  3. Broadcast via RPC (broadcast_tx_sync / broadcast_tx_async)
-      v
-  CHECK_TX (mempool validation)
-      |
-      |  4. Validate signature
-      |  5. Verify chain_id matches
-      |  6. Check nonce ordering
-      |  7. Verify sender has enough XIAN for chi
-      v
-  Mempool
-      |
-      |  8. Transaction waits for inclusion in next block
-      v
-  Consensus (CometBFT BFT)
-      |
-      |  9. Validators agree on block contents and ordering
-      v
-  FINALIZE_BLOCK
-      |
-      |  10. Execute contract function in sandbox
-      |  11. Meter contract execution (chi)
-      |  12. Apply state changes (or rollback on failure)
-      |  13. Deduct chi from sender's XIAN balance
-      |  14. Collect events emitted by the contract
-      v
-  Commit
-      |
-      |  15. Batch-write all state changes to LMDB
-      |  16. Compute app_hash over the full state
-      |  17. Return app_hash to CometBFT for next block header
-      v
-  Block Finalized
-      |
-      |  18. Events indexed by CometBFT
-      |  19. WebSocket subscribers notified
-      |  20. Block available via RPC queries
+```mermaid
+flowchart TD
+  SDK["1-2 SDK creates payload and signs with Ed25519"]
+  RPC["3 Broadcast through CometBFT RPC"]
+  Check["4-7 CHECK_TX validates signature, chain id, nonce, and chi balance"]
+  Reject["Rejected before mempool"]
+  Mempool["8 Mempool waits for block inclusion"]
+  Consensus["9 CometBFT BFT consensus fixes block order"]
+  Finalize["10-14 FINALIZE_BLOCK executes and meters contract calls"]
+  Outcome{"Execution succeeds?"}
+  Buffer["Buffer state changes, chi, return value, and events"]
+  Rollback["Rollback state changes and still charge consumed chi"]
+  Commit["15-17 Atomic LMDB commit and app_hash calculation"]
+  Finalized["18-20 RPC queries, indexing, and WebSocket notifications"]
+
+  SDK --> RPC
+  RPC --> Check
+  Check -->|invalid| Reject
+  Check -->|valid| Mempool
+  Mempool --> Consensus
+  Consensus --> Finalize
+  Finalize --> Outcome
+  Outcome -->|yes| Buffer
+  Outcome -->|no| Rollback
+  Buffer --> Commit
+  Rollback --> Commit
+  Commit --> Finalized
 ```
 
 ## Step-by-Step

@@ -47,6 +47,26 @@ At a high level, one transaction moves through these stages:
    events, receipts, and the new app hash.
 5. CometBFT commits the block and finalizes the height.
 
+```mermaid
+flowchart TD
+  Payload["Signed transaction payload"]
+  Gossip["CometBFT mempool gossip"]
+  Check["xian-abci CHECK_TX validation"]
+  Block["CometBFT ordered block"]
+  Execute["xian-abci FINALIZE_BLOCK execution"]
+  Runtime["xian-contracting or xian_vm_v1 runtime"]
+  Commit["State commit and app_hash"]
+  Finality["CometBFT finalizes height"]
+
+  Payload --> Gossip
+  Gossip --> Check
+  Check --> Block
+  Block --> Execute
+  Execute --> Runtime
+  Runtime --> Commit
+  Commit --> Finality
+```
+
 That separation is why Xian can evolve contract execution without replacing the
 consensus engine itself.
 

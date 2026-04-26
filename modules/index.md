@@ -27,7 +27,22 @@ uv run xian module install dex --recipe local-demo --stack-dir ../xian-stack
 A module is an installable contract/protocol unit. A solution is a full
 workflow that composes templates, modules, services, examples, and docs.
 
+```mermaid
+flowchart LR
+  Source["Source owner repo"]
+  Bundle["Hash-pinned contract bundle"]
+  Module["xian-configs module"]
+  CLI["xian module validate and install"]
+  Network["Running network"]
+  Solution["Optional solution"]
+
+  Source --> Bundle
+  Bundle --> Module
+  Module --> CLI
+  CLI --> Network
+  Module --> Solution
+```
+
 For example, the DEX module owns the canonical AMM contracts. The DEX demo
 solution composes the DEX module with a local indexed node, demo liquidity, and
 optional automation.
-

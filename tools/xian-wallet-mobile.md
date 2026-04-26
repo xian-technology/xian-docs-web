@@ -135,6 +135,25 @@ The normal create flow is:
 3. create the wallet
 4. record the generated recovery seed before continuing
 
+```mermaid
+flowchart TD
+  Launch["Open mobile wallet"]
+  Mode["Choose Create, Seed, or Key"]
+  Password["Set or enter wallet password"]
+  Wallet["Create, restore, or import account"]
+  Seed["Record recovery seed when creating"]
+  Network["Select reachable network preset"]
+  Ready["Wallet ready for balances, receive, and send"]
+
+  Launch --> Mode
+  Mode --> Password
+  Password --> Wallet
+  Wallet --> Seed
+  Seed --> Network
+  Wallet --> Network
+  Network --> Ready
+```
+
 For seed-backed wallets, additional accounts can be derived later while the
 wallet is unlocked. Private-key imports are single-account only.
 

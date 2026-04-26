@@ -119,6 +119,29 @@ or by `network create` when bootstrapping a fresh local network.
 Use `xian network template list` to inspect the canonical starter shapes before
 creating or joining a network.
 
+```mermaid
+flowchart TD
+  Template["Starter template"]
+  Manifest["Network manifest"]
+  Keys["Validator key material"]
+  Join["xian network create or join"]
+  Profile["Node profile JSON"]
+  Init["xian node init"]
+  Home["Rendered CometBFT home"]
+  Start["xian node start"]
+  Stack["xian-stack runtime"]
+
+  Template --> Join
+  Manifest --> Join
+  Keys --> Join
+  Join --> Profile
+  Profile --> Init
+  Init --> Home
+  Home --> Start
+  Profile --> Start
+  Start --> Stack
+```
+
 The current canonical templates standardize these postures:
 
 - `single-node-dev`: `operator_profile=local_development`,

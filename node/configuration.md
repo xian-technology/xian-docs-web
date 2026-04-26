@@ -9,6 +9,25 @@ Xian node configuration is easiest to understand as three layers:
 The higher layers describe operator intent. The rendered home is what the node
 actually runs.
 
+```mermaid
+flowchart TD
+  Templates["Reusable templates"]
+  Manifests["Network manifests"]
+  Profile["Node profile"]
+  Home["Rendered CometBFT home"]
+  Runtime["Running node"]
+  Patches["Local state-patch bundles"]
+  Governance["On-chain governance approval"]
+
+  Templates --> Profile
+  Manifests --> Profile
+  Profile --> Home
+  Home --> Runtime
+  Patches --> Home
+  Governance --> Runtime
+  Patches --> Runtime
+```
+
 ## Network Manifests And Templates
 
 Network manifests describe network-wide defaults such as:

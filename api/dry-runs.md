@@ -24,6 +24,24 @@ GET /api/abci_query/simulate_tx/<hex_encoded_payload>
 The SDK usually talks to the underlying CometBFT RPC `abci_query` endpoint
 directly.
 
+```mermaid
+flowchart TD
+  SDK["SDK or caller builds JSON payload"]
+  Encode["Hex-encode simulate_tx payload"]
+  Query["CometBFT abci_query"]
+  Worker["Bounded simulation subprocess"]
+  Runtime["Contract runtime against current effective state"]
+  Drop["Drop simulated writes"]
+  Result["Return status, chi_used, result, and write preview"]
+
+  SDK --> Encode
+  Encode --> Query
+  Query --> Worker
+  Worker --> Runtime
+  Runtime --> Drop
+  Drop --> Result
+```
+
 ## Payload Shape
 
 The payload is JSON, encoded to hex:

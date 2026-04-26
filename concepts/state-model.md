@@ -44,20 +44,22 @@ All state for all contracts lives in a single LMDB environment on each validator
 
 State access goes through multiple cache layers before hitting disk:
 
-```
-Contract code
-    |
-    v
-Pending Writes (in-memory dict)
-    |  Current transaction's uncommitted state changes.
-    |  Reads check here first (read-your-own-writes).
-    v
-TTL Cache (in-memory LRU)
-    |  Recently accessed values from previous transactions.
-    |  Reduces LMDB read pressure during block execution.
-    v
-LMDB (disk)
-    Persistent storage. Source of truth after each block.
+```mermaid
+flowchart TD
+  Contract["Contract code"]
+  Pending["Pending writes for the current transaction"]
+  Cache["TTL cache for recent committed reads"]
+  LMDB["LMDB persistent state"]
+  Commit["Block-level atomic batch commit"]
+  Rollback["Discard pending writes on failure"]
+
+  Contract --> Pending
+  Pending -->|read-your-own-writes| Contract
+  Pending --> Cache
+  Cache --> LMDB
+  Pending -->|success| Commit
+  Pending -->|failure| Rollback
+  Commit --> LMDB
 ```
 
 ### Pending Writes
