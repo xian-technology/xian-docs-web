@@ -23,6 +23,11 @@ const getStartedSidebar = [
 
 export default defineConfig({
   base: '/',
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 800
+    }
+  },
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
     ['style', {}, '.VPNav{background-color:var(--vp-c-bg,#fff)!important;transition:none!important}']
@@ -45,7 +50,8 @@ export default defineConfig({
         text: 'Tools',
         items: [
           { text: 'Tools & SDKs', link: '/tools/' },
-          { text: 'Solution Packs', link: '/solution-packs/' }
+          { text: 'Modules', link: '/modules/' },
+          { text: 'Solutions', link: '/solutions/' }
         ]
       },
       {
@@ -214,15 +220,25 @@ export default defineConfig({
           ]
         }
       ],
-      '/solution-packs/': [
+      '/modules/': [
         {
-          text: 'Solution Packs',
+          text: 'Modules',
           items: [
-            { text: 'Overview', link: '/solution-packs/' },
-            { text: 'Credits Ledger Pack', link: '/solution-packs/credits-ledger' },
-            { text: 'Registry / Approval Pack', link: '/solution-packs/registry-approval' },
-            { text: 'Stable Protocol Pack', link: '/solution-packs/stable-protocol' },
-            { text: 'Workflow Backend Pack', link: '/solution-packs/workflow-backend' }
+            { text: 'Overview', link: '/modules/' },
+            { text: 'DEX Module', link: '/modules/dex' },
+            { text: 'Stable Protocol Module', link: '/modules/stable-protocol' }
+          ]
+        }
+      ],
+      '/solutions/': [
+        {
+          text: 'Solutions',
+          items: [
+            { text: 'Overview', link: '/solutions/' },
+            { text: 'Credits Ledger', link: '/solutions/credits-ledger' },
+            { text: 'Registry / Approval', link: '/solutions/registry-approval' },
+            { text: 'Workflow Backend', link: '/solutions/workflow-backend' },
+            { text: 'DEX Demo', link: '/solutions/dex-demo' }
           ]
         }
       ],

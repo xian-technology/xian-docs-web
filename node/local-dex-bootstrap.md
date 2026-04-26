@@ -23,7 +23,7 @@ For local development it can also deploy:
 The bootstrap is idempotent. Rerunning it skips contracts that already exist and
 skips the demo pool when it already has reserves. By default the stack reads the
 hash-pinned DEX bundle from
-`xian-configs/solution-packs/dex/contract-bundle.json`.
+`xian-configs/modules/dex/contract-bundle.json`.
 
 ## Multi-Node Localnet
 
@@ -81,7 +81,14 @@ LOCALNET_DEX_EMIT_TEST_SWAP=1 make localnet-dex-bootstrap
 Use a different hash-pinned DEX bundle:
 
 ```bash
-XIAN_DEX_BUNDLE=../xian-configs/solution-packs/dex/contract-bundle.json make localnet-dex-bootstrap
+XIAN_DEX_BUNDLE=../xian-configs/modules/dex/contract-bundle.json make localnet-dex-bootstrap
+```
+
+New automation should prefer the module command:
+
+```bash
+cd ../xian-cli
+uv run xian module install dex --recipe local-demo --stack-dir ../xian-stack
 ```
 
 For development only, override the raw DEX contract source directory:

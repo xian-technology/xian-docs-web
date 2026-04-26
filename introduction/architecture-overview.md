@@ -10,9 +10,60 @@ optional higher-level services.
 |------|-----------|
 | `xian-contracting` | contract compiler, sandbox, storage model, metering, standard library bridges, local testing |
 | `xian-abci` | CometBFT application, block execution, query layer, snapshots, dashboard service |
-| `xian-configs` | canonical network manifests, contracts, templates, solution packs |
+| `xian-configs` | canonical network manifests, system contracts, templates, modules, solutions |
 | `xian-stack` | Docker images, Compose topology, localnet, monitoring, optional sidecars |
 | `xian-cli` | operator workflow surface for keys, manifests, node init/start/stop/health |
+
+## Network, Module, Solution, And Sidecar Structure
+
+The network catalog has three separate responsibilities:
+
+- source owner repositories own active product or contract development
+- `xian-configs` owns reproducible network, module, and solution assets
+- tooling and runtime repositories consume those assets to create or run nodes
+
+![Xian module, solution, localnet, CLI, and sidecar structure](/diagrams/xian-system-structure.svg)
+
+The current maintained inventory is:
+
+| Asset type | Count | Current location |
+|------------|-------|------------------|
+| Canonical network manifests | 3 | `xian-configs/networks/local`, `devnet`, `testnet` |
+| Reusable network templates | 5 | `xian-configs/templates/*.json` |
+| Genesis contract presets | 3 | `xian-configs/contracts/contracts_local.json`, `contracts_devnet.json`, `contracts_testnet.json` |
+| Modules | 2 | `xian-configs/modules/dex`, `modules/stable-protocol` |
+| Solutions | 4 | `xian-configs/solutions/*` |
+
+The important terms are:
+
+| Term | Meaning |
+|------|---------|
+| Source owner repo | The active development home for a product or contract set, such as `xian-dex` for the DEX contracts and frontend. |
+| Genesis contract preset | A `contracts_*.json` file that tells genesis construction which contracts are included before a chain starts. |
+| Module | A reusable installable contract or protocol unit, such as the DEX AMM contracts. |
+| Solution | A complete application/operator pattern that composes templates, modules, services, examples, and docs. |
+| Contract bundle | A hash-pinned manifest for a deployable set of contract source files. It is smaller and more mechanical than a module. |
+| Localnet | A local network instance started by `xian-stack`, usually from canonical assets in `xian-configs`. |
+| Sidecar | An optional runtime service attached to a node or indexed API. It is not part of consensus and does not change genesis. |
+
+`xian-cli` is the operator-facing control plane over this catalog. It reads
+network manifests, templates, profiles, modules, solutions, and contract-bundle
+metadata from `xian-configs`. `xian-stack` is the local Docker runtime that
+turns those assets into running nodes. `xian-deploy` is the remote deployment
+equivalent for prepared host material. `xian-abci` owns the genesis builder and
+runtime application behavior.
+
+The DEX is the clearest example of the split. `xian-dex` owns active DEX
+development. `xian-configs/modules/dex` carries the pinned DEX module snapshot
+for repeatable installs. The `dex-demo` solution composes that module with a
+recommended local network and automation posture. The base `local`, `devnet`,
+and `testnet` genesis presets do not automatically make every network a DEX
+network.
+
+Prefer pinned snapshots and manifest hashes for cross-repo consumption. Avoid
+symlinks between repositories for canonical catalog assets because they are
+brittle in CI, Docker builds, remote deployments, archives, and release
+artifacts.
 
 ## Developer and Application Repositories
 

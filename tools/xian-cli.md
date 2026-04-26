@@ -4,7 +4,7 @@
 roles:
 
 - operator workflows such as node setup, network manifests, profile handling,
-  health checks, snapshots, solution packs, and recovery
+  health checks, snapshots, modules, solutions, and recovery
 - client automation through `xian client ...`, backed directly by `xian-py`
 
 If you are writing Python application code, use [`xian-py`](/tools/xian-py).
@@ -39,7 +39,8 @@ Top-level namespaces:
 - `xian snapshot ...`
 - `xian recovery ...`
 - `xian doctor ...`
-- `xian solution-pack ...`
+- `xian module ...`
+- `xian solution ...`
 - `xian contract bundle ...`
 - `xian client ...`
 
@@ -62,7 +63,9 @@ Current high-value flows include:
   `network join` when the node should manage those optional sidecars
 - `xian snapshot restore ...` and `xian recovery apply ...` for restore and
   recovery workflows
-- `xian solution-pack ...` when you want a guided starter flow built on the
+- `xian module ...` when you want to inspect, validate, or install reusable
+  on-chain modules such as the DEX
+- `xian solution ...` when you want a guided starter flow built on the
   canonical configs
 - `xian contract bundle validate ...` when you need to verify hash-pinned
   contract bundle sources before bootstrap

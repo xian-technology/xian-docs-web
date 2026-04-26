@@ -62,14 +62,15 @@ features:
 </div>
 
 <div class="home-section">
-  <h3>Solution Packs</h3>
-  <p class="section-desc">Start from proven contract packages for common application patterns.</p>
+  <h3>Modules &amp; Solutions</h3>
+  <p class="section-desc">Install reusable protocol modules or start from complete application/operator workflows.</p>
   <div class="home-links">
-    <a href="/solution-packs/credits-ledger">Credits Ledger</a>
-    <a href="/solution-packs/dex">DEX</a>
-    <a href="/solution-packs/registry-approval">Registry &amp; Approval</a>
-    <a href="/solution-packs/stable-protocol">Stable Protocol</a>
-    <a href="/solution-packs/workflow-backend">Workflow Backend</a>
+    <a href="/modules/dex">DEX Module</a>
+    <a href="/modules/stable-protocol">Stable Protocol Module</a>
+    <a href="/solutions/">Solutions</a>
+    <a href="/solutions/credits-ledger">Credits Ledger</a>
+    <a href="/solutions/registry-approval">Registry &amp; Approval</a>
+    <a href="/solutions/workflow-backend">Workflow Backend</a>
   </div>
 </div>
 

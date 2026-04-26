@@ -417,7 +417,7 @@ There is now also a real live runner for the same workflow. It uses:
 - a real Xian localnet
 - a real service node with BDS enabled
 - a real IntentKit local API and autonomous worker
-- a real DEX pack deployed during the run
+- a real DEX module deployed during the run
 - a real `con_pairs.Sync` event trigger with reserve-based threshold detection
 - a real agent-side `xian_dex_trade`
 - a real Telegram post

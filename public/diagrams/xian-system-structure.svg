@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Xian repository, module, solution, localnet, and sidecar structure</title>
+  <desc id="desc">Source owner repositories feed pinned assets into xian-configs. xian-cli and xian-abci consume xian-configs. xian-stack and xian-deploy start networks. Optional sidecars attach to running networks.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#344054" />
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .group { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; rx: 12; }
+      .box { fill: #f9fafb; stroke: #98a2b3; stroke-width: 1.2; rx: 8; }
+      .accent { fill: #eef4ff; stroke: #6172f3; }
+      .runtime { fill: #ecfdf3; stroke: #12b76a; }
+      .sidecar { fill: #fff6ed; stroke: #f79009; }
+      .title { font: 700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #101828; }
+      .group-title { font: 700 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #101828; }
+      .label { font: 700 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #101828; }
+      .small { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475467; }
+      .tiny { font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #667085; }
+      .arrow { stroke: #344054; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+      .arrow-light { stroke: #667085; stroke-width: 1.3; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="760" />
+  <text class="title" x="40" y="46">Xian Module, Solution, Localnet, CLI, And Sidecar Structure</text>
+  <text class="small" x="40" y="70">The active source repos own development. xian-configs owns reproducible network, module, and solution assets. Tooling and runtimes consume those assets.</text>
+
+  <rect class="group" x="35" y="105" width="240" height="300" />
+  <text class="group-title" x="55" y="135">Source owner repos</text>
+  <rect class="box" x="55" y="158" width="200" height="60" />
+  <text class="label" x="72" y="184">xian-dex</text>
+  <text class="small" x="72" y="204">active DEX contracts + web</text>
+  <rect class="box" x="55" y="236" width="200" height="60" />
+  <text class="label" x="72" y="262">xian-contracts</text>
+  <text class="small" x="72" y="282">shared / reusable contracts</text>
+  <rect class="box" x="55" y="314" width="200" height="60" />
+  <text class="label" x="72" y="340">xian-stable-protocol</text>
+  <text class="small" x="72" y="360">protocol source owner</text>
+
+  <rect class="group" x="330" y="105" width="270" height="420" />
+  <text class="group-title" x="350" y="135">xian-configs</text>
+  <text class="tiny" x="350" y="154">canonical catalog and reproducibility layer</text>
+  <rect class="box" x="350" y="176" width="230" height="58" />
+  <text class="label" x="368" y="201">networks/</text>
+  <text class="small" x="368" y="220">local, devnet, testnet</text>
+  <rect class="box" x="350" y="248" width="230" height="58" />
+  <text class="label" x="368" y="273">templates/</text>
+  <text class="small" x="368" y="292">5 reusable network templates</text>
+  <rect class="box" x="350" y="320" width="230" height="58" />
+  <text class="label" x="368" y="345">contracts/contracts_*.json</text>
+  <text class="small" x="368" y="364">3 genesis contract presets</text>
+  <rect class="box" x="350" y="392" width="230" height="58" />
+  <text class="label" x="368" y="417">modules/</text>
+  <text class="small" x="368" y="436">2 installable contract units</text>
+  <rect class="accent" x="350" y="464" width="230" height="42" rx="8" />
+  <text class="label" x="368" y="490">solutions/</text>
+
+  <rect class="group" x="660" y="105" width="215" height="260" />
+  <text class="group-title" x="680" y="135">Tooling</text>
+  <rect class="box" x="680" y="158" width="175" height="74" />
+  <text class="label" x="698" y="184">xian-cli</text>
+  <text class="small" x="698" y="204">network, node, pack,</text>
+  <text class="small" x="698" y="220">bundle validation flows</text>
+  <rect class="box" x="680" y="254" width="175" height="74" />
+  <text class="label" x="698" y="280">xian-abci</text>
+  <text class="small" x="698" y="300">genesis_builder creates</text>
+  <text class="small" x="698" y="316">genesis.json</text>
+
+  <rect class="group" x="935" y="105" width="230" height="300" />
+  <text class="group-title" x="955" y="135">Runtime</text>
+  <rect class="runtime" x="955" y="158" width="190" height="62" rx="8" />
+  <text class="label" x="973" y="184">xian-stack</text>
+  <text class="small" x="973" y="204">local Docker / localnet</text>
+  <rect class="runtime" x="955" y="238" width="190" height="62" rx="8" />
+  <text class="label" x="973" y="264">xian-deploy</text>
+  <text class="small" x="973" y="284">remote deployment</text>
+  <rect class="runtime" x="955" y="318" width="190" height="62" rx="8" />
+  <text class="label" x="973" y="344">running network</text>
+  <text class="small" x="973" y="364">nodes, RPC, indexed APIs</text>
+
+  <rect class="group" x="330" y="575" width="835" height="130" />
+  <text class="group-title" x="350" y="605">Optional sidecars and support services</text>
+  <rect class="sidecar" x="350" y="628" width="170" height="52" rx="8" />
+  <text class="label" x="368" y="650">xian-intentkit</text>
+  <text class="small" x="368" y="668">agent/tool bridge</text>
+  <rect class="sidecar" x="545" y="628" width="190" height="52" rx="8" />
+  <text class="label" x="563" y="650">xian-dex-automation</text>
+  <text class="small" x="563" y="668">deterministic event rules</text>
+  <rect class="sidecar" x="760" y="628" width="160" height="52" rx="8" />
+  <text class="label" x="778" y="650">shielded relayer</text>
+  <text class="small" x="778" y="668">private transfer support</text>
+  <rect class="sidecar" x="945" y="628" width="185" height="52" rx="8" />
+  <text class="label" x="963" y="650">BDS / GraphQL</text>
+  <text class="small" x="963" y="668">indexed reads and APIs</text>
+
+  <path class="arrow" d="M255 188 C295 188 302 421 346 421" />
+  <text class="tiny" x="242" y="430">pinned snapshot</text>
+  <path class="arrow-light" d="M255 266 C305 266 305 349 346 349" />
+  <path class="arrow-light" d="M255 344 C300 344 302 421 346 421" />
+
+  <path class="arrow" d="M580 205 L676 195" />
+  <path class="arrow" d="M580 277 L676 195" />
+  <path class="arrow" d="M580 421 L676 195" />
+  <path class="arrow" d="M580 349 L676 290" />
+  <path class="arrow" d="M580 486 C630 486 630 218 676 195" />
+
+  <path class="arrow" d="M855 195 L951 189" />
+  <text class="tiny" x="870" y="178">profile/material</text>
+  <path class="arrow" d="M855 195 C900 195 900 269 951 269" />
+  <path class="arrow" d="M855 290 C910 290 910 189 951 189" />
+  <text class="tiny" x="865" y="318">genesis.json</text>
+
+  <path class="arrow" d="M1050 220 L1050 314" />
+  <path class="arrow" d="M1050 300 L1050 314" />
+  <path class="arrow" d="M580 421 C760 455 900 235 951 200" />
+  <text class="tiny" x="708" y="470">DEX bootstrap reads pinned bundle</text>
+  <text class="tiny" x="708" y="486">and deploys contracts post-start</text>
+
+  <path class="arrow" d="M1050 380 C1050 520 435 520 435 624" />
+  <path class="arrow-light" d="M1050 380 C1050 525 640 520 640 624" />
+  <path class="arrow-light" d="M1050 380 C1050 525 840 520 840 624" />
+  <path class="arrow-light" d="M1050 380 C1050 525 1038 520 1038 624" />
+</svg>

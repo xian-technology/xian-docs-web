@@ -27,7 +27,8 @@ Use the validation commands below before pushing docs changes.
 ## Key Directories
 
 - `api/`, `concepts/`, `node/`, `tools/`, `smart-contracts/`: published docs sections
-- `solution-packs/`: published product-oriented reference pack walkthroughs
+- `modules/`: reusable installable contract/protocol units
+- `solutions/`: complete application and operator workflow patterns
 - `.meta/`: internal architecture and backlog notes for this repo
 - `.vitepress/`: site theme and build configuration
 
