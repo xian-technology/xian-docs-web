@@ -19,7 +19,40 @@ real runtime path with:
 - logging, readonly simulation under load, intentional BDS catch-up, and
   dedicated parallel-execution validation
 
-## Canonical Command
+## Which 5-Node Flow To Use
+
+There are several 5-node paths, and they are intentionally not the same thing.
+
+| Flow | Command | Purpose |
+|------|---------|---------|
+| Clean 5-node localnet | `LOCALNET_NODES=5 make localnet-init && make localnet-up` | Starts a disposable 5-node network without running the full validation program. |
+| Layered 5-validator e2e | `make localnet-e2e` | Runs the broad whole-stack validation harness on the normal configured execution path. |
+| VM-native layered e2e | `make localnet-vm-e2e` | Runs the same layered harness with `xian_vm_v1`, `xvm-1`, `xvm-gas-1`, and native authority. |
+| Validator/governance localnet | `make localnet-validator-governance` | Runs the focused validator, delegation, governance, evidence, slashing, and leave/rebalance validation program. |
+| Release safety gate | `make release-safety` | Runs the release-grade stack gate: sibling repo validation, VM-native e2e, VM rollout report, and validator/governance localnet. |
+
+```mermaid
+flowchart TD
+  Clean["Clean 5-node localnet"]
+  Layered["make localnet-e2e"]
+  VM["make localnet-vm-e2e"]
+  Report["make localnet-vm-report"]
+  Governance["make localnet-validator-governance"]
+  Release["make release-safety"]
+
+  Clean --> Layered
+  Layered --> VM
+  VM --> Report
+  Report --> Governance
+  VM --> Release
+  Governance --> Release
+```
+
+Use the clean 5-node localnet when you only need a running network to inspect,
+debug, or attach tooling. Use the e2e and release-safety targets when you need
+evidence that the stack still works across real validators and live services.
+
+## Layered E2E Command
 
 From `xian-stack`:
 
@@ -45,6 +78,33 @@ The runner writes:
 - `summary.json`
 - one JSON file per phase
 - a copy of the generated `network.json`
+
+## Release Safety Command
+
+Use the release safety gate before tagging or when a change touches execution,
+networking, genesis, validator behavior, governance, or localnet plumbing:
+
+```bash
+make release-safety
+```
+
+That target runs:
+
+1. `xian-contracting` release validation
+2. `xian-abci` release validation
+3. `xian-stack` validation
+4. `make localnet-vm-e2e`
+5. `make localnet-vm-report`
+6. `make localnet-validator-governance` after resetting the localnet
+
+Useful options:
+
+```bash
+./scripts/release-safety.sh --skip-repo-validation
+./scripts/release-safety.sh --skip-validator-governance
+./scripts/release-safety.sh --skip-vm-report
+./scripts/release-safety.sh --keep-localnet
+```
 
 ## What The Runner Does
 

@@ -110,8 +110,8 @@ deterministic validator path.
 - [xian-dex-automation](/tools/xian-dex-automation): optional deterministic
   DEX event automation sidecar for stack-managed nodes
 - [5-Validator Localnet E2E](/node/localnet-e2e): the canonical whole-stack local
-  validation run across validators, BDS, governance, DEX, logging, and
-  shielded-note flows
+  validation run across validators, BDS, governance, DEX, logging,
+  shielded-note flows, VM-native validation, and `make release-safety`
 - [Protocol Governance & State Patches](/node/protocol-governance): the
   first-class forward patching model, local bundle directory, and emergency
   boundary
