@@ -11,6 +11,18 @@ for the entire Xian stack. When public behavior changes anywhere in the
 workspace, the docs change in the same change set (see the docs-impact
 gate in `xian-meta/docs/CHANGE_WORKFLOW.md`).
 
+## Content Shape
+
+```mermaid
+flowchart LR
+  Changes["Public behavior changes"] --> DocsGate["Docs impact gate"]
+  DocsGate --> Content["Published content tree"]
+  Content --> VitePress["VitePress build"]
+  VitePress --> Site["Public docs site"]
+  Internal[".meta internal notes"] -. hidden .-> VitePress
+  Repos["Xian implementation repos"] --> Changes
+```
+
 ## Quick Start
 
 ```bash
