@@ -96,7 +96,7 @@ export default defineConfig({
         {
           text: 'Storage',
           items: [
-            { text: 'Overview', link: '/smart-contracts/storage/' },
+            { text: 'Overview', link: '/smart-contracts/storage' },
             { text: 'Variables', link: '/smart-contracts/storage/variables' },
             { text: 'Hashes & Multihashes', link: '/smart-contracts/storage/hashes' },
             { text: 'Foreign Variables & Hashes', link: '/smart-contracts/storage/foreign' },

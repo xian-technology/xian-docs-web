@@ -58,7 +58,7 @@ def transfer(to: str, amount: float):
 - [Context Variables](/smart-contracts/context)
 - [Events](/smart-contracts/events)
 - [Valid Code & Restrictions](/smart-contracts/valid-code)
-- [Storage](/smart-contracts/storage/)
+- [Storage](/smart-contracts/storage)
 - [Standard Library](/smart-contracts/stdlib/)
 - [Imports & Interfaces](/smart-contracts/imports/)
 - [Contract Standards](/smart-contracts/standards/)
