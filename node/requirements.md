@@ -19,11 +19,11 @@ Current package floors:
 
 | Repo | Python |
 |------|--------|
-| `xian-cli` | `>=3.12` |
-| `xian-abci` | `>=3.12` |
-| `xian-contracting` | `>=3.12` |
-| `xian-linter` | `>=3.12` |
-| `xian-py` | `>=3.11` |
+| `xian-cli` | `>=3.14` |
+| `xian-abci` | `>=3.14` |
+| `xian-contracting` | `>=3.14` |
+| `xian-linter` | `>=3.14` |
+| `xian-py` | `>=3.14` |
 
 ## Runtime Notes by Platform
 

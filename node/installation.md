@@ -32,9 +32,8 @@ The command and import surfaces remain the same, for example `xian`,
 - macOS or Linux
 - Docker with `docker compose`
 - `uv`
-- Python 3.12+ for `xian-cli`, `xian-abci`, `xian-contracting`, and
-  `xian-linter`
-- Python 3.11+ for `xian-py`
+- Python 3.14 for `xian-cli`, `xian-abci`, `xian-contracting`,
+  `xian-linter`, and `xian-py`
 
 ## Bootstrap the Workspace
 

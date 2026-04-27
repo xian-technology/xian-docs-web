@@ -6,7 +6,7 @@ Choose the smallest setup that matches what you want to do.
 
 If you want to write and test contracts locally without running a node:
 
-- use Python `3.12+`
+- use Python `3.14+`
 - install `xian-tech-contracting`
 - work with `ContractingClient`
 
@@ -29,7 +29,7 @@ If you want to work on nodes, localnet, canonical manifests, or cross-repo
 runtime behavior:
 
 - use the sibling-workspace layout
-- use Python `3.12+`
+- use Python `3.14+`
 - install `uv`
 - install Docker with Compose
 
