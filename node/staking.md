@@ -260,12 +260,15 @@ runtime.
 Vote semantics:
 
 - only active validators can propose
+- only active validators with snapshotted voting weight can vote
 - the proposer automatically records the first `yes`
 - required approvals are snapshotted at proposal creation
 - the current bundled policy stores both a 4/5 count threshold and a 4/5
   weight threshold
 - approval is reached when `yes_weight` reaches the required weight threshold
 - vote count still participates in reporting and early-rejection logic
+- delegators do not vote directly; in `stake_weighted` networks, delegated
+  stake can indirectly increase the active validator's future voting weight
 - proposals expire after 7 days if still pending
 
 In non-manual selection modes:

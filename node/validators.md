@@ -212,6 +212,10 @@ On current bundled networks, validator voting weight comes from active
 Validator-governance proposals emit lifecycle events for submission, votes,
 approval, rejection, and expiry.
 
+Validators can use the [Governance Web Console](/node/governance-web) to view
+open proposals, connect the browser wallet, vote, and inspect per-validator
+vote records.
+
 ## Manual Overrides In Non-Manual Modes
 
 When the network is not in `manual` mode:

@@ -115,6 +115,8 @@ deterministic validator path.
 - [Protocol Governance & State Patches](/node/protocol-governance): the
   first-class forward patching model, local bundle directory, and emergency
   boundary
+- [Governance Web Console](/node/governance-web): validator-facing proposal,
+  voting, vote audit, and state-patch hash verification UI
 - [Recovery Plans](/node/recovery-plans): the guided operator rollback /
   restore workflow when forward patching is not enough
 - [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`

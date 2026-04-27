@@ -189,6 +189,7 @@ export default defineConfig({
             { text: 'Local DEX Bootstrap', link: '/node/local-dex-bootstrap' },
             { text: '5-Validator Localnet E2E', link: '/node/localnet-e2e' },
             { text: 'Protocol Governance & State Patches', link: '/node/protocol-governance' },
+            { text: 'Governance Web Console', link: '/node/governance-web' },
             { text: 'Recovery Plans', link: '/node/recovery-plans' },
             { text: 'Node Profiles', link: '/node/profiles' },
             { text: 'Starting, Stopping & Monitoring', link: '/node/managing' },
