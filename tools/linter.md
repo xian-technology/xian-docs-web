@@ -5,7 +5,9 @@ Xian has two related linting surfaces:
 - the core contract linter in `xian-contracting`
 - the optional standalone `xian-linter` HTTP service
 
-Both ultimately enforce the same contract-language rules.
+Both ultimately enforce the same contract-language rules. The standalone
+package can also run an optional `xian_vm_v1` validation mode for tooling that
+wants to check that a contract lowers to Xian VM IR before deployment.
 
 The published PyPI package name for the standalone service is
 `xian-tech-linter`. The import package and console command remain
@@ -54,6 +56,14 @@ pip install xian-tech-linter
 pip install "xian-tech-linter[server]"
 ```
 
+Install the VM extra when you want native Xian VM IR validation as part of
+`xian_vm_v1` mode:
+
+```bash
+pip install "xian-tech-linter[vm]"
+pip install "xian-tech-linter[server,vm]"
+```
+
 Start the service:
 
 ```bash
@@ -84,10 +94,40 @@ when a controlled integration needs to allow additional PyFlakes names:
 POST /lint?whitelist_patterns=my_helper,con_*
 ```
 
+All endpoints use the default source-linting mode unless a mode is selected:
+
+```text
+POST /lint?mode=xian_vm_v1
+```
+
+The alias `lint_mode=xian_vm_v1` is also accepted for integrations that already
+use `mode` for their own routing.
+
+## Lint Modes
+
+The standalone package supports two modes:
+
+| Mode | What it checks |
+|------|----------------|
+| `python` | default source linting with the shared `xian-contracting` rules plus PyFlakes warnings |
+| `xian_vm_v1` | source linting, VM-profile compatibility, Xian VM IR lowering, and native IR validation when `xian_vm_core` is installed |
+
+The VM mode is still linting only. It does not execute the contract or simulate
+storage, imports, environment values, or host syscalls. Use runtime tests or
+node preflight flows for execution behavior.
+
+Inline usage:
+
+```python
+from xian_linter import lint_code_sync
+
+errors = lint_code_sync(source, mode="xian_vm_v1")
+```
+
 ### Raw Source Example
 
 ```bash
-curl -X POST http://localhost:8000/lint \
+curl -X POST "http://localhost:8000/lint?mode=xian_vm_v1" \
   -H "Content-Type: text/plain" \
   --data-binary $'import os\n\n@export\ndef hack():\n    os.system("rm -rf /")'
 ```
@@ -132,7 +172,9 @@ The HTTP service returns:
 ```
 
 `xian-linter` may also include PyFlakes warnings with code `W001`. Processing
-errors from the wrapper itself are returned as `E000`.
+errors from the wrapper itself are returned as `E000`. In `xian_vm_v1` mode,
+IR lowering failures are returned as `XVM001`; native VM IR validation failures
+are returned as `XVM002`.
 
 ## Error Codes
 
@@ -163,6 +205,8 @@ errors from the wrapper itself are returned as `E000`.
 | `E022` | syntax not supported by the active validation profile |
 | `E023` | builtin not supported by the active validation profile |
 | `W001` | PyFlakes warning from the standalone service |
+| `XVM001` | Xian VM IR lowering failed |
+| `XVM002` | native Xian VM IR validation failed |
 
 See [Valid Code & Restrictions](/smart-contracts/valid-code) for the current
 language surface.

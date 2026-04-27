@@ -82,4 +82,4 @@ sidebar entries, and VitePress build errors all surface here.
   - `.meta/ARCHITECTURE.md`
   - `.meta/BACKLOG.md`
   - `.meta/GOLDEN_PATH_IMPLEMENTATION_LOG.md`
-- [`../xian-meta/docs/CHANGE_WORKFLOW.md`](../xian-meta/docs/CHANGE_WORKFLOW.md) — docs-impact gate that drives updates here
+- `../xian-meta/docs/CHANGE_WORKFLOW.md` — docs-impact gate that drives updates here
