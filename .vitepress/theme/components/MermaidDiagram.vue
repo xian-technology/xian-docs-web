@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   code: string
@@ -10,23 +10,71 @@ const svg = ref('')
 const error = ref('')
 const scale = ref(1)
 const expanded = ref(false)
+const viewport = ref<HTMLElement | null>(null)
+const intrinsicWidth = ref(0)
 let renderGeneration = 0
+const minimumDiagramWidth = 520
 
 const diagramStyle = computed(() => ({
   width: `${scale.value * 100}%`,
-  minWidth: `${Math.round(520 * scale.value)}px`
+  maxWidth: intrinsicWidth.value ? `${intrinsicWidth.value * scale.value}px` : undefined,
+  minWidth: `${Math.round(Math.min(intrinsicWidth.value || minimumDiagramWidth, minimumDiagramWidth) * scale.value)}px`
 }))
 
+function extractIntrinsicWidth(svgMarkup: string) {
+  const viewBox = svgMarkup.match(/\bviewBox=["']\s*[-\d.]+\s+[-\d.]+\s+([\d.]+)/i)
+  return viewBox ? Number(viewBox[1]) : 0
+}
+
+function captureViewportCenter() {
+  const currentViewport = viewport.value
+  if (!currentViewport) {
+    return null
+  }
+
+  return {
+    x: (currentViewport.scrollLeft + currentViewport.clientWidth / 2) / Math.max(currentViewport.scrollWidth, 1),
+    y: (currentViewport.scrollTop + currentViewport.clientHeight / 2) / Math.max(currentViewport.scrollHeight, 1)
+  }
+}
+
+async function restoreViewportCenter(center: { x: number; y: number } | null = { x: 0.5, y: 0.5 }) {
+  await nextTick()
+
+  const currentViewport = viewport.value
+  if (!currentViewport || !center) {
+    return
+  }
+
+  const maxLeft = Math.max(currentViewport.scrollWidth - currentViewport.clientWidth, 0)
+  const maxTop = Math.max(currentViewport.scrollHeight - currentViewport.clientHeight, 0)
+
+  currentViewport.scrollLeft = Math.min(
+    maxLeft,
+    Math.max(0, center.x * currentViewport.scrollWidth - currentViewport.clientWidth / 2)
+  )
+  currentViewport.scrollTop = Math.min(
+    maxTop,
+    Math.max(0, center.y * currentViewport.scrollHeight - currentViewport.clientHeight / 2)
+  )
+}
+
+function setScale(nextScale: number) {
+  const center = captureViewportCenter()
+  scale.value = nextScale
+  void restoreViewportCenter(center)
+}
+
 function zoomOut() {
-  scale.value = Math.max(0.75, Number((scale.value - 0.25).toFixed(2)))
+  setScale(Math.max(0.75, Number((scale.value - 0.25).toFixed(2))))
 }
 
 function zoomIn() {
-  scale.value = Math.min(2.5, Number((scale.value + 0.25).toFixed(2)))
+  setScale(Math.min(2.5, Number((scale.value + 0.25).toFixed(2))))
 }
 
 function resetZoom() {
-  scale.value = 1
+  setScale(1)
 }
 
 function closeExpanded() {
@@ -73,10 +121,13 @@ async function renderDiagram() {
     const id = `mermaid-${generation}-${Math.random().toString(36).slice(2)}`
     const rendered = await mermaid.render(id, source.value)
     if (generation === renderGeneration) {
+      intrinsicWidth.value = extractIntrinsicWidth(rendered.svg)
       svg.value = rendered.svg
+      void restoreViewportCenter()
     }
   } catch (err) {
     if (generation === renderGeneration) {
+      intrinsicWidth.value = 0
       error.value = err instanceof Error ? err.message : String(err)
     }
   }
@@ -90,6 +141,9 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 watch(source, renderDiagram)
+watch(expanded, () => {
+  void restoreViewportCenter()
+})
 </script>
 
 <template>
@@ -113,7 +167,7 @@ watch(source, renderDiagram)
         Fullscreen
       </button>
     </div>
-    <div v-if="svg && !expanded" class="mermaid-diagram__viewport">
+    <div v-if="svg && !expanded" ref="viewport" class="mermaid-diagram__viewport">
       <div class="mermaid-diagram__svg" :style="diagramStyle" v-html="svg"></div>
     </div>
     <pre v-else-if="error" class="mermaid-diagram__error">{{ error }}</pre>
@@ -134,7 +188,7 @@ watch(source, renderDiagram)
               Close
             </button>
           </div>
-          <div class="mermaid-diagram__viewport mermaid-diagram__viewport--overlay">
+          <div ref="viewport" class="mermaid-diagram__viewport mermaid-diagram__viewport--overlay">
             <div class="mermaid-diagram__svg" :style="diagramStyle" v-html="svg"></div>
           </div>
         </div>

@@ -158,12 +158,14 @@
 }
 
 .mermaid-diagram__svg {
+  margin: 0 auto;
   min-width: 640px;
 }
 
 .mermaid-diagram__svg svg {
   display: block;
-  max-width: 100%;
+  width: 100%;
+  max-width: none !important;
   height: auto;
   margin: 0 auto;
 }
