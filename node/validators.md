@@ -202,10 +202,15 @@ Current vote behavior:
 - approval is reached when snapshotted `yes_weight` reaches the required
   weight threshold
 - snapshotted vote count still matters for reporting and early-rejection logic
+- each validator's recorded `yes` / `no` choice is stored per proposal for
+  audit views and governance dashboards
 - proposals expire after 7 days if still pending
 
 On current bundled networks, validator voting weight comes from active
 `validator_power`, not just one-validator-one-vote.
+
+Validator-governance proposals emit lifecycle events for submission, votes,
+approval, rejection, and expiry.
 
 ## Manual Overrides In Non-Manual Modes
 
