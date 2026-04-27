@@ -64,8 +64,6 @@ Important current rules:
 - `xian_vm_v1` requires `bytecode_version`
 - `xian_vm_v1` requires `gas_schedule`
 - `authority` must be `native`
-- the older `shadow_tracer_mode` rollout field is not part of the current
-  supported config surface
 
 The high-level `xian-cli` profile flow currently exposes tracer selection and
 other runtime posture, but the full VM execution policy is still a lower-level
@@ -230,11 +228,6 @@ Important examples:
 - `XIAN_APP_METRICS_PORT`
 - `XIAN_PERF_ENABLED`
 - `XIAN_PERF_RECENT_BLOCKS`
-
-The older `XIAN_LOCALNET_EXECUTION_SHADOW_TRACER_MODE` compatibility input may
-still appear in some stack paths, but any non-empty value is rejected by the
-current `xian-abci` branch and should not be used as a supported runtime
-setting.
 
 Use those primarily for localnet, stack debugging, or deliberate Docker-side
 overrides. For normal operator workflows, prefer manifests, profiles, and the

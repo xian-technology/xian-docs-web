@@ -51,7 +51,8 @@ From `xian-stack`:
 
 ```bash
 make localnet-init
-make localnet-up-with-dex
+make localnet-up
+make localnet-dex-bootstrap
 ```
 
 Equivalent manual flow:

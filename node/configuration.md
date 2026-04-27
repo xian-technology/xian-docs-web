@@ -139,8 +139,6 @@ On the current supported branch:
 - `bytecode_version` is required for `xian_vm_v1`
 - `gas_schedule` is required for `xian_vm_v1`
 - `authority` must be `native`
-- the older `shadow_tracer_mode` rollout field is not part of the current
-  supported config surface
 
 ### `[xian.bds]`
 

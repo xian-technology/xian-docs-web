@@ -51,8 +51,9 @@ cd ~/xian/xian-cli
 uv run xian module install dex --recipe local-demo --stack-dir ../xian-stack
 ```
 
-The older `make localnet-up-with-dex` target remains as a compatibility alias,
-but new automation should prefer `xian module install dex ...`.
+For scripted setups, start the localnet first and then run
+`make localnet-dex-bootstrap`, or use `xian module install dex ...` when the DEX
+module should be installed through the CLI module flow.
 
 ## Development Overrides
 
@@ -67,4 +68,3 @@ Use raw source only for active DEX development:
 ```bash
 XIAN_DEX_CONTRACTS_DIR=../xian-dex/src make localnet-dex-bootstrap
 ```
-

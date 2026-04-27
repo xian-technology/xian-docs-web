@@ -242,9 +242,8 @@ The important rule is that `quote` returns the exact relayer account, chain id,
 fee, and expiry that the proof must bind. The relayer service then submits the
 matching on-chain call through the normal `xian-py` transaction path.
 
-Networks can now advertise one or more relayers in their manifest. The
-canonical field is `shielded_relayers`, while the older single-entry
-`shielded_relayer` field is still readable for compatibility.
+Networks advertise one or more relayers in their manifest with the
+`shielded_relayers` field.
 
 The canonical network manifests can also carry three privacy-specific policy
 surfaces alongside those relayer endpoints:

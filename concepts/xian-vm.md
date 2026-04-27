@@ -86,8 +86,6 @@ On the current supported branch:
 - `xian_vm_v1` requires `bytecode_version`
 - `xian_vm_v1` requires `gas_schedule`
 - `authority` must be `native`
-- the older `shadow_tracer_mode` rollout field is not part of the current
-  supported config surface
 
 This makes the execution contract explicit instead of hiding it behind one
 tracer string.
