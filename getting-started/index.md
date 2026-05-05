@@ -11,7 +11,7 @@ If you want to write and test contracts locally without running a node:
 - work with `ContractingClient`
 
 ```bash
-python -m pip install xian-tech-contracting
+uv add xian-tech-contracting
 ```
 
 This gives you:

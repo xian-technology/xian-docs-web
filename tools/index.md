@@ -39,25 +39,25 @@ npm install @xian-tech/client @xian-tech/provider
 Python application SDK:
 
 ```bash
-python -m pip install xian-tech-py
+uv add xian-tech-py
 ```
 
 CLI automation and operator tooling:
 
 ```bash
-python -m pip install xian-tech-cli
+uv tool install xian-tech-cli
 ```
 
 Local contract runtime and testing:
 
 ```bash
-python -m pip install xian-tech-contracting
+uv add xian-tech-contracting
 ```
 
 Shielded proving toolkit:
 
 ```bash
-python -m pip install xian-tech-zk
+uv add xian-tech-zk
 ```
 
 ## How To Choose

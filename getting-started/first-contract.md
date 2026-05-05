@@ -5,7 +5,7 @@ This guide walks you through writing, testing, and understanding a Xian smart co
 ## Step 1: Install xian-contracting
 
 ```bash
-pip install xian-tech-contracting
+uv add xian-tech-contracting
 ```
 
 The published PyPI package name is `xian-tech-contracting`. The import surface

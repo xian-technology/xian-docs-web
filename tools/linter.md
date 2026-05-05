@@ -52,16 +52,16 @@ Install the base package for inline use, or the server extra for the HTTP
 service:
 
 ```bash
-pip install xian-tech-linter
-pip install "xian-tech-linter[server]"
+uv add xian-tech-linter
+uv add "xian-tech-linter[server]"
 ```
 
 Install the VM extra when you want native Xian VM IR validation as part of
 `xian_vm_v1` mode:
 
 ```bash
-pip install "xian-tech-linter[vm]"
-pip install "xian-tech-linter[server,vm]"
+uv add "xian-tech-linter[vm]"
+uv add "xian-tech-linter[server,vm]"
 ```
 
 Start the service:

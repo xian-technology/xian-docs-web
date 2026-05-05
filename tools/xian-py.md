@@ -12,7 +12,7 @@ wraps the same SDK model for command-line usage.
 Base install:
 
 ```bash
-pip install xian-tech-py
+uv add xian-tech-py
 ```
 
 The published PyPI package name is `xian-tech-py`. The import package remains
@@ -21,8 +21,8 @@ The published PyPI package name is `xian-tech-py`. The import package remains
 Optional extras:
 
 ```bash
-pip install "xian-tech-py[hd]"   # mnemonic / HD wallet support
-pip install "xian-tech-py[eth]"  # Ethereum wallet helpers
+uv add "xian-tech-py[hd]"   # mnemonic / HD wallet support
+uv add "xian-tech-py[eth]"  # Ethereum wallet helpers
 ```
 
 ## Public API

@@ -94,7 +94,7 @@ If you only want to write and test contracts and do not need the full
 workspace, a smaller setup is enough:
 
 ```bash
-python -m pip install xian-tech-contracting
+uv add xian-tech-contracting
 ```
 
 Then start with [Your First Smart Contract](/getting-started/first-contract).

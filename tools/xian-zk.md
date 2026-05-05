@@ -17,7 +17,7 @@ consensus path. `xian-zk` is also the off-chain package for:
 ## Installation
 
 ```bash
-pip install xian-tech-zk
+uv add xian-tech-zk
 ```
 
 The published PyPI package name is `xian-tech-zk`. The import package remains

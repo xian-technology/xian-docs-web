@@ -44,7 +44,7 @@ Use it for:
 ## Installation
 
 ```bash
-python -m pip install xian-tech-contracting
+uv add xian-tech-contracting
 ```
 
 This installs the local contract runtime, linter, and testing client.

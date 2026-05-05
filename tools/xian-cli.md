@@ -20,13 +20,6 @@ uv tool install xian-tech-cli
 xian --help
 ```
 
-Alternative installs:
-
-```bash
-pipx install xian-tech-cli
-python -m pip install xian-tech-cli
-```
-
 The installed command is `xian`.
 
 ## Command Layout
