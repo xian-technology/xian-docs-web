@@ -32,8 +32,7 @@ deterministic application through the ABCI contract.
 - application snapshot export/import
 - optional dashboard HTTP and WebSocket services
 
-It also wires the execution runtime, whether that runtime is tracer-backed
-Python or `xian_vm_v1`.
+It also wires the fixed `xian_vm_v1` execution runtime.
 
 ## Transaction Path Across The Boundary
 
@@ -54,7 +53,7 @@ flowchart TD
   Check["xian-abci CHECK_TX validation"]
   Block["CometBFT ordered block"]
   Execute["xian-abci FINALIZE_BLOCK execution"]
-  Runtime["xian-contracting or xian_vm_v1 runtime"]
+  Runtime["xian_vm_v1 runtime"]
   Commit["State commit and app_hash"]
   Finality["CometBFT finalizes height"]
 

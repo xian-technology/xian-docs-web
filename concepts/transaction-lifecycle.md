@@ -117,11 +117,10 @@ Per transaction, the execution flow is:
 
 1. **Sandbox setup** -- the contract runtime initializes with the sender's context (`ctx.caller`, `ctx.signer`)
 2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs
-3. **Metering** -- the selected execution policy charges compute units through
-   tracer-backed Python execution or the native VM gas schedule
+3. **Metering** -- the VM runtime charges compute units through the fixed gas
+   schedule
 4. **Storage operations** -- reads and writes are charged per byte according to
-   the selected execution policy; tracer-backed execution uses 1 meter unit per
-   byte read and 25 meter units per byte written, while VM-native execution
+   the fixed execution policy; VM-native execution
    charges storage through the VM host-operation schedule
 5. **Block time injection** -- all transactions in the block observe the same
    consensus timestamp as `now`

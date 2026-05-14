@@ -39,9 +39,9 @@ A key-value mapping that persists on-chain. Supports up to 16 key dimensions. De
 ## M
 
 ### Metering
-The system that charges contract execution work. Xian supports tracer-backed
-Python execution and a native VM gas schedule. Both prevent infinite loops and
-ensure deterministic chi accounting.
+The system that charges contract execution work. Xian uses the native
+`xian_vm_v1` gas schedule to prevent infinite loops and ensure deterministic
+chi accounting.
 
 ## N
 

@@ -14,7 +14,7 @@ Create your test file:
 
 ```python
 import unittest
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 class TestMyContract(unittest.TestCase):
     def setUp(self):
@@ -97,12 +97,12 @@ writing into a separate temporary driver.
 
 ## Getting a Contract Handle
 
-### get_contract()
+### get_contract_proxy()
 
 Returns a contract object you can call functions on:
 
 ```python
-contract = client.get_contract("con_my_token")
+contract = client.get_contract_proxy("con_my_token")
 ```
 
 Call exported functions directly on the handle:
@@ -178,7 +178,7 @@ A full unittest file testing a token contract:
 
 ```python
 import unittest
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 
 def token_contract():
@@ -223,7 +223,7 @@ class TestToken(unittest.TestCase):
         self.client = ContractingClient()
         self.client.flush()
         self.client.submit(token_contract, name="con_token")
-        self.token = self.client.get_contract("con_token")
+        self.token = self.client.get_contract_proxy("con_token")
 
     def tearDown(self):
         self.client.flush()

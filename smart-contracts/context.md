@@ -62,7 +62,10 @@ def get():
     return value.get()
 """
 
-    submission.submit_contract(name=name, code=code)
+    submission.submit_contract(
+        name=name,
+        deployment_artifacts=deployment_artifacts,
+    )
 ```
 
 If `con_factory.deploy("con_child")` is called by signer `alice`, then inside

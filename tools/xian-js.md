@@ -252,8 +252,8 @@ await client.getBalance(address);
 await client.getTokenMetadata("currency");
 await client.getTokenBalances(address, { limit: 100, includeZero: false });
 await client.getChiRate();
-await client.getContract("currency");
-await client.getContractCode("currency");
+await client.getContractSource("currency");
+await client.getContractIr("currency");
 await client.getContractMethods("currency");
 await client.getShieldedWalletHistory(tagValue, { afterNoteIndex: 0 });
 ```

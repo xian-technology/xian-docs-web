@@ -17,8 +17,7 @@ That distinction matters:
 - authors write Python-like contracts
 - the linter and compiler enforce the Xian subset
 - the runtime executes that subset deterministically
-- a network may use a tracer-backed Python engine or `xian_vm_v1` under the
-  hood
+- the network executes contracts through the fixed `xian_vm_v1` runtime
 
 So "Python contracts" in Xian means Python-authored, Xian-defined contract
 programs.
@@ -92,12 +91,8 @@ Instead, Xian provides deterministic replacements and host-controlled context:
 One of the big advantages of the Xian design is that Python authorship and
 runtime execution are separate concerns.
 
-Today the same contract language can map to:
-
-- tracer-backed Python execution, where validators align on tracer mode and
-  CPython minor version
-- `xian_vm_v1`, where validators align on a native runtime plus explicit
-  `bytecode_version` and `gas_schedule`
+Today that language maps to `xian_vm_v1`, where validators align on a native
+runtime and deployment artifacts.
 
 That gives Xian a path to more native execution and more stable machine-level
 semantics without forcing developers to abandon the authoring language.
@@ -120,7 +115,7 @@ Python source is chosen for readability and adoption. Performance comes from:
 - deterministic metering
 - explicit host operations
 - careful storage accounting
-- native components such as the tracer, verifier, and Xian VM runtime
+- native components such as the verifier and Xian VM runtime
 
 The point is not to pretend Python is magically as fast as low-level systems
 languages. The point is to keep contract authorship simple while letting the

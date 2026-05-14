@@ -13,13 +13,11 @@ There are always two distinct questions in Xian:
 Developers write a restricted Python subset. The network then chooses an
 execution engine for that authored contract.
 
-## Current Execution Modes
+## Current Execution Mode
 
-| Mode | What executes | When it is useful |
-|------|----------------|-------------------|
-| `python_line_v1` | restricted Python with line-bucket metering | simple development setups and conservative tracer-backed execution |
-| `native_instruction_v1` | restricted Python with native instruction metering | production-style tracer-backed execution |
-| `xian_vm_v1` | validated Xian VM artifacts under a native runtime | stable Xian-owned machine semantics and VM-native metering |
+| Mode | What executes |
+|------|----------------|
+| `xian_vm_v1` | validated Xian VM artifacts under a native runtime |
 
 The contract language stays the same. What changes is the runtime beneath it.
 
@@ -32,7 +30,6 @@ The important stored artifacts are:
 - `__source__`: canonical human-facing source used by explorers, dashboards,
   and inspection tooling
 - `__xian_ir_v1__`: the persisted Xian VM IR used by the native runtime
-- optional runtime-code compatibility fields for tracer-backed/tooling paths
 
 Client and runtime tooling build and validate `deployment_artifacts`, which
 include:
@@ -71,24 +68,20 @@ flowchart TD
 
 ## Execution Policy
 
-VM-native execution is selected through the explicit execution-engine policy:
+VM-native execution is the fixed node execution runtime:
 
 ```toml
 [xian.execution.engine]
 mode = "xian_vm_v1"
-bytecode_version = "xvm-1"
-gas_schedule = "xvm-gas-1"
-authority = "native"
 ```
 
 On the current supported branch:
 
-- `xian_vm_v1` requires `bytecode_version`
-- `xian_vm_v1` requires `gas_schedule`
-- `authority` must be `native`
+- `xian_vm_v1` is the only supported node runtime
+- bytecode, gas schedule, and authority are internal VM constants
+- submitted contracts must provide deployment artifacts
 
-This makes the execution contract explicit instead of hiding it behind one
-tracer string.
+This keeps the execution contract explicit without exposing alternate engines.
 
 ## What The Native Runtime Does
 

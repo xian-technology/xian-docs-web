@@ -15,13 +15,13 @@ exercise contract interactions without running a full node.
 - support for multi-contract tests, events, and return-value inspection
 
 ```python
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 client = ContractingClient()
 client.flush()
 
 client.submit(my_contract_func, name="con_example")
-contract = client.get_contract("con_example")
+contract = client.get_contract_proxy("con_example")
 result = contract.some_function()
 ```
 

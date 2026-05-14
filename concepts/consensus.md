@@ -43,6 +43,5 @@ validators must stay aligned on:
 - the selected execution engine and its policy
 - the supported runtime for that engine
 
-For tracer-backed networks, that includes the aligned CPython minor version and
-tracer mode. For `xian_vm_v1`, that includes the native runtime plus the same
-`bytecode_version`, `gas_schedule`, and authority settings.
+For `xian_vm_v1`, that includes the native runtime and the same deployment
+artifacts for submitted contracts.

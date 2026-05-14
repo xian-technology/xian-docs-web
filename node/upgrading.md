@@ -53,16 +53,11 @@ Always keep aligned:
   them
 - the execution engine selected by the network
 
-For tracer-backed networks, also keep aligned:
+For `xian_vm_v1`, keep aligned:
 
-- tracer mode
-- supported CPython minor version
-
-For `xian_vm_v1`, also keep aligned:
-
-- native runtime support for the selected `bytecode_version`
-- native runtime support for the selected `gas_schedule`
-- native authority posture
+- `xian-abci` and `xian-contracting`
+- native VM runtime support
+- deployment artifacts for submitted contracts
 
 ## Preflight Checks
 
@@ -73,8 +68,7 @@ Before upgrading a validator fleet, use the maintained safety nets:
 - `make smoke-cli`
 - localnet runs when the change touches execution, networking, or rollout logic
 
-If the target network uses VM-native execution, validate the VM path rather than
-assuming tracer-backed behavior is enough.
+Validate the VM path whenever a change touches execution behavior.
 
 ## Config And State Safety
 

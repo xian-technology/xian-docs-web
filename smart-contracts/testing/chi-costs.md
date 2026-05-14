@@ -9,24 +9,22 @@ how many chi your contract functions consume.
 Pass `metering=True` when constructing `ContractingClient`:
 
 ```python
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 client = ContractingClient(metering=True)
 ```
 
 With metering enabled, contract calls use the same tracer mode that the runtime
-would use on-chain. On the default pure-Python backend that means deterministic
-line buckets; on the native backend it means exact instruction metering.
+would use on-chain.
 
-This local testing path is primarily a tracer-backed measurement tool. VM-native
-networks still use the same chi budget concept, but `xian_vm_v1` meters through
-its VM gas schedule rather than the Python tracer callbacks described here.
+`xian_vm_v1` meters through its VM gas schedule. Simulation remains the best
+way to estimate final receipt values before submitting a transaction.
 
 ## How Chi Are Calculated
 
-The tracer-backed chi cost of a transaction has these components:
+The chi cost of a transaction has these components:
 
-1. **Compute costs** -- each Python opcode has a cost (2-1610 compute units)
+1. **Compute costs** -- the VM gas schedule charges host operations and execution
 2. **Read costs** -- 1 meter unit per byte of key + value read from storage
 3. **Write costs** -- 25 meter units per byte of key + value written to storage
 4. **Payload costs** -- submitted transaction bytes and returned value bytes are metered
@@ -43,26 +41,24 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `READ_COST_PER_BYTE` | 1 | tracer meter unit per byte for storage reads |
-| `WRITE_COST_PER_BYTE` | 25 | tracer meter units per byte for storage writes |
+| `READ_COST_PER_BYTE` | 1 | legacy storage-read meter unit per byte |
+| `WRITE_COST_PER_BYTE` | 25 | storage-write meter units per byte |
 | `CHI_PER_T` | 20 | How many chi one XIAN buys. `T` stands for the native token. |
 | Runtime raw safety ceiling | 50,000,000,000 raw units | overflow guard before the submitted chi budget cap |
-| Max line events (`python_line_v1`) | 800,000 | Maximum line callbacks per transaction |
-| Max instruction events (`native_instruction_v1`) | 3,250,000 | Maximum native instruction callbacks per transaction |
 | Max write data | 128 KiB | Maximum write data per transaction |
 | Max return value | 128 KiB | Maximum serialized return payload |
 
-For `xian_vm_v1`, storage and payload accounting still matter, but compute is
-charged through the VM-native gas schedule instead of these tracer-event limits.
-The current VM host-operation schedule has its own read charge and shares the
-same `25` units-per-byte write cost.
+For `xian_vm_v1`, storage and payload accounting still matter, and compute is
+charged through the VM-native gas schedule. The current VM host-operation
+schedule has its own read charge and shares the same `25` units-per-byte write
+cost.
 
 ## Checking Chi Used
 
 When metering is enabled, you need to set a chi limit for execution. Use the `Executor` class directly for detailed chi analysis:
 
 ```python
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 from contracting.execution.executor import Executor
 
 client = ContractingClient()
@@ -113,7 +109,7 @@ The output dictionary contains:
 
 ```python
 import unittest
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 from contracting.execution.executor import Executor
 
 

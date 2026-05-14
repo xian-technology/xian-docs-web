@@ -101,7 +101,7 @@ Add the test class to the same file:
 
 ```python
 import unittest
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 
 def counter_contract():
@@ -140,7 +140,7 @@ class TestCounter(unittest.TestCase):
         self.client = ContractingClient()
         self.client.flush()
         self.client.submit(counter_contract, name="con_counter")
-        self.counter = self.client.get_contract("con_counter")
+        self.counter = self.client.get_contract_proxy("con_counter")
 
     def tearDown(self):
         self.client.flush()
@@ -236,10 +236,10 @@ self.client.submit(counter_contract, name="con_counter")
 
 Deploys the contract. The function's source code is extracted, linted, compiled, and its constructor is executed.
 
-### get_contract()
+### get_contract_proxy()
 
 ```python
-self.counter = self.client.get_contract("con_counter")
+self.counter = self.client.get_contract_proxy("con_counter")
 ```
 
 Returns a handle that lets you call exported functions directly.

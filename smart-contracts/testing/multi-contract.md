@@ -75,7 +75,7 @@ def dex_contract():
 
 ```python
 import unittest
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 
 class TestDex(unittest.TestCase):
@@ -85,11 +85,11 @@ class TestDex(unittest.TestCase):
 
         # Submit token first (the DEX depends on it)
         self.client.submit(token_contract, name="con_token")
-        self.token = self.client.get_contract("con_token")
+        self.token = self.client.get_contract_proxy("con_token")
 
         # Submit DEX second
         self.client.submit(dex_contract, name="con_dex")
-        self.dex = self.client.get_contract("con_dex")
+        self.dex = self.client.get_contract_proxy("con_dex")
 
     def tearDown(self):
         self.client.flush()
@@ -188,7 +188,7 @@ class TestRegistry(unittest.TestCase):
         self.client.flush()
         self.client.submit(token_contract, name="con_token")
         self.client.submit(registry_contract, name="con_registry")
-        self.registry = self.client.get_contract("con_registry")
+        self.registry = self.client.get_contract_proxy("con_registry")
 
     def test_register_existing_token(self):
         self.registry.register(token_name="con_token")

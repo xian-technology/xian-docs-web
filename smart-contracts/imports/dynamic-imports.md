@@ -54,10 +54,8 @@ contract:
 - `submitted`
 
 `importlib.code_hash(...)` returns the canonical SHA3-256 digest of the stored
-execution artifact by default. On tracer-backed paths that is normally stored
-runtime code. On `xian_vm_v1`, it falls back to the persisted VM IR when no
-runtime-code artifact is present. Pass `kind="source"` to hash canonical source
-instead.
+execution artifact by default. On `xian_vm_v1`, that is the persisted VM IR.
+Pass `kind="source"` to hash canonical source instead.
 
 ## When to Use It
 

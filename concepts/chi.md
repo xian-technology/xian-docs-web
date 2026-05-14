@@ -47,11 +47,8 @@ constant one-for-one.
 
 ### Computation
 
-Xian currently supports three metering backends:
-
-- `python_line_v1`: deterministic source-line buckets
-- `native_instruction_v1`: exact executed Python bytecode instructions
-- `xian_vm_v1`: VM-native gas schedule over VM operations and host calls
+Xian currently meters execution through `xian_vm_v1`, using the VM-native gas
+schedule over VM operations and host calls.
 
 The network chooses the execution engine and metering policy. Applications and
 validators do not get to improvise their own cost model.
@@ -65,8 +62,7 @@ schedule.
 ### Storage Writes
 
 Writing state costs `25` meter units per byte of encoded key plus encoded
-value in both the tracer-backed policy and the current VM host-operation
-schedule.
+value under the current VM host-operation schedule.
 
 Writes are intentionally much more expensive than reads because they expand the
 durable chain state.
@@ -88,8 +84,6 @@ explicit host operations instead of implicit Python work.
 | Limit | Value |
 |------|-------|
 | runtime raw safety ceiling | `50,000,000,000` raw units |
-| maximum Python line events per transaction (`python_line_v1`) | `800,000` |
-| maximum instruction events per transaction (`native_instruction_v1`) | `3,250,000` |
 | maximum write per transaction | `128 KiB` |
 | maximum returned value size | `128 KiB` |
 | maximum submitted contract source | `64 KiB` |

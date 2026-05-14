@@ -102,43 +102,15 @@ From here on, the rendered config is the effective runtime truth.
 This section carries the main Xian runtime toggles, including:
 
 - pruning
-- top-level tracer selection
 - metrics
 - application logging
 - readonly simulation
 - parallel execution
 - local pending-nonce reservation behavior
 
-### `[xian.execution.engine]`
-
-This section carries the explicit execution policy:
-
-```toml
-[xian.execution.engine]
-mode = "python_line_v1"
-bytecode_version = ""
-gas_schedule = ""
-authority = ""
-```
-
-For tracer-backed runtimes, `mode` matches the selected tracer-backed engine
-and the other fields remain empty.
-
-For `xian_vm_v1`, the policy becomes explicit:
-
-```toml
-[xian.execution.engine]
-mode = "xian_vm_v1"
-bytecode_version = "xvm-1"
-gas_schedule = "xvm-gas-1"
-authority = "native"
-```
-
-On the current supported branch:
-
-- `bytecode_version` is required for `xian_vm_v1`
-- `gas_schedule` is required for `xian_vm_v1`
-- `authority` must be `native`
+`xian_vm_v1` is the only supported node runtime. Execution mode, bytecode,
+gas schedule, and authority are internal VM constants, not operator-selectable
+settings.
 
 ### `[xian.bds]`
 

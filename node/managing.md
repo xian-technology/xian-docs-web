@@ -540,7 +540,7 @@ What the dashboard adds without duplicating the main node cards:
 
 Use the node's ABCI query surface for canonical reads:
 
-- raw current-state reads like `/get/...`, `/contract/...`, `/contract_code/...`, and
+- raw current-state reads like `/get/...`, `/contract_source/...`, `/contract_ir/...`, and
   `/simulate_tx/...`
 - BDS-backed indexed/history reads like `/blocks/...`, `/tx/...`,
   `/events/...`, `/state_history/...`, and `/developer_rewards/...` when BDS

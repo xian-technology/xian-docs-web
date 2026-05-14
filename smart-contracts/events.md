@@ -106,7 +106,7 @@ def transfer_from(amount: float, to: str, main_account: str):
 - **Types must be** `str`, `int`, `float`, `bool`, or `decimal` (ContractingDecimal).
 - **At least one parameter** is required per event.
 - **Non-indexed is the default**. Only indexed fields need `indexed(...)` or `idx: True`.
-- **Events cost chi** - both indexed and non-indexed parameters incur write-meter costs during execution (25 meter units per encoded byte on tracer-backed execution).
+- **Events cost chi** - both indexed and non-indexed parameters incur write-meter costs during execution (25 meter units per encoded byte).
 - **Events are atomic** — if the transaction fails, all events are rolled back.
 - **Event names are not globally unique**. Consumers should key by both `contract` and `event`.
 

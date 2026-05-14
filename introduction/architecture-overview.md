@@ -164,12 +164,8 @@ There are two separate concerns to keep distinct:
 1. Contract authors write restricted Python source.
 2. The network chooses how that source is executed.
 
-Today Xian supports:
-
-- tracer-based Python execution with `python_line_v1`
-- tracer-based Python execution with `native_instruction_v1`
-- `xian_vm_v1`, which executes validated Xian VM artifacts through a native
-  runtime and explicit execution policy
+Today Xian supports `xian_vm_v1`, which executes validated Xian VM artifacts
+through a native runtime and explicit execution policy.
 
 That means Python remains the contract language, while the execution machine is
 allowed to evolve without asking developers to rewrite contracts in a new

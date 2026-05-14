@@ -27,7 +27,7 @@ def my_contract():
 client = ContractingClient()
 client.flush()
 client.submit(my_contract, name="con_test")
-contract = client.get_contract("con_test")
+contract = client.get_contract_proxy("con_test")
 
 # Return value comes back directly
 balance = contract.balance_of(address="sys")
@@ -77,7 +77,7 @@ def token_with_events():
 client = ContractingClient()
 client.flush()
 client.submit(token_with_events, name="con_token")
-token = client.get_contract("con_token")
+token = client.get_contract_proxy("con_token")
 
 output = token.transfer(to="alice", amount=100, return_full_output=True)
 
@@ -100,7 +100,7 @@ class TestReturnValues(unittest.TestCase):
         self.client = ContractingClient()
         self.client.flush()
         self.client.submit(my_contract, name="con_test")
-        self.contract = self.client.get_contract("con_test")
+        self.contract = self.client.get_contract_proxy("con_test")
 
     def test_balance_returns_correct_value(self):
         balance = self.contract.balance_of(address="sys")

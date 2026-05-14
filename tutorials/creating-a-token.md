@@ -191,12 +191,12 @@ def balance_of(address: str) -> float:
 ## Local Test
 
 ```python
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 client = ContractingClient()
 client.flush()
 client.submit(token_contract, name="con_example_token")
-token = client.get_contract("con_example_token")
+token = client.get_contract_proxy("con_example_token")
 
 assert token.balance_of(address="sys") == 1_000_000
 token.transfer(amount=100, to="alice")

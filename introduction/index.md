@@ -29,11 +29,10 @@ Contracts are written in a restricted, deterministic Python subset. That keeps
 contract code readable for normal software teams while still enforcing
 sandboxing, metering, and deterministic state transitions.
 
-### Explicit Runtime Choices
+### Fixed Xian VM Runtime
 
-Python is the source language, not the only execution engine. A network can run
-contracts through the tracer-based Python runtimes or through `xian_vm_v1`,
-which executes validated Xian VM artifacts under an explicit execution policy.
+Python is the source language. Validators execute deployed contracts through
+the fixed `xian_vm_v1` runtime, using validated Xian VM artifacts.
 
 ### Full Operator Stack
 

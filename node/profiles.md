@@ -12,7 +12,6 @@ They are written as JSON and validated on read. The current schema is explicit:
   "network": "mainnet",
   "moniker": "validator-1",
   "validator_key_ref": "./keys/validator-1/validator_key_info.json",
-  "runtime_backend": "xian-stack",
   "node_image_mode": "registry",
   "node_integrated_image": "ghcr.io/xian-technology/xian-node@sha256:...",
   "node_split_image": "ghcr.io/xian-technology/xian-node-split@sha256:...",
@@ -28,7 +27,6 @@ They are written as JSON and validated on read. The current schema is explicit:
   "blocks_to_keep": 100000,
   "block_policy_mode": "on_demand",
   "block_policy_interval": "0s",
-  "tracer_mode": "python_line_v1",
   "transaction_trace_logging": false,
   "app_log_level": "INFO",
   "app_log_json": false,
@@ -76,7 +74,6 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `home` | explicit CometBFT home override |
 | `block_policy_mode` | `on_demand`, `idle_interval`, or `periodic` |
 | `block_policy_interval` | interval used for idle/periodic block policies |
-| `tracer_mode` | execution tracer backend materialized into `[xian].tracer_mode` |
 | `transaction_trace_logging` | enables per-transaction debug summaries during block execution |
 | `app_log_level` | Xian application log level written to stderr and rotated files |
 | `app_log_json` | emits Xian application logs as structured JSON instead of plain text |

@@ -33,9 +33,8 @@ result = client.submit_contract(
 )
 ```
 
-For tracer-backed networks, submitting canonical source is the normal path.
-For `xian_vm_v1` networks, submit valid `deployment_artifacts` as well, because
-native deployment validates and executes the VM artifact path explicitly.
+Submit valid `deployment_artifacts` with contract source. Native deployment
+validates and executes the VM artifact path explicitly.
 
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts
@@ -56,7 +55,7 @@ preview = client.simulate(
 
 ```python
 balance = client.get_state("currency", "balances", wallet.public_key)
-source = client.get_contract("con_example")
+source = client.get_contract_source("con_example")
 ```
 
 ## Inspect Through the Dashboard

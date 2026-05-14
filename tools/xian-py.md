@@ -233,11 +233,11 @@ value = client.get_state("currency", "balances", wallet.public_key)
 allowance = client.get_state("currency", "approvals", wallet.public_key, "con_dex")
 ```
 
-### get_contract
+### get_contract_source
 
 ```python
-source = client.get_contract("currency")
-runtime_code = client.get_contract_code("currency")
+source = client.get_contract_source("currency")
+vm_ir = client.get_contract_ir("currency")
 ```
 
 ### send_tx

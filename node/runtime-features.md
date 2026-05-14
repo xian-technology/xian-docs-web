@@ -27,48 +27,25 @@ Different settings live at different layers.
 The most important runtime distinction is between the top-level tracer setting
 and the explicit execution-engine policy.
 
-### Tracer-Backed Execution
-
-Tracer-backed networks still use the familiar top-level tracer mode:
-
-```toml
-[xian]
-tracer_mode = "native_instruction_v1"
-
-[xian.execution.engine]
-mode = "native_instruction_v1"
-bytecode_version = ""
-gas_schedule = ""
-authority = ""
-```
-
-Supported tracer-backed modes are:
-
-- `python_line_v1`
-- `native_instruction_v1`
-
 ### VM-Native Execution
 
-`xian_vm_v1` uses explicit execution policy instead:
+`xian_vm_v1` is the fixed node execution runtime:
 
 ```toml
 [xian.execution.engine]
 mode = "xian_vm_v1"
-bytecode_version = "xvm-1"
-gas_schedule = "xvm-gas-1"
-authority = "native"
 ```
 
 Important current rules:
 
-- `xian_vm_v1` requires `bytecode_version`
-- `xian_vm_v1` requires `gas_schedule`
-- `authority` must be `native`
+- `xian_vm_v1` is the only supported node runtime
+- bytecode, gas schedule, and authority are internal VM constants
+- operators configure runtime-adjacent behavior such as simulation and parallel
+  execution, not alternate execution engines
 
-The high-level `xian-cli` profile flow currently exposes tracer selection and
-other runtime posture, but the full VM execution policy is still a lower-level
-runtime concern handled through rendered config, helper tooling, or localnet
-environment controls.
+The high-level `xian-cli` profile flow exposes runtime-adjacent posture such as
+parallel execution and service-node settings. The VM execution policy itself is
+fixed.
 
 ## Application Logging
 
@@ -182,7 +159,6 @@ live-path durability mechanism.
 | `block_service_mode` | service-node / indexed-stack posture |
 | `pruning_enabled` | enable block-history pruning |
 | `blocks_to_keep` | retain-height window when pruning is enabled |
-| `tracer_mode` | top-level tracer selection for tracer-backed runtimes |
 | `metrics_enabled`, `metrics_host`, `metrics_port`, `metrics_bds_refresh_seconds` | Xian application metrics |
 | `transaction_trace_logging`, `app_log_*` | Xian application logging |
 | `simulation_*` | readonly simulation controls |
@@ -193,10 +169,7 @@ live-path durability mechanism.
 
 | Key | Purpose |
 |-----|---------|
-| `mode` | selected execution engine |
-| `bytecode_version` | VM bytecode policy for `xian_vm_v1` |
-| `gas_schedule` | VM gas schedule id for `xian_vm_v1` |
-| `authority` | authoritative executor selection; currently `native` for `xian_vm_v1` |
+| `mode` | fixed execution runtime, currently `xian_vm_v1` |
 
 ### `[xian.bds]` Keys
 
@@ -214,12 +187,6 @@ stack-managed runs.
 
 Important examples:
 
-- `XIAN_TRACER_MODE`
-- `XIAN_LOCALNET_TRACER_MODE`
-- `XIAN_LOCALNET_EXECUTION_MODE`
-- `XIAN_LOCALNET_EXECUTION_BYTECODE_VERSION`
-- `XIAN_LOCALNET_EXECUTION_GAS_SCHEDULE`
-- `XIAN_LOCALNET_EXECUTION_AUTHORITY`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS`
 - `XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS`

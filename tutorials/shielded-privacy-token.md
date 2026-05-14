@@ -87,7 +87,7 @@ On a local chain, deploy `zk_registry` first if it does not already exist:
 ```python
 from pathlib import Path
 
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 client = ContractingClient()
 client.flush()
@@ -100,7 +100,7 @@ shielded_token_source = Path(
 ).read_text()
 
 client.submit(zk_registry_source, name="zk_registry", signer="sys")
-zk_registry = client.get_contract("zk_registry")
+zk_registry = client.get_contract_proxy("zk_registry")
 zk_registry.seed(owner="sys", signer="sys")
 
 client.submit(
@@ -114,7 +114,7 @@ client.submit(
     },
     signer="sys",
 )
-token = client.get_contract("con_private_usd")
+token = client.get_contract_proxy("con_private_usd")
 ```
 
 On a live network, `zk_registry` should already exist as a system contract.

@@ -45,7 +45,7 @@ You need:
 ```python
 from pathlib import Path
 
-from contracting.client import ContractingClient
+from contracting.local import ContractingClient
 
 client = ContractingClient()
 client.flush()
@@ -61,7 +61,7 @@ shielded_dex_adapter_source = Path(
 ).read_text()
 
 client.submit(zk_registry_source, name="zk_registry", signer="sys")
-zk_registry = client.get_contract("zk_registry")
+zk_registry = client.get_contract_proxy("zk_registry")
 zk_registry.seed(owner="sys", signer="sys")
 
 client.submit(
@@ -122,7 +122,7 @@ The current command-family ids are:
 ## Step 3: Bind The Keys And Allow The Adapter
 
 ```python
-commands = client.get_contract("con_shielded_commands")
+commands = client.get_contract_proxy("con_shielded_commands")
 
 for action in ("deposit", "command", "withdraw"):
     commands.configure_vk(

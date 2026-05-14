@@ -27,24 +27,24 @@ There are several 5-node paths, and they are intentionally not the same thing.
 |------|---------|---------|
 | Clean 5-node localnet | `LOCALNET_NODES=5 make localnet-init && make localnet-up` | Starts a disposable 5-node network without running the full validation program. |
 | Layered 5-validator e2e | `make localnet-e2e` | Runs the broad whole-stack validation harness on the normal configured execution path. |
-| VM-native layered e2e | `make localnet-vm-e2e` | Runs the same layered harness with `xian_vm_v1`, `xvm-1`, `xvm-gas-1`, and native authority. |
+| Parallel layered e2e | `make localnet-parallel-e2e` | Runs the same layered harness with lower parallel-execution batching. |
 | Validator/governance localnet | `make localnet-validator-governance` | Runs the focused validator, delegation, governance, evidence, slashing, and leave/rebalance validation program. |
-| Release safety gate | `make release-safety` | Runs the release-grade stack gate: sibling repo validation, VM-native e2e, VM rollout report, and validator/governance localnet. |
+| Release safety gate | `make release-safety` | Runs the release-grade stack gate: sibling repo validation, e2e, runtime report, and validator/governance localnet. |
 
 ```mermaid
 flowchart TD
   Clean["Clean 5-node localnet"]
   Layered["make localnet-e2e"]
-  VM["make localnet-vm-e2e"]
-  Report["make localnet-vm-report"]
+  Parallel["make localnet-parallel-e2e"]
+  Report["make localnet-node-report"]
   Governance["make localnet-validator-governance"]
   Release["make release-safety"]
 
   Clean --> Layered
-  Layered --> VM
-  VM --> Report
+  Layered --> Parallel
+  Parallel --> Report
   Report --> Governance
-  VM --> Release
+  Parallel --> Release
   Governance --> Release
 ```
 
@@ -93,8 +93,8 @@ That target runs:
 1. `xian-contracting` release validation
 2. `xian-abci` release validation
 3. `xian-stack` validation
-4. `make localnet-vm-e2e`
-5. `make localnet-vm-report`
+4. `make localnet-parallel-e2e`
+5. `make localnet-node-report`
 6. `make localnet-validator-governance` after resetting the localnet
 
 Useful options:
@@ -136,7 +136,7 @@ flowchart TD
   P09 --> P10 --> P11 --> P12 --> P13 --> P14 --> P15 --> P16 --> P17 --> P18
 ```
 
-1. bootstrap a fresh 5-validator network with the native tracer and a BDS-enabled
+1. bootstrap a fresh 5-validator network with the fixed Xian VM and a BDS-enabled
    service node
 2. verify health, peer connectivity, validator count, and recent app-hash
    equality

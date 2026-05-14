@@ -57,11 +57,8 @@ GET /api/contract/currency
 ```
 
 Returns the current contract source fetched through the node's query layer.
-When the contract keeps original source in `__source__`, the dashboard returns
-that original source text separately from the stored runtime form. If the
-original source is not available, the contract route still returns the stored
-runtime code, but the explorer labels it explicitly as runtime code instead of
-presenting it as source.
+The dashboard reads `contract_source/<name>` and displays the canonical stored
+source plus Xian VM metadata.
 
 In the explorer UI, the contract page now renders that source with Python
 syntax highlighting, lets you jump from a listed function to its definition
@@ -86,10 +83,10 @@ GET /api/address/<address>?limit=50&offset=0
 Returns indexed sender history for the address on BDS-enabled service nodes,
 plus the developer-reward aggregate for that same address when available.
 
-For the canonical runtime form, query:
+For the persisted Xian VM IR, query:
 
 ```text
-GET /api/abci_query/contract_code/currency
+GET /api/abci_query/contract_ir/currency
 ```
 
 ## ABCI Query Pass-Through
@@ -107,11 +104,10 @@ GET /api/abci_query/get/currency.balances:alice
 GET /api/abci_query/keys/currency.balances/limit=100
 GET /api/abci_query/keys/currency.balances/limit=100/after=alice
 GET /api/abci_query/get_next_nonce/<address>
-GET /api/abci_query/contract/currency
 GET /api/abci_query/contract_source/currency
 GET /api/abci_query/contracts/limit=50/offset=0/sort=submitted_at/order=desc
 GET /api/abci_query/contract_info/currency
-GET /api/abci_query/contract_code/currency
+GET /api/abci_query/contract_ir/currency
 GET /api/abci_query/contract_methods/currency
 GET /api/abci_query/contract_vars/currency
 GET /api/abci_query/health
@@ -319,7 +315,7 @@ Use the raw node paths for authoritative current state:
 
 ```text
 GET /api/abci_query/get/<state_key>
-GET /api/abci_query/contract/<name>
+GET /api/abci_query/contract_source/<name>
 GET /api/abci_query/contract_methods/<name>
 GET /api/abci_query/contract_vars/<name>
 GET /api/abci_query/get_next_nonce/<address>

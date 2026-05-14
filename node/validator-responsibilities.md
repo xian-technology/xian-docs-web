@@ -27,9 +27,7 @@ Tracer-backed networks require validators to stay aligned on:
 
 - `xian-abci` and `xian-contracting`
 - the native VM runtime capability
-- `bytecode_version`
-- `gas_schedule`
-- native authority posture
+- deployment artifacts for submitted contracts
 
 In both cases, ad hoc local runtime changes are dangerous.
 

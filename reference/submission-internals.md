@@ -18,10 +18,8 @@ built-in `submission` contract.
 
 ## Source Submission Vs Artifact Submission
 
-Xian supports both source-backed and artifact-backed deployment flows, but they
-are not identical.
+Xian deployments are source-backed and artifact-backed.
 
-- tracer-backed execution can use the canonical source-backed path
 - `xian_vm_v1` requires valid `deployment_artifacts` for native deployment
 
 Those artifacts include the canonical source plus the VM artifact payload used
@@ -50,7 +48,6 @@ Every deployed contract stores metadata such as:
 For execution artifacts:
 
 - `__xian_ir_v1__` is the persisted VM IR for `xian_vm_v1`
-- tracer-backed and tooling paths may also persist `__code__`
 
 `__source__` is the human-facing canonical source. It is normalized before
 storage.

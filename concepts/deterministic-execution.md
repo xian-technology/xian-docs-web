@@ -32,8 +32,7 @@ That means the exact alignment rules depend on the selected execution engine:
 
 | Engine family | Validators must align on |
 |--------------|---------------------------|
-| tracer-backed Python runtimes | `xian-abci`, `xian-contracting`, tracer mode, and the supported CPython minor version |
-| `xian_vm_v1` | `xian-abci`, `xian-contracting`, native VM support, `bytecode_version`, `gas_schedule`, and authority |
+| `xian_vm_v1` | `xian-abci`, `xian-contracting`, native VM support, and deployment artifacts |
 
 The principle is always the same: validators must execute the same machine
 contract for the same source and state.
@@ -68,11 +67,6 @@ That means:
 ## Metering Is Deterministic Too
 
 Chi accounting is part of execution semantics, so it must be deterministic.
-
-Tracer-backed runtimes meter execution in one of two ways:
-
-- `python_line_v1` charges deterministic line buckets
-- `native_instruction_v1` charges exact executed Python bytecode instructions
 
 `xian_vm_v1` meters directly at the VM and host-operation layer through the
 selected VM gas schedule.
@@ -144,8 +138,7 @@ Real divergence risks tend to come from operator drift rather than exotic math.
 Common examples:
 
 - validators running different runtime versions
-- tracer-backed networks drifting on CPython minor version
-- validators selecting different execution policy
+- validators missing required deployment artifacts
 - local forks of consensus-sensitive repos
 - corrupted or inconsistent local state
 

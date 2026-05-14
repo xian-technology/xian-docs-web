@@ -254,11 +254,11 @@ Current runtime rules:
 - `activation_height` must be positive
 - `changes` must be non-empty
 - duplicate keys are rejected
-- direct `.__code__` writes are rejected
+- derived VM artifact writes are rejected
 - contract source changes must be supplied as `contract_name.__source__`
 
 When a bundle patches `.__source__`, the runtime derives and applies the
-matching canonical `.__code__` artifact automatically.
+matching canonical `.__xian_ir_v1__` artifact automatically.
 
 ## Activation Path
 

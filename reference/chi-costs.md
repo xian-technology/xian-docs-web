@@ -2,7 +2,7 @@
 
 This page provides a detailed reference for chi costs across all operation types.
 
-## Tracer Storage Costs
+## Storage Costs
 
 | Operation | Cost | Unit |
 |-----------|------|------|
@@ -13,11 +13,9 @@ This page provides a detailed reference for chi costs across all operation types
 
 Byte count includes both the encoded key (e.g., `currency.balances:alice`) and the encoded value (e.g., `1000000`).
 
-These constants are the tracer-backed policy used by `python_line_v1` and
-`native_instruction_v1`. `xian_vm_v1` uses its own VM host-operation schedule;
-current VM storage writes are charged at `25` units per byte, while VM storage
-reads are charged by the VM schedule rather than the tracer `READ_COST_PER_BYTE`
-constant.
+`xian_vm_v1` uses the VM host-operation schedule. Current VM storage writes are
+charged at `25` units per byte, while VM storage reads are charged by the VM
+schedule.
 
 ## Base Costs
 
@@ -31,8 +29,6 @@ constant.
 | Limit | Value |
 |-------|-------|
 | Runtime raw safety ceiling | 50,000,000,000 raw units |
-| Maximum line events per transaction (`python_line_v1`) | 800,000 |
-| Maximum instruction events per transaction (`native_instruction_v1`) | 3,250,000 |
 | Maximum write data per transaction | 128 KiB |
 | Maximum return value size | 128 KiB |
 | Maximum submitted contract source | 64 KiB |
@@ -53,27 +49,9 @@ Where:
 
 ## Opcode Costs
 
-Each Python bytecode instruction has a fixed cost in compute units (CU). The
-native tracer charges those instructions exactly; the pure-Python tracer
-precomputes line buckets from the same opcode schedule. Both are converted to
-chi via `raw_cost // 1000`.
-
-For `xian_vm_v1`, the runtime no longer meters CPython bytecode directly. VM
-execution is charged through the VM gas schedule plus the same storage and
-payload-size concepts. The table below therefore describes the tracer-backed
-compute schedule, not every possible VM-native gas entry.
-
-| Cost Range (CU) | Instructions |
-|-----------------|--------------|
-| 2 | Simple loads, stores, stack operations |
-| 4 | Arithmetic operations, comparisons |
-| 6 | Function calls, attribute access |
-| 8 | Container operations (list/dict access) |
-| 10-20 | Loop control, exception setup |
-| 26 | Import operations |
-| 1610 | Maximum cost instruction |
-
-The exact cost per opcode is defined in the metering engine and is deterministic across all validators.
+`xian_vm_v1` meters execution through the VM gas schedule plus storage and
+payload-size costs. The exact compute breakdown is implementation-defined by
+the VM runtime, so use simulation for final receipt values.
 
 ## Example Meter Contributions
 
@@ -87,8 +65,8 @@ one part of the raw aggregate that becomes final `chi_used`.
 counter.get()
 ```
 
-- Opcode cost: backend-dependent compute units
-- Storage read: key `con_x.counter` (12 bytes) + value `42` (2 bytes) = 14 raw meter units on tracer-backed execution
+- Compute cost: VM gas schedule dependent
+- Storage read: key `con_x.counter` (12 bytes) + value `42` (2 bytes) = 14 raw meter units
 - Final chi: `5 + (raw_meter_cost // 1000)`, so use simulation for the exact receipt value
 
 ### Simple Hash Write
@@ -97,8 +75,8 @@ counter.get()
 balances["alice"] = 1000
 ```
 
-- Opcode cost: backend-dependent compute units
-- Storage write: key `con_x.balances:alice` (20 bytes) + value `1000` (4 bytes) = 24 bytes * 25 = 600 raw meter units on tracer-backed execution
+- Compute cost: VM gas schedule dependent
+- Storage write: key `con_x.balances:alice` (20 bytes) + value `1000` (4 bytes) = 24 bytes * 25 = 600 raw meter units
 - Final chi: `5 + (raw_meter_cost // 1000)`, capped by the submitted budget
 
 ### Token Transfer (Two Reads + Two Writes)
