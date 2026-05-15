@@ -1,16 +1,17 @@
 # Contract Standards
 
-Xian currently uses a small set of contract interface standards for the token
-and payment primitives that other tools expect.
+Xian uses a small set of contract interface standards for token, NFT, and
+payment primitives that other tools expect.
 
 ## Current Standards
 
 - [XSC-0001](/smart-contracts/standards/xsc-0001): fungible token core
 - [XSC-0002](/smart-contracts/standards/xsc-0002): permit-style approvals
 - [XSC-0003](/smart-contracts/standards/xsc-0003): streaming payments
+- [XSC-0004](/smart-contracts/standards/xsc-0004): non-fungible token core
 
 These standards are reflected in the canonical contracts shipped in
-`xian-configs/contracts`, especially the current `currency` contract.
+`xian-configs/contracts` and the maintained packages in `xian-contracts`.
 
 ## How To Use Them
 
