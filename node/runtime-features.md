@@ -215,6 +215,23 @@ Important examples:
 - `XIAN_PERF_ENABLED`
 - `XIAN_PERF_RECENT_BLOCKS`
 
+For single-node stack BDS runs, the stack also mirrors the BDS runtime keys as
+environment variables:
+
+| Environment variable | Runtime key |
+|----------------------|-------------|
+| `XIAN_BDS_DSN` | `xian.bds.dsn` |
+| `XIAN_BDS_HOST`, `XIAN_BDS_PORT`, `XIAN_BDS_DATABASE`, `XIAN_BDS_USER`, `XIAN_BDS_PASSWORD` | Postgres connection fields |
+| `XIAN_BDS_POOL_MIN_SIZE`, `XIAN_BDS_POOL_MAX_SIZE` | connection pool sizing |
+| `XIAN_BDS_STATEMENT_TIMEOUT_MS`, `XIAN_BDS_ACQUIRE_TIMEOUT_MS`, `XIAN_BDS_APPLICATION_NAME` | query/runtime behavior |
+| `XIAN_BDS_QUEUE_MAX_SIZE`, `XIAN_BDS_CATCHUP_ENABLED`, `XIAN_BDS_CATCHUP_POLL_SECONDS`, `XIAN_BDS_RPC_URL` | live BDS queue and catch-up behavior |
+| `XIAN_BDS_SPOOL_DIR`, `XIAN_BDS_SPOOL_WARN_ENTRIES`, `XIAN_BDS_SPOOL_WARN_BYTES`, `XIAN_BDS_DISK_FREE_WARN_BYTES` | recovery spool and warning thresholds |
+
+For the integrated stack, `XIAN_BDS_RPC_URL` defaults to
+`http://127.0.0.1:26657`, which is the CometBFT RPC endpoint reachable from the
+BDS process. To stop catch-up, disable `XIAN_BDS_CATCHUP_ENABLED`; do not rely
+on an empty RPC URL as a disable switch.
+
 Use those primarily for localnet, stack debugging, or deliberate Docker-side
 overrides. For normal operator workflows, prefer manifests, profiles, and the
 rendered config first.
