@@ -17,11 +17,13 @@ They are written as JSON and validated on read. The current schema is explicit:
   "node_split_image": "ghcr.io/xian-technology/xian-node-split@sha256:...",
   "node_release_manifest": null,
   "stack_dir": "../xian-stack",
-  "seeds": [],
-  "genesis_url": null,
+  "p2p": {
+    "seeds": [],
+    "persistent_peers": []
+  },
+  "genesis": null,
   "snapshot_url": null,
   "snapshot_signing_keys": [],
-  "service_node": false,
   "home": null,
   "pruning_enabled": false,
   "blocks_to_keep": 100000,
@@ -37,23 +39,72 @@ They are written as JSON and validated on read. The current schema is explicit:
   "simulation_timeout_ms": 3000,
   "simulation_max_chi": 1000000,
   "parallel_execution_enabled": false,
-  "parallel_execution_workers": 0,
+  "parallel_execution_workers": 4,
   "parallel_execution_min_transactions": 8,
   "operator_profile": "embedded_backend",
-  "monitoring_profile": "service_node",
-  "dashboard_enabled": false,
-  "monitoring_enabled": true,
-  "dashboard_host": "127.0.0.1",
-  "dashboard_port": 8080,
-  "intentkit_enabled": false,
-  "intentkit_network_id": "xian-mainnet",
-  "intentkit_host": "127.0.0.1",
-  "intentkit_port": 38000,
-  "intentkit_api_port": 38080,
-  "dex_automation_enabled": false,
-  "dex_automation_host": "127.0.0.1",
-  "dex_automation_port": 38280,
-  "dex_automation_config": null
+  "monitoring_profile": "bds",
+  "services": {
+    "bds": {
+      "enabled": true
+    },
+    "dashboard": {
+      "enabled": false,
+      "host": "127.0.0.1",
+      "port": 8080
+    },
+    "monitoring": {
+      "enabled": true
+    },
+    "intentkit": {
+      "enabled": false,
+      "network_id": "xian-mainnet",
+      "host": "127.0.0.1",
+      "port": 38000,
+      "api_port": 38080
+    },
+    "dex_automation": {
+      "enabled": false,
+      "host": "127.0.0.1",
+      "port": 38280,
+      "config": null
+    },
+    "shielded_relayer": {
+      "enabled": false,
+      "host": "127.0.0.1",
+      "port": 38180
+    }
+  },
+  "advanced": {
+    "cometbft": {
+      "allow_cors": true,
+      "prometheus": true,
+      "proxy_app": "unix:///tmp/abci.sock"
+    },
+    "statesync": {
+      "enabled": false,
+      "rpc_servers": [],
+      "trust_height": 0,
+      "trust_hash": "",
+      "trust_period": "168h0m0s"
+    },
+    "metrics": {
+      "enabled": true,
+      "host": "0.0.0.0",
+      "port": 9108,
+      "bds_refresh_seconds": 5.0
+    },
+    "pending_nonce": {
+      "reservation_ttl_seconds": 60.0,
+      "max_per_sender": 128
+    },
+    "parallel_execution": {
+      "max_speculative_waves": 4,
+      "min_wave_acceptance_ratio": 0.25,
+      "low_acceptance_min_wave_size": 8,
+      "warm_workers": true,
+      "access_estimates_enabled": true
+    }
+  }
 }
 ```
 
@@ -66,7 +117,9 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `node_image_mode` | `registry` for pinned published images or `local_build` for workspace-built images |
 | `node_*_image` | immutable integrated/split image references used when `node_image_mode=registry` |
 | `node_release_manifest` | optional embedded provenance block copied from `xian-stack/release-manifest.json`, including the exact component Git refs, digest-pinned base images, and checksum-pinned external build inputs used for a canonical published image |
-| `service_node` | enables the optional indexed-service stack used for BDS-backed reads |
+| `p2p.seeds` | CometBFT seed peers for node discovery |
+| `p2p.persistent_peers` | CometBFT persistent peers maintained by this node |
+| `genesis` | optional node-local genesis override; usually inherited from the network manifest |
 | `operator_profile` | the intended operator posture inherited from the selected starter template |
 | `monitoring_profile` | the monitoring posture inherited from the selected starter template |
 | `snapshot_url` | optional remote bootstrap source; may point to a snapshot archive directly or to a signed snapshot manifest |
@@ -84,24 +137,33 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `simulation_timeout_ms` | wall-clock timeout for one readonly simulation worker |
 | `simulation_max_chi` | readonly chi budget cap used during simulation |
 | `parallel_execution_enabled` | enables speculative parallel block execution for this node |
-| `parallel_execution_workers` | worker count for speculative execution on this node |
+| `parallel_execution_workers` | worker count for speculative execution on this node; defaults to `4` and must be greater than zero when parallel execution is enabled |
 | `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
-| `monitoring_enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
-| `dashboard_*` | optional runtime dashboard settings |
-| `intentkit_enabled` | starts the optional stack-managed `xian-intentkit` deployment |
-| `intentkit_network_id` | selects the Xian network slot exposed to `xian-intentkit` |
-| `intentkit_*` | published local host/port settings for the stack-managed frontend and API |
-| `dex_automation_enabled` | starts the optional stack-managed `xian-dex-automation` service |
-| `dex_automation_host` / `dex_automation_port` | local admin UI and API bind settings for the automation sidecar |
-| `dex_automation_config` | optional path to a persistent automation YAML config; when omitted, `xian-stack` generates one under `.artifacts/dex-automation/` |
+| `services.bds.enabled` | enables Blockchain Data Service indexing and the BDS-backed read stack |
+| `services.dashboard` | optional runtime dashboard enable flag and bind settings |
+| `services.monitoring.enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
+| `services.intentkit` | optional stack-managed `xian-intentkit` enable flag, network slot, and published ports |
+| `services.dex_automation` | optional stack-managed `xian-dex-automation` enable flag, bind settings, and optional config path |
+| `services.shielded_relayer` | optional stack-managed shielded relayer enable flag and bind settings |
+| `advanced` | lower-level runtime settings with sensible defaults; override only when you need direct control |
 
-The explicit VM execution policy under `[xian.execution.engine]` is currently a
-lower-level runtime concern. It is rendered into `config.toml`, but it is not
-yet a first-class high-level field family in the normal profile JSON flow.
+## High-Level And Advanced Runtime Settings
 
-For the remaining lower-level runtime keys that are **not** currently surfaced
-through the high-level profile flow, see
-[Runtime Features](/node/runtime-features).
+Profiles are the declarative source for node runtime settings. The high-level
+fields cover the choices most operators set deliberately: P2P peers, pruning,
+block policy, logging, simulation, parallel execution, and sidecar services.
+
+The `advanced` object carries lower-level knobs that normally work well with
+defaults. Keep it in the profile when you want a complete local contract, and
+override only the nested keys you intentionally tune. Important families are:
+
+| Advanced family | Meaning |
+|-----------------|---------|
+| `advanced.cometbft` | CORS, Prometheus, and ABCI proxy-app settings |
+| `advanced.statesync` | CometBFT state sync trust and RPC settings |
+| `advanced.metrics` | Xian application metrics bind settings and BDS refresh cadence |
+| `advanced.pending_nonce` | local pending-nonce reservation limits |
+| `advanced.parallel_execution` | speculative execution guardrails beyond the high-level enable/worker/min-tx fields |
 
 ## How Profiles Are Created
 
@@ -146,9 +208,9 @@ The current canonical templates standardize these postures:
 - `single-node-indexed`: `operator_profile=indexed_development`,
   `monitoring_profile=local_stack`
 - `consortium-3`: `operator_profile=shared_network`,
-  `monitoring_profile=service_node`
+  `monitoring_profile=bds`
 - `embedded-backend`: `operator_profile=embedded_backend`,
-  `monitoring_profile=service_node`
+  `monitoring_profile=bds`
 
 ## Scope
 
@@ -187,12 +249,13 @@ Application logging is also node-local. It changes how much execution context
 the node records and how those logs are formatted and retained under
 `.cometbft/xian/logs`.
 
-`xian-intentkit` posture is also node-local. The profile only stores the
-operator-facing enable flag, selected Xian network slot, and local published
-ports. The stack adapter generates the actual `xian-intentkit` env file from
-those profile fields plus the resolved RPC endpoint and chain ID of the node.
+`xian-intentkit` posture is also node-local. The profile stores it under
+`services.intentkit`: enable flag, selected Xian network slot, and local
+published ports. The stack adapter generates the actual `xian-intentkit` env
+file from those profile fields plus the resolved RPC endpoint and chain ID of
+the node.
 
 `xian-dex-automation` posture is node-local too. The profile stores only the
-enable flag, local host/port, and optional config path. The stack adapter
-generates the default config and service-wallet key file under
+`services.dex_automation` enable flag, local host/port, and optional config
+path. The stack adapter generates the default config and service-wallet key file under
 `xian-stack/.artifacts/dex-automation/` when no explicit config is supplied.

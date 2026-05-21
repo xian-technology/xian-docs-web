@@ -8,7 +8,7 @@ real runtime path with:
 
 - 5 validators
 - the native Rust tracer
-- one BDS-enabled service node
+- one node with BDS enabled
 - real validator governance
 - governed forward state patches
 - `xian-py`
@@ -112,7 +112,7 @@ The phases intentionally build on each other:
 
 ```mermaid
 flowchart TD
-  P00["00 Bootstrap 5 validators and BDS service node"]
+  P00["00 Bootstrap 5 validators and one BDS node"]
   P01["01 Health, peers, validator count, app hashes"]
   P02["02 xian-py smoke"]
   P03["03 Contract orchestration and nested dispatch"]
@@ -136,8 +136,8 @@ flowchart TD
   P09 --> P10 --> P11 --> P12 --> P13 --> P14 --> P15 --> P16 --> P17 --> P18
 ```
 
-1. bootstrap a fresh 5-validator network with the fixed Xian VM and a BDS-enabled
-   service node
+1. bootstrap a fresh 5-validator network with the fixed Xian VM and one node
+   with BDS enabled
 2. verify health, peer connectivity, validator count, and recent app-hash
    equality
 3. use `xian-py` to fund accounts, deploy helper contracts, simulate, and read
@@ -244,11 +244,11 @@ already-running localnet.
 - The BDS catch-up phase intentionally stops the local Postgres service. The
   pass condition is that live block production continues, BDS reports backlog
   or degraded indexing, and the indexed surface catches up again after
-  Postgres returns. On the current service-node implementation, `queue_depth`
+  Postgres returns. On the current BDS implementation, `queue_depth`
   can stay nonzero in steady state, so the meaningful recovery signals are the
   indexed height, spool state, and DB health.
-- The harness also validates a secondary BDS rebuild path outside the live
-  service-node process. That makes the retrieval phase cover both live catch-up
+- The harness also validates a secondary BDS rebuild path outside the live node
+  process. That makes the retrieval phase cover both live catch-up
   and explicit reindex/restart recovery from retained block history.
 - The secondary BDS path is no longer just a one-shot sync. The current run
   also stops that rebuilt instance, lets the chain advance, then restarts it
@@ -279,7 +279,7 @@ Always inspect:
 
 - `summary.json`
 - the phase JSON files
-- BDS status and indexed-height progress on the service node
+- BDS status and indexed-height progress on the BDS node
 - the logging phase output snippets
 
 If a phase fails:

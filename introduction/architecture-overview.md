@@ -33,7 +33,7 @@ flowchart LR
   subgraph Catalog["xian-configs catalog"]
     Networks["Network manifests"]
     Templates["Network templates"]
-    Genesis["Genesis contract presets"]
+    Genesis["Genesis contract bundles"]
     Modules["Modules"]
     Solutions["Solutions"]
     Bundles["Hash-pinned contract bundles"]
@@ -80,7 +80,7 @@ The current maintained inventory is:
 |------------|-------|------------------|
 | Canonical network manifests | 3 | `xian-configs/networks/local`, `devnet`, `testnet` |
 | Reusable network templates | 5 | `xian-configs/templates/*.json` |
-| Genesis contract presets | 3 | `xian-configs/contracts/contracts_local.json`, `contracts_devnet.json`, `contracts_testnet.json` |
+| Genesis contract bundles | 3 | `xian-configs/contracts/contracts_local.json`, `contracts_devnet.json`, `contracts_testnet.json` |
 | Modules | 2 | `xian-configs/modules/dex`, `modules/stable-protocol` |
 | Solutions | 4 | `xian-configs/solutions/*` |
 
@@ -89,7 +89,7 @@ The important terms are:
 | Term | Meaning |
 |------|---------|
 | Source owner repo | The active development home for a product or contract set, such as `xian-dex` for the DEX contracts and frontend. |
-| Genesis contract preset | A `contracts_*.json` file that tells genesis construction which contracts are included before a chain starts. |
+| Genesis contract bundle | A `contracts_*.json` file that tells genesis construction which contracts are included before a chain starts. |
 | Module | A reusable installable contract or protocol unit, such as the DEX AMM contracts. |
 | Solution | A complete application/operator pattern that composes templates, modules, services, examples, and docs. |
 | Contract bundle | A hash-pinned manifest for a deployable set of contract source files. It is smaller and more mechanical than a module. |
@@ -107,7 +107,7 @@ The DEX is the clearest example of the split. `xian-dex` owns active DEX
 development. `xian-configs/modules/dex` carries the pinned DEX module snapshot
 for repeatable installs. The `dex-demo` solution composes that module with a
 recommended local network and automation posture. The base `local`, `devnet`,
-and `testnet` genesis presets do not automatically make every network a DEX
+and `testnet` genesis bundles do not automatically make every network a DEX
 network.
 
 Prefer pinned snapshots and manifest hashes for cross-repo consumption. Avoid

@@ -41,7 +41,7 @@ The maintained repos cover the operator path end to end:
 - `xian-cli` for network and node workflows
 - `xian-stack` for Docker topology, localnet, monitoring, and sidecars
 - `xian-abci` for the deterministic application behind CometBFT
-- `xian-configs` for canonical network bundles and contract presets
+- `xian-configs` for canonical network bundles and contract bundles
 
 ### Software-Friendly Integration
 

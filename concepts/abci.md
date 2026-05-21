@@ -77,7 +77,7 @@ Important query families include:
 
 - current contract state and contract metadata
 - transaction simulation
-- indexed/BDS-backed history reads when the service-node stack is enabled
+- indexed/BDS-backed history reads when BDS is enabled
 - performance and runtime health summaries
 - application snapshot coordination
 

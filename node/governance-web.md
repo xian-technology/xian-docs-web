@@ -97,7 +97,7 @@ That means:
 
 - active validator wallet accounts can create proposals and vote
 - non-validator wallets can observe but cannot vote
-- service nodes, BDS nodes, dashboards, and public RPC nodes observe unless the
+- BDS nodes, dashboards, and public RPC nodes observe unless the
   connected wallet account is also an active validator
 - a validator added after a proposal opens cannot vote on that already-open
   proposal

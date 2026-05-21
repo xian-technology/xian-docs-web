@@ -131,7 +131,7 @@ print(result["state"])
   unrestricted public validator RPC endpoint
 - if you expose dry runs to users, front them with gateway-level protections
   such as rate limiting, request timeouts, concurrency caps, and preferably a
-  dedicated service-node or API tier
+  dedicated BDS-backed or API tier
 
 ## Operator Controls
 

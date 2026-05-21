@@ -60,7 +60,7 @@ uv run xian node health validator-1
 - backend state as `healthy`, `degraded`, or `stopped`
 - RPC reachability and current sync detail
 - CometBFT and Xian metrics reachability
-- BDS queue, pool, spool, lag, and database status when `service_node` is enabled
+- BDS queue, pool, spool, lag, and database status when `services.bds.enabled` is true
 - optional dashboard / Prometheus / Grafana reachability when enabled
 - optional `xian-intentkit` frontend and API reachability when enabled
 - optional `xian-dex-automation` sidecar reachability when enabled
@@ -76,8 +76,8 @@ prints the expected entrypoints for:
 - ABCI query
 - CometBFT metrics
 - Xian metrics
-- BDS status and spool ABCI query URLs when `service_node` is enabled
-- GraphQL when `service_node` is enabled
+- BDS status and spool ABCI query URLs when `services.bds.enabled` is true
+- GraphQL when `services.bds.enabled` is true
 - dashboard and dashboard status when enabled
 - Prometheus and Grafana when monitoring is enabled
 - `xian-intentkit` frontend and API health URLs when enabled
@@ -198,37 +198,37 @@ return the node to its normal log level.
 From `xian-stack`, the stable machine-readable backend is:
 
 ```bash
-python3 ./scripts/backend.py start --no-service-node --no-dashboard --no-monitoring
-python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monitoring
-python3 ./scripts/backend.py endpoints --no-service-node --no-dashboard --no-monitoring
-python3 ./scripts/backend.py health --no-service-node --no-dashboard --no-monitoring
-python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py start --no-bds-enabled --no-dashboard --no-monitoring
+python3 ./scripts/backend.py status --no-bds-enabled --no-dashboard --no-monitoring
+python3 ./scripts/backend.py endpoints --no-bds-enabled --no-dashboard --no-monitoring
+python3 ./scripts/backend.py health --no-bds-enabled --no-dashboard --no-monitoring
+python3 ./scripts/backend.py stop --no-bds-enabled --no-dashboard --no-monitoring
 ```
 
 With stack-managed `xian-intentkit`:
 
 ```bash
-python3 ./scripts/backend.py start --service-node --intentkit --intentkit-network-id xian-mainnet
-python3 ./scripts/backend.py endpoints --service-node --intentkit --intentkit-network-id xian-mainnet
-python3 ./scripts/backend.py health --service-node --intentkit --intentkit-network-id xian-mainnet
-python3 ./scripts/backend.py stop --service-node --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py start --bds-enabled --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py endpoints --bds-enabled --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py health --bds-enabled --intentkit --intentkit-network-id xian-mainnet
+python3 ./scripts/backend.py stop --bds-enabled --intentkit --intentkit-network-id xian-mainnet
 ```
 
 With stack-managed `xian-dex-automation`:
 
 ```bash
-python3 ./scripts/backend.py start --no-service-node --dex-automation
-python3 ./scripts/backend.py endpoints --no-service-node --dex-automation
-python3 ./scripts/backend.py health --no-service-node --dex-automation
-python3 ./scripts/backend.py stop --no-service-node --dex-automation
+python3 ./scripts/backend.py start --no-bds-enabled --dex-automation
+python3 ./scripts/backend.py endpoints --no-bds-enabled --dex-automation
+python3 ./scripts/backend.py health --no-bds-enabled --dex-automation
+python3 ./scripts/backend.py stop --no-bds-enabled --dex-automation
 ```
 
 For BDS-enabled integrated runs:
 
 ```bash
-python3 ./scripts/backend.py start --service-node --monitoring
-python3 ./scripts/backend.py endpoints --service-node --monitoring
-python3 ./scripts/backend.py health --service-node --monitoring --no-check-disk
+python3 ./scripts/backend.py start --bds-enabled --monitoring
+python3 ./scripts/backend.py endpoints --bds-enabled --monitoring
+python3 ./scripts/backend.py health --bds-enabled --monitoring --no-check-disk
 ```
 
 The maintained stack now defaults to a fail-closed network posture:
@@ -236,7 +236,7 @@ The maintained stack now defaults to a fail-closed network posture:
 - CometBFT RPC binds to `127.0.0.1` unless you pass `--public-rpc`
 - CometBFT and Xian metrics bind to `127.0.0.1` unless you pass
   `--public-metrics`
-- PostGraphile binds to `127.0.0.1` unless you run a service node and pass
+- PostGraphile binds to `127.0.0.1` unless you enable BDS and pass
   `--public-query`
 - local BDS and PostGraphile credentials are generated once into
   `xian-stack/.stack-secrets.env`
@@ -248,11 +248,11 @@ ABCI submission endpoints.
 Examples:
 
 ```bash
-# Public read/query surface on a service node.
-python3 ./scripts/backend.py start --service-node --public-query
+# Public read/query surface on a BDS node.
+python3 ./scripts/backend.py start --bds-enabled --public-query
 
-# Explicit public RPC and metrics on a non-service node.
-python3 ./scripts/backend.py start --no-service-node --public-rpc --public-metrics
+# Explicit public RPC and metrics on a node without BDS.
+python3 ./scripts/backend.py start --no-bds-enabled --public-rpc --public-metrics
 ```
 
 Host-side storage inspection from `xian-stack`:
@@ -271,7 +271,7 @@ The remote starter flows now also have reusable preset files in `xian-deploy`:
 
 - `presets/templates/embedded-backend.yml`
 - `presets/templates/consortium-validator.yml`
-- `presets/templates/consortium-service-node.yml`
+- `presets/templates/consortium-bds-node.yml`
 
 Use those with `ansible-playbook ... -e @presets/templates/<name>.yml` or place
 the same values into host/group vars in your private inventory.
@@ -463,9 +463,9 @@ Use Prometheus and Grafana for remote monitoring, alerting, and retention.
 
 Template-specific monitoring assets now exist on top of the generic overview:
 
-- `Xian Embedded Backend` dashboard for service-node and embedded-backend
+- `Xian Embedded Backend` dashboard for BDS-backed and embedded-backend
   application deployments
-- `Xian Shared Network` dashboard for consortium/shared-network service nodes
+- `Xian Shared Network` dashboard for consortium/shared-network BDS nodes
 - embedded-backend and shared-network Prometheus alert presets
 
 From `xian-stack`:
@@ -482,7 +482,7 @@ make monitoring-fidelity-down
 The built-in monitoring commands now map to meaningful monitoring postures:
 
 - `monitoring-up`: generic integrated monitoring with the overview dashboard
-- `monitoring-bds-up`: integrated service-node monitoring with the
+- `monitoring-bds-up`: integrated BDS monitoring with the
   embedded-backend alert preset
 - `monitoring-fidelity-up`: shared-network monitoring with the shared-network
   alert preset
@@ -528,7 +528,7 @@ What the dashboard adds without duplicating the main node cards:
 - richer contract metadata, including owner / developer / deployer / creator
   fields, clickable address links, and indexed generated developer-reward
   totals when BDS is available
-- recent indexed event browsing on service nodes with BDS enabled
+- recent indexed event browsing on nodes with BDS enabled
 - execution health from `/perf_status`, plus explicit visibility when advanced
   perf capture is disabled
 - BDS lag, pending-buffer depth, pool utilization, spool state,
@@ -657,7 +657,6 @@ node with trusted RPC servers and trust metadata:
 uv run xian-configure-node \
   --moniker validator-1 \
   --validator-privkey <hex> \
-  --copy-genesis \
   --statesync-enable \
   --statesync-rpc-server http://rpc-1.example:26657 \
   --statesync-rpc-server http://rpc-2.example:26657 \

@@ -17,8 +17,8 @@ Different settings live at different layers.
 
 | Layer | Typical settings |
 |------|------------------|
-| templates / manifests | block policy defaults, tracer defaults, image posture |
-| node profiles | service-node posture, logging, simulation, parallel execution, dashboard, monitoring |
+| templates / manifests | block policy defaults, genesis, P2P seeds, image posture |
+| node profiles | BDS/service posture, logging, simulation, parallel execution, dashboard, monitoring, advanced runtime defaults |
 | rendered `config.toml` | effective runtime values, including execution engine policy |
 | `xian-stack` environment | localnet and Docker-specific overrides, especially for stack-managed services |
 
@@ -44,7 +44,7 @@ Important current rules:
   execution, not alternate execution engines
 
 The high-level `xian-cli` profile flow exposes runtime-adjacent posture such as
-parallel execution and service-node settings. The VM execution policy itself is
+parallel execution and BDS/service settings. The VM execution policy itself is
 fixed.
 
 ## Application Logging
@@ -96,9 +96,16 @@ Relevant `[xian]` keys:
 - `parallel_execution_enabled`
 - `parallel_execution_workers`
 - `parallel_execution_min_transactions`
+- `parallel_execution_max_speculative_waves`
+- `parallel_execution_min_wave_acceptance_ratio`
+- `parallel_execution_low_acceptance_min_wave_size`
+- `parallel_execution_warm_workers`
+- `parallel_execution_access_estimates_enabled`
 
 Practical guidance:
 
+- `parallel_execution_workers` defaults to `4`
+- if parallel execution is enabled, workers must be greater than zero
 - enable it deliberately, not blindly
 - treat it as a rollout-managed operator feature
 - validate it against your actual workload
@@ -127,16 +134,20 @@ The app metrics endpoint is separate from CometBFT's built-in metrics exporter.
 When BDS is enabled, the app metrics exporter also mirrors the queue, lag,
 storage, and connection-pool posture from `/bds_status`.
 
-## Service-Node / BDS Runtime
+## BDS Runtime
 
-When a node is run in service-node mode, the optional indexed stack becomes
-relevant.
+When `bds_enabled = true`, the optional indexed stack becomes relevant. BDS is
+the Blockchain Data Service, one service under the node profile `services`
+object.
 
 Important `[xian.bds]` families:
 
 - connection settings for Postgres
 - pool sizing
 - statement timeout
+- queue capacity
+- live catch-up polling
+- optional RPC URL override
 - application name
 - spool location
 - warning thresholds for queued or disk-heavy recovery conditions
@@ -156,7 +167,7 @@ live-path durability mechanism.
 
 | Key | Purpose |
 |-----|---------|
-| `block_service_mode` | service-node / indexed-stack posture |
+| `bds_enabled` | BDS / indexed-stack posture |
 | `pruning_enabled` | enable block-history pruning |
 | `blocks_to_keep` | retain-height window when pruning is enabled |
 | `metrics_enabled`, `metrics_host`, `metrics_port`, `metrics_bds_refresh_seconds` | Xian application metrics |
@@ -177,7 +188,8 @@ live-path durability mechanism.
 |------------|---------|
 | `dsn`, `host`, `port`, `database`, `user`, `password` | Postgres connectivity |
 | `pool_min_size`, `pool_max_size` | connection pool sizing |
-| `statement_timeout_ms`, `application_name` | query/runtime behavior |
+| `statement_timeout_ms`, `acquire_timeout_ms`, `application_name` | query/runtime behavior |
+| `queue_max_size`, `catchup_enabled`, `catchup_poll_seconds`, `rpc_url` | live BDS queue and catch-up behavior |
 | `spool_dir`, `spool_warn_entries`, `spool_warn_bytes`, `disk_free_warn_bytes` | recovery spool and warning thresholds |
 
 ## Stack / Localnet Environment Knobs

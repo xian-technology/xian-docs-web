@@ -47,7 +47,7 @@ Minimum requirements:
 
 Recommended for serious Xian automation:
 
-- run against a service node so indexed reads and event-triggered workflows are
+- run against a node with BDS enabled so indexed reads and event-triggered workflows are
   available
 - fund the agent with a dedicated limited-purpose wallet
 - keep the agent’s skill surface narrow
@@ -68,7 +68,7 @@ In a normal operator or user workflow, the sequence is:
 
 ```mermaid
 flowchart TD
-  Node["Reachable Xian node or service node"]
+  Node["Reachable Xian node or BDS node"]
   IntentKit["xian-intentkit frontend and API"]
   Agent["Agent with purpose, model, wallet, and skills"]
   Task{"Task trigger"}
@@ -96,7 +96,7 @@ For node operators using the stack-managed integration, the usual entrypoint is:
 uv run xian network join mainnet-agent-node \
   --network mainnet \
   --template embedded-backend \
-  --service-node \
+  --bds-enabled \
   --enable-intentkit \
   --intentkit-network-id xian-mainnet \
   --init-node
@@ -197,7 +197,7 @@ single-node commands.
 For a normal autonomous Xian trading or monitoring agent, the recommended
 current pattern is:
 
-1. run `xian-intentkit` against a service node
+1. run `xian-intentkit` against a node with BDS enabled
 2. create an agent in the frontend
 3. give it a narrow purpose
 4. enable only the Xian and notification skills it needs
@@ -257,19 +257,20 @@ IntentKit service definitions into `xian-stack`.
 
 Relevant node-profile fields:
 
-- `intentkit_enabled`
-- `intentkit_network_id`
-- `intentkit_host`
-- `intentkit_port`
-- `intentkit_api_port`
+- `services.bds.enabled`
+- `services.intentkit.enabled`
+- `services.intentkit.network_id`
+- `services.intentkit.host`
+- `services.intentkit.port`
+- `services.intentkit.api_port`
 
-Common join flow for a service node:
+Common join flow for a BDS-backed IntentKit node:
 
 ```bash
 uv run xian network join mainnet-agent-node \
   --network mainnet \
   --template embedded-backend \
-  --service-node \
+  --bds-enabled \
   --enable-intentkit \
   --intentkit-network-id xian-mainnet \
   --enable-monitoring \
@@ -298,13 +299,13 @@ slots:
 networks. The stack adapter fills in the actual RPC URL and chain ID for that
 runtime.
 
-## Service-Node Recommendation
+## BDS Recommendation
 
 Basic Xian wallet and transaction flows only need RPC access.
 
 If you want indexed transaction inspection, event listing, and the broader
-service-node read surface inside `xian-intentkit`, run the node as a service
-node so the BDS-backed ABCI query paths are available.
+BDS-backed read surface inside `xian-intentkit`, enable BDS on the node so the
+BDS-backed ABCI query paths are available.
 
 For Xian event-triggered agents, this is the normal recommended posture.
 
@@ -341,7 +342,7 @@ Xian contract-call and contract-transaction tools.
 
 For an autonomous Xian trading agent, the recommended current pattern is:
 
-1. run `xian-intentkit` against a service node
+1. run `xian-intentkit` against a node with BDS enabled
 2. configure an autonomous task with:
    - `trigger_type="xian_event"`
    - `xian_event={contract,event,filters?,cooldown_seconds?}`
@@ -439,7 +440,7 @@ REDIS_HOST=localhost uv run pytest -q \
 There is now also a real live runner for the same workflow. It uses:
 
 - a real Xian localnet
-- a real service node with BDS enabled
+- a real node with BDS enabled
 - a real IntentKit local API and autonomous worker
 - a real DEX module deployed during the run
 - a real `con_pairs.Sync` event trigger with reserve-based threshold detection
