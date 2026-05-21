@@ -33,6 +33,23 @@ ok = importlib.enforce_interface(
 )
 ```
 
+## Variable Markers
+
+Use the storage type name itself as the second argument to `importlib.Var`.
+Do not quote it and do not pass a constructed storage object.
+
+Supported storage markers are:
+
+| Marker | Interface requirement |
+|--------|-----------------------|
+| `Variable` | local `Variable` storage |
+| `Hash` | local `Hash` storage |
+| `ForeignVariable` | foreign `Variable` storage |
+| `ForeignHash` | foreign `Hash` storage |
+
+The compiler preserves these markers in the Xian VM artifact, and the runtime
+resolves them as interface type markers when the contract executes.
+
 ## Why It Matters
 
 This is the closest thing to interface checking in the contract runtime. It is

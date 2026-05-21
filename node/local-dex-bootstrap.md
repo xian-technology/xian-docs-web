@@ -99,6 +99,19 @@ Emit one small swap event after deployment:
 LOCALNET_DEX_EMIT_TEST_SWAP=1 make localnet-dex-bootstrap
 ```
 
+Control local demo amounts:
+
+```bash
+LOCALNET_DEX_DEMO_TOKEN_SUPPLY=1000000 \
+LOCALNET_DEX_LIQUIDITY_CURRENCY_AMOUNT=10000 \
+LOCALNET_DEX_LIQUIDITY_DEMO_TOKEN_AMOUNT=10000 \
+LOCALNET_DEX_TEST_SWAP_AMOUNT=10 \
+make localnet-dex-bootstrap
+```
+
+The bootstrap parses these numeric values as exact decimal contract values. Use
+plain decimal strings such as `0.1` or `2500.75` when overriding them.
+
 Use a different hash-pinned DEX bundle:
 
 ```bash
@@ -131,6 +144,10 @@ DEX event automation needs more than the contract code:
 The bootstrap provides the local contracts and a demo liquid pair. It does not
 replace production deployment policy, and it does not make AI agents
 deterministic trade executors by itself.
+
+DEX transactions emitted by the bootstrap use Xian VM datetime deadline
+payloads, so the same local setup is suitable for testing MCP DEX helper flows
+against the current VM runtime.
 
 After bootstrapping the contracts, start the deterministic sidecar with
 `--dex-automation` or a node profile created with `--enable-dex-automation`.
