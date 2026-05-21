@@ -276,6 +276,12 @@ The remote starter flows now also have reusable preset files in `xian-deploy`:
 Use those with `ansible-playbook ... -e @presets/templates/<name>.yml` or place
 the same values into host/group vars in your private inventory.
 
+The `xian_runtime` role exposes the same node-local runtime controls that
+`xian-configure-node` writes: logging, simulation, pending-nonce limits,
+metrics, state sync, BDS, P2P peers, snapshot verification, and the advanced
+parallel execution guardrails. Host-publish variables still decide which
+container ports are reachable outside the remote host.
+
 Common entrypoints:
 
 ```bash

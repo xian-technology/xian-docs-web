@@ -89,7 +89,7 @@ They are written as JSON and validated on read. The current schema is explicit:
     },
     "metrics": {
       "enabled": true,
-      "host": "0.0.0.0",
+      "host": "127.0.0.1",
       "port": 9108,
       "bds_refresh_seconds": 5.0
     },
@@ -164,6 +164,11 @@ override only the nested keys you intentionally tune. Important families are:
 | `advanced.metrics` | Xian application metrics bind settings and BDS refresh cadence |
 | `advanced.pending_nonce` | local pending-nonce reservation limits |
 | `advanced.parallel_execution` | speculative execution guardrails beyond the high-level enable/worker/min-tx fields |
+
+The base profile default binds Xian application metrics to `127.0.0.1`.
+Stack/container starter templates override this to `0.0.0.0` inside the
+container so Docker publishing can reach the process; the stack or deploy host
+bind variables still decide whether metrics are reachable outside the host.
 
 ## How Profiles Are Created
 

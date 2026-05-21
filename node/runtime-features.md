@@ -161,6 +161,13 @@ been recovered from RPC. The local spool is still useful for offline
 maintenance and explicit recovery workflows, but it is no longer the primary
 live-path durability mechanism.
 
+`catchup_enabled` only starts the background catch-up worker when `rpc_url` is
+also set. Stack localnets fill this with the RPC URL reachable from the BDS
+process: loopback for integrated containers, and the CometBFT service name for
+split fidelity containers. `xian-deploy` derives the same topology-aware
+default for remote hosts when BDS is enabled; set `xian_bds_rpc_url` only when
+you need to point catch-up at a different trusted RPC endpoint.
+
 ## Runtime Key Reference
 
 ### Core `[xian]` Keys
