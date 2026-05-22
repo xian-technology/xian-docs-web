@@ -170,6 +170,10 @@ CometBFT `[statesync]` settings are protocol-level sync controls that require:
 - trust hash
 - trust period
 
+For Xian application snapshots, the trusted CometBFT app hash is the state-root
+Merkle commitment. During import, Xian recomputes that root from the downloaded
+contract state and nonce state before accepting the snapshot.
+
 These are not the same mechanism.
 
 ## State Patch Bundles

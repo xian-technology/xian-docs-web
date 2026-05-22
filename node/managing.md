@@ -639,7 +639,7 @@ uv run xian-state-snapshot import --input-path ./xian-state-snapshot.tar.gz
 
 What these snapshots contain:
 
-- latest Xian application height and app hash
+- latest Xian application height and state-root app hash
 - contract state
 - nonce state
 
@@ -655,6 +655,12 @@ against trusted Ed25519 public keys.
 
 Use `xian-state-snapshot` plus CometBFT state sync when you want protocol-level
 application snapshot bootstrap.
+
+The app hash is a 32-byte Merkle root over Xian consensus state. It includes
+contract key/value state and committed nonce keys, and excludes local runtime
+metadata that is not part of consensus. When a snapshot is imported, Xian
+recomputes this root from `exported_state.json` and rejects the archive if it
+does not match the advertised app hash.
 
 To consume peer-served application snapshots through state sync, configure the
 node with trusted RPC servers and trust metadata:
@@ -675,6 +681,7 @@ Current model:
 - snapshot export is manual
 - snapshot serving/loading is implemented through the ABCI snapshot lifecycle
 - imported snapshots are stored locally so the node can serve them afterward
+- snapshot contents are verified against the trusted CometBFT app hash
 
 ## Pruning
 
