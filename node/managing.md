@@ -658,9 +658,10 @@ application snapshot bootstrap.
 
 The app hash is a 32-byte Merkle root over Xian consensus state. It includes
 contract key/value state and committed nonce keys, and excludes local runtime
-metadata that is not part of consensus. When a snapshot is imported, Xian
-recomputes this root from `exported_state.json` and rejects the archive if it
-does not match the advertised app hash.
+metadata that is not part of consensus. Validators update this root
+incrementally during block finalization from the block's pending state writes.
+When a snapshot is imported, Xian recomputes the root from `exported_state.json`
+and rejects the archive if it does not match the advertised app hash.
 
 To consume peer-served application snapshots through state sync, configure the
 node with trusted RPC servers and trust metadata:
