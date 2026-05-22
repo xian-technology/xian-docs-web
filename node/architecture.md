@@ -10,7 +10,7 @@ deterministic core, operator UX, and runtime backend stay cleanly separated.
 | `xian-cli` | operator-facing commands and local manifest/profile artifacts |
 | `xian-stack` | Docker images, Compose topology, backend control surface |
 | `xian-abci` | deterministic node process, query handling, config rendering |
-| `xian-configs` | canonical network bundles and contract presets |
+| `xian-configs` | canonical network bundles and contract bundles |
 | `xian-contracting` | contract runtime, metering, storage, linting |
 | `xian-py` | external SDK for apps, wallets, and transaction helpers |
 

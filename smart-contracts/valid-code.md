@@ -68,11 +68,14 @@ Allowed builtins are still bounded by deterministic runtime limits:
 - `range(...)` may create at most `131,072` entries.
 - `bytes(n)` and `bytearray(n)` may allocate at most `131,072` bytes.
 - string, bytes, bytearray, list, and tuple repetition with `*` may not exceed the same sequence or byte limits.
+- integer multiplication, exponentiation, and left shifts may not create integers larger than `1,048,576` bits.
+- `int(...)` string and bytes inputs may be at most `8,192` characters or bytes.
+- three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus and rejects exponent values with more than `8,192` bits.
 - returned contract values may not exceed `131,072` bytes when serialized.
 - submitted contract source may not exceed `65,536` bytes.
 
-Numeric multiplication is unaffected. These guards prevent contracts from
-allocating large in-memory objects while keeping validation deterministic.
+These guards prevent contracts from allocating large in-memory objects or huge
+integers in a single operation while keeping validation deterministic.
 
 ## Allowed Export Signature Annotations
 

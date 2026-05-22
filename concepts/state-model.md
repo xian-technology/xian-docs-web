@@ -112,7 +112,14 @@ entire transaction rolls back, including the earlier writes and events from
 
 ## State and the App Hash
 
-After committing a block's state changes, each validator computes an `app_hash` -- a hash of the entire state database. This hash is included in the next block's header and is how CometBFT verifies that all validators agree on the state.
+After applying a block's state changes, each validator computes an `app_hash`.
+In Xian this is a 32-byte Merkle root over the canonical consensus key/value
+state: contract state plus committed nonce keys. Local runtime metadata that is
+not part of consensus is excluded. Validators maintain an in-memory root cache
+and update it from the keys touched by each block.
+
+This hash is included in the next block's header and is how CometBFT verifies
+that all validators agree on the state.
 
 If any validator has a different state (due to non-deterministic execution, a bug, or data corruption), its `app_hash` will differ, and the consensus protocol will flag the disagreement.
 

@@ -100,9 +100,9 @@ Use `xian node status <name>` for the human-facing runtime summary. It includes
 the age of the latest observed block so a stalled node is obvious even when the
 RPC is still technically reachable.
 
-Use `xian node health <name>` for machine-readable checks. On service-node
-profiles it surfaces the effective snapshot bootstrap source plus BDS lag,
-spool, and database posture.
+Use `xian node health <name>` for machine-readable checks. On profiles with BDS
+enabled it surfaces the effective snapshot bootstrap source plus BDS lag, spool,
+and database posture.
 
 ## When To Use `xian client`
 

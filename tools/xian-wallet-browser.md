@@ -132,10 +132,17 @@ The **Network settings** disclosure on the setup screen lets you override:
 - expected chain ID
 - RPC URL
 - dashboard URL
+- whether to allow HTTP data transfers for that preset
 
 If you leave those fields on the local defaults, the built-in **Local node**
 preset stays active. If you change them during setup, the wallet creates a
 custom preset and makes it active immediately.
+
+Remote `http://` RPC endpoints are blocked unless the selected preset has
+**Allow HTTP data transfers** enabled. Leave that off for public networks and
+prefer HTTPS. Use the HTTP opt-in only for trusted local or private endpoints.
+Loopback development URLs such as `http://127.0.0.1` are treated as local
+development endpoints.
 
 ## Release Flow
 
@@ -257,14 +264,18 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 ### Networks
 
 - **Built-in presets** - Local node configured by default
-- **Custom presets** - add, edit, delete RPC endpoints with optional chain ID and dashboard URL
+- **Custom presets** - add, edit, delete RPC endpoints with optional chain ID,
+  dashboard URL, and HTTP data-transfer opt-in
 - **Switch** - change active network, all state updates accordingly
 - **Status indicator** - green (ready), yellow (unreachable), red (chain mismatch), with refresh on click
 
 ### Backup
 
-- **Export** - enter password, downloads a JSON file containing the seed/key, account names, active account, network presets, watched assets, and shielded wallet state snapshots when present
-- **Import** - upload a previously exported JSON, enter a new password to encrypt
+- **Export** - enter a backup password, downloads encrypted JSON containing the
+  seed/key, account names, active account, network presets, watched assets, and
+  shielded wallet state snapshots when present
+- **Import** - paste encrypted backup JSON and enter the backup password; the
+  restored wallet state is encrypted again for local storage
 
 ### Shielded Wallet Snapshots
 

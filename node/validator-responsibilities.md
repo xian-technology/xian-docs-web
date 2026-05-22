@@ -38,7 +38,7 @@ Good validator posture includes:
 - testing changes in localnet or smoke flows before rollout
 - keeping snapshots, state-sync inputs, and patch bundles organized
 - exposing only the ports your deployment model actually needs
-- separating validator duties from optional service-node extras when necessary
+- separating validator duties from optional BDS and sidecar extras when necessary
 - watching for mismatches in execution, metrics, and indexed-service recovery
 
 ## What Validators Should Not Do

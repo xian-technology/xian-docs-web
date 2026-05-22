@@ -84,5 +84,5 @@ After the node comes back:
 - confirm it is healthy and not stuck
 - confirm it is on the expected height and chain
 - confirm the runtime posture matches the intended execution engine
-- confirm any optional service-node components recover cleanly if they are part
-  of your deployment
+- confirm any optional BDS and sidecar components recover cleanly if they are
+  part of your deployment

@@ -70,8 +70,8 @@ when BDS is available.
 GET /api/addresses?limit=50&offset=0
 ```
 
-Returns the recent indexed sender set for the explorer address list. On
-BDS-enabled service nodes this is backed by the canonical sender-history index.
+Returns the recent indexed sender set for the explorer address list. On nodes
+with BDS enabled this is backed by the canonical sender-history index.
 If the connected node does not expose that indexed address query, the dashboard
 returns the route as unavailable instead of synthesizing address rows from some
 other data source.
@@ -80,7 +80,7 @@ other data source.
 GET /api/address/<address>?limit=50&offset=0
 ```
 
-Returns indexed sender history for the address on BDS-enabled service nodes,
+Returns indexed sender history for the address on nodes with BDS enabled,
 plus the developer-reward aggregate for that same address when available.
 
 For the persisted Xian VM IR, query:

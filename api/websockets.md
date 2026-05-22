@@ -348,5 +348,5 @@ Smart Contract Execution
 - **New blocks always broadcast** to all connected clients regardless of subscriptions.
 - **State change values are strings.** Parse them in your client if you need numeric types.
 - **Subscriptions are per-connection.** If you disconnect and reconnect, you need to re-subscribe.
-- **The dashboard must be enabled** on the node (`dashboard_enabled = true` in config.toml). Not all nodes run the dashboard.
+- **The dashboard must be enabled** on the node (`services.dashboard.enabled = true` in a node profile, or the equivalent stack flag). Not all nodes run the dashboard.
 - **This is a read-only observer.** The subscription system does not affect consensus or block production. If the dashboard restarts, subscriptions are lost but the chain continues normally.

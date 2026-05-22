@@ -132,9 +132,10 @@ Per transaction, the execution flow is:
 
 After all transactions in the block are executed:
 
-1. All successful state changes are written to LMDB in a single atomic batch
-2. The `app_hash` is computed as a hash over the entire state database
+1. All successful state changes are assembled in pending state
+2. The `app_hash` cache is updated as a Merkle root over consensus state
 3. The app_hash is returned to CometBFT for inclusion in the next block header
+4. Commit persists the pending state to LMDB in a single atomic batch
 
 ### 18-20. Post-Finalization
 

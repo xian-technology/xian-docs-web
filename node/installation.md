@@ -100,9 +100,9 @@ uv run xian node health validator-1
 For backend-only debugging from `xian-stack`:
 
 ```bash
-python3 ./scripts/backend.py start --no-service-node --no-dashboard --no-monitoring
-python3 ./scripts/backend.py status --no-service-node --no-dashboard --no-monitoring
-python3 ./scripts/backend.py stop --no-service-node --no-dashboard --no-monitoring
+python3 ./scripts/backend.py start --no-bds-enabled --no-dashboard --no-monitoring
+python3 ./scripts/backend.py status --no-bds-enabled --no-dashboard --no-monitoring
+python3 ./scripts/backend.py stop --no-bds-enabled --no-dashboard --no-monitoring
 ```
 
 ## Advanced Runtime Features

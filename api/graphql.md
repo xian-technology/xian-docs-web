@@ -3,7 +3,7 @@
 GraphQL in Xian is an optional convenience layer over the BDS Postgres
 database.
 
-It is available only when the indexed service-node stack is running.
+It is available only when the stack runs BDS and the GraphQL sidecar.
 
 ## What It Runs On
 
@@ -21,7 +21,7 @@ The maintained stack publishes it on port `5000` when enabled.
 
 In the maintained `xian-stack` runtime:
 
-- GraphQL is available only on service nodes
+- GraphQL is available only on nodes with BDS enabled
 - it binds to `127.0.0.1` by default
 - public exposure is explicit through `--public-query` or
   `XIAN_PUBLIC_QUERY_ENABLED=1`

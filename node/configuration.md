@@ -33,11 +33,11 @@ flowchart TD
 Network manifests describe network-wide defaults such as:
 
 - chain and network identity
-- canonical seed nodes
+- genesis declaration
+- canonical P2P seeds and persistent peers
 - snapshot bootstrap URLs
-- runtime backend and image posture
+- image posture
 - block policy defaults
-- tracer-mode defaults
 - optional pinned release images and their provenance metadata
 - optional shielded/privacy packaging metadata such as approved privacy artifact
   catalogs and shielded history commitments
@@ -70,12 +70,15 @@ Profiles capture node-local intent such as:
 - moniker and validator key reference
 - stack checkout path
 - image mode and optional pinned images copied from a manifest
-- service-node posture
+- P2P seeds and persistent peers
+- optional node-local genesis override
+- BDS and other service posture
 - pruning
 - dashboard and monitoring settings
 - application logging settings
 - readonly simulation settings
 - parallel execution settings
+- advanced runtime defaults and overrides
 
 See [Node Profiles](/node/profiles) for the high-level JSON contract.
 
@@ -114,14 +117,15 @@ settings.
 
 ### `[xian.bds]`
 
-This section is relevant when the node is running as a service node with the
-optional indexed stack enabled.
+This section is relevant when `bds_enabled = true` and the optional indexed
+stack is enabled.
 
 It contains BDS/Postgres-related settings such as:
 
 - connection info
 - pool sizing
 - statement timeout
+- queue and catch-up settings
 - application name
 - spool location and warning thresholds
 
@@ -165,6 +169,10 @@ CometBFT `[statesync]` settings are protocol-level sync controls that require:
 - trust height
 - trust hash
 - trust period
+
+For Xian application snapshots, the trusted CometBFT app hash is the state-root
+Merkle commitment. During import, Xian recomputes that root from the downloaded
+contract state and nonce state before accepting the snapshot.
 
 These are not the same mechanism.
 
@@ -218,6 +226,33 @@ Public exposure is explicit through the stack backend:
 `public-query` is intentionally separate from `public-rpc`. It publishes the
 read-only indexed surface for BDS / GraphQL. It does not also expose the live
 node RPC.
+
+## Network Manifest Shape
+
+Manifests use object families instead of flat legacy fields:
+
+```json
+{
+  "schema_version": 1,
+  "name": "testnet",
+  "chain_id": "xian-testnet-1",
+  "genesis": {
+    "kind": "bundle",
+    "bundle": "testnet",
+    "genesis_time": "2026-03-30T00:00:00.000000Z"
+  },
+  "p2p": {
+    "seeds": [],
+    "persistent_peers": []
+  }
+}
+```
+
+`genesis.kind = "source"` points at a materialized `genesis.json` by URL or
+file path. `genesis.kind = "bundle"` tells tooling to render deterministic
+genesis from a named contract bundle such as `local`, `devnet`, or `testnet`.
+When tooling generates a source genesis from a bundle, it may also record
+`genesis_build` provenance beside the manifest.
 
 For local workflows, `xian-stack` now generates `.stack-secrets.env` on first
 use. That file holds local BDS and PostGraphile passwords and should stay

@@ -11,7 +11,7 @@ the maintained repos:
   script, localnet, and optional dashboard/BDS services.
 - `xian-abci` owns the deterministic node process, config rendering primitives,
   CometBFT-facing behavior, and application snapshot serving/loading.
-- `xian-configs` owns canonical network bundles and contract presets.
+- `xian-configs` owns canonical network bundles and contract bundles.
 
 ## Recommended Flow
 

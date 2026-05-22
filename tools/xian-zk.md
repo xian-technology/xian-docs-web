@@ -306,8 +306,8 @@ For local operator use through `xian-stack`:
 
 ```bash
 export XIAN_SHIELDED_RELAYER_PRIVATE_KEY=<relayer-ed25519-private-key>
-python3 ./scripts/backend.py start --no-service-node --shielded-relayer
-python3 ./scripts/backend.py endpoints --no-service-node --shielded-relayer
+python3 ./scripts/backend.py start --no-bds-enabled --shielded-relayer
+python3 ./scripts/backend.py endpoints --no-bds-enabled --shielded-relayer
 ```
 
 The relayer can optionally require a bearer token for quote and submission

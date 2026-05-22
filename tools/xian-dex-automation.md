@@ -181,8 +181,8 @@ Or directly through the stack backend:
 
 ```bash
 cd xian-stack
-python3 ./scripts/backend.py start --no-service-node --dex-automation
-python3 ./scripts/backend.py endpoints --no-service-node --dex-automation
+python3 ./scripts/backend.py start --no-bds-enabled --dex-automation
+python3 ./scripts/backend.py endpoints --no-bds-enabled --dex-automation
 ```
 
 The default UI/API URL is `http://127.0.0.1:38280`. `xian-stack` generates
