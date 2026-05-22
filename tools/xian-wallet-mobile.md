@@ -172,7 +172,11 @@ RPC: http://192.168.x.y:26657
 Dashboard: http://192.168.x.y:8080
 ```
 
-Use the same Wi-Fi network for the phone and the dev machine.
+Use the same Wi-Fi network for the phone and the dev machine. Remote `http://`
+RPC endpoints are blocked unless the network preset has **Allow HTTP data
+transfers** enabled. Leave that off for public networks and prefer HTTPS; only
+enable it for local or private endpoints you trust. Loopback development URLs
+such as `http://127.0.0.1` are treated as local development endpoints.
 
 #### Android release APK
 
@@ -286,7 +290,7 @@ Connect.
 xian-wallet-mobile/
   src/
     lib/
-      crypto-polyfill.ts   # Self-contained SHA-256, PBKDF2, AES-GCM
+      crypto-polyfill.ts   # React Native crypto adapter around Noble + native RNG
       wallet-controller.ts # Portable business logic
       wallet-context.tsx   # React context for state management
       rpc-client.ts        # Shared xian-js client wrapper + extra ABCI helpers
@@ -321,14 +325,14 @@ xian-wallet-mobile/
 ### Crypto Layer
 
 The mobile wallet cannot use the Web Crypto API directly. Instead it uses a
-self-contained crypto polyfill:
+small adapter around audited Noble crypto libraries plus the native random-byte
+source exposed by `react-native-get-random-values`:
 
 | Primitive | Implementation |
 |-----------|---------------|
-| SHA-256 | Pure JS (FIPS 180-4), used for key derivation |
-| HMAC-SHA256 | Built on native SHA-256 via `expo-crypto` for PBKDF2 loop performance |
-| PBKDF2 | 10,000 iterations (lower than browser's 250k due to JS-native bridge overhead) |
-| AES-256-GCM | Pure JS with lookup-table AES block cipher + GF(2^128) GHASH |
+| SHA-256 | `@noble/hashes/sha2` |
+| PBKDF2-HMAC-SHA256 | `@noble/hashes/pbkdf2`, 10,000 iterations for mobile wallet state and mobile-created backups |
+| AES-256-GCM | `@noble/ciphers/aes` |
 | Ed25519 | `@xian-tech/client` signer (`tweetnacl` under the hood) |
 | BIP39 | `@scure/bip39` (pure JS) |
 | Random | `react-native-get-random-values` (native RNG) |
@@ -340,9 +344,10 @@ self-contained crypto polyfill:
 
 Seeds are interchangeable between browser and mobile wallets.
 
-**Note:** PBKDF2 uses 10,000 iterations on mobile vs 250,000 on browser. This
-means encrypted backups are not directly interchangeable. Export / import uses
-the raw seed or key material and re-encrypts it for the target platform.
+**Note:** PBKDF2 uses 10,000 iterations for mobile wallet state vs 250,000 in
+the browser wallet to keep unlock responsive on mobile devices. Backup files
+carry their own encryption parameters, so imports decrypt the backup with the
+backup password and then re-encrypt wallet state for the target platform.
 
 ### Storage
 
@@ -352,6 +357,9 @@ the raw seed or key material and re-encrypts it for the target platform.
 | Unlocked session | `expo-secure-store` | Active private key, mnemonic when available, and a derived session key while unlocked |
 | Contacts | `AsyncStorage` | Saved recipient addresses |
 | Preferences | `AsyncStorage` | Layout, label visibility |
+
+Android automatic app-data backup is disabled for wallet data. Use the wallet's
+manual encrypted backup export when you need a portable recovery file.
 
 ### RPC Client
 
@@ -425,11 +433,13 @@ Transaction history with:
 ### Settings
 
 - **Accounts** - add, switch, rename (inline), remove
-- **Networks** - full CRUD, tap to switch, long-press to edit
+- **Networks** - full CRUD, tap to switch, long-press to edit, optional HTTP
+  data-transfer opt-in per preset
 - **Security** - reveal seed / key (tap to copy), hide
 - **Contacts** - add, delete
 - **Appearance** - quick actions position (top / bottom), hide labels
-- **Backup** - export via Share sheet, import
+- **Backup** - export encrypted backup JSON via Share sheet, import encrypted
+  backup JSON with the backup password
 - **Shielded snapshots** - save, export, import, remove, and compare stored
   shielded wallet snapshots against indexed `shielded_wallet_history` when the
   connected node exposes that BDS surface
@@ -464,6 +474,6 @@ Stack screens: Send, Receive, TokenDetail, Networks, AdvancedTx.
 - **iOS** - same codebase; simulator, device, and Xcode archive flow are
   available from the Expo project
 - **Seed compatibility** - same derivation as browser wallet, seeds work in both
-- **Backup compatibility** - JSON structure is compatible, including stored
-  shielded wallet state snapshots when present, but backup material is
-  re-encrypted for the target platform during import
+- **Backup compatibility** - encrypted backup JSON includes account metadata,
+  network presets, watched assets, and stored shielded wallet state snapshots
+  when present; imports re-encrypt wallet state for the target platform
