@@ -31,7 +31,7 @@ are injected automatically and do not need `import` statements:
 import currency
 
 def commitment(label: str):
-    return hashlib.sha3(label)
+    return hashlib.sha3_text(label)
 ```
 
 Do not put executable setup logic at module scope. Initialization belongs in
