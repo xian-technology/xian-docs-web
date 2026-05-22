@@ -119,7 +119,6 @@ A proposal is approved as soon as:
 Early rejection can also happen before expiry:
 
 - if the remaining uncast weight can no longer reach the required yes weight
-- if `no_votes > member_count_snapshot - required_yes_votes`
 
 If neither side finalizes early, the proposal stays pending until:
 

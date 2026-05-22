@@ -85,10 +85,23 @@ from xian_py import (
     XianAsync,
     XianClientConfig,
     XianException,
+    XianX402Facilitator,
+    XianX402PaymentPayload,
+    XianX402PaymentRequirement,
+    XianX402SettlementResult,
+    XianX402VerificationResult,
+    canonical_amount,
+    canonical_permit_amount,
+    construct_payment_message,
+    construct_permit_authorizer_message,
     indexed_event_sort_key,
     merged_event_payload,
     run_sync,
+    sign_xian_x402_payment,
     to_contract_time,
+    verify_xian_x402_payment,
+    x402_request,
+    xian_network_id,
 )
 ```
 
@@ -753,6 +766,45 @@ flowchart TD
   API --> ReadModel
   Client --> API
 ```
+
+## Xian x402 Payments
+
+`xian_py.x402` provides helpers for Xian-native exact x402 payments. The wallet
+signs two messages:
+
+- the x402 payment intent, bound to network, asset, amount, resource, payer,
+  payment id, deadline, and settlement contract
+- the XSC-0002 permit authorizer message, bound to the same asset, payer,
+  settlement contract, deadline, chain id, authorizer contract, and permit
+  nonce
+
+```python
+from xian_py import (
+    XianX402PaymentRequirement,
+    sign_xian_x402_payment,
+    verify_xian_x402_payment,
+    xian_network_id,
+)
+
+requirement = XianX402PaymentRequirement(
+    network=xian_network_id("xian-local-1"),
+    asset="currency",
+    amount="0.001",
+    pay_to="seller_public_key",
+    resource="https://api.example.test/data",
+)
+
+payload = sign_xian_x402_payment(
+    requirement,
+    wallet,
+    permit_nonce=0,
+)
+result = verify_xian_x402_payment(payload, requirement)
+```
+
+The serialized payment payload includes `permitSignature` and `permitNonce`.
+For repeated payments from the same payer, callers should read or track the
+current `permit_authorizer.nonces[payer]` value and pass it as `permit_nonce`.
 
 ### Registry / Approval Solution Examples
 
