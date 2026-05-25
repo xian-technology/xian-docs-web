@@ -50,6 +50,25 @@ different lifecycle, owner, or secret posture. The clearest example: merging
 node profile and deploy binding would force credentials into a document
 operators want to check into source control.
 
+## Precedence
+
+Precedence is phase-specific. There is no single global chain where every later
+layer may override every earlier layer. Each command resolves only the fields it
+owns, then writes the next artifact.
+
+| Phase or question | Value resolution |
+| --- | --- |
+| Create a new network manifest | explicit `xian network create` flag, then selected template default, then built-in default |
+| Generate a node profile | explicit `xian network create` or `xian network join` flag, then selected template profile default, then network manifest default where that field is network-scoped, then built-in profile default |
+| Resolve network identity, chain ID, and canonical genesis | network manifest, unless a command exposes an explicit node-local override |
+| Start or inspect a local node | explicit lifecycle command flag, then node profile, then network manifest where applicable, then runtime default |
+| Deploy a profile remotely | node profile for runtime intent; Ansible inventory or vault for host paths, published ports, secrets, resource limits, and topology |
+| Rendered runtime files and containers | generated output only; regenerate from the profile plus deploy bindings instead of editing by hand |
+
+Once a manifest or profile has been written, it is an artifact. Later template
+changes do not mutate existing manifests or profiles. Deploy bindings also do
+not supersede profile runtime intent; they place that profile on a host.
+
 ## Templates
 
 Templates are reusable starter defaults. They answer: "What kind of network or
