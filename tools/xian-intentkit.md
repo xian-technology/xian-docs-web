@@ -95,7 +95,7 @@ For node operators using the stack-managed integration, the usual entrypoint is:
 ```bash
 uv run xian network join mainnet-agent-node \
   --network mainnet \
-  --template embedded-backend \
+  --template single-node-indexed \
   --bds-enabled \
   --enable-intentkit \
   --intentkit-network-id xian-mainnet \
@@ -269,7 +269,7 @@ Common join flow for a BDS-backed IntentKit node:
 ```bash
 uv run xian network join mainnet-agent-node \
   --network mainnet \
-  --template embedded-backend \
+  --template single-node-indexed \
   --bds-enabled \
   --enable-intentkit \
   --intentkit-network-id xian-mainnet \
@@ -442,7 +442,7 @@ There is now also a real live runner for the same workflow. It uses:
 - a real Xian localnet
 - a real node with BDS enabled
 - a real IntentKit local API and autonomous worker
-- a real DEX module deployed during the run
+- a real DEX contract pack deployed during the run
 - a real `con_pairs.Sync` event trigger with reserve-based threshold detection
 - a real agent-side `xian_dex_trade`
 - a real Telegram post

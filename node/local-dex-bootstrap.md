@@ -23,13 +23,13 @@ For local development it can also deploy:
 The bootstrap is idempotent. Rerunning it skips contracts that already exist and
 skips the demo pool when it already has reserves. By default the stack reads the
 hash-pinned DEX bundle from
-`xian-configs/modules/dex/contract-bundle.json`.
+`xian-configs/contract-packs/dex/contract-bundle.json`.
 
 ```mermaid
 flowchart TD
-  Bundle["xian-configs/modules/dex/contract-bundle.json"]
+  Bundle["xian-configs/contract-packs/dex/contract-bundle.json"]
   Node["Running localnet or single stack node"]
-  Bootstrap["localnet-dex-bootstrap or xian module install dex"]
+  Bootstrap["localnet-dex-bootstrap or xian contract-pack install dex"]
   Check["Check existing contracts and pool reserves"]
   Contracts["Deploy con_pairs, con_dex, and optional helper"]
   Demo["Optional demo token, LP token, and XIAN/XDT pool"]
@@ -115,14 +115,14 @@ plain decimal strings such as `0.1` or `2500.75` when overriding them.
 Use a different hash-pinned DEX bundle:
 
 ```bash
-XIAN_DEX_BUNDLE=../xian-configs/modules/dex/contract-bundle.json make localnet-dex-bootstrap
+XIAN_DEX_BUNDLE=../xian-configs/contract-packs/dex/contract-bundle.json make localnet-dex-bootstrap
 ```
 
-New automation should prefer the module command:
+New automation should prefer the contract-pack command:
 
 ```bash
 cd ../xian-cli
-uv run xian module install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
 ```
 
 For development only, override the raw DEX contract source directory:

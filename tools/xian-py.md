@@ -655,7 +655,7 @@ instead of each carrying their own event-loop and cursor implementation.
 The `xian-py` repo now includes application-facing examples under
 `examples/` that show how the SDK fits into ordinary backend workflows.
 
-It also includes the first solution example set under
+It also includes the first reference example set under
 `examples/credits_ledger/`, which turns the generic SDK primitives into a
 concrete credits-ledger backend pattern.
 
@@ -721,9 +721,9 @@ Typical run:
 uv run python examples/admin_job.py
 ```
 
-### Credits Ledger Solution Examples
+### Credits Ledger Example Set
 
-`examples/credits_ledger/` adds a solution-specific set of examples for the
+`examples/credits_ledger/` adds an example-specific set of code for the
 first credits-ledger workflow and the first deeper reference-app slice:
 
 - `admin_job.py`: bootstrap or administer `con_credits_ledger`
@@ -806,9 +806,9 @@ The serialized payment payload includes `permitSignature` and `permitNonce`.
 For repeated payments from the same payer, callers should read or track the
 current `permit_authorizer.nonces[payer]` value and pass it as `permit_nonce`.
 
-### Registry / Approval Solution Examples
+### Registry / Approval Example Set
 
-`examples/registry_approval/` adds the second reference solution and the second
+`examples/registry_approval/` adds the second reference example and the second
 deeper reference-app slice:
 
 - `admin_job.py`: deploy `con_registry_records` and `con_registry_approval`,
@@ -836,9 +836,9 @@ This is the second example set that demonstrates the deeper backend pattern:
 - authoritative decoded readonly contract calls as hydration
 - a local projected read model for application-oriented approval queries
 
-### Workflow Backend Solution Examples
+### Workflow Backend Example Set
 
-`examples/workflow_backend/` adds the third reference solution and the third
+`examples/workflow_backend/` adds the third reference example and the third
 deeper reference-app slice:
 
 - `admin_job.py`: deploy `con_job_workflow`, add workers, and optionally

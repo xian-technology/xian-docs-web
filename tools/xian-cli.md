@@ -4,7 +4,7 @@
 roles:
 
 - operator workflows such as node setup, network manifests, profile handling,
-  health checks, snapshots, modules, solutions, and recovery
+  health checks, snapshots, contract packs, examples, and recovery
 - client automation through `xian client ...`, backed directly by `xian-py`
 
 If you are writing Python application code, use [`xian-py`](/tools/xian-py).
@@ -32,8 +32,8 @@ Top-level namespaces:
 - `xian snapshot ...`
 - `xian recovery ...`
 - `xian doctor ...`
-- `xian module ...`
-- `xian solution ...`
+- `xian contract-pack ...`
+- `xian example ...`
 - `xian contract bundle ...`
 - `xian client ...`
 
@@ -56,16 +56,16 @@ Current high-value flows include:
   `network join` when the node should manage those optional sidecars
 - `xian snapshot restore ...` and `xian recovery apply ...` for restore and
   recovery workflows
-- `xian module ...` when you want to inspect, validate, or install reusable
-  on-chain modules such as the DEX
-- `xian solution ...` when you want a guided starter flow built on the
+- `xian contract-pack ...` when you want to inspect, validate, or install
+  reusable on-chain contract packs such as the DEX
+- `xian example ...` when you want a guided starter flow built on the
   canonical configs
 - `xian contract bundle validate ...` when you need to verify hash-pinned
   contract bundle sources before bootstrap
 
 ```mermaid
 flowchart TD
-  Catalog["xian-configs templates, manifests, modules, and solutions"]
+  Catalog["xian-configs templates, manifests, contract packs, and examples"]
   Network["xian network create or join"]
   Profile["Local network and node profile files"]
   Node["xian node init, start, status, health"]

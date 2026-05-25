@@ -267,14 +267,17 @@ make storage-report
 Use `xian-deploy` when the node is running on a remote Linux host and you want
 the deployment-side equivalent of the local health and recovery workflow.
 
-The remote starter flows now also have reusable preset files in `xian-deploy`:
+Remote starter flows use the same node profiles as local flows. In
+`xian-deploy`, set `xian_node_profile` for each host:
 
-- `presets/templates/embedded-backend.yml`
-- `presets/templates/consortium-validator.yml`
-- `presets/templates/consortium-bds-node.yml`
+```yaml
+xian_node_profile: /path/to/network/nodes/validator-1.json
+```
 
-Use those with `ansible-playbook ... -e @presets/templates/<name>.yml` or place
-the same values into host/group vars in your private inventory.
+The profile decides runtime intent such as BDS, dashboard, monitoring, block
+policy, pruning, metrics, P2P peers, snapshots, state sync, and node images.
+Inventory stays focused on deployment bindings such as host paths, published
+ports, database credentials, memory limits, and `xian_deploy_topology`.
 
 The `xian_runtime` role exposes the same node-local runtime controls that
 `xian-configure-node` writes: logging, simulation, pending-nonce limits,
@@ -421,16 +424,16 @@ contract-level governance action.
 For the concrete JSON plan format and `xian recovery validate/apply` commands,
 see [Recovery Plans](/node/recovery-plans).
 
-Required remote variables:
+Required profile settings:
 
-- `xian_statesync_enable=true`
-- at least two `xian_statesync_rpc_servers`
-- `xian_statesync_trust_height`
-- `xian_statesync_trust_hash`
-- `xian_statesync_trust_period`
+- `advanced.statesync.enabled=true`
+- at least two `advanced.statesync.rpc_servers`
+- `advanced.statesync.trust_height`
+- `advanced.statesync.trust_hash`
+- `advanced.statesync.trust_period`
 
-This playbook validates the state-sync inputs first, deploys the runtime, then
-prints a focused bootstrap summary from the remote host.
+This playbook validates the state-sync profile settings first, deploys the
+runtime, then prints a focused bootstrap summary from the remote host.
 
 ## Monitoring Layers
 
@@ -467,12 +470,10 @@ uv run --project /path/to/xian-abci python3 -m xian.dashboard.cli \
 
 Use Prometheus and Grafana for remote monitoring, alerting, and retention.
 
-Template-specific monitoring assets now exist on top of the generic overview:
+Profile-specific monitoring assets exist on top of the generic overview:
 
-- `Xian Embedded Backend` dashboard for BDS-backed and embedded-backend
-  application deployments
 - `Xian Shared Network` dashboard for consortium/shared-network BDS nodes
-- embedded-backend and shared-network Prometheus alert presets
+- shared-network Prometheus alert variants
 
 From `xian-stack`:
 
@@ -488,10 +489,10 @@ make monitoring-fidelity-down
 The built-in monitoring commands now map to meaningful monitoring postures:
 
 - `monitoring-up`: generic integrated monitoring with the overview dashboard
-- `monitoring-bds-up`: integrated BDS monitoring with the
-  embedded-backend alert preset
+- `monitoring-bds-up`: integrated BDS monitoring with the overview and BDS
+  recovery dashboards
 - `monitoring-fidelity-up`: shared-network monitoring with the shared-network
-  alert preset
+  alert variant
 
 What gets scraped:
 

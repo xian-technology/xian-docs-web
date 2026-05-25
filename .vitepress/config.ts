@@ -66,8 +66,8 @@ export default defineConfig({
         text: 'Tools',
         items: [
           { text: 'Tools & SDKs', link: '/tools/' },
-          { text: 'Modules', link: '/modules/' },
-          { text: 'Solutions', link: '/solutions/' }
+          { text: 'Contract Packs', link: '/contract-packs/' },
+          { text: 'Examples', link: '/examples/' }
         ]
       },
       {
@@ -187,6 +187,7 @@ export default defineConfig({
             { text: 'System Requirements', link: '/node/requirements' },
             { text: 'Installation & Setup', link: '/node/installation' },
             { text: 'Configuration', link: '/node/configuration' },
+            { text: 'Config Taxonomy', link: '/node/config-taxonomy' },
             { text: 'Runtime Features', link: '/node/runtime-features' },
             { text: 'Local DEX Bootstrap', link: '/node/local-dex-bootstrap' },
             { text: '5-Validator Localnet E2E', link: '/node/localnet-e2e' },
@@ -239,25 +240,26 @@ export default defineConfig({
           ]
         }
       ],
-      '/modules/': [
+      '/contract-packs/': [
         {
-          text: 'Modules',
+          text: 'Contract Packs',
           items: [
-            { text: 'Overview', link: '/modules/' },
-            { text: 'DEX Module', link: '/modules/dex' },
-            { text: 'Stable Protocol Module', link: '/modules/stable-protocol' }
+            { text: 'Overview', link: '/contract-packs/' },
+            { text: 'DEX Contract Pack', link: '/contract-packs/dex' },
+            { text: 'Stable Protocol Contract Pack', link: '/contract-packs/stable-protocol' }
           ]
         }
       ],
-      '/solutions/': [
+      '/examples/': [
         {
-          text: 'Solutions',
+          text: 'Examples',
           items: [
-            { text: 'Overview', link: '/solutions/' },
-            { text: 'Credits Ledger', link: '/solutions/credits-ledger' },
-            { text: 'Registry / Approval', link: '/solutions/registry-approval' },
-            { text: 'Workflow Backend', link: '/solutions/workflow-backend' },
-            { text: 'DEX Demo', link: '/solutions/dex-demo' }
+            { text: 'Overview', link: '/examples/' },
+            { text: 'Credits Ledger', link: '/examples/credits-ledger' },
+            { text: 'Registry / Approval', link: '/examples/registry-approval' },
+            { text: 'Workflow Backend', link: '/examples/workflow-backend' },
+            { text: 'DEX Demo', link: '/examples/dex-demo' },
+            { text: 'x402 Exact Payment', link: '/examples/x402-exact' }
           ]
         }
       ],

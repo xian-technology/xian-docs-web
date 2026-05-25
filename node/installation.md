@@ -62,7 +62,7 @@ If you are joining an existing network instead of creating a fresh local one:
 ```bash
 uv run xian keys validator generate --out-dir ./keys/validator-1
 uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
+  --template single-node-indexed \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 uv run xian node init validator-1
@@ -82,7 +82,7 @@ Use a local source-built override when you want to test unreleased changes:
 
 ```bash
 uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
+  --template single-node-indexed \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack \
   --node-image-mode local_build

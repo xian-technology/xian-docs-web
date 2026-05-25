@@ -1,7 +1,7 @@
 # Node Profiles
 
-Node profiles are the operator-local contract between `xian-cli` and
-`xian-stack`.
+Node profiles are the operator contract shared by `xian-cli`, `xian-stack`,
+and `xian-deploy`.
 
 They are written as JSON and validated on read. The current schema is explicit:
 
@@ -41,8 +41,8 @@ They are written as JSON and validated on read. The current schema is explicit:
   "parallel_execution_enabled": false,
   "parallel_execution_workers": 4,
   "parallel_execution_min_transactions": 8,
-  "operator_profile": "embedded_backend",
-  "monitoring_profile": "bds",
+  "operator_profile": "indexed_development",
+  "monitoring_profile": "local_stack",
   "services": {
     "bds": {
       "enabled": true
@@ -140,7 +140,7 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `parallel_execution_workers` | worker count for speculative execution on this node; defaults to `4` and must be greater than zero when parallel execution is enabled |
 | `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
 | `services.bds.enabled` | enables Blockchain Data Service indexing and the BDS-backed read stack |
-| `services.dashboard` | optional runtime dashboard enable flag and bind settings |
+| `services.dashboard` | optional dashboard enable flag and local stack bind defaults; remote published ports are deploy bindings |
 | `services.monitoring.enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
 | `services.intentkit` | optional stack-managed `xian-intentkit` enable flag, network slot, and published ports |
 | `services.dex_automation` | optional stack-managed `xian-dex-automation` enable flag, bind settings, and optional config path |
@@ -175,7 +175,7 @@ bind variables still decide whether metrics are reachable outside the host.
 Profiles are usually created with:
 
 ```bash
-uv run xian network join validator-1 --network mainnet --template embedded-backend ...
+uv run xian network join validator-1 --network mainnet --template single-node-indexed ...
 ```
 
 or by `network create` when bootstrapping a fresh local network.
@@ -212,9 +212,7 @@ The current canonical templates standardize these postures:
   `monitoring_profile=none`
 - `single-node-indexed`: `operator_profile=indexed_development`,
   `monitoring_profile=local_stack`
-- `consortium-3`: `operator_profile=shared_network`,
-  `monitoring_profile=bds`
-- `embedded-backend`: `operator_profile=embedded_backend`,
+- `consortium-5`: `operator_profile=shared_network`,
   `monitoring_profile=bds`
 
 ## Scope

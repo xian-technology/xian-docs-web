@@ -1,32 +1,30 @@
-# DEX Module
+# DEX Contract Pack
 
-The DEX module is the canonical Xian AMM contract set.
+The DEX contract pack is the canonical Xian AMM contract set.
 
 Active development lives in `xian-dex`. The pinned, reproducible catalog copy
-lives in `xian-configs/modules/dex`.
+lives in `xian-configs/contract-packs/dex`.
 
-## Contract Bundle
+## Assets
 
-The canonical module assets are:
+The canonical assets are:
 
-- `modules/dex/module.json`
-- `modules/dex/contract-bundle.json`
-- `modules/dex/contracts/con_pairs.s.py`
-- `modules/dex/contracts/con_dex.s.py`
-- `modules/dex/contracts/con_dex_helper.s.py`
-- `modules/dex/contracts/con_lp_token.s.py`
-- `modules/dex/contracts/demo_token.s.py`
+- `contract-packs/dex/contract-pack.json`
+- `contract-packs/dex/contract-bundle.json`
+- `contract-packs/dex/contracts/con_pairs.s.py`
+- `contract-packs/dex/contracts/con_dex.s.py`
+- `contract-packs/dex/contracts/con_dex_helper.s.py`
+- `contract-packs/dex/contracts/con_lp_token.s.py`
+- `contract-packs/dex/contracts/demo_token.s.py`
 
-Validate the module:
+Validate the contract pack:
 
 ```bash
 cd ~/xian/xian-cli
-uv run xian module validate dex
+uv run xian contract-pack validate dex
 ```
 
 ## Recipes
-
-The module currently exposes these recipes:
 
 | Recipe | Purpose |
 |--------|---------|
@@ -44,16 +42,16 @@ make localnet-init
 make localnet-up
 ```
 
-Then install the DEX module:
+Then install the DEX contract pack:
 
 ```bash
 cd ~/xian/xian-cli
-uv run xian module install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
 ```
 
 For scripted setups, start the localnet first and then run
-`make localnet-dex-bootstrap`, or use `xian module install dex ...` when the DEX
-module should be installed through the CLI module flow.
+`make localnet-dex-bootstrap`, or use `xian contract-pack install dex ...`
+when the install should be driven through the CLI catalog flow.
 
 ## Development Overrides
 

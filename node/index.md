@@ -64,7 +64,7 @@ For joining an existing network with indexed services and monitoring defaults:
 
 ```bash
 uv run xian network join validator-1 --network mainnet \
-  --template embedded-backend \
+  --template single-node-indexed \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 uv run xian node init validator-1
@@ -103,6 +103,8 @@ deterministic validator path.
 - [System Requirements](/node/requirements): host, Docker, and workspace needs
 - [Installation & Setup](/node/installation): supported setup path today
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
+- [Config Taxonomy](/node/config-taxonomy): templates, profiles, deploy
+  bindings, bundles, contract packs, examples, and when to use each one
 - [Runtime Features](/node/runtime-features): execution-engine policy, tracer
   modes, readonly simulation, parallel execution, and the current runtime keys
 - [Local DEX Bootstrap](/node/local-dex-bootstrap): opt-in local deployment of

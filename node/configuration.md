@@ -9,6 +9,9 @@ Xian node configuration is easiest to understand as three layers:
 The higher layers describe operator intent. The rendered home is what the node
 actually runs.
 
+If you are deciding between templates, profiles, deploy bindings, bundles,
+contract packs, and examples, start with [Config Taxonomy](/node/config-taxonomy).
+
 ```mermaid
 flowchart TD
   Templates["Reusable templates"]

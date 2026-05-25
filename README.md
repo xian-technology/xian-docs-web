@@ -3,7 +3,7 @@
 `xian-docs-web` is the public Xian Technology documentation site, built
 with [VitePress](https://vitepress.dev/). It owns the published docs
 content (concepts, getting-started, smart-contract guides, API references,
-tutorials, modules, and solutions) and keeps its repo-internal notes
+tutorials, contract packs, and examples) and keeps its repo-internal notes
 hidden under `.meta/` so they are not shipped as public pages.
 
 The published site is the operator- and developer-facing source of truth
@@ -65,8 +65,8 @@ The site is statically generated; the build output goes to
     game, multi-contract dapp, streaming payments, shielded commands,
     shielded privacy token).
   - `reference/` — flat reference material.
-  - `modules/` — reusable installable contract / protocol units.
-  - `solutions/` — complete application and operator workflow patterns.
+  - `contract-packs/` — reusable installable contract / protocol units.
+  - `examples/` — complete application and operator workflow patterns.
   - `introduction/` — high-level introductions for first-time readers.
 - `public/` — static assets served as-is.
 - `.vitepress/` — site theme, navigation, sidebar, and build
