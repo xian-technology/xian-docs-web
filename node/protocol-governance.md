@@ -234,7 +234,7 @@ Current bundle shape:
   "version": 1,
   "patch_id": "metering-fix-20260327",
   "activation_height": 123456,
-  "chain_id": "xian-mainnet-1",
+  "chain_id": "xian-1",
   "summary": "Correct meter output for edge-case branch",
   "uri": "ipfs://...",
   "changes": [

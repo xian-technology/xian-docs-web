@@ -6,8 +6,11 @@ CometBFT itself. It proxies selected RPC calls and adds convenience endpoints.
 Base URL:
 
 ```text
-http://<dashboard-host>:8080
+http://<dashboard-host>:18080
 ```
+
+`18080` is the stack-managed template default host port. If you run the
+dashboard process directly, its process default is `8080`.
 
 ## Core Endpoints
 

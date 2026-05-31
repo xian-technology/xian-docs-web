@@ -3,7 +3,7 @@
 `xian-js` is the JavaScript / TypeScript SDK workspace for integrating Xian
 from browser apps, wallets, dapps, and Node.js code that prefers TS.
 
-It currently ships three public packages:
+It currently ships four public packages:
 
 - `@xian-tech/client`: typed RPC client, tx helpers, Ed25519 signing helpers, and
   websocket subscriptions
@@ -11,7 +11,9 @@ It currently ships three public packages:
   provider implementation for demos, tests, injected-wallet discovery, and
   early integrations
 - `@xian-tech/types`: the shared transaction, signer, number, and broadcast-mode
-  types used by both public packages
+  types used by the SDK packages
+- `@xian-tech/web-kit`: shared browser-app helpers for wallet connection, RPC
+  client storage, formatting, toasts, and React integration
 
 The browser wallet product line now lives in the sibling
 `xian-wallet-browser` repo, which consumes these SDK packages. The current
@@ -25,6 +27,7 @@ wallet product surface is documented here under
 - `@xian-tech/client`
 - `@xian-tech/provider`
 - `@xian-tech/types`
+- `@xian-tech/web-kit`
 
 The browser wallet product line is documented separately under
 [xian-wallet-browser](/tools/xian-wallet-browser). The source repo publishes
@@ -79,11 +82,22 @@ workspace:
 - signer interfaces
 - broadcast-mode and numeric helper types
 
+### `@xian-tech/web-kit`
+
+The web-kit package owns reusable browser-app helpers:
+
+- injected-wallet connection helpers
+- React wallet context and hooks
+- RPC client persistence helpers
+- toast helpers
+- address, number, date, and clipboard utilities
+
 That gives Xian a clean split between:
 
 - low-level network and tx logic in `@xian-tech/client`
 - wallet-provider integration in `@xian-tech/provider`
 - shared transaction and signer types in `@xian-tech/types`
+- reusable browser app glue in `@xian-tech/web-kit`
 - browser wallet product code in `xian-wallet-browser`
 
 ## Installing In Another JS Project
@@ -91,7 +105,7 @@ That gives Xian a clean split between:
 Install the packages directly from npm:
 
 ```bash
-npm install @xian-tech/client @xian-tech/provider @xian-tech/types
+npm install @xian-tech/client @xian-tech/provider @xian-tech/types @xian-tech/web-kit
 ```
 
 For local development against the monorepo itself, you can still work from the
@@ -152,12 +166,24 @@ import {
   ProviderDisconnectedError,
   ProviderUnauthorizedError,
   ProviderUnsupportedMethodError,
+  WalletConnectXianProvider,
+  XIAN_WALLETCONNECT_EVENTS,
+  XIAN_WALLETCONNECT_METHODS,
+  XIAN_WALLETCONNECT_NAMESPACE,
   XianProviderError,
   XIAN_INITIALIZED_EVENT,
+  createXianDappPolicyForRequest,
+  evaluateXianDappPolicy,
+  findMatchingXianDappPolicy,
   getInjectedXianProvider,
   listInjectedXianProviders,
+  parseXianDappAction,
   registerInjectedXianProvider,
   waitForInjectedXianProvider,
+  xianAccountFromCaip10,
+  xianAccountToCaip10,
+  xianChainIdFromCaip2,
+  xianChainIdToCaip2,
 } from "@xian-tech/provider";
 ```
 
@@ -173,6 +199,20 @@ import type {
   XianTxPayload,
   XianUnsignedTransaction,
 } from "@xian-tech/types";
+```
+
+For shared browser-app helpers, import from `@xian-tech/web-kit`:
+
+```ts
+import {
+  WalletProvider,
+  ToastProvider,
+  connectWallet,
+  createXianRpcStore,
+  sendCall,
+  shortAddress,
+  useXianWallet,
+} from "@xian-tech/web-kit";
 ```
 
 ## Ed25519 Signers
@@ -217,10 +257,13 @@ import { XianClient } from "@xian-tech/client";
 
 const client = new XianClient({
   rpcUrl: "http://127.0.0.1:26657",
-  dashboardUrl: "http://127.0.0.1:8080",
-  chainId: "xian-local",
+  dashboardUrl: "http://127.0.0.1:18080",
+  chainId: "xian-local-1",
 });
 ```
+
+The stack-managed local templates publish the dashboard on host port `18080`.
+If you run the dashboard process directly, its process default is `8080`.
 
 Constructor fields:
 
@@ -642,7 +685,7 @@ import { InMemoryXianProvider } from "@xian-tech/provider";
 const signer = new Ed25519Signer();
 const client = new XianClient({
   rpcUrl: "http://127.0.0.1:26657",
-  dashboardUrl: "http://127.0.0.1:8080",
+  dashboardUrl: "http://127.0.0.1:18080",
 });
 const provider = new InMemoryXianProvider({ signer, client });
 ```

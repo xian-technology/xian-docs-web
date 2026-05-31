@@ -29,14 +29,17 @@ see the read-safe default surface.
 
 ## Network Configuration
 
-By default, the server targets the public Xian testnet:
+Configure the target network explicitly. Current public testnet values are:
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
+| Variable | Purpose | Current public testnet value |
+|----------|---------|-------------------------------|
 | `XIAN_NODE_URL` | Node RPC URL | `https://testnet.xian.org` |
 | `XIAN_GRAPHQL` | GraphQL endpoint | `https://testnet.xian.org/graphql` |
-| `XIAN_CHAIN_ID` | Chain ID used for transaction payloads | `xian-testnet-12` |
+| `XIAN_CHAIN_ID` | Chain ID used for transaction payloads | `xian-testnet-13` |
 | `XIAN_INCLUDE_RAW` | Include raw SDK payloads in responses | `false` |
+
+When in doubt, read `result.node_info.network` from the node's `/status`
+response and use that value for `XIAN_CHAIN_ID`.
 
 For a current local stack node, point the MCP server at the local RPC and
 GraphQL endpoints:
@@ -47,8 +50,8 @@ XIAN_GRAPHQL=http://127.0.0.1:5500/graphql
 XIAN_CHAIN_ID=xian-mcp-local-1
 ```
 
-Use the chain ID from the node's `/status` response
-(`result.node_info.network`) when running against a custom local network.
+Use the chain ID from the node's `/status` response when running against a
+custom local network.
 
 ## Transport Modes
 

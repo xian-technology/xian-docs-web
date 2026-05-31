@@ -158,7 +158,7 @@ Only indexed parameters (`idx: True`) are searchable this way.
 Connect to the dashboard WebSocket and subscribe to events in real time. See [WebSocket Subscriptions](/api/websockets) for the full API.
 
 ```javascript
-const ws = new WebSocket("ws://localhost:8080/ws");
+const ws = new WebSocket("ws://localhost:18080/ws");
 
 ws.onopen = () => {
     // Watch Transfer events on the currency contract

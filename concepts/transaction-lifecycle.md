@@ -43,7 +43,7 @@ Using the Python SDK (`xian-py`), construct a transaction payload:
 from xian_py import Wallet, Xian
 
 wallet = Wallet()
-xian = Xian("http://localhost:26657", "xian-testnet-1", wallet=wallet)
+xian = Xian("http://localhost:26657", "xian-local-1", wallet=wallet)
 
 result = xian.send_tx(
     contract="currency",

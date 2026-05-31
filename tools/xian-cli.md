@@ -34,6 +34,7 @@ Top-level namespaces:
 - `xian doctor ...`
 - `xian contract-pack ...`
 - `xian example ...`
+- `xian contract build-artifacts ...`
 - `xian contract bundle ...`
 - `xian client ...`
 
@@ -60,6 +61,8 @@ Current high-value flows include:
   reusable on-chain contract packs such as the DEX
 - `xian example ...` when you want a guided starter flow built on the
   canonical configs
+- `xian contract build-artifacts ...` when you need to build `xian_vm_v1`
+  deployment artifacts from contract source
 - `xian contract bundle validate ...` when you need to verify hash-pinned
   contract bundle sources before bootstrap
 
@@ -224,6 +227,7 @@ The `tx` namespace signs and submits transactions.
 Available commands:
 
 - `xian client tx send`
+- `xian client tx submit-artifacts`
 - `xian client tx transfer`
 
 ### Supplying A Private Key
@@ -272,6 +276,15 @@ xian client tx send \
   currency \
   approve \
   --kwargs-json '{"to":"con_dex","amount":7}'
+```
+
+### Submit Prebuilt Contract Artifacts
+
+```bash
+xian client tx submit-artifacts \
+  --node-url http://127.0.0.1:26657 \
+  --private-key-env XIAN_PRIVATE_KEY \
+  ./artifacts/my-contract.json
 ```
 
 ## Submission Controls

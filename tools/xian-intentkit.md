@@ -90,19 +90,23 @@ flowchart TD
   Tools --> Review
 ```
 
-For node operators using the stack-managed integration, the usual entrypoint is:
+For node operators using the stack-managed integration, the usual entrypoint is
+to join one of the maintained canonical manifests or pass an explicit manifest.
+The current checked-in canonical manifests cover local, devnet, and testnet
+profiles; mainnet operators should use the operator-supplied mainnet manifest
+for their deployment.
 
 ```bash
-uv run xian network join mainnet-agent-node \
-  --network mainnet \
+uv run xian network join testnet-agent-node \
+  --network testnet \
   --template single-node-indexed \
-  --bds-enabled \
+  --enable-bds \
   --enable-intentkit \
-  --intentkit-network-id xian-mainnet \
+  --intentkit-network-id xian-testnet \
   --init-node
 
-uv run xian node start mainnet-agent-node
-uv run xian node endpoints mainnet-agent-node
+uv run xian node start testnet-agent-node
+uv run xian node endpoints testnet-agent-node
 ```
 
 For local/private runs, the same model applies: bring up the frontend/API,
@@ -267,12 +271,12 @@ Relevant node-profile fields:
 Common join flow for a BDS-backed IntentKit node:
 
 ```bash
-uv run xian network join mainnet-agent-node \
-  --network mainnet \
+uv run xian network join testnet-agent-node \
+  --network testnet \
   --template single-node-indexed \
-  --bds-enabled \
+  --enable-bds \
   --enable-intentkit \
-  --intentkit-network-id xian-mainnet \
+  --intentkit-network-id xian-testnet \
   --enable-monitoring \
   --init-node
 ```
@@ -280,9 +284,9 @@ uv run xian network join mainnet-agent-node \
 Then start it normally:
 
 ```bash
-uv run xian node start mainnet-agent-node
-uv run xian node endpoints mainnet-agent-node
-uv run xian node health mainnet-agent-node
+uv run xian node start testnet-agent-node
+uv run xian node endpoints testnet-agent-node
+uv run xian node health testnet-agent-node
 ```
 
 ## Network Slot Mapping
@@ -290,7 +294,7 @@ uv run xian node health mainnet-agent-node
 The stack integration maps node posture to one of four current IntentKit Xian
 slots:
 
-- canonical mainnet -> `xian-mainnet`
+- operator-supplied mainnet manifest -> `xian-mainnet`
 - canonical testnet -> `xian-testnet`
 - canonical devnet -> `xian-devnet`
 - local or private stack-managed network -> `xian-localnet`

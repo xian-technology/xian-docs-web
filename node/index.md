@@ -60,16 +60,21 @@ uv run xian node health validator-1
 uv run xian node stop validator-1
 ```
 
-For joining an existing network with indexed services and monitoring defaults:
+For joining an existing canonical network with indexed services and monitoring
+defaults:
 
 ```bash
-uv run xian network join validator-1 --network mainnet \
+uv run xian network join validator-1 --network testnet \
   --template single-node-indexed \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 uv run xian node init validator-1
 uv run xian node start validator-1
 ```
+
+Mainnet operators should pass the operator-supplied mainnet manifest with
+`--network-manifest`; the current checked-in canonical manifests cover local,
+devnet, and testnet.
 
 When the joined network manifest pins published node images, `xian node start`
 pulls those immutable images by default through `xian-stack`. Use

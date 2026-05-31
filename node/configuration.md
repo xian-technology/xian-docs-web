@@ -218,7 +218,8 @@ publishing:
 - CometBFT RPC defaults to `127.0.0.1:26657`
 - CometBFT metrics defaults to `127.0.0.1:26660`
 - Xian app metrics defaults to `127.0.0.1:9108`
-- dashboard defaults to `127.0.0.1:8080`
+- dashboard process defaults to `127.0.0.1:8080`; maintained stack templates
+  currently publish it on host port `18080`
 - PostGraphile defaults to `127.0.0.1:5000`
 - `xian-dex-automation` defaults to `127.0.0.1:38280` when enabled
 
@@ -259,6 +260,10 @@ genesis from a named contract bundle such as `local`, `devnet`, or `testnet`.
 When tooling generates a source genesis from a bundle, it may also record
 `genesis_build` provenance beside the manifest.
 
+This example shows the checked-in canonical testnet manifest shape. When you
+target a public RPC endpoint, use the chain ID reported by `/status`
+(`result.node_info.network`) for transaction payloads.
+
 For local workflows, `xian-stack` now generates `.stack-secrets.env` on first
 use. That file holds local BDS and PostGraphile passwords and should stay
 untracked. For BDS-enabled runs, PostGraphile now uses its own dedicated
@@ -272,7 +277,8 @@ read-only database role instead of the primary BDS owner account.
 | `26657` | CometBFT RPC |
 | `26660` | CometBFT Prometheus metrics |
 | `9108` | Xian application Prometheus metrics |
-| `8080` | optional dashboard |
+| `8080` | optional dashboard process default |
+| `18080` | stack-managed dashboard host-port default |
 | `9090` | optional Prometheus |
 | `3000` | optional Grafana |
 | `5000` | optional GraphQL / PostGraphile |

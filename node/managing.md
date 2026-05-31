@@ -322,9 +322,12 @@ node.
 Local path:
 
 ```bash
-uv run xian network join validator-1 --network mainnet
+uv run xian network join validator-1 --network testnet
 uv run xian node init validator-1
 ```
+
+For mainnet recovery, pass the operator-supplied mainnet manifest with
+`--network-manifest`.
 
 Remote path:
 

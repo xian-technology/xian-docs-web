@@ -67,7 +67,7 @@ Set the target network in `.env`:
 PORT=4173
 XIAN_NETWORK_ID=mainnet
 XIAN_NETWORK_NAME="Xian Mainnet"
-XIAN_CHAIN_ID=<chain-id>
+XIAN_CHAIN_ID=xian-1
 XIAN_RPC_URL=https://<rpc-host>
 XIAN_DASHBOARD_URL=https://<dashboard-host>
 XIAN_GOVERNANCE_CONTRACT=governance

@@ -192,7 +192,7 @@ relay_plan = relay_wallet.build_relay_transfer(
     recipient=recipient_bundle.recipient,
     amount=25,
     relayer="relayer-1",
-    chain_id="xian-mainnet-1",
+    chain_id="xian-1",
     fee=2,
 )
 
@@ -393,7 +393,7 @@ command_wallet = ShieldedCommandWallet.from_json(wallet.to_json())
 command_plan = command_wallet.build_command(
     target_contract="con_shielded_dex_adapter",
     relayer="relayer-1",
-    chain_id="xian-mainnet-1",
+    chain_id="xian-1",
     fee=5,
     public_amount=100,
     payload={

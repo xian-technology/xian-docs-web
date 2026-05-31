@@ -5,10 +5,12 @@ The dashboard exposes a WebSocket endpoint at `/ws` that supports real-time subs
 ## Connecting
 
 ```javascript
-const ws = new WebSocket("ws://localhost:8080/ws");
+const ws = new WebSocket("ws://localhost:18080/ws");
 ```
 
-Replace `localhost:8080` with the dashboard address of the node you want to connect to.
+Replace `localhost:18080` with the dashboard address of the node you want to
+connect to. `18080` is the stack-managed template default host port; a direct
+dashboard process defaults to `8080`.
 
 Once connected, you'll automatically receive `new_block` messages for every block the node commits. To receive state changes or contract events, you need to subscribe explicitly.
 
@@ -194,6 +196,7 @@ the service:
 | Limit | Default | CLI flag |
 |-------|---------|----------|
 | concurrent WebSocket clients | `100` | `--max-ws-clients` |
+| concurrent connections from one client address | `8` | `--max-ws-clients-per-client` |
 | state subscriptions per client | `64` | `--max-state-subs-per-client` |
 | event subscriptions per client | `32` | `--max-event-subs-per-client` |
 | inbound message size | `64 KiB` | `--max-ws-message-bytes` |
@@ -202,7 +205,7 @@ the service:
 ## Full Example: Wallet Balance Watcher
 
 ```javascript
-const ws = new WebSocket("ws://localhost:8080/ws");
+const ws = new WebSocket("ws://localhost:18080/ws");
 const MY_ADDRESS = "your_public_key_here";
 
 ws.onopen = () => {
@@ -257,7 +260,7 @@ import json
 import websockets
 
 async def monitor_dex():
-    async with websockets.connect("ws://localhost:8080/ws") as ws:
+    async with websockets.connect("ws://localhost:18080/ws") as ws:
         # Watch all state changes on the DEX contract
         await ws.send(json.dumps({
             "action": "subscribe",
@@ -290,7 +293,7 @@ asyncio.run(monitor_dex())
 ## Full Example: Multi-Token Portfolio Tracker
 
 ```javascript
-const ws = new WebSocket("ws://localhost:8080/ws");
+const ws = new WebSocket("ws://localhost:18080/ws");
 const MY_ADDRESS = "your_public_key_here";
 const TOKENS = ["currency", "con_usdt", "con_eth", "con_btc"];
 

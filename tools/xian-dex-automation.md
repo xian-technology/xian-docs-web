@@ -171,6 +171,7 @@ operators can enable it from a node profile:
 uv run xian network create local-dex --chain-id xian-local-1 \
   --template single-node-indexed \
   --generate-validator-key \
+  --bootstrap-node local-dex \
   --enable-dex-automation \
   --init-node
 uv run xian node start local-dex

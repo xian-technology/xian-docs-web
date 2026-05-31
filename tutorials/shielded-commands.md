@@ -185,7 +185,7 @@ note.
 command_plan = wallet.build_command(
     target_contract="con_shielded_dex_adapter",
     relayer="relayer-1",
-    chain_id="xian-mainnet-1",
+    chain_id="xian-1",
     fee=5,
     public_amount=100,
     payload={
@@ -218,7 +218,7 @@ commands.execute_command(
     expires_at=command_plan.request.expires_at,
     output_payloads=command_plan.output_payloads,
     signer="relayer-1",
-    environment={"chain_id": "xian-mainnet-1"},
+    environment={"chain_id": "xian-1"},
 )
 ```
 

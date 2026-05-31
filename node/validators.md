@@ -20,10 +20,14 @@ uv run xian keys validator generate --out-dir ./keys/validator-1
 Join or create the target network profile:
 
 ```bash
-uv run xian network join validator-1 --network mainnet \
+uv run xian network join validator-1 --network testnet \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 ```
+
+For mainnet, pass the operator-supplied mainnet manifest with
+`--network-manifest`; the checked-in canonical manifests currently cover local,
+devnet, and testnet.
 
 For canonical networks, that profile now inherits pinned published
 `xian-node` image digests from the network manifest by default. Use

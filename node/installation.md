@@ -61,12 +61,16 @@ If you are joining an existing network instead of creating a fresh local one:
 
 ```bash
 uv run xian keys validator generate --out-dir ./keys/validator-1
-uv run xian network join validator-1 --network mainnet \
+uv run xian network join validator-1 --network testnet \
   --template single-node-indexed \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 uv run xian node init validator-1
 ```
+
+Mainnet operators should pass the operator-supplied mainnet manifest with
+`--network-manifest`; the current checked-in canonical manifests cover local,
+devnet, and testnet.
 
 Canonical network manifests can now pin published `xian-node` image digests.
 When those fields are present, `xian network join` writes them into the node
@@ -81,7 +85,7 @@ refs / build toolchain those images were produced from.
 Use a local source-built override when you want to test unreleased changes:
 
 ```bash
-uv run xian network join validator-1 --network mainnet \
+uv run xian network join validator-1 --network testnet \
   --template single-node-indexed \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack \

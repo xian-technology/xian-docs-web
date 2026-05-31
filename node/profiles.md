@@ -9,7 +9,7 @@ They are written as JSON and validated on read. The current schema is explicit:
 {
   "schema_version": 1,
   "name": "validator-1",
-  "network": "mainnet",
+  "network": "testnet",
   "moniker": "validator-1",
   "validator_key_ref": "./keys/validator-1/validator_key_info.json",
   "node_image_mode": "registry",
@@ -57,7 +57,7 @@ They are written as JSON and validated on read. The current schema is explicit:
     },
     "intentkit": {
       "enabled": false,
-      "network_id": "xian-mainnet",
+      "network_id": "xian-testnet",
       "host": "127.0.0.1",
       "port": 38000,
       "api_port": 38080
@@ -175,10 +175,14 @@ bind variables still decide whether metrics are reachable outside the host.
 Profiles are usually created with:
 
 ```bash
-uv run xian network join validator-1 --network mainnet --template single-node-indexed ...
+uv run xian network join validator-1 --network testnet --template single-node-indexed ...
 ```
 
 or by `network create` when bootstrapping a fresh local network.
+
+For mainnet, use `--network-manifest` with the operator-supplied mainnet
+manifest. The checked-in canonical manifests currently cover local, devnet, and
+testnet.
 
 Use `xian network template list` to inspect the canonical starter shapes before
 creating or joining a network.
