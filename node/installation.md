@@ -50,6 +50,23 @@ contract from `xian-configs`.
 
 ## Create Local Operator Artifacts
 
+For a guided local setup or network join, use:
+
+```bash
+cd ~/xian/xian-cli
+uv run xian setup node
+```
+
+To inspect the exact lifecycle commands and files first:
+
+```bash
+uv run xian setup node --mode join --network testnet --name validator-1 --plan
+```
+
+The wizard is a thin wrapper over the explicit commands below. Use the lower
+level commands directly when you need advanced flags or automation-specific
+control.
+
 ```bash
 cd ~/xian/xian-cli
 uv run xian network template list
