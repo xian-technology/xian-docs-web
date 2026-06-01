@@ -220,17 +220,59 @@ allowed to commit what is still correct in serial order.
 The runtime now includes a dedicated benchmark harness in
 `xian-contracting/tests/performance/benchmark_parallel_tps.py`.
 
-Representative local numbers from the current implementation on an 8-core
-development machine, using mostly non-conflicting automated transactions:
+Representative local numbers from June 1, 2026 were collected on an Apple M1
+development machine with 8 logical CPUs, Python 3.14.5, 4 parallel workers, 5
+iterations per scenario, warmed workers, and the default guardrails of 4
+speculative waves, 25% minimum wave acceptance, and 8 low-acceptance minimum
+wave size.
 
-- `256` transactions, `20,000` contract-loop rounds per transaction:
-  serial about `915 TPS`, parallel about `1,655 TPS`, about `1.77x`
-- `256` transactions, `50,000` contract-loop rounds per transaction:
-  serial about `431 TPS`, parallel about `1,583 TPS`, about `3.68x`
+Command:
 
-Those numbers are execution-engine throughput, not full end-to-end network TPS.
-They are useful for comparing the execution path, not for quoting a guaranteed
-validator TPS figure.
+```bash
+uv run python tests/performance/benchmark_parallel_tps.py --scenario all --iterations 5 --workers 4 --markdown
+```
+
+| Workload | Tx | Rounds | Serial TPS | Parallel TPS | Speedup | Speculative outcome |
+|---|---:|---:|---:|---:|---:|---|
+| Independent CPU-heavy writes | 256 | 50,000 | 34 | 120 | 3.55x | 256 / 256 accepted |
+| Independent light writes | 256 | 1,000 | 300 | 938 | 3.14x | 256 / 256 accepted |
+| Small independent block | 8 | 10,000 | 121 | 432 | 3.63x | 8 / 8 accepted |
+| Same sender, independent keys | 128 | 10,000 | 117 | 116 | 1.01x | 128 prefiltered to serial |
+| Hot counter contention | 128 | 10,000 | 126 | 97 | 0.78x | 1 accepted, 127 guardrail fallbacks |
+| Many writes, one scan at tail | 128 | 10,000 | 126 | 435 | 3.44x | 127 accepted, 1 prefiltered |
+| Alternating writes and scans | 64 | 5,000 | 187 | 148 | 0.79x | 1 accepted, 63 guardrail fallbacks |
+| Mostly independent, periodic hot counter | 128 | 10,000 | 125 | 103 | 0.82x | 9 accepted, 119 guardrail fallbacks |
+
+These numbers are execution-engine throughput, not full end-to-end network TPS.
+They compare the serial and speculative execution paths after worker warmup;
+they should not be quoted as a guaranteed validator TPS figure.
+
+The result is workload-dependent:
+
+- parallel execution is clearly useful when a block contains many transactions
+  from different senders that touch disjoint state
+- it still helps when broad reads such as `Hash.all()` are pushed to the tail of
+  a block, because the independent prefix can be accepted first
+- same-sender runs naturally collapse back to serial execution and are roughly
+  neutral
+- hot shared state and alternating scan/write patterns are worse than serial
+  execution, even with guardrails, because the node pays for failed speculation
+  before serializing the tail
+
+That makes speculative parallel execution worth keeping as a configurable
+node-side feature, especially for high-throughput workloads with independent
+accounts or sharded contract state. It should remain rollout-managed rather
+than blindly enabled for every validator profile. Operators should monitor
+`speculative_accepted`, `serial_prefiltered`, `serial_fallbacks`, and
+`guardrail_fallbacks`; if fallback-heavy blocks dominate, serial execution is
+the better posture for that workload.
+
+One important measurement boundary: this benchmark uses custom contract
+functions, so the node's conservative access estimator cannot know most shapes
+ahead of time. Built-in known shapes, such as common token transfer and approve
+patterns, can be prefiltered or staged earlier by the ABCI wrapper. Unknown
+contract shapes are still safe because the runtime records actual reads,
+writes, and prefix reads before accepting speculative results.
 
 ## What It Does Not Do
 

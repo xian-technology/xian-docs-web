@@ -109,6 +109,12 @@ Practical guidance:
 - enable it deliberately, not blindly
 - treat it as a rollout-managed operator feature
 - validate it against your actual workload
+- expect the largest gains when blocks contain many different senders touching
+  disjoint state
+- expect little or negative gain when blocks repeatedly touch the same hot
+  state key or alternate writes with broad prefix scans
+- watch the parallel execution counters; sustained `serial_fallbacks` or
+  `guardrail_fallbacks` means the workload is behaving more like serial work
 - remember that it is process-level speculation with serial fallback, not
   unrestricted shared-memory concurrency
 
