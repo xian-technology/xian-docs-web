@@ -113,6 +113,7 @@ This section carries the main Xian runtime toggles, including:
 - metrics
 - application logging
 - readonly simulation
+- transaction fee mode and 0-fee chi caps
 - parallel execution
 - local pending-nonce reservation behavior
 
@@ -203,6 +204,7 @@ In practice:
 - application metrics live under `[xian]`
 - Xian application logging lives under `[xian]`
 - readonly simulation lives under `[xian]`
+- transaction fee mode lives under `[xian]`
 - speculative parallel execution lives under `[xian]`
 - the execution engine policy lives under `[xian.execution.engine]`
 

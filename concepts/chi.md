@@ -10,9 +10,14 @@ It is not a separate token. It is the unit Xian uses to price execution.
 When a transaction is submitted, it carries a chi limit.
 
 - if execution finishes within that limit, the transaction succeeds and the
-  chain charges the chi actually used
+  receipt records the chi actually used
 - if execution exceeds the limit, execution aborts, state changes roll back,
   and the submitted limit is what matters for failure accounting
+
+On normal paid networks, used chi is converted into a native-token fee. On
+0-fee networks, chi is still the deterministic execution budget and receipt
+unit, but the runtime does not debit the sender's native-token balance for
+execution.
 
 ## Core Constants
 
@@ -97,7 +102,8 @@ success is still bounded by the `chi` supplied by the sender.
 
 ## Converting Chi To Native Token Cost
 
-Chi is priced through the chain's native token:
+In the default `paid_metered` fee mode, chi is priced through the chain's
+native token:
 
 ```text
 token_cost = chi_used / 20
@@ -112,6 +118,36 @@ Examples:
 | `10,000` | `500.0` |
 | `100,000` | `5,000.0` |
 | `1,000,000` | `50,000.0` |
+
+## 0-Fee Metered Networks
+
+Operators can run a network with `tx_fee_mode = "free_metered"` in the rendered
+Xian node config. In this mode:
+
+- transaction execution is still metered
+- each transaction still supplies a chi budget
+- receipts still report `chi_used`
+- the runtime does not debit native-token fees for execution
+- fee-derived validator, foundation, and developer rewards are not generated
+- admission does not require a native-token balance just to cover chi
+
+This is different from disabling metering. Contracts still run under a fixed
+chi budget and can still fail with out-of-chi. Contract-level balances,
+allowances, and assertions are unchanged; a token transfer can still fail for
+insufficient token balance.
+
+0-fee networks should set explicit resource caps:
+
+```toml
+tx_fee_mode = "free_metered"
+free_tx_max_chi = 1000000
+free_block_max_chi = 20000000
+```
+
+`free_tx_max_chi` caps the submitted chi budget for one transaction.
+`free_block_max_chi` caps the total submitted chi budget admitted into one
+proposed block. These caps are the main spam and capacity controls when fees
+are not used as an economic throttle.
 
 ## Why Chi Matters For Design
 

@@ -86,6 +86,43 @@ Operationally:
 - it is meant for SDKs, wallets, and developer tooling
 - it should not be treated as free unbounded public compute
 
+## Transaction Fee Mode
+
+The transaction fee mode is a network-level runtime policy. Every validator on
+the same chain must render the same fee-mode settings.
+
+Relevant `[xian]` keys:
+
+- `tx_fee_mode`
+- `free_tx_max_chi`
+- `free_block_max_chi`
+
+Supported modes:
+
+| Mode | Behavior |
+|------|----------|
+| `paid_metered` | default; execution is metered, senders must have enough native-token balance for the submitted chi limit, used chi is charged, and fee-derived rewards are generated |
+| `free_metered` | execution is metered, but native-token fee debits and fee-derived rewards are disabled |
+
+Use `free_metered` only with explicit chi caps. `free_tx_max_chi` limits the
+submitted chi budget for one transaction, and `free_block_max_chi` limits the
+total submitted chi budget accepted into one proposed block. The block cap must
+be greater than or equal to the transaction cap.
+
+Example rendered config:
+
+```toml
+tx_fee_mode = "free_metered"
+free_tx_max_chi = 1000000
+free_block_max_chi = 20000000
+```
+
+0-fee mode does not make execution unlimited. Transactions still need a chi
+budget, execution can still run out of chi, and receipts still report
+`chi_used`. The difference is billing: the runtime does not debit the sender's
+native-token balance for execution and does not create validator/foundation/
+developer rewards from transaction fees.
+
 ## Parallel Execution
 
 Xian supports speculative parallel block execution while still committing the
@@ -186,6 +223,7 @@ you need to point catch-up at a different trusted RPC endpoint.
 | `metrics_enabled`, `metrics_host`, `metrics_port`, `metrics_bds_refresh_seconds` | Xian application metrics |
 | `transaction_trace_logging`, `app_log_*` | Xian application logging |
 | `simulation_*` | readonly simulation controls |
+| `tx_fee_mode`, `free_tx_max_chi`, `free_block_max_chi` | transaction fee policy and 0-fee chi caps |
 | `parallel_execution_*` | speculative parallel execution controls |
 | `pending_nonce_reservation_ttl_seconds` | local pending-nonce reservation TTL |
 

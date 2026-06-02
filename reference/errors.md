@@ -25,7 +25,8 @@ These happen before execution, during mempool admission:
 - invalid signature
 - wrong `chain_id`
 - nonce mismatch
-- insufficient balance for the supplied chi limit
+- insufficient balance for the supplied chi limit on paid-fee networks
+- submitted chi above the configured 0-fee transaction or block cap
 
 These transactions do not enter the block execution path.
 
@@ -47,7 +48,7 @@ Current execution outputs also classify these failures under `error_class`:
 Effects:
 
 - state changes for that transaction are rolled back
-- consumed chi are still charged
+- consumed chi are still recorded; paid-fee networks charge the matching execution fee
 - emitted events from that transaction are discarded
 
 ## Query/Service Errors

@@ -100,7 +100,7 @@ When a transaction fails (assertion error, out of chi, runtime error), its state
 
 1. The pending writes buffer for that transaction is discarded
 2. No state from the failed transaction reaches LMDB
-3. The chi consumed up to the failure point are still charged
+3. The receipt records consumed chi; paid networks charge the matching execution fee
 4. Events emitted during the failed transaction are also discarded
 
 This rollback is immediate and requires no explicit undo logic -- the pending writes were never committed.

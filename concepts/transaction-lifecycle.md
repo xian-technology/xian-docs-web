@@ -8,14 +8,14 @@ Every transaction on Xian follows a defined path from creation to finalization. 
 flowchart TD
   SDK["1-2 SDK creates payload and signs with Ed25519"]
   RPC["3 Broadcast through CometBFT RPC"]
-  Check["4-7 CHECK_TX validates signature, chain id, nonce, and chi balance"]
+  Check["4-7 CHECK_TX validates signature, chain id, nonce, and fee policy"]
   Reject["Rejected before mempool"]
   Mempool["8 Mempool waits for block inclusion"]
   Consensus["9 CometBFT BFT consensus fixes block order"]
   Finalize["10-14 FINALIZE_BLOCK executes and meters contract calls"]
   Outcome{"Execution succeeds?"}
   Buffer["Buffer state changes, chi, return value, and events"]
-  Rollback["Rollback state changes and still charge consumed chi"]
+  Rollback["Rollback state changes and account for consumed chi"]
   Commit["15-17 Atomic LMDB commit and app_hash calculation"]
   Finalized["18-20 RPC queries, indexing, and WebSocket notifications"]
 
@@ -81,7 +81,7 @@ Before entering the mempool, the transaction passes through validation:
 1. **Signature verification** -- the Ed25519 signature must be valid for the payload and sender's public key
 2. **Chain ID check** -- the transaction's chain_id must match the network
 3. **Nonce check** -- the nonce must be the next expected value for this sender
-4. **Balance check** -- the sender must have enough XIAN to cover the requested chi limit
+4. **Fee-policy check** -- in `paid_metered` mode, the sender must have enough XIAN to cover the requested chi limit; in `free_metered` mode, the submitted chi budget is checked against configured transaction and block caps instead
 
 If any check fails, the transaction is rejected and never enters the mempool.
 Local pending-nonce reservations only happen after the transaction passes the
@@ -126,7 +126,7 @@ Per transaction, the execution flow is:
    consensus timestamp as `now`
 6. **Completion or failure**:
    - **Success** -- state changes are buffered for commit, chi consumed are recorded
-   - **Failure** (assertion, out of chi, runtime error) -- state changes are rolled back, chi are still charged
+   - **Failure** (assertion, out of chi, runtime error) -- state changes are rolled back, chi are recorded, and paid networks charge the matching execution fee
 
 ### 15-17. Commit
 
@@ -159,9 +159,9 @@ After finalization, querying a transaction returns:
 
 ## Failure Modes
 
-| Failure | When | State Changes | Chi Charged |
-|---------|------|---------------|----------------|
+| Failure | When | State Changes | Fee Charged |
+|---------|------|---------------|-------------|
 | CHECK_TX rejection | Before mempool | None | None |
-| Assertion error | During execution | Rolled back | Yes (chi consumed up to failure) |
-| Out of chi | During execution | Rolled back | Yes (full chi limit) |
-| Runtime error | During execution | Rolled back | Yes (chi consumed up to failure) |
+| Assertion error | During execution | Rolled back | Paid networks charge consumed chi; 0-fee networks charge `0` |
+| Out of chi | During execution | Rolled back | Paid networks charge the bounded failed-execution cost; 0-fee networks charge `0` |
+| Runtime error | During execution | Rolled back | Paid networks charge consumed chi; 0-fee networks charge `0` |

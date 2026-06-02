@@ -280,10 +280,11 @@ Inventory stays focused on deployment bindings such as host paths, published
 ports, database credentials, memory limits, and `xian_deploy_topology`.
 
 The `xian_runtime` role exposes the same node-local runtime controls that
-`xian-configure-node` writes: logging, simulation, pending-nonce limits,
-metrics, state sync, BDS, P2P peers, snapshot verification, and the advanced
-parallel execution guardrails. Host-publish variables still decide which
-container ports are reachable outside the remote host.
+`xian-configure-node` writes: logging, simulation, transaction fee mode,
+pending-nonce limits, metrics, state sync, BDS, P2P peers, snapshot
+verification, and the advanced parallel execution guardrails. Host-publish
+variables still decide which container ports are reachable outside the remote
+host.
 
 Common entrypoints:
 

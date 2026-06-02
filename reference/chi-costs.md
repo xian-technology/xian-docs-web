@@ -22,7 +22,7 @@ schedule.
 | Item | Value |
 |------|-------|
 | Base transaction cost | 5 chi |
-| Chi-to-XIAN conversion | 20 chi = 1 XIAN |
+| Chi-to-XIAN conversion in `paid_metered` mode | 20 chi = 1 XIAN |
 
 ## Limits
 
@@ -132,7 +132,8 @@ public inputs to `32`, and registry verifying-key ids to `128` characters.
 
 ## XIAN Cost Conversion
 
-At 20 chi per XIAN:
+In the default `paid_metered` mode, the chain converts used chi to XIAN at 20
+chi per XIAN:
 
 | Billed chi | XIAN cost |
 |------------|-----------|
@@ -141,6 +142,10 @@ At 20 chi per XIAN:
 | 100 | 5 |
 | 1,000 | 50 |
 | 10,000 | 500 |
+
+In `free_metered` mode, the same chi accounting and receipt values apply, but
+the execution fee charged to the sender is `0`. Use the submitted chi caps in
+the node config to bound per-transaction and per-block work on 0-fee networks.
 
 Use dry-run simulation for operation-level estimates. Deployment includes more
 than final writes: it also pays for contract-analysis work and canonical source
