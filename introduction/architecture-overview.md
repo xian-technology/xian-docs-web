@@ -1,8 +1,9 @@
 # Architecture Overview
 
-Xian is organized as a small set of focused repositories that together cover
-contract authoring, deterministic execution, node operations, SDKs, and
-optional higher-level services.
+Xian is organized as a maintained set of focused repositories that together
+cover contract authoring, deterministic execution, node operations, SDKs,
+applications, AI-assisted workflows, public docs, and optional higher-level
+services.
 
 ## Core Runtime Repositories
 
@@ -13,6 +14,8 @@ optional higher-level services.
 | `xian-configs` | canonical network manifests, system contracts, templates, contract packs, examples |
 | `xian-stack` | Docker images, Compose topology, localnet, monitoring, optional sidecars |
 | `xian-cli` | operator workflow surface for keys, manifests, node init/start/stop/health |
+| `xian-deploy` | remote Linux deployment playbooks for released node images and prepared node homes |
+| `xian-governance-web` | validator governance operations console for proposals, voting, state patches, and chain status |
 
 ## Network, Contract Pack, Example, And Sidecar Structure
 
@@ -116,18 +119,44 @@ symlinks between repositories for canonical catalog assets because they are
 brittle in CI, Docker builds, remote deployments, archives, and release
 artifacts.
 
-## Developer and Application Repositories
+## Contract, Protocol, And Product Repositories
+
+| Repo | Main role |
+|------|-----------|
+| `xian-contracts` | maintained contract packages, including shielded-note and shielded-command contracts |
+| `xian-dex` | canonical DEX contracts, SnakX frontend, and hash-pinned DEX bundle manifest |
+| `xian-dex-automation` | deterministic DEX event automation sidecar with rule evaluation and optional swap execution |
+| `xian-stable-protocol` | Xian-native overcollateralized stable-vault reference protocol |
+| `xian-nft-web` | XSC-0005 NFT marketplace for discovering, minting, and listing NFT collections |
+| `xian-bridge` | cross-chain bridge service for monitored source-chain deposits and matching Xian-side transfers |
+| `xian-tg-bot` | plugin-first Telegram bot framework for Xian notifications, commands, and service integrations |
+
+## Developer, Wallet, And Agent Tooling Repositories
 
 | Repo | Main role |
 |------|-----------|
 | `xian-py` | Python SDK for reads, submissions, watchers, indexed feeds, and shielded relayer clients |
 | `xian-js` | TypeScript client, provider contract, relayer clients, and browser dapp example |
-| `xian-wallet-browser` / `xian-wallet-mobile` | end-user wallet applications |
-| `xian-contracts` | maintained contract packages, including shielded-note and shielded-command contracts |
+| `xian-wallet-browser` | browser extension wallet and reusable wallet domain layer |
+| `xian-wallet-mobile` | Expo / React Native mobile wallet application for Xian accounts and transactions |
 | `xian-linter` | standalone lint service/package |
 | `xian-playground-web` | browser playground for authoring, linting, deploying, and calling contracts |
+| `xian-ide-web` | Monaco-based browser IDE for writing, testing, deploying, and interacting with contracts |
 | `xian-contracting-hub-web` | curated contract catalog and deployment UI |
 | `xian-mcp-server` | local MCP/HTTP bridge for AI-assisted Xian workflows |
+| `xian-intentkit` | self-hosted agent platform fork with Xian-specific skills and stack integration |
+| `xian-ai-guides` | context guides for LLM-generated Xian contracts, BDS queries, and tests |
+| `xian-ai-skills` | drop-in agent skill packs for Xian SDK usage, node operations, and contract development |
+
+## Docs, Standards, Website, And Workspace Repositories
+
+| Repo | Main role |
+|------|-----------|
+| `xian-docs-web` | public VitePress documentation site and source of truth for developer/operator docs |
+| `xian-technology-web` | public xian.technology brand and information website |
+| `xian-meta` | shared repository conventions, change workflow, and cross-repo design contracts |
+| `xian-xips` | Xian standards and improvement proposals, including XSC specifications and reference material |
+| `.github` | organization profile and shared community-health files |
 
 ## Execution Path
 
