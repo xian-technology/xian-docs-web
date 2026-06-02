@@ -1,6 +1,6 @@
 # Installation & Setup
 
-The supported setup path today is the sibling-workspace model:
+The supported setup path uses the sibling-workspace model:
 
 ```text
 ~/xian/
@@ -48,24 +48,102 @@ make validate
 `make validate` checks both the Compose topology and the canonical manifest
 contract from `xian-configs`.
 
-## Create Local Operator Artifacts
+## Guided Node Setup
 
-For a guided local setup or network join, use:
+`xian setup node` is the recommended first path for local node setup. It walks
+through the same lifecycle that the lower-level commands expose:
+
+- choose whether to join an existing network or create a local single-node network
+- choose the network name, node name, validator key mode, and runtime preset
+- create or join the network manifest and write the node profile
+- materialize the CometBFT home with `xian node init`
+- optionally start the node and run the post-start health check
+
+For an interactive setup:
 
 ```bash
 cd ~/xian/xian-cli
 uv run xian setup node
 ```
 
-To inspect the exact lifecycle commands and files first:
+Non-interactive shells must pass either `--plan` or `--yes`. Use `--plan` to
+inspect the exact lifecycle commands and output paths before writing files:
 
 ```bash
 uv run xian setup node --mode join --network testnet --name validator-1 --plan
 ```
 
+Use `--yes` to apply the plan without confirmation. In scripted runs, pass
+`--start` explicitly when the node should start immediately:
+
+```bash
+uv run xian setup node --mode local --network local-dev --name validator-1 \
+  --preset basic --key-mode generate --start --yes
+```
+
+For a joined node with indexed services, use the indexed preset and a validator
+key reference:
+
+```bash
+uv run xian keys validator generate --out-dir ./keys/validator-1
+uv run xian setup node --mode join --network testnet --name validator-1 \
+  --preset indexed --key-mode existing \
+  --validator-key-ref ./keys/validator-1/validator_key_info.json \
+  --start --yes
+```
+
+For mainnet or an operator-supplied network, pass the manifest explicitly:
+
+```bash
+uv run xian setup node --mode join --network mainnet --name validator-1 \
+  --network-manifest /path/to/mainnet/manifest.json \
+  --preset indexed --key-mode existing \
+  --validator-key-ref ./keys/validator-1/validator_key_info.json \
+  --no-start --yes
+```
+
+Common wizard options:
+
+| Option | Use |
+|--------|-----|
+| `--mode join|local` | join a manifest-backed network or create a fresh local network |
+| `--preset basic|indexed` | choose `single-node-dev` or `single-node-indexed` |
+| `--key-mode generate|existing` | generate validator key material or use `--validator-key-ref` |
+| `--network-manifest` | use an operator-supplied manifest for a joined network |
+| `--bootstrap-mode genesis|snapshot` | choose the join bootstrap source |
+| `--restore-snapshot` | restore the effective snapshot after initializing a joined node |
+| `--start` / `--no-start` | start immediately or only write the artifacts |
+| `--base-dir` | choose where `nodes/`, `networks/`, and `keys/` are written |
+| `--stack-dir` / `--configs-dir` | point at explicit sibling checkouts |
+| `--node-image-mode registry|local_build` | use pinned images or local source builds |
+| `--force` | overwrite existing generated artifacts where supported |
+
+Wizard defaults:
+
+| Field | Default |
+|-------|---------|
+| setup path | `join` |
+| joined network | `testnet` |
+| local network | `local-dev` |
+| node name | `validator-1` |
+| local chain ID | `xian-local-1` for `local` / `local-dev`, otherwise `xian-<network>-1` |
+| joined preset | `indexed` |
+| local preset | `basic` |
+| key mode | `generate`, unless `--validator-key-ref` is supplied |
+| interactive start choice | asks, defaulting to start |
+| scripted start choice | does not start unless `--start` is supplied |
+
+The `basic` preset maps to `single-node-dev`. It creates a minimal local node
+profile with the dashboard enabled and BDS / monitoring disabled.
+
+The `indexed` preset maps to `single-node-indexed`. It enables BDS, the local
+dashboard, and monitoring. The first start of an indexed local build can spend
+time pulling or building Docker images, including the PostGraphile image used by
+the optional GraphQL layer. Startup progress is printed while Docker works.
+
 The wizard is a thin wrapper over the explicit commands below. Use the lower
 level commands directly when you need advanced flags or automation-specific
-control.
+control that the wizard does not expose.
 
 ```bash
 cd ~/xian/xian-cli
@@ -86,10 +164,10 @@ uv run xian node init validator-1
 ```
 
 Mainnet operators should pass the operator-supplied mainnet manifest with
-`--network-manifest`; the current checked-in canonical manifests cover local,
-devnet, and testnet.
+`--network-manifest`; the checked-in canonical manifests cover local, devnet,
+and testnet.
 
-Canonical network manifests can now pin published `xian-node` image digests.
+Canonical network manifests may pin published `xian-node` image digests.
 When those fields are present, `xian network join` writes them into the node
 profile and `xian node start` pulls those images by default instead of building
 from the local workspace.
@@ -170,7 +248,7 @@ from trusted peers through CometBFT state sync.
 
 ## Distribution Model
 
-Xian now supports two node-runtime paths on the same `xian-stack` backend:
+Xian supports two node-runtime paths on the same `xian-stack` backend:
 
 - canonical networks can pin published immutable `xian-node` images by digest
 - local and custom workflows can keep using source-built workspace images

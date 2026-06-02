@@ -15,27 +15,28 @@ the maintained repos:
 
 ## Recommended Flow
 
-The supported workflow today is:
+The supported workflow is:
 
-1. Inspect the available starter templates with `xian-cli`
-2. Generate validator key material with `xian-cli` when needed
-3. Create or join a network manifest/profile
-4. Materialize the local CometBFT home with `xian node init`
-5. Start and stop the runtime through `xian-stack`
-6. Use `xian node status`, `xian node endpoints`, `xian node health`, monitoring, and the optional dashboard for inspection
+1. Run `xian setup node` to choose local setup or network join
+2. Choose validator key mode and the `basic` or `indexed` runtime preset
+3. Let the wizard create or join the network, write the node profile, and
+   materialize the local CometBFT home
+4. Start and stop the runtime through `xian-stack`
+5. Use `xian node status`, `xian node endpoints`, `xian node health`,
+   monitoring, and the optional dashboard for inspection
 
 ```mermaid
 flowchart TD
-  Templates["Inspect templates"]
-  Keys["Generate validator keys when needed"]
-  Profile["Create or join a network manifest and node profile"]
+  Setup["xian setup node"]
+  Keys["Generate or reference validator keys"]
+  Profile["Network manifest and node profile"]
   Init["xian node init renders the CometBFT home"]
   Start["xian node start delegates runtime to xian-stack"]
   Observe["Inspect status, endpoints, health, monitoring, and dashboard"]
   Remote["Prepare remote host material"]
   Deploy["xian-deploy bootstrap, health, recovery, and runbooks"]
 
-  Templates --> Keys
+  Setup --> Keys
   Keys --> Profile
   Profile --> Init
   Init --> Start
@@ -51,9 +52,8 @@ runbooks.
 Typical commands:
 
 ```bash
-uv run xian network template list
-uv run xian network create local-dev --chain-id xian-local-1 \
-  --template single-node-dev --generate-validator-key --init-node
+uv run xian setup node --mode local --network local-dev --name validator-1 \
+  --preset basic --key-mode generate --start --yes
 uv run xian node status validator-1
 uv run xian node endpoints validator-1
 uv run xian node health validator-1
@@ -64,12 +64,10 @@ For joining an existing canonical network with indexed services and monitoring
 defaults:
 
 ```bash
-uv run xian network join validator-1 --network testnet \
-  --template single-node-indexed \
+uv run xian setup node --mode join --network testnet --name validator-1 \
+  --preset indexed --key-mode existing \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
-  --stack-dir ../xian-stack
-uv run xian node init validator-1
-uv run xian node start validator-1
+  --stack-dir ../xian-stack --start --yes
 ```
 
 Mainnet operators should pass the operator-supplied mainnet manifest with
@@ -78,10 +76,10 @@ devnet, and testnet.
 
 When the joined network manifest pins published node images, `xian node start`
 pulls those immutable images by default through `xian-stack`. Use
-`--node-image-mode local_build` during `network join` when you need a dev
-override against the local workspace instead.
+`--node-image-mode local_build` during setup when you need a dev override
+against the local workspace instead.
 
-Without templates, the lower-level flow is still available:
+The lower-level flow is still available:
 
 1. Generate validator key material with `xian-cli`
 2. Create or join a network manifest/profile manually
@@ -106,7 +104,7 @@ deterministic validator path.
 
 - [Architecture](/node/architecture): how the runtime pieces fit together
 - [System Requirements](/node/requirements): host, Docker, and workspace needs
-- [Installation & Setup](/node/installation): supported setup path today
+- [Installation & Setup](/node/installation): supported setup path
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
 - [Config Taxonomy](/node/config-taxonomy): templates, profiles, deploy
   bindings, bundles, contract packs, examples, and when to use each one

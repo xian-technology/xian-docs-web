@@ -27,6 +27,7 @@ The installed command is `xian`.
 Top-level namespaces:
 
 - `xian keys ...`
+- `xian setup ...`
 - `xian network ...`
 - `xian node ...`
 - `xian snapshot ...`
@@ -46,8 +47,9 @@ transaction automation.
 Use the non-`client` namespaces when you are shaping manifests and profiles or
 inspecting a running node.
 
-Current high-value flows include:
+High-value flows include:
 
+- `xian setup node ...` for a guided local node setup or network join
 - `xian network create ...` for local or private network manifests
 - `xian network join ...` for generating a local node profile from a canonical
   network manifest
@@ -69,6 +71,7 @@ Current high-value flows include:
 ```mermaid
 flowchart TD
   Catalog["xian-configs templates, manifests, contract packs, and examples"]
+  Setup["xian setup node"]
   Network["xian network create or join"]
   Profile["Local network and node profile files"]
   Node["xian node init, start, status, health"]
@@ -79,6 +82,8 @@ flowchart TD
   RPC["CometBFT RPC"]
 
   Catalog --> Network
+  Catalog --> Setup
+  Setup --> Profile
   Network --> Profile
   Profile --> Node
   Node --> Stack
@@ -87,9 +92,39 @@ flowchart TD
   Client --> RPC
 ```
 
-`--dry-run` is available on `network create`, `network join`, and recovery-plan
-application so you can validate inputs and inspect the planned artifact paths
-before anything is written to disk.
+`--dry-run` is available on `setup node`, `network create`, `network join`, and
+recovery-plan application so you can validate inputs and inspect the planned
+artifact paths before anything is written to disk.
+
+## Guided Node Setup
+
+Use `xian setup node` when you want the CLI to ask for the setup path, network,
+node name, validator key mode, runtime preset, and start behavior:
+
+```bash
+uv run xian setup node
+```
+
+Use `--plan` to see the generated lower-level commands and paths:
+
+```bash
+uv run xian setup node --mode join --network testnet --name validator-1 --plan
+```
+
+Use `--yes` for non-interactive setup. Scripted runs do not start the node
+unless `--start` is supplied:
+
+```bash
+uv run xian setup node --mode join --network testnet --name validator-1 \
+  --preset indexed --key-mode existing \
+  --validator-key-ref ./keys/validator-1/validator_key_info.json \
+  --start --yes
+```
+
+The `basic` preset maps to `single-node-dev`; the `indexed` preset maps to
+`single-node-indexed` and enables BDS, dashboard, and monitoring. See
+[Installation & Setup](/node/installation#guided-node-setup) for the full
+wizard reference.
 
 `xian-cli` is also manifest-aware. When a canonical network manifest includes
 pinned node images and release provenance, `network join` carries that posture
