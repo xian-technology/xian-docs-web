@@ -116,6 +116,9 @@ Common wizard options:
 | `--base-dir` | choose where `nodes/`, `networks/`, and `keys/` are written |
 | `--stack-dir` / `--configs-dir` | point at explicit sibling checkouts |
 | `--node-image-mode registry|local_build` | use pinned images or local source builds |
+| `--tx-fee-mode paid_metered|free_metered` | choose paid transaction fees or 0-fee metered execution |
+| `--free-tx-max-chi` | cap one transaction's submitted chi budget in `free_metered` mode |
+| `--free-block-max-chi` | cap one proposed block's total submitted chi budget in `free_metered` mode |
 | `--force` | overwrite existing generated artifacts where supported |
 
 Wizard defaults:
@@ -214,10 +217,11 @@ If you need lower-level runtime tuning such as:
 
 see [Runtime Features](/node/runtime-features).
 
-The supported high-level `xian-cli` flow currently surfaces tracer selection,
-and parallel execution settings, but some lower-level runtime knobs still
-require editing the rendered `config.toml`, using `xian-configure-node`, or
-setting the relevant `xian-stack` environment variables.
+The supported high-level `xian-cli` flow currently surfaces the common runtime
+settings operators need during setup, including transaction fee mode, readonly
+simulation, parallel execution, logging, pruning, and optional sidecars. Use
+`xian-configure-node`, rendered config edits, or stack environment variables
+only for lower-level runtime knobs that are not part of the profile flow.
 
 ## Remote Linux Hosts
 

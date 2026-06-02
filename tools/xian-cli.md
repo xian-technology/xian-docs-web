@@ -99,7 +99,9 @@ artifact paths before anything is written to disk.
 ## Guided Node Setup
 
 Use `xian setup node` when you want the CLI to ask for the setup path, network,
-node name, validator key mode, runtime preset, and start behavior:
+node name, validator key mode, runtime preset, and start behavior. The same
+command also accepts advanced runtime flags such as `--tx-fee-mode` when you
+need a non-default network policy:
 
 ```bash
 uv run xian setup node

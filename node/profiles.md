@@ -38,6 +38,9 @@ They are written as JSON and validated on read. The current schema is explicit:
   "simulation_max_concurrency": 2,
   "simulation_timeout_ms": 3000,
   "simulation_max_chi": 1000000,
+  "tx_fee_mode": "paid_metered",
+  "free_tx_max_chi": 1000000,
+  "free_block_max_chi": 20000000,
   "parallel_execution_enabled": false,
   "parallel_execution_workers": 4,
   "parallel_execution_min_transactions": 8,
@@ -136,6 +139,9 @@ They are written as JSON and validated on read. The current schema is explicit:
 | `simulation_max_concurrency` | maximum concurrent readonly simulations accepted by this node |
 | `simulation_timeout_ms` | wall-clock timeout for one readonly simulation worker |
 | `simulation_max_chi` | readonly chi budget cap used during simulation |
+| `tx_fee_mode` | transaction fee policy, either `paid_metered` or `free_metered` |
+| `free_tx_max_chi` | maximum submitted chi budget for one transaction when `tx_fee_mode=free_metered` |
+| `free_block_max_chi` | maximum total submitted chi budget accepted into one proposed block when `tx_fee_mode=free_metered` |
 | `parallel_execution_enabled` | enables speculative parallel block execution for this node |
 | `parallel_execution_workers` | worker count for speculative execution on this node; defaults to `4` and must be greater than zero when parallel execution is enabled |
 | `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
@@ -151,7 +157,8 @@ They are written as JSON and validated on read. The current schema is explicit:
 
 Profiles are the declarative source for node runtime settings. The high-level
 fields cover the choices most operators set deliberately: P2P peers, pruning,
-block policy, logging, simulation, parallel execution, and sidecar services.
+block policy, logging, simulation, transaction fee mode, parallel execution,
+and sidecar services.
 
 The `advanced` object carries lower-level knobs that normally work well with
 defaults. Keep it in the profile when you want a complete local contract, and
@@ -246,6 +253,10 @@ idle. Contract `now` still comes from the finalized consensus block timestamp.
 Readonly simulation and speculative parallel execution are both node-local
 operator posture. They do not change consensus rules, but they do change how a
 node exposes free compute and how it schedules block execution work locally.
+
+`tx_fee_mode` is network-level runtime policy carried by each node profile.
+Every validator on the same chain should render the same fee-mode settings.
+Use `free_metered` only with explicit transaction and block chi caps.
 
 When `snapshot_url` points to a signed snapshot manifest instead of a raw
 archive, the profile must also carry one or more trusted
