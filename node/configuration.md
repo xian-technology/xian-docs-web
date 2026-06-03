@@ -218,12 +218,13 @@ publishing:
 
 - CometBFT P2P remains public-facing by default on `26656`
 - CometBFT RPC defaults to `127.0.0.1:26657`
-- CometBFT metrics defaults to `127.0.0.1:26660`
-- Xian app metrics defaults to `127.0.0.1:9108`
+- CometBFT metrics defaults to `http://127.0.0.1:26660/metrics`
+- Xian app metrics defaults to `http://127.0.0.1:9108/metrics`
 - dashboard process defaults to `127.0.0.1:8080`; maintained stack templates
   currently publish it on host port `18080`
-- PostGraphile defaults to `127.0.0.1:5000`
+- PostGraphile defaults to `http://127.0.0.1:5000/graphql`
 - `xian-dex-automation` defaults to `127.0.0.1:38280` when enabled
+- the shielded relayer defaults to `127.0.0.1:38180` when enabled
 
 Public exposure is explicit through the stack backend:
 
@@ -271,23 +272,28 @@ use. That file holds local BDS and PostGraphile passwords and should stay
 untracked. For BDS-enabled runs, PostGraphile now uses its own dedicated
 read-only database role instead of the primary BDS owner account.
 
-## Common Ports
+## Common Local Endpoints
 
-| Port | Purpose |
-|------|---------|
-| `26656` | CometBFT P2P |
-| `26657` | CometBFT RPC |
-| `26660` | CometBFT Prometheus metrics |
-| `9108` | Xian application Prometheus metrics |
-| `8080` | optional dashboard process default |
-| `18080` | stack-managed dashboard host-port default |
-| `9090` | optional Prometheus |
-| `3000` | optional Grafana |
-| `5000` | optional GraphQL / PostGraphile |
-| `38280` | optional `xian-dex-automation` admin UI and API |
+These are the usual local endpoints a node runner may see. Not every service is
+enabled on every node or profile.
 
-Additional sidecars such as the shielded relayer or `xian-intentkit` use their
-own published ports when enabled.
+| Surface | Default local endpoint | When it exists |
+|---------|------------------------|----------------|
+| CometBFT P2P | `26656` | node runtime |
+| CometBFT RPC | `http://127.0.0.1:26657/status` | node runtime |
+| CometBFT metrics | `http://127.0.0.1:26660/metrics` | CometBFT Prometheus metrics enabled |
+| Xian metrics/perf | `http://127.0.0.1:9108/metrics` | Xian application metrics enabled |
+| Dashboard process | `http://127.0.0.1:8080` | dashboard service enabled |
+| Dashboard stack host | `http://127.0.0.1:18080` | maintained stack templates that publish the dashboard on a separate host port |
+| BDS GraphQL | `http://127.0.0.1:5000/graphql` | BDS and PostGraphile enabled |
+| Prometheus | `http://127.0.0.1:9090` | monitoring enabled |
+| Grafana | `http://127.0.0.1:3000` | monitoring enabled |
+| DEX automation | `http://127.0.0.1:38280` | `xian-dex-automation` enabled |
+| Shielded relayer | `http://127.0.0.1:38180` | shielded relayer enabled |
+
+Related frontend dev servers are separate from the node runtime. The DEX UI
+uses `http://127.0.0.1:5173/` in `xian-dex/web`; the browser IDE uses Vite's
+dev-server port selection and prints the actual URL when started.
 
 Those port numbers describe the service sockets, not a guarantee that the
 service is Internet-facing. In the maintained stack, only CometBFT P2P is

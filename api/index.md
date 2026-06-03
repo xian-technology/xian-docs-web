@@ -12,6 +12,7 @@ different jobs and they are not all equally authoritative.
 | dashboard REST | optional convenience API for explorer and operator UX |
 | dashboard WebSocket | optional real-time subscriptions for dashboards, dapps, and monitors |
 | Xian app metrics | Prometheus metrics for runtime, execution, and BDS health |
+| CometBFT metrics | Prometheus metrics for consensus, networking, and mempool health |
 | GraphQL | optional PostGraphile layer over the BDS Postgres database |
 
 ## Which Surface To Use
@@ -76,5 +77,6 @@ GET http://localhost:18080/api/abci_query/contract_info/currency
 GET http://localhost:18080/api/abci_query/blocks/limit=20/offset=0
 GET http://localhost:18080/api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0
 GET http://localhost:9108/metrics
+GET http://localhost:26660/metrics
 GET http://localhost:5000/graphql
 ```
