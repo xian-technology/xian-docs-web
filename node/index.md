@@ -110,6 +110,8 @@ deterministic validator path.
   bindings, bundles, contract packs, examples, and when to use each one
 - [Runtime Features](/node/runtime-features): execution-engine policy, tracer
   modes, readonly simulation, parallel execution, and the current runtime keys
+- [Pruning & Retention](/node/pruning): block-history pruning policy,
+  `blocks_to_keep` sizing, and recovery implications
 - [Local DEX Bootstrap](/node/local-dex-bootstrap): opt-in local deployment of
   `con_pairs`, `con_dex`, and a demo liquid pair for DEX UI and event testing
 - [xian-dex-automation](/tools/xian-dex-automation): optional deterministic
@@ -125,7 +127,8 @@ deterministic validator path.
 - [Recovery Plans](/node/recovery-plans): the guided operator rollback /
   restore workflow when forward patching is not enough
 - [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`
-- [Starting, Stopping & Monitoring](/node/managing): the operational commands
+- [Starting, Stopping & Monitoring](/node/managing): operational commands,
+  monitoring surfaces, and incident runbooks
 - [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,
-  reindex, and snapshot import/export workflows
+  BDS rebuilds, and snapshot import/export workflows
 - [Validators](/node/validators): validator-specific setup and expectations

@@ -314,6 +314,10 @@ The remote health playbook checks:
 ## Recovery Runbooks
 
 Use the recovery/bootstrap path that matches the artifact you already have.
+These procedures are operator runbooks, not contract APIs. Prefer the least
+destructive path that restores the node to a known-good state, and verify with
+`xian node health`, remote `health.yml`, or `/bds_status` before returning the
+node to normal service.
 
 ### Prepared Node-Home Archive
 
@@ -366,6 +370,14 @@ Required remote variable:
 Use this when you want the node to bootstrap from trusted peers that already
 serve Xian application snapshots through CometBFT state sync.
 
+Required profile settings:
+
+- `advanced.statesync.enabled=true`
+- at least two `advanced.statesync.rpc_servers`
+- `advanced.statesync.trust_height`
+- `advanced.statesync.trust_hash`
+- `advanced.statesync.trust_period`
+
 Local path:
 
 - set the rendered `[statesync]` config through the node profile
@@ -376,6 +388,48 @@ Remote path:
 ```bash
 ansible-playbook playbooks/bootstrap-state-sync.yml
 ```
+
+This playbook validates the state-sync profile settings first, deploys the
+runtime, then prints a focused bootstrap summary from the remote host.
+
+### Snapshot Or State-Sync Bootstrap Fails
+
+Use this when a newly joined node fails during snapshot restore or gets stuck
+before it can join through state sync.
+
+Operator response:
+
+1. confirm the node is using the intended network manifest and profile
+2. run the local or remote health check before deleting any state
+3. verify the snapshot URL, signed manifest keys, or state-sync trust data
+4. confirm at least two state-sync RPC servers are reachable and on the same
+   chain
+5. confirm the trust height and trust hash came from that chain and are still
+   inside the trust period
+6. retry the restore only after the inputs are corrected
+
+Local checks and retry:
+
+```bash
+uv run xian node health validator-1
+uv run xian doctor validator-1
+uv run xian snapshot restore validator-1
+```
+
+Remote checks:
+
+```bash
+ansible-playbook playbooks/health.yml
+ansible-playbook playbooks/bootstrap-state-sync.yml
+```
+
+Important boundaries:
+
+- `snapshot_url` restores a prepared node-home archive or signed snapshot
+  manifest
+- CometBFT state sync restores Xian application snapshots from trusted peers
+- BDS/Postgres data is not restored by either path; rebuild or import BDS
+  separately when indexed history matters
 
 ### Forward State Patch Activation
 
@@ -428,16 +482,43 @@ contract-level governance action.
 For the concrete JSON plan format and `xian recovery validate/apply` commands,
 see [Recovery Plans](/node/recovery-plans).
 
-Required profile settings:
+### RPC Reachable But Height Is Stale
 
-- `advanced.statesync.enabled=true`
-- at least two `advanced.statesync.rpc_servers`
-- `advanced.statesync.trust_height`
-- `advanced.statesync.trust_hash`
-- `advanced.statesync.trust_period`
+Use this when `/status` answers but the latest block height or block age stops
+moving.
 
-This playbook validates the state-sync profile settings first, deploys the
-runtime, then prints a focused bootstrap summary from the remote host.
+Operator response:
+
+1. compare local height against at least one trusted peer or public RPC
+2. check local peer count and whether CometBFT reports `catching_up`
+3. inspect application logs for `process_proposal`, `finalize_block`, or
+   state-patch failures
+4. if only the local node is isolated, fix peers/seeds or restart the local
+   runtime
+5. if multiple validators are stalled at the same height, stop treating it as a
+   local repair and coordinate with the validator set
+
+Useful checks:
+
+```bash
+uv run xian node status validator-1
+uv run xian node health validator-1
+uv run xian node endpoints validator-1
+```
+
+Remote checks:
+
+```bash
+ansible-playbook playbooks/status.yml
+ansible-playbook playbooks/health.yml
+```
+
+Important boundary:
+
+- do not wipe local state just because the RPC process is reachable but stale
+- a local peer/connectivity issue is a node operation
+- a network-wide halt or app-hash divergence is a coordinated recovery-plan
+  event
 
 ## Monitoring Layers
 
@@ -621,12 +702,118 @@ What this needs:
 
 - local or remote CometBFT RPC access
 - retained block history for the heights you want to index
+- a maintenance window or runtime shape where the reindex command is not racing
+  another live BDS writer against the same Postgres database
 
-If the local node has already pruned away the required history, local reindex
-cannot reconstruct it. In that case the practical options are:
+### BDS Lag After A Database Outage
 
-- reindex from an archival RPC source
-- import a BDS snapshot from another node
+Use this when BDS was temporarily unable to write, for example because Postgres
+was down or unreachable, but the BDS database is not believed to be corrupted.
+
+Operator response:
+
+1. restore Postgres or the network path to Postgres
+2. check `/bds_status` and confirm `db_status`, `worker_running`,
+   `indexed.indexed_height`, `height_lag`, and `catching_up`
+3. let automatic catch-up run while `height_lag` is decreasing
+4. use offline spool maintenance only if the local spool contains finalized
+   blocks that were not persisted
+5. use `xian-bds-reindex` only if automatic catch-up cannot close the gap
+
+Useful checks:
+
+```text
+GET /api/abci_query/bds_status
+GET /api/abci_query/bds_spool/limit=50/offset=0
+```
+
+Offline maintenance commands:
+
+```bash
+uv run xian-bds-spool compact --offline
+uv run xian-bds-spool drain --offline
+uv run xian-bds-reindex --rpc-url http://127.0.0.1:26657
+```
+
+Important boundary:
+
+- do not use `--reset` for ordinary lag
+- run spool maintenance or manual reindex from a maintenance shell where the
+  same BDS database is not also being actively rewritten by another BDS process
+
+### BDS Database Corruption: Reset And Rebuild
+
+Use this when Postgres has corrupted BDS rows or schema, BDS cannot start
+cleanly after restart, or indexed reads are known to be wrong. This rebuilds the
+optional indexed database; it does not rewrite CometBFT history or Xian
+consensus state.
+
+Prerequisites:
+
+- stop the BDS writer that normally uses this Postgres database
+- keep or choose a trusted CometBFT RPC source for the reindex
+- make sure that RPC source retains every height you need to rebuild
+
+Procedure:
+
+```bash
+uv run xian-bds-reindex --reset --rpc-url http://127.0.0.1:26657
+```
+
+Use a remote or archival RPC URL when the local node is stopped during the BDS
+maintenance window:
+
+```bash
+uv run xian-bds-reindex --reset --rpc-url https://archival-rpc.example.invalid:26657
+```
+
+After restart, verify:
+
+```text
+GET /api/abci_query/bds_status
+```
+
+Expected recovery signals:
+
+- `db_status` is `ok`
+- `worker_running` is true
+- `indexed.indexed_height` reaches the current node height
+- `height_lag` reaches `0` or keeps decreasing during catch-up
+- `catching_up` becomes false when the index is current
+
+Important boundaries:
+
+- `--reset` resets BDS schema and local spool before replaying indexed history
+- it is the right tool for a corrupted BDS database, not for corrupted
+  consensus state
+- if the RPC source lacks old block history, the rebuild will stop at the
+  missing height; use an archival RPC source or BDS snapshot instead
+
+### Missing History On Pruned Nodes
+
+Use this when a local reindex cannot reconstruct older heights because local
+CometBFT history has already been pruned.
+
+Practical options:
+
+```bash
+uv run xian-bds-reindex --rpc-url https://archival-rpc.example.invalid:26657
+uv run xian-bds-snapshot import --input-path ./xian-bds-snapshot.tar.gz --clear-spool
+```
+
+On `xian-stack`, use the backend wrapper for snapshot import:
+
+```bash
+python3 ./scripts/backend.py bds-snapshot-import --clear-spool
+```
+
+Important boundary:
+
+- pruning does not remove current LMDB application state
+- pruning does remove local historical block data needed for local replay and
+  BDS rebuilds
+- keep at least one archival RPC source or recent BDS snapshot for indexed
+  deployments
 
 ## Chain State Snapshots
 
@@ -693,18 +880,14 @@ Current model:
 
 Current pruning is block-history pruning through `retain_height`.
 
-What this means operationally:
+The short operational rule is:
 
-- the current LMDB application state remains available
+- current LMDB application state remains available
 - historical local replay/reindex depends on retained block history
-- pruned nodes are fine for normal operation but not ideal as archival sources
+- disabling pruning later does not restore history that has already been pruned
 
-If you enable pruning and later need historical rebuilds beyond the retained
-window, use:
-
-- an archival RPC source
-- a full-home snapshot
-- or a BDS snapshot / reindex workflow, depending on what data you need
+For the full operator policy, sizing guidance, setup flags, and recovery
+implications, see [Pruning And History Retention](/node/pruning).
 
 ## BDS Snapshot Export and Import
 
@@ -714,6 +897,7 @@ imported separately from the live chain state:
 ```bash
 uv run xian-bds-snapshot export --output-path ./xian-bds-snapshot.tar.gz
 uv run xian-bds-snapshot import --input-path ./xian-bds-snapshot.tar.gz
+uv run xian-bds-snapshot import --input-path ./xian-bds-snapshot.tar.gz --clear-spool
 ```
 
 On `xian-stack`, the standardized operator path is:
@@ -721,6 +905,7 @@ On `xian-stack`, the standardized operator path is:
 ```bash
 python3 ./scripts/backend.py bds-snapshot-export
 python3 ./scripts/backend.py bds-snapshot-import
+python3 ./scripts/backend.py bds-snapshot-import --clear-spool
 ```
 
 That backend command writes and reads the canonical archive at:
@@ -736,6 +921,8 @@ Recommended use:
 
 - export from a healthy indexed node
 - import into a stopped node before bringing BDS online
+- use `--clear-spool` when the local spool may contain stale or mismatched
+  payloads from before the import
 - let the local spool replay or `xian-bds-reindex` fill any remaining gap after
   the imported indexed height
 
@@ -772,6 +959,52 @@ python3 ./scripts/backend.py storage-report
 
 Use `/bds_status` to inspect the BDS worker, indexed head, spool size, and
 low-disk alerts.
+
+### Disk Pressure Runbook
+
+Use this when `xian node health`, remote `health.yml`, `/bds_status`, or the
+storage report warns about low free space.
+
+Operator response:
+
+1. identify whether pressure is from CometBFT data, Xian state, BDS spool,
+   Postgres data, Docker cache, or logs
+2. preserve `.cometbft/data`, `.cometbft/xian`, and `.bds.db` unless you are
+   deliberately restoring or rebuilding that component
+3. compact stale BDS spool files only after confirming the indexed BDS head
+   covers those heights
+4. free Docker cache, rotated logs, or unrelated host files before deleting
+   chain data
+5. if the host is structurally undersized, increase disk capacity or adjust
+   pruning/retention policy before restarting normal load
+
+Useful checks:
+
+```bash
+python3 ./scripts/backend.py storage-report
+uv run xian node health validator-1
+```
+
+Remote check:
+
+```bash
+ansible-playbook playbooks/health.yml
+```
+
+BDS spool maintenance:
+
+```bash
+uv run xian-bds-spool compact --offline
+```
+
+Important boundary:
+
+- deleting CometBFT history can make local replay and BDS rebuilds impossible
+  for older heights
+- deleting `.bds.db` is a BDS database rebuild/import decision, not routine
+  disk cleanup
+- deleting `.cometbft/xian` or current node-home state is a recovery-plan or
+  snapshot-restore decision
 
 Interpretation note:
 
