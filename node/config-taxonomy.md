@@ -150,7 +150,7 @@ onto an already-running network:
 ```bash
 uv run xian contract-pack show dex
 uv run xian contract-pack validate dex
-uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --repo-dir ../xian-dex
 ```
 
 Contract packs are not required for every app. If a project has one-off

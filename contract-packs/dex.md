@@ -46,23 +46,28 @@ Then install the DEX contract pack:
 
 ```bash
 cd ~/xian/xian-cli
-uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --repo-dir ../xian-dex
 ```
 
-For scripted setups, start the localnet first and then run
-`make localnet-dex-bootstrap`, or use `xian contract-pack install dex ...`
-when the install should be driven through the CLI catalog flow.
+For scripted setups, start the localnet first and then use
+`xian contract-pack install dex ...` to drive the product-owned installer
+through the CLI catalog flow.
 
 ## Development Overrides
 
 Use a different pinned bundle when testing a release candidate:
 
 ```bash
-XIAN_DEX_BUNDLE=/path/to/contract-bundle.json make localnet-dex-bootstrap
+cd ~/xian/xian-dex
+XIAN_DEX_BUNDLE=/path/to/contract-bundle.json \
+  uv run python scripts/bootstrap_dex.py --recipe local-demo
 ```
 
 Use raw source only for active DEX development:
 
 ```bash
-XIAN_DEX_CONTRACTS_DIR=../xian-dex/src make localnet-dex-bootstrap
+cd ~/xian/xian-dex
+uv run python scripts/bootstrap_dex.py \
+  --recipe local-demo \
+  --dex-contracts-dir ./src
 ```

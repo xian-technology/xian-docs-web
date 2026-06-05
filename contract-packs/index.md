@@ -16,7 +16,7 @@ cd ~/xian/xian-cli
 uv run xian contract-pack list
 uv run xian contract-pack show dex
 uv run xian contract-pack validate dex
-uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --repo-dir ../xian-dex
 ```
 
 ## Available Contract Packs

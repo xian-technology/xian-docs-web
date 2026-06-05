@@ -20,7 +20,7 @@ The machine-readable example manifest lives at
 cd ~/xian/xian-cli
 uv run xian example show dex-demo
 uv run xian example starter dex-demo
-uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --repo-dir ../xian-dex
 ```
 
 See [DEX Contract Pack](/contract-packs/dex) for the reusable contract bundle

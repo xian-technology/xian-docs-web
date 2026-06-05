@@ -185,12 +185,16 @@ example:
 This is the recommended pattern for near-real-time Xian automation.
 
 For local DEX event testing, the node must actually have the DEX deployed.
-Base local networks do not include it by default. Use the stack DEX bootstrap
-to deploy `con_pairs`, `con_dex`, and a demo liquid pair before creating DEX
-event tasks:
+Base local networks do not include it by default. Use the product catalog
+installer to deploy `con_pairs`, `con_dex`, and a demo
+liquid pair before creating DEX event tasks:
 
 ```bash
-XIAN_DEX_BOOTSTRAP_RPC_URL=http://127.0.0.1:26657 make localnet-dex-bootstrap
+cd ../xian-cli
+uv run xian contract-pack install dex \
+  --recipe local-demo \
+  --repo-dir ../xian-dex \
+  --rpc-url http://127.0.0.1:26657
 ```
 
 See [Local DEX Bootstrap](/node/local-dex-bootstrap) for the full localnet and

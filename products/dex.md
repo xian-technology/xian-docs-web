@@ -13,3 +13,4 @@ Lifecycle:
 - Install phase: post-genesis
 - Included in genesis: no
 - Shipped with node image: no
+- Installer: `xian-dex/scripts/bootstrap_dex.py`

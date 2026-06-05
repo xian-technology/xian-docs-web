@@ -7,8 +7,7 @@ turning every network into a DEX network by default.
 
 ## What It Deploys
 
-The stack-managed DEX bootstrap deploys these canonical contracts when they are
-missing:
+The DEX bootstrap deploys these canonical contracts when they are missing:
 
 - `con_pairs`: pair factory, pair state, reserves, and LP mint/burn routing
 - `con_dex`: router for liquidity and swaps
@@ -21,15 +20,16 @@ For local development it can also deploy:
 - a seeded `currency` / `con_dex_demo_token` pool
 
 The bootstrap is idempotent. Rerunning it skips contracts that already exist and
-skips the demo pool when it already has reserves. By default the stack reads the
-hash-pinned DEX bundle from
+skips the demo pool when it already has reserves. The product-owned
+`xian-dex` wrapper reads the product bundle by default; the stack-local helper
+can also read the pinned catalog bundle from
 `xian-configs/contract-packs/dex/contract-bundle.json`.
 
 ```mermaid
 flowchart TD
-  Bundle["xian-configs/contract-packs/dex/contract-bundle.json"]
+  Bundle["xian-dex or xian-configs DEX bundle"]
   Node["Running localnet or single stack node"]
-  Bootstrap["localnet-dex-bootstrap or xian contract-pack install dex"]
+  Bootstrap["xian-dex bootstrap or localnet-dex-bootstrap"]
   Check["Check existing contracts and pool reserves"]
   Contracts["Deploy con_pairs, con_dex, and optional helper"]
   Demo["Optional demo token, LP token, and XIAN/XDT pool"]
@@ -118,11 +118,11 @@ Use a different hash-pinned DEX bundle:
 XIAN_DEX_BUNDLE=../xian-configs/contract-packs/dex/contract-bundle.json make localnet-dex-bootstrap
 ```
 
-New automation should prefer the contract-pack command:
+New automation should prefer the product-owned contract-pack command:
 
 ```bash
 cd ../xian-cli
-uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-stack
+uv run xian contract-pack install dex --recipe local-demo --repo-dir ../xian-dex
 ```
 
 For development only, override the raw DEX contract source directory:
