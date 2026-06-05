@@ -95,6 +95,11 @@ wallet package, or generated example artifact. Packages may use contract packs,
 bundles, profiles, and templates, but they are not the same thing as those
 runtime and protocol artifacts. See [Config Taxonomy](/node/config-taxonomy).
 
+### Product
+An optional application or protocol surface with one owning repo. Products are
+installed after a chain exists; they are not genesis contracts and are not
+shipped in node images. See [Products](/products/).
+
 ### Profile
 A node-local JSON contract that tells `xian-cli`, `xian-stack`, and
 `xian-deploy` what one node should run. Profiles are usually generated from a

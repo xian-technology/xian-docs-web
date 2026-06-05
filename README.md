@@ -65,6 +65,7 @@ The site is statically generated; the build output goes to
     game, multi-contract dapp, streaming payments, shielded commands,
     shielded privacy token).
   - `reference/` — flat reference material.
+  - `products/` — optional repo-owned product surfaces.
   - `contract-packs/` — reusable installable contract / protocol units.
   - `examples/` — complete application and operator workflow patterns.
   - `introduction/` — high-level introductions for first-time readers.

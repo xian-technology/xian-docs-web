@@ -62,13 +62,16 @@ features:
 </div>
 
 <div class="home-section">
-  <h3>Contract Packs &amp; Examples</h3>
-  <p class="section-desc">Install reusable protocol contract packs or start from guided application/operator workflows.</p>
+  <h3>Products, Contract Packs &amp; Examples</h3>
+  <p class="section-desc">Inspect optional products, install reusable protocol contract packs, or start from guided workflows.</p>
   <div class="home-links">
+    <a href="/products/">Products</a>
     <a href="/contract-packs/dex">DEX Contract Pack</a>
+    <a href="/contract-packs/nft">NFT Contract Pack</a>
     <a href="/contract-packs/stable-protocol">Stable Protocol Contract Pack</a>
     <a href="/examples/">Examples</a>
     <a href="/examples/credits-ledger">Credits Ledger</a>
+    <a href="/examples/nft-marketplace">NFT Marketplace</a>
     <a href="/examples/registry-approval">Registry &amp; Approval</a>
     <a href="/examples/workflow-backend">Workflow Backend</a>
   </div>

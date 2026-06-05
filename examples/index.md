@@ -21,6 +21,7 @@ uv run xian example starter dex-demo
 - [Registry / Approval](/examples/registry-approval)
 - [Workflow Backend](/examples/workflow-backend)
 - [DEX Demo](/examples/dex-demo)
+- [NFT Marketplace](/examples/nft-marketplace)
 - [x402 Exact Payment](/examples/x402-exact)
 
 ## Contract Packs Vs Examples

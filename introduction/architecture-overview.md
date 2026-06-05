@@ -17,12 +17,12 @@ services.
 | `xian-deploy` | remote Linux deployment playbooks for released node images and prepared node homes |
 | `xian-governance-web` | validator governance operations console for proposals, voting, state patches, and chain status |
 
-## Network, Contract Pack, Example, And Sidecar Structure
+## Network, Product, Contract Pack, Example, And Sidecar Structure
 
 The network catalog has three separate responsibilities:
 
 - source owner repositories own active product or contract development
-- `xian-configs` owns reproducible network, contract-pack, and example assets
+- `xian-configs` owns reproducible network, product, contract-pack, and example assets
 - tooling and runtime repositories consume those assets to create or run nodes
 
 ```mermaid
@@ -36,6 +36,7 @@ flowchart LR
   subgraph Catalog["xian-configs catalog"]
     Networks["Network manifests"]
     Templates["Network templates"]
+    Products["Products"]
     Genesis["Genesis contract bundles"]
     ContractPacks["Contract packs"]
     Examples["Examples"]
@@ -57,9 +58,13 @@ flowchart LR
   end
 
   DexRepo --> ContractPacks
+  DexRepo --> Products
   ContractsRepo --> Genesis
   ContractsRepo --> Examples
   AppRepos --> Examples
+  AppRepos --> Products
+  Products --> ContractPacks
+  Products --> Examples
   ContractPacks --> Bundles
   Examples --> ContractPacks
   Networks --> Genesis
@@ -84,8 +89,9 @@ The current maintained inventory is:
 | Canonical network manifests | 3 | `xian-configs/networks/local`, `devnet`, `testnet` |
 | Reusable network templates | 3 | `xian-configs/templates/*.json` |
 | Genesis contract bundles | 3 | `xian-configs/contracts/contracts_local.json`, `contracts_devnet.json`, `contracts_testnet.json` |
-| Contract packs | 2 | `xian-configs/contract-packs/dex`, `contract-packs/stable-protocol` |
-| Examples | 5 | `xian-configs/examples/*` |
+| Products | 3 | `xian-configs/products/dex`, `products/stable-protocol`, `products/nft` |
+| Contract packs | 3 | `xian-configs/contract-packs/dex`, `contract-packs/stable-protocol`, `contract-packs/nft` |
+| Examples | 6 | `xian-configs/examples/*` |
 
 The important terms are:
 
@@ -93,6 +99,7 @@ The important terms are:
 |------|---------|
 | Source owner repo | The active development home for a product or contract set, such as `xian-dex` for the DEX contracts and frontend. |
 | Genesis contract bundle | A `contracts_*.json` file that tells genesis construction which contracts are included before a chain starts. |
+| Product | An optional repo-owned application or protocol surface installed after a chain exists. Products are not genesis inputs and are not shipped in node images. |
 | Contract pack | A reusable installable contract or protocol unit, such as the DEX AMM contracts. |
 | Example | A complete application/operator pattern that composes templates, contract packs, services, app code, and docs. |
 | Contract bundle | A hash-pinned manifest for a deployable set of contract source files. It is smaller and more mechanical than a contract pack. |
@@ -107,12 +114,17 @@ equivalent for prepared host material. `xian-abci` owns the genesis builder and
 runtime application behavior.
 
 The DEX is the clearest example of the split. `xian-dex` owns active DEX
-development. `xian-configs/contract-packs/dex` carries the pinned DEX contract
-pack snapshot for repeatable installs. The `dex-demo` example composes that
-contract pack with a
+development. `xian-configs/products/dex` records the product boundary, and
+`xian-configs/contract-packs/dex` carries the pinned DEX contract pack snapshot
+for repeatable installs. The `dex-demo` example composes that contract pack with a
 recommended local network and automation posture. The base `local`, `devnet`,
 and `testnet` genesis bundles do not automatically make every network a DEX
 network.
+
+The same rule applies to the stable protocol and NFT marketplace. Their
+product records are discoverable in `xian-configs/products`, their installable
+on-chain snapshots live under `contract-packs/`, and their active development
+lives in one owning product repo each.
 
 Prefer pinned snapshots and manifest hashes for cross-repo consumption. Avoid
 symlinks between repositories for canonical catalog assets because they are
@@ -124,10 +136,10 @@ artifacts.
 | Repo | Main role |
 |------|-----------|
 | `xian-contracts` | maintained contract packages, including shielded-note and shielded-command contracts |
-| `xian-dex` | canonical DEX contracts, SnakX frontend, and hash-pinned DEX bundle manifest |
+| `xian-dex` | DEX product repo: canonical AMM contracts, SnakX frontend, and hash-pinned DEX bundle manifest |
 | `xian-dex-automation` | deterministic DEX event automation sidecar with rule evaluation and optional swap execution |
-| `xian-stable-protocol` | Xian-native overcollateralized stable-vault reference protocol |
-| `xian-nft-web` | XSC-0005 NFT marketplace for discovering, minting, and listing NFT collections |
+| `xian-stable-protocol` | stable-protocol product repo: Xian-native overcollateralized stable-vault contracts and bootstrap tooling |
+| `xian-nft` | NFT product repo: XSC-0005 contracts, PixelSnek marketplace, and bootstrap tooling |
 | `xian-bridge` | cross-chain bridge service for monitored source-chain deposits and matching Xian-side transfers |
 | `xian-tg-bot` | plugin-first Telegram bot framework for Xian notifications, commands, and service integrations |
 

@@ -22,6 +22,7 @@ uv run xian contract-pack install dex --recipe local-demo --stack-dir ../xian-st
 ## Available Contract Packs
 
 - [DEX Contract Pack](/contract-packs/dex)
+- [NFT Contract Pack](/contract-packs/nft)
 - [Stable Protocol Contract Pack](/contract-packs/stable-protocol)
 
 ## Relation To Examples
