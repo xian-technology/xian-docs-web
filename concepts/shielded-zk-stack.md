@@ -159,6 +159,27 @@ The relayer still learns things such as:
 
 Treat it as a trusted submission hop, not as magic privacy.
 
+## Trust Model
+
+Zero-knowledge proofs make the *prover* untrusted, but the shielded stack still
+rests on a few trust assumptions. Be explicit about them:
+
+- **The native verifier is a consensus requirement.** Proof verification runs
+  in-protocol, so every validator must have the native backend. `xian-abci`
+  refuses to start without it rather than risk a fork.
+- **Trusted setup.** Groth16 has a per-circuit setup whose toxic waste, if not
+  destroyed by a multi-party ceremony, lets the holder forge proofs. Dev bundles
+  are test-only and single-party bundles are for testnets; a real network needs
+  an MPC ceremony.
+- **Registry owner.** Whoever owns `zk_registry` chooses the active verifying
+  keys, so that role should be governance-controlled (DAO / multisig / timelock,
+  via the registry's two-step ownership transfer).
+- **The algebraic hash is binding.** Commitments, nullifiers, and Merkle nodes
+  use Poseidon over BN254; the native implementation and the in-circuit gadget
+  are kept provably identical so a proof means what the contract thinks it means.
+
+These are the things to verify before trusting a deployment with real value.
+
 ## Where To Learn The Practical Flow
 
 - [ZK Standard Library](/smart-contracts/stdlib/zk)

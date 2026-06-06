@@ -51,8 +51,12 @@ shielded contract patterns rather than composing these helpers directly.
 Returns `True` when the native zk verifier backend is installed in the node
 runtime.
 
-This is mainly useful for tests and controlled deployments. In production, a
-network should treat zk verification as a node capability requirement.
+This is mainly useful for tests and tooling. Validator nodes **enforce** the
+backend at startup: `xian-abci` refuses to boot without the native verifier,
+because a node missing it would raise instead of returning a verdict for
+shielded-contract calls, compute a different transaction outcome, and fork the
+chain. Treat the verifier as a hard node requirement (it ships via
+`xian-tech-contracting[zk]`), not an optional add-on.
 
 ## `zk.has_verifying_key(...)`
 
@@ -198,6 +202,31 @@ network-ready setup material.
 - this module verifies proofs only; it does not generate them
 - public inputs must be canonical BN254 field elements, not arbitrary 32-byte
   hashes
+- the shielded circuits hash commitments, nullifiers, and Merkle nodes with
+  Poseidon over BN254 (a binding, collision-resistant algebraic hash); the
+  native verifier is the single source of truth and the in-circuit gadget is
+  proven equal to it by parity tests
+
+## Trust Assumptions
+
+Zero-knowledge proofs remove the need to trust the *prover*, but two parties
+remain trusted and a soundness break in either lets them forge proofs (i.e.
+counterfeit shielded value). Make these explicit in any deployment:
+
+- **Trusted setup.** Groth16 needs a per-circuit setup. Whoever ran it holds the
+  toxic waste and can forge proofs unless it was destroyed by a multi-party
+  ceremony. The deterministic dev bundles expose the toxic waste by design and
+  are test-only; the single-party bundle is for testnets; **mainnet requires an
+  MPC ceremony.** `zk.get_vk_info(...)` reports `setup_mode`/`setup_ceremony` so
+  contracts and reviewers can check provenance.
+- **Registry owner.** The `zk_registry` owner decides which verifying keys are
+  active, so a malicious or compromised owner can register a key from a
+  trapdoored setup. Ownership should sit behind governance (a DAO / multisig /
+  timelock). The registry supports a two-step ownership transfer
+  (`transfer_ownership` + `accept_ownership`) so it can be handed to such a
+  contract without being stranded. Contracts should pin and re-check `vk_hash`
+  (`vk_hash = sha3(vk_hex)`) so a later registry change cannot silently alter
+  live proof semantics.
 
 ## Metering And Limits
 
