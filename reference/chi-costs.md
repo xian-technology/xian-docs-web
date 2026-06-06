@@ -10,12 +10,14 @@ This page provides a detailed reference for chi costs across all operation types
 | Storage write | 25 | meter units per byte (key + value) |
 | Submitted transaction bytes | 1 | meter unit per byte |
 | Returned value bytes | 1 | meter unit per byte |
+| Cross-contract dispatch | 10,000 | raw meter units per call |
 
 Byte count includes both the encoded key (e.g., `currency.balances:alice`) and the encoded value (e.g., `1000000`).
 
 `xian_vm_v1` uses the VM host-operation schedule. Current VM storage writes are
 charged at `25` units per byte, while VM storage reads are charged by the VM
-schedule.
+schedule. Cross-contract dispatch is charged as a fixed per-call cost; repeated
+contract calls do not add a progressive surcharge.
 
 ## Base Costs
 

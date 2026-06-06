@@ -76,7 +76,9 @@ durable chain state.
 
 Cross-contract calls meter the called work too. In practice that means a single
 transaction can accumulate chi across multiple contracts if it touches multiple
-execution paths.
+execution paths. The VM also charges a fixed dispatch cost for each
+cross-contract call so composable transactions pay for each hop without a
+progressive repeated-call surcharge.
 
 ### Proof Verification and Other Runtime Bridges
 
