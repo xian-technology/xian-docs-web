@@ -140,17 +140,23 @@ through the runtime `zk` bridge. That was the change that materially lowered
 shielded transaction cost.
 
 Using the reproducible benchmark in
-`xian-abci/scripts/benchmark_shielded_chi.py`, the local April 2026 numbers
-for the current implementation are roughly:
+`xian-abci/scripts/benchmark_shielded_chi.py`, the local June 2026 numbers for
+the current shielded note implementation are roughly:
 
-- shielded deposit with 2 outputs: `3,347` chi
-- shielded transfer with 2 inputs / 2 outputs: `3,600` chi
-- shielded withdraw with 1 input / 1 output: `3,128` chi
-- exact withdraw with no new output note: `2,175` chi
-- relayed hidden-sender transfer: `5,288` chi
+- shielded exact withdraw with no new output note: `2,242` chi
+- shielded withdraw with 1 input / 1 output: `3,435` chi
+- shielded deposit with 2 outputs: `3,645` chi
+- shielded transfer with 2 inputs / 2 outputs: `3,926` chi
+- relayed hidden-sender transfer: `6,126` chi
 
-Those are still above a plain public transfer, but they are dramatically lower
-than the earlier five-digit shielded costs from the all-Python contract path.
+Live local measurements on the rebuilt BDS stack also put a simple shielded
+command execution at `6,577` chi and a shielded-command DEX swap path at
+`8,950` chi. At the default `20` chi per XIAN conversion, those two command
+paths cost about `328.85` XIAN and `447.50` XIAN.
+
+Those are still above a plain public transfer, which measured `69` chi on the
+same local stack, but they are dramatically lower than the earlier five-digit
+shielded costs from the all-Python contract path.
 
 ## Planning Shielded Actions
 

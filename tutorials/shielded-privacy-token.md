@@ -55,14 +55,14 @@ The current shielded implementation is much cheaper than the original
 all-Python contract path because tree updates and relay-digest hot paths now
 run through native `xian-zk` bindings inside the runtime.
 
-Local benchmark reference values from April 2026:
+Local benchmark reference values from June 2026:
 
-- normal public transfer: `48` chi
-- shielded exact withdraw with no new output: about `2,175` chi
-- shielded withdraw with 1 input / 1 new output: about `3,128` chi
-- shielded deposit with 2 outputs: about `3,347` chi
-- shielded transfer with 2 inputs / 2 outputs: about `3,600` chi
-- relayed hidden-sender shielded transfer: about `5,288` chi
+- normal public transfer on the rebuilt local stack: about `69` chi
+- shielded exact withdraw with no new output: about `2,242` chi
+- shielded withdraw with 1 input / 1 new output: about `3,435` chi
+- shielded deposit with 2 outputs: about `3,645` chi
+- shielded transfer with 2 inputs / 2 outputs: about `3,926` chi
+- relayed hidden-sender shielded transfer: about `6,126` chi
 
 Those are still more expensive than a public transfer, but no longer in the
 earlier five-digit chi range.

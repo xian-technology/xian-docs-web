@@ -121,6 +121,25 @@ Examples:
 | `100,000` | `5,000.0` |
 | `1,000,000` | `50,000.0` |
 
+## Current Local Reference Measurements
+
+The following values were measured on the rebuilt local BDS node in June 2026
+with `paid_metered` fees, `chi_cost = 20`, and fixed-cost cross-contract
+dispatch. They are reference points, not protocol guarantees; simulate against
+the target network before submitting production transactions.
+
+| Action | Chi used | XIAN fee |
+|--------|----------|----------|
+| Contract read call | `19` | `0.95` |
+| Contract storage write | `30` | `1.50` |
+| Native XIAN transfer | `69` | `3.45` |
+| `transfer_from` spend | `83` | `4.15` |
+| Deploy small contract | `927` | `46.35` |
+| Direct DEX core swap | `1,775` | `88.75` |
+| DEX helper buy | `2,214` | `110.70` |
+| Shielded command execution | `6,577` | `328.85` |
+| Shielded DEX swap path | `8,950` | `447.50` |
+
 ## 0-Fee Metered Networks
 
 Operators can run a network with `tx_fee_mode = "free_metered"` in the rendered

@@ -104,8 +104,40 @@ def transfer(to: str, amount: float):
 | Cache repeated reads in local variables | Avoids paying read cost multiple times |
 | Use `default_value` in Hash declarations | Avoids unnecessary reads that return None |
 | Minimize writes in loops | Each write is 25x more expensive than a read |
-| Batch cross-contract calls | Reduces function call overhead |
+| Keep cross-contract boundaries intentional | Each hop pays a fixed dispatch cost plus the called work |
 | Avoid storing large strings or lists | Every byte increases the raw write-meter cost |
+
+## Measured Local Reference Transactions
+
+These examples were measured on a rebuilt local BDS node in June 2026 with
+`paid_metered` fees, `chi_cost = 20`, and `xian_vm_v1` cross-contract dispatch
+charged as a fixed per-call cost. They are useful for comparing relative
+transaction shapes, but exact values can move with contract source, arguments,
+network config, and VM metering policy.
+
+| Action | Main call | Chi used | XIAN fee |
+|--------|-----------|----------|----------|
+| Contract read call | probe `read_value` | `19` | `0.95` |
+| Contract storage write | probe `set_value` | `30` | `1.50` |
+| Contract loop + write | probe `bump_many` | `31` | `1.55` |
+| Contract event + write | probe `emit_probe` | `40` | `2.00` |
+| Approve demo token | token `approve` | `42` | `2.10` |
+| Approve allowance | `currency.approve` | `60` | `3.00` |
+| Native XIAN transfer | `currency.transfer` | `69` | `3.45` |
+| Spend via `transfer_from` | `currency.transfer_from` | `83` | `4.15` |
+| Deploy small contract | `submission.submit_contract` | `927` | `46.35` |
+| Direct DEX core swap | `con_dex.swapExactTokenForToken` | `1,775` | `88.75` |
+| Direct DEX supporting swap | `con_dex.swapExactTokenForTokenSupportingFeeOnTransferTokens` | `1,923` | `96.15` |
+| DEX sell demo token | `con_dex_helper.sell` | `2,126` | `106.30` |
+| DEX buy demo token | `con_dex_helper.buy` | `2,214` | `110.70` |
+| Shielded command execution | shielded command `execute_command` | `6,577` | `328.85` |
+| Shielded DEX swap path | shielded command plus DEX adapter | `8,950` | `447.50` |
+
+The shielded rows include proof verification, hidden-note spend accounting, and
+hidden change-note output handling. The DEX shielded row also includes the
+adapter and router swap. Setup transactions such as verifier-key registration,
+contract deployment, approvals, deposits, and liquidity seeding are excluded
+from these per-action rows.
 
 ## ZK Bridge Metering
 
