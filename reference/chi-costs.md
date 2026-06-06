@@ -130,14 +130,14 @@ network config, and VM metering policy.
 | Direct DEX supporting swap | `con_dex.swapExactTokenForTokenSupportingFeeOnTransferTokens` | `1,923` | `96.15` |
 | DEX sell demo token | `con_dex_helper.sell` | `2,126` | `106.30` |
 | DEX buy demo token | `con_dex_helper.buy` | `2,214` | `110.70` |
-| Shielded command execution | shielded command `execute_command` | `6,577` | `328.85` |
-| Shielded DEX swap path | shielded command plus DEX adapter | `8,950` | `447.50` |
+| Shielded command execution | shielded command `execute_command` | `6,715` | `335.75` |
+| Shielded DEX swap path | shielded command plus DEX adapter | `9,898` | `494.90` |
 
 The shielded rows include proof verification, hidden-note spend accounting, and
 hidden change-note output handling. The DEX shielded row also includes the
-adapter and router swap. Setup transactions such as verifier-key registration,
-contract deployment, approvals, deposits, and liquidity seeding are excluded
-from these per-action rows.
+canonical shielded DEX adapter and the real `con_dex` router swap. Setup
+transactions such as verifier-key registration, contract deployment, approvals,
+deposits, and liquidity seeding are excluded from these per-action rows.
 
 ## ZK Bridge Metering
 

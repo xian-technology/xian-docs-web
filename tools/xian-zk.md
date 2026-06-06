@@ -150,9 +150,9 @@ the current shielded note implementation are roughly:
 - relayed hidden-sender transfer: `6,126` chi
 
 Live local measurements on the rebuilt BDS stack also put a simple shielded
-command execution at `6,577` chi and a shielded-command DEX swap path at
-`8,950` chi. At the default `20` chi per XIAN conversion, those two command
-paths cost about `328.85` XIAN and `447.50` XIAN.
+command execution at `6,715` chi and a shielded-command DEX swap path at
+`9,898` chi. At the default `20` chi per XIAN conversion, those two command
+paths cost about `335.75` XIAN and `494.90` XIAN.
 
 Those are still above a plain public transfer, which measured `69` chi on the
 same local stack, but they are dramatically lower than the earlier five-digit

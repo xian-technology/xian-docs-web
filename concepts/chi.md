@@ -137,8 +137,8 @@ the target network before submitting production transactions.
 | Deploy small contract | `927` | `46.35` |
 | Direct DEX core swap | `1,775` | `88.75` |
 | DEX helper buy | `2,214` | `110.70` |
-| Shielded command execution | `6,577` | `328.85` |
-| Shielded DEX swap path | `8,950` | `447.50` |
+| Shielded command execution | `6,715` | `335.75` |
+| Shielded DEX swap path | `9,898` | `494.90` |
 
 ## 0-Fee Metered Networks
 
