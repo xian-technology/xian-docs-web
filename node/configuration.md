@@ -10,7 +10,7 @@ The higher layers describe operator intent. The rendered home is what the node
 actually runs.
 
 If you are deciding between templates, profiles, deploy bindings, bundles,
-contract packs, and examples, start with [Config Taxonomy](/node/config-taxonomy).
+products, and solutions, start with [Config Taxonomy](/node/config-taxonomy).
 Its precedence table is the canonical reference for which layer wins during
 manifest/profile creation, local runtime, and remote deployment.
 

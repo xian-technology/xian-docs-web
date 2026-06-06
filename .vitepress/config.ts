@@ -66,9 +66,7 @@ export default defineConfig({
         text: 'Tools',
         items: [
           { text: 'Tools & SDKs', link: '/tools/' },
-          { text: 'Products', link: '/products/' },
-          { text: 'Contract Packs', link: '/contract-packs/' },
-          { text: 'Examples', link: '/examples/' }
+          { text: 'Products', link: '/products/' }
         ]
       },
       {
@@ -250,31 +248,6 @@ export default defineConfig({
             { text: 'Xian DEX', link: '/products/dex' },
             { text: 'Stable Protocol', link: '/products/stable-protocol' },
             { text: 'Xian NFT', link: '/products/nft' }
-          ]
-        }
-      ],
-      '/contract-packs/': [
-        {
-          text: 'Contract Packs',
-          items: [
-            { text: 'Overview', link: '/contract-packs/' },
-            { text: 'DEX Contract Pack', link: '/contract-packs/dex' },
-            { text: 'NFT Contract Pack', link: '/contract-packs/nft' },
-            { text: 'Stable Protocol Contract Pack', link: '/contract-packs/stable-protocol' }
-          ]
-        }
-      ],
-      '/examples/': [
-        {
-          text: 'Examples',
-          items: [
-            { text: 'Overview', link: '/examples/' },
-            { text: 'Credits Ledger', link: '/examples/credits-ledger' },
-            { text: 'Registry / Approval', link: '/examples/registry-approval' },
-            { text: 'Workflow Backend', link: '/examples/workflow-backend' },
-            { text: 'DEX Demo', link: '/examples/dex-demo' },
-            { text: 'NFT Marketplace', link: '/examples/nft-marketplace' },
-            { text: 'x402 Exact Payment', link: '/examples/x402-exact' }
           ]
         }
       ],

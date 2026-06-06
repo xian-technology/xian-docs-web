@@ -185,16 +185,13 @@ example:
 This is the recommended pattern for near-real-time Xian automation.
 
 For local DEX event testing, the node must actually have the DEX deployed.
-Base local networks do not include it by default. Use the product catalog
-installer to deploy `con_pairs`, `con_dex`, and a demo
-liquid pair before creating DEX event tasks:
+Base local networks do not include it by default. Use the `xian-dex` bootstrap
+script to deploy `con_pairs`, `con_dex`, and a demo liquid pair before creating
+DEX event tasks:
 
 ```bash
-cd ../xian-cli
-uv run xian contract-pack install dex \
-  --recipe local-demo \
-  --repo-dir ../xian-dex \
-  --rpc-url http://127.0.0.1:26657
+cd ../xian-dex
+XIAN_NODE_URL=http://127.0.0.1:26657 uv run python scripts/bootstrap_dex.py --recipe local-demo
 ```
 
 See [Local DEX Bootstrap](/node/local-dex-bootstrap) for the full localnet and
@@ -450,7 +447,7 @@ There is now also a real live runner for the same workflow. It uses:
 - a real Xian localnet
 - a real node with BDS enabled
 - a real IntentKit local API and autonomous worker
-- a real DEX contract pack deployed during the run
+- a real DEX product deployed during the run
 - a real `con_pairs.Sync` event trigger with reserve-based threshold detection
 - a real agent-side `xian_dex_trade`
 - a real Telegram post

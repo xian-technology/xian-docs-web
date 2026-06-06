@@ -62,18 +62,15 @@ features:
 </div>
 
 <div class="home-section">
-  <h3>Products, Contract Packs &amp; Examples</h3>
-  <p class="section-desc">Inspect optional products, install reusable protocol contract packs, or start from guided workflows.</p>
+  <h3>Products &amp; Reference Workflows</h3>
+  <p class="section-desc">Inspect optional products, install post-genesis product bundles, or explore SDK-backed reference workflows.</p>
   <div class="home-links">
     <a href="/products/">Products</a>
-    <a href="/contract-packs/dex">DEX Contract Pack</a>
-    <a href="/contract-packs/nft">NFT Contract Pack</a>
-    <a href="/contract-packs/stable-protocol">Stable Protocol Contract Pack</a>
-    <a href="/examples/">Examples</a>
-    <a href="/examples/credits-ledger">Credits Ledger</a>
-    <a href="/examples/nft-marketplace">NFT Marketplace</a>
-    <a href="/examples/registry-approval">Registry &amp; Approval</a>
-    <a href="/examples/workflow-backend">Workflow Backend</a>
+    <a href="/products/dex">Xian DEX</a>
+    <a href="/products/nft">Xian NFT</a>
+    <a href="/products/stable-protocol">Stable Protocol</a>
+    <a href="/tools/xian-py#service-integration-examples">xian-py Service Examples</a>
+    <a href="/node/local-dex-bootstrap">Local DEX Bootstrap</a>
   </div>
 </div>
 

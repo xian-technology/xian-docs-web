@@ -14,7 +14,7 @@ A batch of transactions ordered and agreed upon by validators through consensus.
 
 ### Bundle
 A hash-pinned set of artifacts used for deterministic packaging or recovery.
-Examples include genesis contract bundles, contract-pack bundles, generated
+Examples include genesis contract bundles, product contract bundles, generated
 operator handoff bundles, governed state-patch bundles, and shielded proving
 bundles. See [Config Taxonomy](/node/config-taxonomy).
 
@@ -39,12 +39,10 @@ The `@construct` decorator marks a function that runs once when a contract is de
 ### Contract
 A Python source file deployed to the Xian blockchain. Contains state declarations, an optional constructor, and one or more exported functions. User-submitted contracts must have names starting with `con_`, and all deployed contract names must use lowercase ASCII letters, digits, and underscores only.
 
-### Contract Pack
-A reusable on-chain contract or protocol unit that can be installed onto a
-running network through `xian contract-pack ...`. Contract packs wrap pinned
-contract bundles with metadata and install recipes. See
-[Contract Packs](/contract-packs/) and
-[Config Taxonomy](/node/config-taxonomy).
+### Contract Bundle
+A hash-pinned manifest for a deployable set of contract source files. Product
+repos and contract repos can publish contract bundles; `xian-cli` can validate
+them before deployment. See [Config Taxonomy](/node/config-taxonomy).
 
 ## D
 
@@ -56,11 +54,10 @@ See [Config Taxonomy](/node/config-taxonomy).
 
 ## E
 
-### Example
-A complete application or operator workflow that composes templates, contract
-packs, services, app code, and documentation. Use an example when you need the
-whole starter flow, not only a reusable contract set. See
-[Examples](/examples/).
+### Example Contract
+A small reference contract used by SDK examples or e2e tests. Example contract
+sources live beside the example code that consumes them, usually in an SDK or
+product repo.
 
 ### Export
 The `@export` decorator marks a function as publicly callable -- by user transactions or by other contracts. All arguments must have type annotations.
@@ -91,7 +88,7 @@ Object-Relational Mapping. In Xian, refers to the `Variable`, `Hash`, `ForeignVa
 
 ### Package
 A code or build distribution unit, such as an SDK package, app package,
-wallet package, or generated example artifact. Packages may use contract packs,
+wallet package, or generated example artifact. Packages may use contract bundles,
 bundles, profiles, and templates, but they are not the same thing as those
 runtime and protocol artifacts. See [Config Taxonomy](/node/config-taxonomy).
 

@@ -107,7 +107,7 @@ deterministic validator path.
 - [Installation & Setup](/node/installation): supported setup path
 - [Configuration](/node/configuration): manifests, profiles, homes, and ports
 - [Config Taxonomy](/node/config-taxonomy): templates, profiles, deploy
-  bindings, bundles, contract packs, examples, and when to use each one
+  bindings, bundles, products, solutions, and when to use each one
 - [Runtime Features](/node/runtime-features): execution-engine policy, tracer
   modes, readonly simulation, parallel execution, and the current runtime keys
 - [Pruning & Retention](/node/pruning): block-history pruning policy,

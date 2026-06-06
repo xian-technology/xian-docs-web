@@ -198,8 +198,8 @@ The DEX contracts must exist on the target network. For local testing, deploy
 the DEX contracts and demo pool first:
 
 ```bash
-cd xian-cli
-uv run xian contract-pack install dex --recipe local-demo --repo-dir ../xian-dex
+cd ../xian-dex
+uv run python scripts/bootstrap_dex.py --recipe local-demo
 ```
 
 See [Local DEX Bootstrap](/node/local-dex-bootstrap).

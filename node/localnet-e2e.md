@@ -148,7 +148,7 @@ flowchart TD
 5. send periodic transfers from different nodes
 6. run a higher-rate burst workload and capture approximate TPS
 7. trigger conflicting and invalid transactions intentionally
-8. deploy and exercise the DEX contract pack
+8. deploy and exercise the DEX product contracts
 9. hammer readonly simulation and capture approximate simulator QPS
 10. intentionally let the primary BDS service fall behind by stopping
     Postgres, generate live chain traffic, then verify it catches back up
