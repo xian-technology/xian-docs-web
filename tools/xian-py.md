@@ -392,7 +392,10 @@ proposal = client.call(
 `call` runs through the same readonly simulation path, but it unwraps the
 successful return value and raises if the readonly execution itself fails.
 
-### submit_contract
+### deploy_contract / submit_contract
+
+Use `deploy_contract` when you have contract source. It lints the source,
+builds the `xian_vm_v1` deployment artifacts locally, and submits them:
 
 ```python
 code = """
@@ -408,13 +411,17 @@ def increment() -> int:
     return counter.get()
 """
 
-result = client.submit_contract(
+result = client.deploy_contract(
     name="con_counter",
-    code=code,
+    source=code,
     args={},
     chi=500_000,
 )
 ```
+
+Use `submit_contract(name, deployment_artifacts, args=...)` when you already
+have prebuilt deployment artifacts, for example from
+`xian contract build-artifacts` or `contracting.artifacts.build_contract_artifacts`.
 
 `name` must use lowercase ASCII letters, digits, and underscores only. For
 user contracts, keep the standard `con_` prefix.
@@ -882,6 +889,22 @@ This is the third example set that demonstrates the deeper backend pattern:
 The workflow bootstrap now also tops up configured workers with native balance
 by default so the documented processor path can actually claim and complete
 items in local/reference networks.
+
+### x402 Exact Example Set
+
+`examples/x402_exact/` demonstrates a native-Xian x402-style paid HTTP
+request:
+
+- `admin_job.py`: deploy `con_x402_settlement`
+- `paid_api_service.py`: a seller API that answers `402 Payment Required`
+  until a valid signed payment payload arrives
+- `facilitator_service.py`: an optional separate settlement facilitator
+- `buyer_client.py`: sign the payment + permit payloads and fetch the
+  protected resource
+
+Each example set ships its own contract sources under
+`examples/<name>/contracts/`, so the SDK examples are self-contained and do
+not depend on any external contract catalog.
 
 ## Structured Errors
 

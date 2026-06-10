@@ -9,6 +9,22 @@ Xian contract state is exposed through four ORM-style primitives:
 
 All of them ultimately map to deterministic key-value storage in LMDB.
 
+```mermaid
+flowchart LR
+  V["owner = Variable()"] --> KV1["con_token.owner"]
+  H1["balances['alice']"] --> KV2["con_token.balances:alice"]
+  H2["approvals['alice', 'con_dex']"] --> KV3["con_token.approvals:alice:con_dex"]
+  FV["ForeignVariable(currency, owner)"] -.read only.-> KV4["currency.owner"]
+  KV1 --> LMDB["LMDB key-value state"]
+  KV2 --> LMDB
+  KV3 --> LMDB
+  KV4 --> LMDB
+```
+
+Every declaration resolves to flat keys of the form
+`contract.variable` or `contract.variable:key1:key2:...`, which is also the
+shape you use when reading state through `/get/<state-key>`.
+
 ## What to Use
 
 | Primitive | Use |

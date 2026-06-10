@@ -19,11 +19,15 @@ Current package floors:
 
 | Repo | Python |
 |------|--------|
-| `xian-cli` | `>=3.14` |
-| `xian-abci` | `>=3.14` |
-| `xian-contracting` | `>=3.14` |
-| `xian-linter` | `>=3.14` |
-| `xian-py` | `>=3.14` |
+| `xian-cli` | `>=3.14,<3.15` |
+| `xian-abci` | `>=3.14,<3.15` |
+| `xian-contracting` | `>=3.14,<3.15` |
+| `xian-linter` | `>=3.14,<3.15` |
+| `xian-py` | `>=3.14,<3.15` |
+
+The runtime repos pin a single Python minor version (3.14) rather than an
+open-ended floor, so deterministic execution does not drift across Python
+releases.
 
 ## Runtime Notes by Platform
 

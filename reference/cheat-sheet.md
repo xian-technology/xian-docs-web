@@ -116,8 +116,8 @@ ZK verification:
 ```python
 # public_inputs must be exact 32-byte canonical BN254 field encodings
 zk.is_available()
-zk.has_verifying_key("shielded-deposit-v3")
-zk.verify_groth16("shielded-deposit-v3", proof_hex, public_inputs)
+zk.has_verifying_key("shielded-deposit-v4")
+zk.verify_groth16("shielded-deposit-v4", proof_hex, public_inputs)
 zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
 ```
 
@@ -129,16 +129,17 @@ contract stores a verifier binding, pin the registry `vk_hash` alongside the
 `importlib.contract_info(...)` also accept an imported contract module if you
 already resolved one.
 
-Factory deployments use the built-in submission contract:
+Factory deployments use the built-in submission contract. Deployment takes
+prebuilt `xian_vm_v1` deployment artifacts, not raw source:
 
 ```python
 import submission
 
 @export
-def deploy_child(name: str, code: str, owner: str = None):
+def deploy_child(name: str, deployment_artifacts: dict, owner: str = None):
     submission.submit_contract(
         name=name,
-        code=code,
+        deployment_artifacts=deployment_artifacts,
         owner=owner,
         constructor_args={},
     )

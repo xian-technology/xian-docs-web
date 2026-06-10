@@ -177,12 +177,13 @@ for manifest in (prover.registry_manifest(), relay_prover.registry_manifest()):
         zk_registry.register_vk(**args, signer="sys")
 ```
 
-This registers the current `v3` ids:
+This registers the current ids:
 
-- `shielded-deposit-v3`
-- `shielded-transfer-v3`
-- `shielded-withdraw-v3`
-- `shielded-relay-transfer-v4`
+- `shielded-deposit-v4`
+- `shielded-transfer-v4`
+- `shielded-withdraw-v4`
+- `shielded-command-execute-v5` (registered under the `relay_transfer` action
+  by the relay-transfer prover manifest)
 
 ## Step 3: Bind The Keys To The Token
 

@@ -42,12 +42,12 @@ When in doubt, read `result.node_info.network` from the node's `/status`
 response and use that value for `XIAN_CHAIN_ID`.
 
 For a current local stack node, point the MCP server at the local RPC and
-GraphQL endpoints:
+GraphQL endpoints (stack defaults shown):
 
 ```bash
-XIAN_NODE_URL=http://127.0.0.1:29657
-XIAN_GRAPHQL=http://127.0.0.1:5500/graphql
-XIAN_CHAIN_ID=xian-mcp-local-1
+XIAN_NODE_URL=http://127.0.0.1:26657
+XIAN_GRAPHQL=http://127.0.0.1:5000/graphql
+XIAN_CHAIN_ID=xian-local-1
 ```
 
 Use the chain ID from the node's `/status` response when running against a

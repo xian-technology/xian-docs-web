@@ -83,6 +83,7 @@ flowchart TD
   Schedule["State patch is approved and scheduled"]
   Bundle{"Each validator has the matching local bundle?"}
   Apply["Apply bundle during finalize_block at activation height"]
+  Halt["Node fails at activation until the approved bundle is supplied"]
   Terminal["Rejected or expired terminal state"]
   Waiting["Proposal remains pending"]
 
@@ -97,8 +98,12 @@ flowchart TD
   Decision -->|approved state_patch| Schedule
   Schedule --> Bundle
   Bundle -->|yes| Apply
-  Bundle -->|no| Terminal
+  Bundle -->|no| Halt
 ```
+
+A missing local bundle does not cancel an approved patch. The node refuses to
+finalize past the activation height without the exact approved bundle, so
+operators must distribute the bundle to every validator before activation.
 
 Important current behavior:
 

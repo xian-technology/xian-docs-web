@@ -122,6 +122,8 @@ GET /api/abci_query/masternodes_candidates
 GET /api/abci_query/masternodes_validator/<address>
 GET /api/abci_query/masternodes_pending_unbonds/<address>
 GET /api/abci_query/masternodes_open_votes/limit=50/offset=0
+GET /api/abci_query/masternodes_vote/<proposal-id>
+GET /api/abci_query/masternodes_vote_records/<proposal-id>
 ```
 
 For paginated key scans over a contract hash prefix, the `/keys/...` form
@@ -236,9 +238,11 @@ GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0/ki
 GET /api/abci_query/recent_events/limit=50/offset=0
 GET /api/abci_query/developer_rewards/<recipient_key>
 GET /api/abci_query/state/<prefix>/limit=50/offset=0
+GET /api/abci_query/state_previous/<key>
 GET /api/abci_query/state_history/<key>/limit=50/offset=0
 GET /api/abci_query/state_for_tx/<hash>
 GET /api/abci_query/state_for_block/123
+GET /api/abci_query/token_contracts/limit=100/offset=0
 GET /api/abci_query/contracts/limit=50/offset=0
 GET /api/abci_query/state_patch_bundles
 GET /api/abci_query/scheduled_state_patches/123

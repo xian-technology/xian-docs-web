@@ -28,8 +28,8 @@ There are several 5-node paths, and they are intentionally not the same thing.
 | Clean 5-node localnet | `LOCALNET_NODES=5 make localnet-init && make localnet-up` | Starts a disposable 5-node network without running the full validation program. |
 | Layered 5-validator e2e | `make localnet-e2e` | Runs the broad whole-stack validation harness on the normal configured execution path. |
 | Parallel layered e2e | `make localnet-parallel-e2e` | Runs the same layered harness with lower parallel-execution batching. |
-| Validator/governance localnet | `make localnet-validator-governance` | Runs the focused validator, delegation, governance, evidence, slashing, and leave/rebalance validation program. |
-| Release safety gate | `make release-safety` | Runs the release-grade stack gate: sibling repo validation, e2e, runtime report, and validator/governance localnet. |
+| Protocol safety localnet | `make localnet-protocol-safety` | Runs the focused validator, delegation, governance, evidence, slashing, and leave/rebalance validation program. |
+| Release safety gate | `make release-safety` | Runs the release-grade stack gate: sibling repo validation, e2e, runtime report, and the protocol safety localnet. |
 
 ```mermaid
 flowchart TD
@@ -37,15 +37,15 @@ flowchart TD
   Layered["make localnet-e2e"]
   Parallel["make localnet-parallel-e2e"]
   Report["make localnet-node-report"]
-  Governance["make localnet-validator-governance"]
+  Safety["make localnet-protocol-safety"]
   Release["make release-safety"]
 
   Clean --> Layered
   Layered --> Parallel
   Parallel --> Report
-  Report --> Governance
+  Report --> Safety
   Parallel --> Release
-  Governance --> Release
+  Safety --> Release
 ```
 
 Use the clean 5-node localnet when you only need a running network to inspect,
@@ -95,13 +95,13 @@ That target runs:
 3. `xian-stack` validation
 4. `make localnet-parallel-e2e`
 5. `make localnet-node-report`
-6. `make localnet-validator-governance` after resetting the localnet
+6. `make localnet-protocol-safety` after resetting the localnet
 
 Useful options:
 
 ```bash
 ./scripts/release-safety.sh --skip-repo-validation
-./scripts/release-safety.sh --skip-validator-governance
+./scripts/release-safety.sh --skip-protocol-safety
 ./scripts/release-safety.sh --skip-vm-report
 ./scripts/release-safety.sh --keep-localnet
 ```
@@ -115,12 +115,12 @@ flowchart TD
   P00["00 Bootstrap 5 validators and one BDS node"]
   P01["01 Health, peers, validator count, app hashes"]
   P02["02 xian-py smoke"]
-  P03["03 Contract orchestration and nested dispatch"]
+  P03["03 Contract orchestration, atomic rollback, x402 canaries"]
   P04["04 Periodic load"]
   P05["05 Burst load"]
   P06["06 Conflict and invalid transactions"]
   P07["07 DEX mixed trading"]
-  P08["08 Readonly simulator load"]
+  P08["08 Throughput mix and readonly simulator load"]
   P09["09 BDS catch-up after outage"]
   P10["10 Retrieval and reindex surfaces"]
   P11["11 Determinism checks"]
@@ -135,6 +135,10 @@ flowchart TD
   P00 --> P01 --> P02 --> P03 --> P04 --> P05 --> P06 --> P07 --> P08 --> P09
   P09 --> P10 --> P11 --> P12 --> P13 --> P14 --> P15 --> P16 --> P17 --> P18
 ```
+
+Phase 03 covers contract orchestration plus dedicated atomic-rollback,
+x402-exact, and intentkit-x402 canaries. Phase 08 runs both a mixed
+throughput workload and readonly simulator load.
 
 1. bootstrap a fresh 5-validator network with the fixed Xian VM and one node
    with BDS enabled

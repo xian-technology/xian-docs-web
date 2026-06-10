@@ -15,6 +15,34 @@ different jobs and they are not all equally authoritative.
 | CometBFT metrics | Prometheus metrics for consensus, networking, and mempool health |
 | GraphQL | optional PostGraphile layer over the BDS Postgres database |
 
+```mermaid
+flowchart TD
+  App["Wallets, SDKs, dapps, services"]
+  RPC["CometBFT RPC :26657"]
+  ABCI["ABCI query paths"]
+  Node["xian-abci node process"]
+  Dashboard["Dashboard REST + WebSocket :18080"]
+  BDS["BDS Postgres index"]
+  GraphQL["GraphQL / PostGraphile :5000"]
+  Metrics["Prometheus metrics"]
+
+  App --> RPC
+  App --> Dashboard
+  App --> GraphQL
+  RPC --> ABCI
+  ABCI --> Node
+  Dashboard --> RPC
+  Node -->|finalized blocks| BDS
+  BDS --> GraphQL
+  ABCI -->|indexed reads when BDS enabled| BDS
+  Node --> Metrics
+```
+
+The canonical path is always RPC plus ABCI query against the node itself.
+The dashboard proxies that same surface for convenience, and the indexed
+surfaces (BDS-backed ABCI reads, GraphQL) are derived views fed from
+finalized blocks.
+
 ## Which Surface To Use
 
 Use the canonical node surfaces when correctness matters most:

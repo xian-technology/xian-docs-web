@@ -26,15 +26,17 @@ def balance_of(address: str) -> float:
     return balances[address]
 """
 
-result = client.submit_contract(
+result = client.deploy_contract(
     name="con_example",
-    code=code,
+    source=code,
     chi=500_000,
 )
 ```
 
-Submit valid `deployment_artifacts` with contract source. Native deployment
-validates and executes the VM artifact path explicitly.
+`deploy_contract` lints the source, builds the `xian_vm_v1` deployment
+artifacts locally, and submits them. If you already have prebuilt artifacts
+(for example from `xian contract build-artifacts`), submit them directly with
+`client.submit_contract(name, deployment_artifacts)`.
 
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts

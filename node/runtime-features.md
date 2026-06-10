@@ -47,6 +47,33 @@ The high-level `xian-cli` profile flow exposes runtime-adjacent posture such as
 parallel execution and BDS/service settings. The VM execution policy itself is
 fixed.
 
+## Chain Runtime Features
+
+Separate from node-local posture, the chain itself carries an explicit
+runtime-feature map. These are consensus-level switches: every validator
+resolves the same values, and contracts that depend on a disabled feature are
+rejected at deployment.
+
+The currently supported feature is `zk`, which gates the zk host syscalls used
+by the shielded stack.
+
+| Context | `zk` default |
+|---------|--------------|
+| Real-network chain default | disabled; networks opt in explicitly |
+| Local in-process dev client | enabled |
+| Stack localnet | enabled (set `XIAN_LOCALNET_RUNTIME_FEATURE_ZK=0` to disable) |
+
+Resolution order at node startup:
+
+1. committed chain state (`__runtime_features.zk`)
+2. genesis entries generated with `configure_node --runtime-feature-zk`
+3. the chain default (disabled)
+
+Deploying a contract whose IR uses zk syscalls fails with an explicit error
+when the feature is disabled on that chain. See
+[Shielded & ZK Stack](/concepts/shielded-zk-stack) for what the zk surface
+provides.
+
 ## Application Logging
 
 Xian has its own application logger, separate from CometBFT logging.

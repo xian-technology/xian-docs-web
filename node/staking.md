@@ -73,6 +73,33 @@ That distinction matters operationally:
 - self-bond and delegations become `pending_unbond` records and must wait out
   the unbonding period before claim
 
+## Validator Status Lifecycle
+
+The membership contract tracks one status per validator. Jailing is a
+separate flag on top of the status, not a status of its own.
+
+```mermaid
+stateDiagram-v2
+    [*] --> pending: register()
+    pending --> approved: add_member vote approved
+    pending --> withdrawn: unregister()
+    approved --> active: activation (delay / rebalance)
+    active --> approved: rebalance demotion
+    approved --> withdrawn: unregister()
+    active --> leaving: announce_leave()
+    leaving --> approved: leave cancelled
+    leaving --> left: leave() after leave delay
+    active --> removed: remove_member vote
+    approved --> removed: remove_member vote
+    left --> [*]
+    removed --> [*]
+    withdrawn --> [*]
+```
+
+Every terminal exit (`left`, `removed`, `withdrawn`) refunds the registration
+bond immediately and sweeps self-bond and delegations into pending unbonds
+that wait out the unbonding period.
+
 ## Bonding and Delegation Rules
 
 The contract lets a validator accept bond only while it is:

@@ -237,6 +237,22 @@ failing silently.
 - Set chi manually or auto-estimate
 - Review and send
 
+### Swap
+
+When the active network has the DEX router (`con_dex`) deployed, the wallet
+shows a **Swap** surface:
+
+- pick a from-token and to-token from the tracked asset list
+- quotes are computed from on-chain pair reserves, including multi-hop routes
+- the review summary shows rate, price impact, and minimum received
+- slippage (0.5% / 1% / 3% / 5%, default 1%) and deadline (10-60 min, default
+  20 min) are selectable per swap
+- if the router allowance is insufficient, the wallet runs the approve step
+  first, then the swap
+
+On networks without a deployed DEX router, the Swap card explains that swaps
+become available once the DEX is deployed.
+
 ### Activity
 
 Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
@@ -274,8 +290,9 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 - **Export** - enter a backup password, downloads encrypted JSON containing the
   seed/key, account names, active account, network presets, watched assets, and
   shielded wallet state snapshots when present
-- **Import** - paste encrypted backup JSON and enter the backup password; the
-  restored wallet state is encrypted again for local storage
+- **Import** - select a backup file or paste encrypted backup JSON, then enter
+  the backup password; the restored wallet state is encrypted again for local
+  storage
 
 ### Shielded Wallet Snapshots
 

@@ -115,9 +115,9 @@ available, but it must never be used for a real network.
 
 The current command-family ids are:
 
-- `shielded-command-deposit-v4`
-- `shielded-command-execute-v4`
-- `shielded-command-withdraw-v4`
+- `shielded-command-deposit-v5`
+- `shielded-command-execute-v5`
+- `shielded-command-withdraw-v5`
 
 ## Step 3: Bind The Keys And Allow The Adapter
 

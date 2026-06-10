@@ -119,6 +119,8 @@ Common wizard options:
 | `--tx-fee-mode paid_metered|free_metered` | choose paid transaction fees or 0-fee metered execution |
 | `--free-tx-max-chi` | cap one transaction's submitted chi budget in `free_metered` mode |
 | `--free-block-max-chi` | cap one proposed block's total submitted chi budget in `free_metered` mode |
+| `--block-policy-mode on_demand|idle_interval|periodic` | block production policy when the template/manifest default is not wanted |
+| `--block-policy-interval` | idle or periodic empty-block interval, for example `1s` or `10s` |
 | `--force` | overwrite existing generated artifacts where supported |
 
 Wizard defaults:

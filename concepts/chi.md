@@ -19,6 +19,29 @@ On normal paid networks, used chi is converted into a native-token fee. On
 unit, but the runtime does not debit the sender's native-token balance for
 execution.
 
+```mermaid
+flowchart TD
+  Estimate["Optional: estimate chi via readonly simulation"]
+  Submit["Submit transaction with chi limit"]
+  Admit["CHECK_TX: sender can cover the submitted limit (paid mode)"]
+  Execute["Metered execution in xian_vm_v1"]
+  Within{"Finished within limit?"}
+  Success["Success: receipt records chi_used"]
+  Fail["Out of chi: state rolls back, submitted limit is charged"]
+  Fee["Paid mode: chi converts to native-token fee and reward split"]
+  Free["0-fee mode: no balance debit, chi still metered and reported"]
+
+  Estimate --> Submit
+  Submit --> Admit
+  Admit --> Execute
+  Execute --> Within
+  Within -->|yes| Success
+  Within -->|no| Fail
+  Success --> Fee
+  Success --> Free
+  Fail --> Fee
+```
+
 ## Core Constants
 
 | Constant | Value | Meaning |

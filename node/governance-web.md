@@ -13,13 +13,23 @@ Repository:
 
 Use the console to:
 
-- inspect protocol-governance and validator-governance proposals
-- see proposal status, thresholds, voting weight, and per-validator votes
+- inspect protocol-governance and validator-governance proposals, with
+  layer / status / type / needs-my-vote / emergency / expiring-soon filters
+  and free-text search
+- see proposal status, thresholds, voting weight, and a per-validator vote
+  matrix that distinguishes "not voted" from "ineligible"
+- see your own vote eligibility per proposal; the dashboard "needs your
+  vote" queue reflects real eligibility for the connected account
+- review an effect-and-risk preview on proposal detail before voting
 - connect the Xian browser wallet
 - submit validator votes through wallet signing
-- create guided protocol and validator-governance proposals
-- inspect active validators and candidates
-- verify state-patch bundle hashes before activation
+- create guided protocol and validator-governance proposals through typed
+  forms
+- inspect active validators and candidates, including a validator detail
+  panel
+- review network settings (governance parameters and membership policy)
+- verify state-patch bundle hashes before activation, with a state-patch
+  detail panel
 - open off-chain proposal references such as GitHub discussions or pull
   requests
 

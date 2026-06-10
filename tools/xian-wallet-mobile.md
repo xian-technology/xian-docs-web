@@ -295,20 +295,25 @@ xian-wallet-mobile/
       wallet-context.tsx   # React context for state management
       rpc-client.ts        # Shared xian-js client wrapper + extra ABCI helpers
       storage.ts           # AsyncStorage + SecureStore adapter
+      biometrics.ts        # Biometric unlock support
+      dex.ts               # DEX quoting and swap helpers
+      walletconnect.ts     # WalletConnect session handling
+      wallet-backup.ts     # Encrypted backup parsing and validation
       haptics.ts           # Haptic feedback utility
       preferences.ts       # User preferences (layout, labels)
     screens/
       SetupScreen.tsx      # Create / import wallet
-      LockScreen.tsx       # Password unlock
+      LockScreen.tsx       # Password + biometric unlock
       HomeScreen.tsx       # Balances, assets, quick actions
       SendScreen.tsx       # Simple token transfer
+      TradeScreen.tsx      # In-wallet DEX swap
       AdvancedTxScreen.tsx # Contract call builder
       ReceiveScreen.tsx    # QR code + address
       ActivityScreen.tsx   # Transaction history
       TokenDetailScreen.tsx # Asset details + decimals
       SettingsScreen.tsx   # Accounts, networks, security, backup
       NetworksScreen.tsx   # Network CRUD
-      AppsScreen.tsx       # Connected apps (placeholder)
+      AppsScreen.tsx       # WalletConnect dApp sessions
     components/
       Button.tsx           # Styled button variants
       Input.tsx            # Styled text input
@@ -384,6 +389,8 @@ Current important calls include:
 - **Import from seed** - 12 or 24-word phrase
 - **Import from private key** - single-account, no multi-account
 - **Lock / unlock** - password-based, 5-minute session
+- **Biometric unlock** - optional fingerprint / Face ID unlock with automatic
+  prompt on the lock screen and password fallback after repeated failures
 - **Remove wallet** - with native alert confirmation
 
 ### Multi-Account
@@ -411,6 +418,27 @@ Same as browser wallet:
 - Function selection - auto-populates typed arguments
 - Manual or auto chi estimation
 
+### Swap
+
+When the active network has the DEX router (`con_dex`) deployed, the wallet
+offers an in-wallet **Swap** screen:
+
+- from / to token selection from the tracked asset list
+- quotes computed from on-chain pair reserves, including multi-hop routes
+- review summary with rate, price impact, and minimum received
+- selectable slippage (0.5% / 1% / 3% / 5%, default 1%) and deadline
+  (default 20 min)
+- automatic approve step when the router allowance is insufficient
+
+### WalletConnect (Apps Tab)
+
+The Apps tab manages WalletConnect dApp sessions:
+
+- pair by scanning a WalletConnect QR code (preferred) or pasting a `wc:` URI
+- review and approve session proposals
+- approve or reject per-request signing and transaction prompts
+- list and disconnect active sessions
+
 ### Gestures
 
 - **Swipe left** on a token - opens Send with that token pre-selected
@@ -435,11 +463,11 @@ Transaction history with:
 - **Accounts** - add, switch, rename (inline), remove
 - **Networks** - full CRUD, tap to switch, long-press to edit, optional HTTP
   data-transfer opt-in per preset
-- **Security** - reveal seed / key (tap to copy), hide
+- **Security** - reveal seed / key (tap to copy), hide, biometric unlock toggle
 - **Contacts** - add, delete
 - **Appearance** - quick actions position (top / bottom), hide labels
-- **Backup** - export encrypted backup JSON via Share sheet, import encrypted
-  backup JSON with the backup password
+- **Backup** - export encrypted backup JSON via Share sheet, import an
+  encrypted backup file (or pasted JSON) with the backup password
 - **Shielded snapshots** - save, export, import, remove, and compare stored
   shielded wallet snapshots against indexed `shielded_wallet_history` when the
   connected node exposes that BDS surface
@@ -463,10 +491,10 @@ Bottom tab bar with four tabs:
 |-----|--------|---------|
 | Home | HomeScreen | Balances, quick actions, asset list |
 | Activity | ActivityScreen | Transaction history |
-| Apps | AppsScreen | Connected dApps (placeholder) |
+| Apps | AppsScreen | WalletConnect dApp sessions and approvals |
 | Settings | SettingsScreen | All wallet configuration |
 
-Stack screens: Send, Receive, TokenDetail, Networks, AdvancedTx.
+Stack screens: Send, Trade (Swap), Receive, TokenDetail, Networks, AdvancedTx.
 
 ## Compatibility
 

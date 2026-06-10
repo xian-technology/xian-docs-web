@@ -211,9 +211,9 @@ from xian_py import Wallet, Xian
 wallet = Wallet(private_key="your_private_key_hex")
 client = Xian("http://127.0.0.1:26657", wallet=wallet)
 
-result = client.submit_contract(
+result = client.deploy_contract(
     name="con_example_token",
-    code=TOKEN_CODE,
+    source=TOKEN_CODE,
     args={
         "name": "Example Token",
         "symbol": "EXT",
