@@ -53,6 +53,8 @@ High-value flows include:
   network manifest
 - `xian node init|start|stop|status|health|endpoints ...` for local lifecycle
   and inspection
+- `--validator-selection-mode` on local genesis creation when a fresh chain
+  should start in `manual`, `auto_top_n`, or `hybrid` validator-selection mode
 - `--enable-intentkit` and `--enable-dex-automation` on `network create` /
   `network join` when the node should manage those optional sidecars
 - `xian snapshot restore ...` and `xian recovery apply ...` for restore and
@@ -93,9 +95,9 @@ artifact paths before anything is written to disk.
 ## Guided Node Setup
 
 Use `xian setup node` when you want the CLI to ask for the setup path, network,
-node name, validator key mode, runtime preset, and start behavior. The same
-command also accepts advanced runtime flags such as `--tx-fee-mode` when you
-need a non-default network policy:
+node name, validator key mode, runtime preset, local validator-selection policy,
+and start behavior. The same command also accepts advanced runtime flags such as
+`--tx-fee-mode` when you need a non-default network policy:
 
 ```bash
 uv run xian setup node
@@ -121,6 +123,41 @@ The `basic` preset maps to `single-node-dev`; the `indexed` preset maps to
 `single-node-indexed` and enables BDS, dashboard, and monitoring. See
 [Installation & Setup](/node/installation#guided-node-setup) for the full
 wizard reference.
+
+## Local Genesis Validator Selection
+
+`--validator-selection-mode` is a genesis-time setting for fresh local networks.
+It seeds the `validators.selection_mode` constructor argument when
+`xian network create` renders a local genesis from a contract bundle.
+
+```bash
+uv run xian setup node --mode local --network local-dev --name validator-1 \
+  --preset basic --key-mode generate \
+  --validator-selection-mode hybrid \
+  --plan
+```
+
+The lower-level command exposes the same setting:
+
+```bash
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --bootstrap-node validator-1 \
+  --generate-validator-key \
+  --validator-selection-mode auto_top_n
+```
+
+Allowed values are:
+
+| Value | Use |
+| --- | --- |
+| `manual` | validator admission is controlled directly by governance votes |
+| `auto_top_n` | eligible registered validators are ranked by bonded stake during rebalancing |
+| `hybrid` | governance approves candidate eligibility, then rebalancing ranks approved candidates by bonded stake |
+
+The flag is intentionally not part of `network join`, and it is rejected with an
+external `--genesis-source`. Joined networks already have a canonical genesis.
+Existing chains change validator policy through `validators.update_policy`
+governance rather than through node-local setup flags.
 
 `xian-cli` is also manifest-aware. When a canonical network manifest includes
 pinned node images and release provenance, `network join` carries that posture

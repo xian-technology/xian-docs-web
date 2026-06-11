@@ -55,6 +55,7 @@ through the same lifecycle that the lower-level commands expose:
 
 - choose whether to join an existing network or create a local single-node network
 - choose the network name, node name, validator key mode, and runtime preset
+- choose the validator selection policy when generating a fresh local genesis
 - create or join the network manifest and write the node profile
 - materialize the CometBFT home with `xian node init`
 - optionally start the node and run the post-start health check
@@ -121,6 +122,7 @@ Common wizard options:
 | `--free-block-max-chi` | cap one proposed block's total submitted chi budget in `free_metered` mode |
 | `--block-policy-mode on_demand|idle_interval|periodic` | block production policy when the template/manifest default is not wanted |
 | `--block-policy-interval` | idle or periodic empty-block interval, for example `1s` or `10s` |
+| `--validator-selection-mode manual|auto_top_n|hybrid` | validator-set selection policy for a generated local genesis; valid only with `--mode local` and without `--genesis-source` |
 | `--force` | overwrite existing generated artifacts where supported |
 
 Wizard defaults:
@@ -135,6 +137,7 @@ Wizard defaults:
 | joined preset | `indexed` |
 | local preset | `basic` |
 | key mode | `generate`, unless `--validator-key-ref` is supplied |
+| local validator selection mode | `manual` |
 | interactive start choice | asks, defaulting to start |
 | scripted start choice | does not start unless `--start` is supplied |
 
@@ -146,6 +149,24 @@ dashboard, and monitoring. The first start of an indexed local build can spend
 time pulling or building Docker images, including the PostGraphile image used by
 the optional GraphQL layer. Startup progress is printed while Docker works.
 
+For fresh local networks, validator selection is written into the generated
+genesis file. Keep `manual` when validator admission should happen through
+explicit governance votes. Use `auto_top_n` or `hybrid` when you need a local
+chain that exercises stake-ranked validator-set rebalancing:
+
+```bash
+uv run xian setup node --mode local --network local-dev --name validator-1 \
+  --preset basic --key-mode generate \
+  --validator-selection-mode hybrid \
+  --no-start --yes
+```
+
+This option does not apply when joining an existing network or when passing an
+external `--genesis-source`. For a chain that already exists, validator policy
+changes happen through the `validators.update_policy` governance path. See
+[Becoming a Validator](/node/validators#selection-modes) for the selection mode
+semantics.
+
 The wizard is a thin wrapper over the explicit commands below. Use the lower
 level commands directly when you need advanced flags or automation-specific
 control that the wizard does not expose.
@@ -155,6 +176,18 @@ cd ~/xian/xian-cli
 uv run xian network template list
 uv run xian network create local-dev --chain-id xian-local-1 \
   --template single-node-dev --generate-validator-key --init-node
+```
+
+When using `xian network create` directly, the same genesis-time validator
+policy is available with `--validator-selection-mode`. The flag is accepted only
+when the command is generating the local genesis from a bundle:
+
+```bash
+uv run xian network create local-dev --chain-id xian-local-1 \
+  --template single-node-dev \
+  --bootstrap-node validator-1 \
+  --generate-validator-key \
+  --validator-selection-mode auto_top_n
 ```
 
 If you are joining an existing network instead of creating a fresh local one:

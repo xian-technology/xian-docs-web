@@ -162,8 +162,9 @@ throughput workload and readonly simulator load.
    history
 12. run a dedicated determinism check by comparing recent app hashes, sampled
     state, and simulation outputs across validators
-13. vote a validator power change, remove a validator, and add it back through
-    real on-chain governance
+13. vote a validator power change, remove a validator, add it back, switch the
+    validator policy through `auto_top_n` and `hybrid`, and restore `manual`
+    through real on-chain governance
 14. approve and apply a governed forward state patch
 15. switch logging posture to `DEBUG` and `TRACE` and verify the expected log
     output appears

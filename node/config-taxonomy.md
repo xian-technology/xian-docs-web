@@ -57,6 +57,7 @@ owns, then writes the next artifact.
 | Phase or question | Value resolution |
 | --- | --- |
 | Create a new network manifest | explicit `xian network create` flag, then selected template default, then built-in default |
+| Generate local genesis state | explicit `xian network create` genesis flag, then selected genesis bundle constructor default |
 | Generate a node profile | explicit `xian network create` or `xian network join` flag, then selected template profile default, then network manifest default where that field is network-scoped, then built-in profile default |
 | Resolve network identity, chain ID, and canonical genesis | network manifest, unless a command exposes an explicit node-local override |
 | Start or inspect a local node | explicit lifecycle command flag, then node profile, then network manifest where applicable, then runtime default |
@@ -88,6 +89,12 @@ mode, seed policy, privacy artifact catalogs, and related network facts.
 
 Templates can create new manifests, but once a manifest exists it is the source
 of truth for that network.
+
+When `xian network create` generates a local `genesis.json`, genesis-only flags
+such as `--validator-selection-mode` affect the generated contract constructor
+state before the chain starts. They are not node profile fields. A joined network
+inherits its already-fixed genesis from the manifest, and an existing chain
+changes validator policy through governance.
 
 ## Profiles
 
