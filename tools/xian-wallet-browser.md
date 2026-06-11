@@ -306,9 +306,11 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 
 - **Reveal seed** - password-protected, click to copy
 - **Reveal private key** - password-protected, click to copy
-- **Session** - while unlocked, the extension keeps the active private key, the
-  mnemonic when the wallet is seed-backed, and a derived session key in
-  `chrome.storage.session`; the raw password is not persisted
+- **Session** - while unlocked, `chrome.storage.session` holds only the public
+  key, the session expiry, and a derived session key; the decrypted private key
+  and mnemonic stay in background-worker memory, and a worker restart restores
+  them from the encrypted store via the session key. The raw password is not
+  persisted
 
 ### dApp Integration
 
