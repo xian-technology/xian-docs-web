@@ -5,13 +5,13 @@ off-chain social process.
 
 The canonical contracts are:
 
-- `members.s.py`, submitted as `masternodes`
+- `validators.s.py`, deployed as `validators`
 - `rewards.s.py`
 - `governance.s.py`
 
-`masternodes` owns validator registration, self-bonding, delegation, unbonding,
+`validators` owns validator registration, self-bonding, delegation, unbonding,
 membership voting, and evidence-driven slashing. `rewards` defines the global
-fee split, and the runtime uses `masternodes` state to distribute the validator
+fee split, and the runtime uses `validators` state to distribute the validator
 bucket.
 
 ## What Exists Today
@@ -129,9 +129,9 @@ Additional rules:
 Validator fee rewards are computed in two stages.
 
 First, the runtime takes the validator bucket from the `rewards` contract split
-and divides it across active validators by `validator_power`.
+and divides it across active validators by `powers`.
 
-Second, each validator's share is split using `masternodes` state:
+Second, each validator's share is split using `validators` state:
 
 1. The validator's `commission_bps` is taken off the top.
 2. The remainder is distributed pro rata across:
@@ -216,7 +216,7 @@ networks currently set to `dao`.
 ## Evidence Penalties
 
 The runtime submits evidence penalties internally during `finalize_block`
-through `masternodes.apply_evidence_penalty(...)`. Normal users cannot call
+through `validators.apply_evidence_penalty(...)`. Normal users cannot call
 that surface directly.
 
 Supported infraction types today:
@@ -268,7 +268,7 @@ runtime.
 
 ## Membership Vote Types
 
-`masternodes.propose_vote(...)` currently accepts these vote types:
+`validators.propose_vote(...)` currently accepts these vote types:
 
 - `add_member`
 - `remove_member`

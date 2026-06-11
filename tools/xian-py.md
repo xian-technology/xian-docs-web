@@ -142,6 +142,16 @@ Restore from an existing private key:
 wallet = Wallet(private_key="your_private_key_hex")
 ```
 
+Restore from a browser/mobile recovery phrase:
+
+```python
+wallet = Wallet.from_mnemonic("your twelve or twenty four words")
+second_account = Wallet.from_mnemonic(
+    "your twelve or twenty four words",
+    account_index=1,
+)
+```
+
 ### HD Wallet
 
 ```python

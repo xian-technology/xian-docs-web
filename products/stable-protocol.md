@@ -53,7 +53,7 @@ Design highlights:
   system debt
 - a surplus buffer and recapitalization path keep protocol losses explicit
 - governance changes are explicit and delayed, executed through Xian's
-  `masternodes` and `governance` contracts after handoff
+  `validators` and `governance` contracts after handoff
 
 ## Installing The Protocol
 

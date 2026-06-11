@@ -116,14 +116,14 @@ GET /api/abci_query/contract_vars/currency
 GET /api/abci_query/health
 GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
-GET /api/abci_query/masternodes_policy
-GET /api/abci_query/masternodes_active
-GET /api/abci_query/masternodes_candidates
-GET /api/abci_query/masternodes_validator/<address>
-GET /api/abci_query/masternodes_pending_unbonds/<address>
-GET /api/abci_query/masternodes_open_votes/limit=50/offset=0
-GET /api/abci_query/masternodes_vote/<proposal-id>
-GET /api/abci_query/masternodes_vote_records/<proposal-id>
+GET /api/abci_query/validators_policy
+GET /api/abci_query/validators_active
+GET /api/abci_query/validators_candidates
+GET /api/abci_query/validators_validator/<address>
+GET /api/abci_query/validators_pending_unbonds/<address>
+GET /api/abci_query/validators_open_votes/limit=50/offset=0
+GET /api/abci_query/validators_vote/<proposal-id>
+GET /api/abci_query/validators_vote_records/<proposal-id>
 ```
 
 For paginated key scans over a contract hash prefix, the `/keys/...` form

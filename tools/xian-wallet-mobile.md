@@ -344,8 +344,7 @@ source exposed by `react-native-get-random-values`:
 
 **Key derivation is identical** to the browser wallet:
 
-- Index 0: `SHA256(bip39_seed + "xian-wallet-seed-v1")`
-- Index N > 0: `SHA256(bip39_seed + "xian-wallet-seed-v1" + uint32BE(N))`
+- Index N >= 0: `SHA256(bip39_seed + "xian-wallet-seed-v2" + uint32BE(N))`
 
 Seeds are interchangeable between browser and mobile wallets.
 

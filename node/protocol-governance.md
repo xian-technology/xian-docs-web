@@ -41,7 +41,7 @@ devnet bundles currently rely on the same contract defaults.
 The governance contract does not own its own member list. It imports a
 membership contract through `membership_contract_name`.
 
-On current canonical networks, that contract is `masternodes`.
+On current canonical networks, that contract is `validators`.
 
 Governance uses:
 

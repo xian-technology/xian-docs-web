@@ -213,8 +213,7 @@ Seed-backed wallets support multiple derived accounts:
 
 Key derivation is deterministic:
 
-- Index 0: `SHA256(bip39_seed + "xian-wallet-seed-v1")` (backward compatible)
-- Index N > 0: `SHA256(bip39_seed + "xian-wallet-seed-v1" + uint32BE(N))`
+- Index N >= 0: `SHA256(bip39_seed + "xian-wallet-seed-v2" + uint32BE(N))`
 
 ### Sending Tokens
 

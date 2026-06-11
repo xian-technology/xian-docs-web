@@ -4,10 +4,10 @@ Becoming a validator in Xian has two separate parts:
 
 - operator setup through `xian-cli` and `xian-stack`
 - on-chain admission through the canonical membership contract shipped in
-  `xian-configs/contracts/members.s.py` and submitted as `masternodes`
+  `xian-configs/contracts/validators.s.py` and deployed as `validators`
 
 Protocol-level changes that affect validator policy or state patching also go
-through `xian-configs/contracts/governance.s.py`, submitted as `governance`.
+through `xian-configs/contracts/governance.s.py`, deployed as `governance`.
 
 ## Local Setup
 
@@ -93,7 +93,7 @@ The canonical validator record tracks:
 - requested and active validator power
 - `reward_key`
 - profile metadata: `moniker`, `network_endpoint`, `metadata_uri`
-- registration bond held by `masternodes`
+- registration bond held by `validators`
 - `self_bond`, `total_delegated`, and `total_bond`
 - commission rate in basis points
 - delegator count
@@ -102,8 +102,8 @@ The canonical validator record tracks:
 The lifecycle is:
 
 1. Prepare the node and key locally.
-2. Submit `masternodes.register(...)` on-chain.
-3. Escrow the registration bond into the `masternodes` contract.
+2. Submit `validators.register(...)` on-chain.
+3. Escrow the registration bond into the `validators` contract.
 4. Set the requested validator profile fields:
    `reward_key`, `requested_validator_power`, `commission_bps_value`,
    `moniker`, `network_endpoint`, and `metadata_uri`.
@@ -124,7 +124,7 @@ Status values used by the contract today include:
 
 ## Selection Modes
 
-`members.s.py` supports three validator-set selection modes.
+`validators.s.py` supports three validator-set selection modes.
 
 | Mode | Admission behavior | Rebalance behavior |
 | --- | --- | --- |
@@ -179,7 +179,7 @@ Replacement behavior is intentionally conservative:
 
 ## Governance Around Membership
 
-The `masternodes` contract uses its own vote surface for validator operations.
+The `validators` contract uses its own vote surface for validator operations.
 Supported vote types are currently:
 
 - `add_member`
@@ -211,7 +211,7 @@ Current vote behavior:
 - proposals expire after 7 days if still pending
 
 On current bundled networks, validator voting weight comes from active
-`validator_power`, not just one-validator-one-vote.
+`powers`, not just one-validator-one-vote.
 
 Validator-governance proposals emit lifecycle events for submission, votes,
 approval, rejection, and expiry.
@@ -240,7 +240,7 @@ The runtime now does this:
 
 1. Take the validator bucket from the `rewards` contract split.
 2. Divide that bucket across active validators in proportion to
-   `validator_power`.
+   `powers`.
 3. Send each validator's share to its `reward_key`, with delegation commission
    and pro-rata stake sharing applied afterward.
 

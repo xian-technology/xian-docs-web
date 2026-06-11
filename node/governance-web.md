@@ -47,8 +47,8 @@ To run the console locally:
 
 Current-governance read support expects the node/API surface to include:
 
-- `/masternodes_vote/<proposal-id>`
-- `/masternodes_vote_records/<proposal-id>`
+- `/validators_vote/<proposal-id>`
+- `/validators_vote_records/<proposal-id>`
 
 Those endpoints expose the per-voter validator-governance records used by the
 vote matrix. Older networks that do not yet have those contract/API changes can
@@ -81,7 +81,7 @@ XIAN_CHAIN_ID=xian-1
 XIAN_RPC_URL=https://<rpc-host>
 XIAN_DASHBOARD_URL=https://<dashboard-host>
 XIAN_GOVERNANCE_CONTRACT=governance
-XIAN_MEMBERSHIP_CONTRACT=masternodes
+XIAN_MEMBERSHIP_CONTRACT=validators
 ```
 
 `XIAN_DASHBOARD_URL` is optional and is used only for navigation and
@@ -96,9 +96,9 @@ serving a public RPC endpoint does not create voting rights by itself.
 
 For protocol governance, the `governance` contract imports the membership
 contract and requires the caller to be a current member. On canonical networks,
-that membership contract is `masternodes`.
+that membership contract is `validators`.
 
-For validator governance, `masternodes` requires:
+For validator governance, `validators` requires:
 
 - `ctx.caller` to be in the active validator set to open a proposal
 - the caller to have snapshotted voting weight on that proposal to vote
