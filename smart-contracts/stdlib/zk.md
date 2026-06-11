@@ -2,7 +2,7 @@
 
 The contract runtime exposes a narrow `zk` module for proof verification.
 
-This is still a verifier surface inside contracts.
+This is a verifier surface inside contracts.
 
 The first real proof-backed contract flow using this module is the
 shielded-note token work in `xian-contracts`.
@@ -11,10 +11,9 @@ Validators that enable zk verification need the native verifier bindings
 installed in the node image. Wallet-side proving, witness construction, and
 proving-key material stay outside the consensus path.
 
-The current shielded-note circuit family is `shielded_note_v3`, built around
-Merkle auth paths and a chain-owned append frontier rather than whole-tree
-witnesses. The current shielded-command execution family is
-`shielded_command_v4`.
+The shielded-note circuit family is `shielded_note_v4`, built around Merkle
+auth paths and a chain-owned append frontier rather than whole-tree witnesses.
+The shielded-command execution family is `shielded_command_v5`.
 
 ## Available Functions
 
@@ -140,7 +139,7 @@ Malformed inputs raise an assertion error instead of returning `False`.
 The first real contract families using this verifier surface are the
 shielded-note token and shielded-command stack in `xian-contracts`.
 
-The current pattern is:
+The pattern is:
 
 - prove note membership against an accepted `old_root`
 - keep witness construction, Merkle auth paths, and note scanning off-chain
@@ -154,7 +153,7 @@ The current pattern is:
   history off-chain
 - use a chain-owned append frontier for post-state projection
 
-The shipped `shielded_note_v3` flow uses:
+The shipped `shielded_note_v4` flow uses:
 
 - Merkle auth paths instead of whole-tree witnesses
 - a default tree depth of `20`
@@ -165,7 +164,7 @@ The shipped `shielded_note_v3` flow uses:
 - proof-bound output payload hashes, so encrypted note payloads cannot be
   swapped after proof generation without invalidating the proof
 
-The shipped `shielded_command_v4` flow adds:
+The shipped `shielded_command_v5` flow adds:
 
 - note-spending command proofs on top of the same root / nullifier model
 - binding to a target contract, payload digest, relayer, expiry, and chain id
@@ -182,14 +181,19 @@ For the off-chain prover, wallet, and deployment-tool reference itself, see
 For that workflow, off-chain tooling such as `xian_zk` tracks:
 
 - the accepted root being proved
-- the current append frontier state
+- the append frontier state
 - the input notes and their Merkle auth paths
 - wallet-side snapshots of note records, keys, and commitment history
 
-Operator-side tooling now also exists to generate a random shielded-note
-bundle plus a registry-ready verifying-key manifest. That replaces the
-deterministic dev bundle for deployment, but it is still a single-party setup,
-not an MPC ceremony.
+Operator tooling can generate a random shielded-note bundle plus a
+registry-ready verifying-key manifest. Use that for private networks or test
+deployments that explicitly accept single-party setup trust. It is not an MPC
+ceremony.
+
+For ceremony-generated material, operators should use
+`xian-zk-shielded-bundle promote` to validate and package note, command, and
+relay-command bundles into registry manifests, a `register_and_bind.py` helper,
+and a catalog snippet for the network privacy artifact catalog.
 
 Deterministic dev proving bundles remain local test tooling only. They are not
 network-ready setup material.
@@ -259,8 +263,8 @@ def verify_join(vk_id: str, proof_hex: str, public_inputs: list):
     )
 ```
 
-Low-level raw-key verification is still available when a contract must work
-with an explicit verifying key:
+Low-level raw-key verification is available when a contract must work with an
+explicit verifying key:
 
 ```python
 @export

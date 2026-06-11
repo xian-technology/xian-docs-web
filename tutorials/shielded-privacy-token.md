@@ -4,8 +4,8 @@ This tutorial uses the existing `con_shielded_note_token` contract plus the
 `xian_zk` proving toolkit to deploy and use a note-based privacy token on
 Xian.
 
-The current implementation works end to end with the existing contract and
-tooling. It is still `candidate`, not a finished production wallet stack.
+This implementation works end to end with the existing contract and tooling.
+The wallet stack is `candidate`, not a finished production wallet experience.
 
 For the package-level `xian_zk` reference, deployment CLI, and wallet API
 surface, see [xian-zk](/tools/xian-zk).
@@ -38,7 +38,7 @@ surface, see [xian-zk](/tools/xian-zk).
 - nullifiers, output commitments, and accepted roots
 - the relayer account and relayer fee for relayed transfers
 
-## Current Caveats
+## Caveats
 
 - there is no standardized network-wide viewing policy yet
 - there is no polished end-user GUI or mobile wallet UX yet
@@ -49,11 +49,11 @@ surface, see [xian-zk](/tools/xian-zk).
 - wallet note sync depends on indexed transaction history, not just contract
   state
 
-## Current Cost Profile
+## Cost Profile
 
-The current shielded implementation is much cheaper than the original
-all-Python contract path because tree updates and relay-digest hot paths now
-run through native `xian-zk` bindings inside the runtime.
+Shielded transactions are much cheaper than the original all-Python contract
+path because tree updates and relay-digest hot paths run through native
+`xian-zk` bindings inside the runtime.
 
 Local benchmark reference values from June 2026:
 
@@ -64,8 +64,8 @@ Local benchmark reference values from June 2026:
 - shielded transfer with 2 inputs / 2 outputs: about `3,926` chi
 - relayed hidden-sender shielded transfer: about `6,126` chi
 
-Those are still more expensive than a public transfer, but no longer in the
-earlier five-digit chi range.
+Those remain more expensive than a public transfer, but are below the
+five-digit chi range of the all-Python path.
 
 ## Before You Start
 
@@ -128,56 +128,91 @@ The shielded token needs one verifying key for each shielded action:
 - `withdraw`
 - `relay_transfer`
 
-For a real deployment, generate a random bundle and registry manifest once:
+For a production-style deployment, start from ceremony-generated note and
+relay-command bundles and promote them into network handoff artifacts:
 
 ```bash
-uv run xian-zk-shielded-bundle generate-note \
-  --output-dir ./artifacts/private-usd-mainnet \
+uv run xian-zk-shielded-bundle promote \
+  --network testnet \
   --contract-name con_private_usd \
-  --vk-id-prefix private-usd-mainnet-20260327
+  --note-bundle ./ceremony-note-bundle.json \
+  --relay-command-bundle ./ceremony-relay-command-bundle.json \
+  --output-dir ./artifacts/private-usd-testnet
 ```
 
-That writes:
+The command writes:
 
 - `shielded-note-bundle.json`: private proving bundle, keep offline
 - `shielded-note-registry-manifest.json`: public verifying-key manifest
-- `shielded-note-deployment.md`: operator guide for registration and binding
+- `shielded-relay-command-bundle.json`: private relay proving bundle, keep
+  offline
+- `shielded-relay-registry-manifest.json`: public relay verifying-key manifest
+- `register_and_bind.py`: importable helper for registration and binding
+- `promotion-summary.json`: operator handoff summary
+- `catalog-artifacts-snippet.json`: starting point for the network privacy
+  artifact catalog
 
-Then register the manifest entries. The manifest already carries the current
-registry metadata surface, so the simplest path is to forward each entry
-directly after removing the helper-only `action` field:
+If `zk_registry` is governance-owned, use the generated `registry_entries` as
+the payload for governance proposals that call `zk_registry.register_vk(...)`.
+The generated helper is useful for operator automation, but it does not bypass
+governance or multisig ownership.
+
+For private networks or test deployments that explicitly accept single-party
+setup trust, the note bundle generator is available:
+
+```bash
+uv run xian-zk-shielded-bundle generate-note \
+  --output-dir ./artifacts/private-usd-testnet \
+  --contract-name con_private_usd \
+  --vk-id-prefix private-usd-testnet-20260611
+```
+
+That path is not an MPC ceremony. If the token enables `relay_transfer`, also
+provision and register a relay-command manifest before binding the token.
+
+Load the manifests that match your setup path:
 
 ```python
 import json
 from pathlib import Path
 
-manifest = json.loads(
-    Path("./artifacts/private-usd-mainnet/shielded-note-registry-manifest.json").read_text()
-)
-
-for entry in manifest["registry_entries"]:
-    args = dict(entry)
-    args.pop("action", None)
-    zk_registry.register_vk(**args, signer="sys")
+manifest_paths = [
+    Path("./artifacts/private-usd-testnet/shielded-note-registry-manifest.json"),
+    Path("./artifacts/private-usd-testnet/shielded-relay-registry-manifest.json"),
+]
+manifests = [json.loads(path.read_text()) for path in manifest_paths]
 ```
 
-For local development, the deterministic `v3` dev bundle still contains the
-matching verifying keys:
+Then register the manifest entries. Each entry carries the registry metadata
+surface, including setup provenance and artifact hashes. Remove the helper-only
+`action` field before calling `register_vk(...)`:
 
 ```python
-from xian_zk import ShieldedNoteProver, ShieldedRelayTransferProver
-
-prover = ShieldedNoteProver.build_insecure_dev_bundle()
-relay_prover = ShieldedRelayTransferProver.build_insecure_dev_bundle()
-
-for manifest in (prover.registry_manifest(), relay_prover.registry_manifest()):
+for manifest in manifests:
     for entry in manifest["registry_entries"]:
         args = dict(entry)
         args.pop("action", None)
         zk_registry.register_vk(**args, signer="sys")
 ```
 
-This registers the current ids:
+For local development, the deterministic dev bundles contain matching
+verifying keys:
+
+```python
+from xian_zk import ShieldedNoteProver, ShieldedRelayTransferProver
+
+prover = ShieldedNoteProver.build_insecure_dev_bundle()
+relay_prover = ShieldedRelayTransferProver.build_insecure_dev_bundle()
+manifests = [prover.registry_manifest(), relay_prover.registry_manifest()]
+
+for manifest in manifests:
+    for entry in manifest["registry_entries"]:
+        args = dict(entry)
+        args.pop("action", None)
+        zk_registry.register_vk(**args, signer="sys")
+```
+
+This registers these verifier ids:
 
 - `shielded-deposit-v4`
 - `shielded-transfer-v4`
@@ -192,18 +227,13 @@ stores the registry `vk_hash`, so a later registry drift cannot silently
 change the live circuit semantics.
 
 ```python
-for action in ("deposit", "transfer", "withdraw"):
-    token.configure_vk(
-        action=action,
-        vk_id=prover.bundle[action]["vk_id"],
-        signer="sys",
-    )
-
-token.configure_vk(
-    action="relay_transfer",
-    vk_id=relay_prover.bundle["relay_transfer"]["vk_id"],
-    signer="sys",
-)
+for manifest in manifests:
+    for binding in manifest["configure_actions"]:
+        token.configure_vk(
+            action=binding["action"],
+            vk_id=binding["vk_id"],
+            signer="sys",
+        )
 ```
 
 You can inspect the binding at any time:
@@ -371,15 +401,15 @@ restored_wallet = ShieldedWallet.from_json(state_snapshot)
 resume snapshot that also keeps synced commitments and wallet note state so the
 wallet can continue scanning and planning without rebuilding everything first.
 
-The browser and mobile wallet apps now treat this `state_snapshot` as a
-first-class backup primitive: users can store shielded snapshots in wallet
+The browser and mobile wallet apps treat this `state_snapshot` as a first-class
+backup primitive: users can store shielded snapshots in wallet
 settings, include them automatically in full encrypted wallet backups, and
 export individual shielded snapshots when needed. They can also check whether
 indexed shielded history already contains newer notes after a stored snapshot,
 which is the user-facing signal that a restore file is stale and should be
 refreshed before spending.
 
-`ShieldedWallet.sync_transactions(...)` now prefilters note payloads before full
+`ShieldedWallet.sync_transactions(...)` prefilters note payloads before full
 decryption. If you already materialized note records from indexed transactions,
 you can prefilter first:
 
@@ -485,7 +515,7 @@ network sees only:
 - the proof-bound payload hashes
 - the next accepted root
 
-Bob can now recover the incoming note by reading indexed contract transactions
+Bob recovers the incoming note by reading indexed contract transactions
 and decrypting payloads with `recover_encrypted_notes(...)`.
 
 ## Optional: Hide The Public Transaction Sender With A Relayer
@@ -601,9 +631,9 @@ alice_keys = ShieldedKeyBundle.from_parts(
 
 ## Step 7: Withdraw Back To A Public Balance
 
-Withdraw is still public on the exit side, but the wallet-side note recovery
+Withdraw is public on the exit side, but the wallet-side note recovery
 and change-note flow stay the same. When the selected notes add up exactly to
-the public withdraw amount, the proof can now use `outputs=[]` and the
+the public withdraw amount, the proof can use `outputs=[]` and the
 contract accepts a full exit without forcing a change note.
 
 ```python
@@ -676,16 +706,17 @@ assert exact_exit.output_payloads == []
 
 ## Operational Notes
 
-- The current shielded circuit family is `shielded_note_v3`.
+- The shielded note circuit family is `shielded_note_v4`; relayed note
+  transfers use the `shielded_command_v5` statement family for the
+  `relay_transfer` action.
 - Tree depth is fixed per circuit family. If you want a different depth, you
   need a new circuit and new verifying keys.
 - The on-chain payload channel is for note delivery and optional viewer
   disclosure. It is not what authorizes spending; only `owner_secret` does
   that.
-- `ShieldedWallet` is the current canonical Python-side wallet abstraction for
-  seed backup, state snapshots, note sync, note selection, and request
-  planning.
-- Encrypted payloads are now proof-bound by per-output payload hashes. A wallet
+- `ShieldedWallet` is the canonical Python-side wallet abstraction for seed
+  backup, state snapshots, note sync, note selection, and request planning.
+- Encrypted payloads are proof-bound by per-output payload hashes. A wallet
   should still decrypt the payload and recompute the commitment before trusting
   the note, but an attacker cannot swap the stored payload without also
   breaking proof validity.
@@ -703,9 +734,9 @@ assert exact_exit.output_payloads == []
   material
 - define the network-level policy for who gets disclosed viewing access and how
   that is audited
-- build a real network-origin privacy story beyond the current relayed
-  execution primitives
-- ship a polished end-user wallet interface on top of the current `ShieldedWallet`
+- build a real network-origin privacy story beyond the relayed execution
+  primitives
+- ship a polished end-user wallet interface on top of `ShieldedWallet`
   and `xian_zk` flow
 - improve indexer / app-facing read paths so large live pools do not depend only
   on direct contract paging

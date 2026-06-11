@@ -14,7 +14,8 @@ real runtime path with:
 - `xian-py`
 - nested contract deployment and dynamic contract-call routing
 - DEX deployment and mixed trading flows
-- shielded-note-token proof-backed flows
+- shielded-note-token proof-backed flows, including the promoted bundle
+  deployment handoff
 - indexed reads, websocket subscriptions, and event watching
 - logging, readonly simulation under load, intentional BDS catch-up, and
   dedicated parallel-execution validation
@@ -168,8 +169,11 @@ throughput workload and readonly simulator load.
 14. approve and apply a governed forward state patch
 15. switch logging posture to `DEBUG` and `TRACE` and verify the expected log
     output appears
-16. use the governed system `zk_registry`, deploy the shielded-note-token, then
-    test deposit, shielded transfer, and withdraw flows
+16. use the governed system `zk_registry`, deploy the shielded-note-token,
+    promote note and relay-command bundles through the
+    `xian-zk-shielded-bundle promote` handoff, register/bind the resulting
+    manifests through governance, then test deposit, shielded transfer, relayed
+    transfer, and withdraw flows
 17. run a dedicated parallel-execution probe that:
     - verifies `/perf_status` reports the configured parallel on/off posture on
       every validator
@@ -177,6 +181,18 @@ throughput workload and readonly simulator load.
     - forces same-sender reuse and checks for serial prefiltering
     - forces read-after-write and prefix-scan tails and checks for multi-wave
       speculative handling
+
+Phase 15 writes its promotion artifacts under the run directory:
+
+```text
+.artifacts/localnet-e2e/<run-id>/shielded-promotion/promoted/
+```
+
+That directory contains the promoted private prover bundles, registry
+manifests, `promotion-summary.json`, `catalog-artifacts-snippet.json`, and the
+generated `register_and_bind.py` helper. The e2e runner uses governance for
+on-chain `zk_registry.register_vk(...)` calls because the testnet-shaped
+localnet registry is governance-owned.
 
 ## Recommended Matrix
 
@@ -236,9 +252,9 @@ already-running localnet.
   `.localnet/network.json` so it can exercise real validator governance. Treat
   those keys as local-only dev material.
 - The shielded-note-token is exercised as a privacy-asset flow, but it is not
-  currently listed on the DEX in the canonical run. The current DEX fixture
-  expects float-based token semantics, while the shielded-note-token public
-  interface uses integer amounts.
+  listed on the DEX in the canonical run. The DEX fixture expects float-based
+  token semantics, while the shielded-note-token public interface uses integer
+  amounts.
 - The orchestration phase validates contract-submitted child deployments,
   dynamic name-based and module-based dispatch, rollback on nested submission
   failure, and preserved `ctx.caller` / `ctx.signer` across a multi-hop call
@@ -249,15 +265,15 @@ already-running localnet.
 - The BDS catch-up phase intentionally stops the local Postgres service. The
   pass condition is that live block production continues, BDS reports backlog
   or degraded indexing, and the indexed surface catches up again after
-  Postgres returns. On the current BDS implementation, `queue_depth`
-  can stay nonzero in steady state, so the meaningful recovery signals are the
+  Postgres returns. On the BDS implementation, `queue_depth` can stay nonzero
+  in steady state, so the meaningful recovery signals are the
   indexed height, spool state, and DB health.
 - The harness also validates a secondary BDS rebuild path outside the live node
   process. That makes the retrieval phase cover both live catch-up
   and explicit reindex/restart recovery from retained block history.
-- The secondary BDS path is no longer just a one-shot sync. The current run
-  also stops that rebuilt instance, lets the chain advance, then restarts it
-  again to verify delayed catch-up from retained history.
+- The secondary BDS path covers more than a one-shot sync. The run stops that
+  rebuilt instance, lets the chain advance, then restarts it again to verify
+  delayed catch-up from retained history.
 - The localnet validator image must include `xian-zk`, not just the Python-side
   prover utilities. The shielded phase verifies proofs inside the validator
   runtime.
@@ -269,13 +285,13 @@ already-running localnet.
   includes real proving work. A clean success run can spend multiple minutes in
   that phase alone.
 - Hex-looking public addresses are valid shielded withdraw recipients. The
-  toolkit and contract now use matching recipient-digest hashing semantics for
+  toolkit and contract use matching recipient-digest hashing semantics for
   those values.
 - Keep the logging phase short. `TRACE` is intentionally expensive and exists
   for debugging, not for steady-state operation.
 - Localnet Compose waits for `service_healthy`, not just `service_started`.
   Treat a running container as not ready until the health checks pass.
-- `make localnet-clean` now requires `FORCE=1` because it deletes all localnet
+- `make localnet-clean` requires `FORCE=1` because it deletes all localnet
   keys, state, and generated Compose files.
 
 ## What To Review After A Run

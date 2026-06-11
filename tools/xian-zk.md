@@ -1,6 +1,6 @@
 # xian-zk
 
-`xian-zk` is the current external proving, wallet, and deployment-tooling
+`xian-zk` is the primary external proving, wallet, and deployment-tooling
 package for Xian's shielded note and shielded command flows.
 
 Validators that enable zk verification need the native `xian-zk` verifier
@@ -33,11 +33,11 @@ uv run maturin develop -r
 
 ## What It Ships
 
-The current package surface includes:
+The package surface includes:
 
 - Groth16 / BN254 verification helpers
-- shielded-note proof generation for the `shielded_note_v3` circuit family
-- shielded-command proof generation for the `shielded_command_v4` circuit
+- shielded-note proof generation for the `shielded_note_v4` circuit family
+- shielded-command proof generation for the `shielded_command_v5` circuit
   family
 - note commitments, nullifiers, Merkle roots, and auth-path helpers
 - `ShieldedWallet` for seed backup, wallet snapshots, sync, note selection, and
@@ -54,13 +54,15 @@ The current package surface includes:
 - optional disclosed viewers on output payloads
 - a CLI for generating a random shielded-note trusted-setup bundle plus a
   registry-ready manifest
+- a CLI promotion path for turning ceremony-generated note, command, and
+  relay-command bundles into operator handoff artifacts
 - programmatic bundle / manifest generation for shielded-command circuits
 - a trusted local prover service and matching prover clients for wallet-side
   proving offload
 
 ## Canonical Wallet Model
 
-The current Python-side wallet model is:
+The Python-side wallet model is:
 
 - `owner_secret`: spend authority inside the shielded pool
 - `viewing_private_key` / `viewing_public_key`: note decryption and disclosure
@@ -88,13 +90,13 @@ wallet.sync_transactions(
 balance = wallet.available_balance()
 ```
 
-`ShieldedWallet` now syncs from indexed transaction history rather than reading
+`ShieldedWallet` syncs from indexed transaction history rather than reading
 encrypted note payloads out of contract state. On a live node, that means BDS
 or another equivalent indexed transaction feed needs to be available.
 
-For newer payloads, `xian-zk` no longer embeds the recipient viewing public key
-in cleartext. Instead it stores anonymous discovery-tag entries plus ephemeral
-keys inside the encrypted payload bundle. Wallet sync uses those entries to
+Encrypted payloads do not embed the recipient viewing public key in cleartext.
+Instead they store anonymous discovery-tag entries plus ephemeral keys inside
+the encrypted payload bundle. Wallet sync uses those entries to
 prefilter candidate notes before full decryption.
 
 Wallet snapshots:
@@ -116,32 +118,31 @@ candidates = wallet.candidate_records(records)
 sync_result = wallet.sync_records(candidates)
 ```
 
-Indexed note records now also expose `payload_tags`, which indexers can persist
-for future selective note-discovery queries. Newer wallet sync flows should use
+Indexed note records expose `payload_tags`, which indexers can persist for
+future selective note-discovery queries. Wallet sync flows should use
 the higher-level `shielded_wallet_history` feed first. That feed keeps the full
 commitment sequence in note-index order and only includes `output_payload` for
 rows whose indexed tag matches the wallet. If that feed is not available,
-`ShieldedWallet.sync_indexed_client(...)` still falls back to the older
+`ShieldedWallet.sync_indexed_client(...)` falls back to the older
 event/tag/transaction fan-out path.
 
-Browser and mobile wallet integrations can now treat `state_snapshot` as a
+Browser and mobile wallet integrations can treat `state_snapshot` as a
 first-class user backup. Stored shielded snapshots are included in full wallet
 backup exports, and users can also store, export, or remove shielded wallet
-snapshots directly through the wallet settings flows. Both wallet apps can now
+snapshots directly through the wallet settings flows. Both wallet apps can
 also check indexed shielded history after a stored snapshot so users can tell
 whether the chain has already advanced beyond that snapshot before attempting a
 restore or spend.
 
 ## Runtime Cost Direction
 
-Recent shielded-fee work moved the Merkle frontier append and relay-digest hot
-paths out of Python contract code and into native `xian-zk` bindings exposed
-through the runtime `zk` bridge. That was the change that materially lowered
-shielded transaction cost.
+Shielded transaction cost is lower because Merkle frontier appends and
+relay-digest hot paths run through native `xian-zk` bindings exposed through
+the runtime `zk` bridge instead of Python contract code.
 
 Using the reproducible benchmark in
-`xian-abci/scripts/benchmark_shielded_chi.py`, the local June 2026 numbers for
-the current shielded note implementation are roughly:
+`xian-abci/scripts/benchmark_shielded_chi.py`, the local June 2026 shielded
+note profile is roughly:
 
 - shielded exact withdraw with no new output note: `2,242` chi
 - shielded withdraw with 1 input / 1 output: `3,435` chi
@@ -154,7 +155,7 @@ command execution at `6,715` chi and a shielded-command DEX swap path at
 `9,898` chi. At the default `20` chi per XIAN conversion, those two command
 paths cost about `335.75` XIAN and `494.90` XIAN.
 
-Those are still above a plain public transfer, which measured `69` chi on the
+Those remain above a plain public transfer, which measured `69` chi on the
 same local stack, but they are dramatically lower than the earlier five-digit
 shielded costs from the all-Python contract path.
 
@@ -223,8 +224,8 @@ the proof on another chain.
 
 ## Private Submission Relayer
 
-The proof-bound relayed transfer and shielded-command paths now also have a
-concrete network-facing relayer service:
+The proof-bound relayed transfer and shielded-command paths use a
+network-facing relayer service:
 
 - Python client: `ShieldedRelayerClient`
 - async Python client: `ShieldedRelayerAsyncClient`
@@ -283,10 +284,10 @@ Example:
 }
 ```
 
-The current CLI-side selection rule is intentionally simple: sort by
-`priority`, then `id`, then `base_url`, and expose the first entry as the
-primary relayer while keeping the full catalog available to tooling. The routed
-pool clients in `xian-py` and `xian-js` now use that same ordered catalog.
+The CLI-side selection rule is intentionally simple: sort by `priority`, then
+`id`, then `base_url`, and expose the first entry as the primary relayer while
+keeping the full catalog available to tooling. The routed pool clients in
+`xian-py` and `xian-js` use that same ordered catalog.
 
 If a public network actually enables shielded assets, the recommended posture
 is:
@@ -296,7 +297,7 @@ is:
 - make the relayer auth and retention posture in
   `privacy_submission_policy` match the deployed relayer configuration
 
-Current pool-client behavior is:
+Pool-client behavior is:
 
 - `get_info` / `getInfo` and `get_quote` / `getQuote` can fail over across the
   ordered relayer list
@@ -323,11 +324,11 @@ routes:
 export XIAN_SHIELDED_RELAYER_AUTH_TOKEN=local-dev-token
 ```
 
-If the relayer binds to a non-loopback host, the current stack-managed runtime
-now requires `XIAN_SHIELDED_RELAYER_AUTH_TOKEN`. Treat that as a minimum
-hardening rule, not an optional production extra.
+If the relayer binds to a non-loopback host, the stack-managed runtime requires
+`XIAN_SHIELDED_RELAYER_AUTH_TOKEN`. Treat that as a minimum hardening rule, not
+an optional production extra.
 
-Operational knobs now also include:
+Operational knobs include:
 
 ```bash
 export XIAN_SHIELDED_RELAYER_PUBLIC_INFO=1
@@ -361,7 +362,7 @@ Operational privacy notes:
 
 ## Trusted Local Prover Service
 
-`xian-zk` now ships a local prover-service entrypoint for wallet-side proving
+`xian-zk` ships a local prover-service entrypoint for wallet-side proving
 offload:
 
 ```bash
@@ -425,7 +426,11 @@ contracts can spend only that exact public budget during the active execution.
 
 ## Deployment CLI
 
-For a real deployment, use the CLI instead of the deterministic dev bundle:
+Use the deployment CLI whenever a verifier bundle will leave a local test.
+Deterministic dev bundles are only for local tests.
+
+For a single-party note-token setup, generate the note bundle and registry
+manifest:
 
 ```bash
 uv run xian-zk-shielded-bundle generate-note \
@@ -434,25 +439,61 @@ uv run xian-zk-shielded-bundle generate-note \
   --vk-id-prefix private-usd-mainnet-20260327
 ```
 
-The output directory contains:
+The command writes:
 
 - `shielded-note-bundle.json`: private proving bundle
 - `shielded-note-registry-manifest.json`: public verifying-key manifest
 - `shielded-note-deployment.md`: operator registration / binding guide
+- `register_and_bind.py`: importable helper for registration and binding
 
-The manifest can be registered directly in `zk_registry` and then bound into
-the token contract with `configure_vk(...)`.
+Keep `shielded-note-bundle.json` on the prover host. Publish or submit only the
+registry manifest and catalog metadata.
 
-The registry entries now carry richer metadata. The easiest operator path is to
-register each manifest entry directly after removing the helper-only `action`
-field:
+For ceremony-backed material, promote the note and relay-command bundles
+together:
+
+```bash
+xian-zk-shielded-bundle promote \
+  --network testnet \
+  --contract-name con_private_usd \
+  --note-bundle ./ceremony-note-bundle.json \
+  --relay-command-bundle ./ceremony-relay-command-bundle.json \
+  --output-dir ./artifacts/private-usd-testnet
+```
+
+The promotion command writes:
+
+- `shielded-note-bundle.json`
+- `shielded-note-registry-manifest.json`
+- `shielded-relay-command-bundle.json`
+- `shielded-relay-registry-manifest.json`
+- `register_and_bind.py`
+- `promotion-summary.json`
+- `catalog-artifacts-snippet.json`
+
+Use `catalog-artifacts-snippet.json` as the starting point for the network
+`privacy_artifact_catalog` entry. The private bundle files contain proving
+keys and should stay offline or on access-controlled prover hosts.
+
+Register every manifest entry in `zk_registry`, then bind each action in the
+token contract with `configure_vk(...)`. Registry entries include deployment
+metadata such as setup mode, ceremony label, circuit family, statement version,
+tree depth, IO limits, and artifact hashes. Remove the helper-only `action`
+field before calling `register_vk(...)`:
 
 ```python
-for entry in manifest["registry_entries"]:
-    args = dict(entry)
-    args.pop("action", None)
-    zk_registry.register_vk(**args, signer="sys")
+for manifest in manifests:
+    for entry in manifest["registry_entries"]:
+        args = dict(entry)
+        args.pop("action", None)
+        zk_registry.register_vk(**args, signer="sys")
 ```
+
+On a governed network, route the same `registry_entries` through the
+governance proposal flow for `zk_registry.register_vk(...)`. The generated
+`register_and_bind.py` helper is intentionally importable so operator scripts
+can reuse the manifest parsing, but it does not replace the network's
+authorization model.
 
 ## Dev Bundle vs Deployment Bundle
 
@@ -503,13 +544,13 @@ relay_manifest = relay_prover.registry_manifest()
 
 ## Important Warning
 
-The built-in deployment generator is still a single-party random trusted setup.
-That is a real deployment path, but it is not a substitute for an MPC
-ceremony.
+The built-in deployment generator is a single-party random trusted setup. That
+is a real deployment path, but it is not a substitute for an MPC ceremony.
 
-If a network wants ceremony-grade trust reduction, use the explicit import and
-validation flow rather than treating the built-in random generator as an MPC
-flow:
+If a network wants ceremony-grade trust reduction, use ceremony-generated
+bundles and the explicit validation/import flow rather than treating the
+built-in random generator as an MPC flow. The standalone import commands are
+useful when you need to inspect note and command artifacts separately:
 
 ```bash
 xian-zk-shielded-bundle validate-note --bundle ./ceremony-note-bundle.json
@@ -530,16 +571,15 @@ network rollout and rotation policy.
 
 ## Prover Service Guardrails
 
-`xian-zk-prover-service` still assumes the prover is trusted with witness
-material, but it now has basic bind-safety guardrails:
+`xian-zk-prover-service` assumes the prover is trusted with witness material,
+but it has basic bind-safety guardrails:
 
 - loopback binds are allowed without extra flags
 - non-loopback binds are refused unless `--unsafe-allow-remote-host` is passed
 - non-loopback binds also require a non-empty `--auth-token`
 
-So the intended posture is still "local trusted prover first", with deliberate
-operator acknowledgement required before exposing the service to any remote
-network path.
+The intended posture is "local trusted prover first", with deliberate operator
+acknowledgement required before exposing the service to any remote network path.
 
 ## See Also
 
