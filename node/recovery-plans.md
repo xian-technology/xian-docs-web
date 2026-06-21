@@ -23,7 +23,7 @@ Current required fields:
 {
   "schema_version": 1,
   "name": "metering-incident-20260327",
-  "chain_id": "xian-1",
+  "chain_id": "xian-local-1",
   "target_height": 123456,
   "trusted_block_hash": "ABCD...",
   "trusted_app_hash": "EFGH...",

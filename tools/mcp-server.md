@@ -29,13 +29,13 @@ see the read-safe default surface.
 
 ## Network Configuration
 
-Configure the target network explicitly. Current public testnet values are:
+Configure the target network explicitly. Local current-code defaults are:
 
-| Variable | Purpose | Current public testnet value |
+| Variable | Purpose | Local default |
 |----------|---------|-------------------------------|
-| `XIAN_NODE_URL` | Node RPC URL | `https://testnet.xian.org` |
-| `XIAN_GRAPHQL` | GraphQL endpoint | `https://testnet.xian.org/graphql` |
-| `XIAN_CHAIN_ID` | Chain ID used for transaction payloads | `xian-testnet-13` |
+| `XIAN_NODE_URL` | Node RPC URL | `http://127.0.0.1:26657` |
+| `XIAN_GRAPHQL` | GraphQL endpoint | `http://127.0.0.1:5000/graphql` |
+| `XIAN_CHAIN_ID` | Chain ID used for transaction payloads | `xian-local-1` |
 | `XIAN_INCLUDE_RAW` | Include raw SDK payloads in responses | `false` |
 
 When in doubt, read `result.node_info.network` from the node's `/status`

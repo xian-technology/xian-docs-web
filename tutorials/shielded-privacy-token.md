@@ -539,7 +539,7 @@ relay_plan = alice_relay_wallet.build_relay_transfer(
     recipient=bob_keys.recipient,
     amount=10,
     relayer="relayer-1",
-    chain_id="xian-1",
+    chain_id="xian-local-1",
     fee=2,
 )
 
