@@ -187,9 +187,9 @@ uv run xian network join validator-1 --network testnet --template single-node-in
 
 or by `network create` when bootstrapping a fresh local network.
 
-For mainnet, use `--network-manifest` with the operator-supplied mainnet
-manifest. The checked-in canonical manifests currently cover local, devnet, and
-testnet.
+For mainnet, use `--network-manifest` with the accepted `xian-mainnet-1`
+operator bundle manifest. The checked-in mainnet manifest is a launch
+preparation asset, not a signal that public endpoints are live.
 
 Use `xian network template list` to inspect the canonical starter shapes before
 creating or joining a network.

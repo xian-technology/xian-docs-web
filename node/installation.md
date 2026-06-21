@@ -201,9 +201,9 @@ uv run xian network join validator-1 --network testnet \
 uv run xian node init validator-1
 ```
 
-Mainnet operators should pass the operator-supplied mainnet manifest with
-`--network-manifest`; the checked-in canonical manifests cover local, devnet,
-and testnet.
+Mainnet preparation uses the draft `xian-mainnet-1` manifest in `xian-configs`,
+but operators should pass the accepted operator bundle manifest with
+`--network-manifest` instead of relying on defaults.
 
 Canonical network manifests may pin published `xian-node` image digests.
 When those fields are present, `xian network join` writes them into the node

@@ -70,9 +70,9 @@ uv run xian setup node --mode join --network testnet --name validator-1 \
   --stack-dir ../xian-stack --start --yes
 ```
 
-Mainnet operators should pass the operator-supplied mainnet manifest with
-`--network-manifest`; the current checked-in canonical manifests cover local,
-devnet, and testnet.
+Mainnet preparation uses the draft `xian-mainnet-1` manifest in `xian-configs`,
+but operators should pass the accepted operator bundle manifest with
+`--network-manifest`; product defaults should stay local.
 
 When the joined network manifest pins published node images, `xian node start`
 pulls those immutable images by default through `xian-stack`. Use

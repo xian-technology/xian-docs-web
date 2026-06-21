@@ -25,9 +25,8 @@ uv run xian network join validator-1 --network testnet \
   --stack-dir ../xian-stack
 ```
 
-For mainnet, pass the operator-supplied mainnet manifest with
-`--network-manifest`; the checked-in canonical manifests currently cover local,
-devnet, and testnet.
+For mainnet, pass the accepted `xian-mainnet-1` operator bundle manifest with
+`--network-manifest`; do not rely on product defaults for launch networks.
 
 For canonical networks, that profile now inherits pinned published
 `xian-node` image digests from the network manifest by default. Use

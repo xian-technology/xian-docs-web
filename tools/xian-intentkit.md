@@ -92,9 +92,9 @@ flowchart TD
 
 For node operators using the stack-managed integration, the usual entrypoint is
 to join one of the maintained canonical manifests or pass an explicit manifest.
-The current checked-in canonical manifests cover local, devnet, and testnet
-profiles; mainnet operators should use the operator-supplied mainnet manifest
-for their deployment.
+The checked-in canonical manifests include a draft `xian-mainnet-1` launch
+preparation manifest; mainnet operators should use the accepted operator bundle
+manifest for their deployment.
 
 ```bash
 uv run xian network join testnet-agent-node \
