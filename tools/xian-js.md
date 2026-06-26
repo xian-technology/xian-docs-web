@@ -442,6 +442,13 @@ These are useful when you need:
 - stable sorted object encoding
 - runtime wrapper handling for big integers and byte arrays
 
+`decodeRuntime` preserves integer precision when reading runtime JSON. Safe
+integer tokens decode to JavaScript `number`, while runtime big-integer wrappers
+and plain integer tokens outside `Number.MAX_SAFE_INTEGER` decode to `bigint`.
+Use `parseXianNumber` or `normalizeMaybeXianNumber` for values that may cross
+the safe integer boundary; use `normalizeMaybeInteger` only when the caller
+requires a safe JavaScript integer.
+
 ## Websocket Subscriptions
 
 Dashboard websocket support lives under `client.watch`.
@@ -487,7 +494,10 @@ Unsubscribe explicitly:
 await sub.unsubscribe();
 ```
 
-`dashboardUrl` must be configured on the client for websocket usage.
+`dashboardUrl` must be configured on the client for websocket usage. Pass the
+dashboard base URL; `client.watch` appends `/ws` and derives the websocket
+protocol from it (`http` -> `ws`, `https` -> `wss`, while `ws` and `wss` stay
+websocket URLs).
 Malformed websocket payloads and async listener failures are surfaced through
 that optional `onError` callback instead of becoming unhandled promise
 rejections.
@@ -675,6 +685,11 @@ payload in the dapp:
 
 That avoids stale nonces and wrong-account or wrong-chain mismatches better
 than forcing every dapp to build the full unsigned tx upfront.
+
+Chain checks also apply when a dapp passes a prebuilt transaction to
+`xian_signTransaction` or `xian_sendTransaction`: the transaction payload must
+include `chain_id`, and that chain id must match the wallet's active
+`xian_chainId` before the wallet signs or broadcasts it.
 
 ## In-Memory Provider Example
 
