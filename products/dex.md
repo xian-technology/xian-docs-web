@@ -39,10 +39,10 @@ The bundle deploys four contracts in a pinned order:
 
 | Contract | Role |
 |----------|------|
-| `con_pairs` | pair factory, reserve bookkeeping, and LP balance logic |
+| `con_pairs` | pair factory, reserve bookkeeping, and LP mint/burn (total-supply) logic |
 | `con_dex` | router-style liquidity and swap entrypoints |
 | `con_dex_helper` | convenience helper around the router for single-pair buy/sell flows |
-| `con_lp_token` | XSC-0001-compatible LP token template for pairs that mint transferable LP tokens |
+| `con_lp_token` | XSC-0001-compatible LP token template; each pair binds its own instance, which holds the per-account LP balances and approvals |
 
 Behavior worth knowing before integrating:
 
@@ -54,6 +54,12 @@ Behavior worth knowing before integrating:
 - Every pair binds an XSC-0001 LP token contract. Create pairs with
   `createPair(tokenA, tokenB, lpToken=...)` or pass `lpToken=...` to
   `addLiquidity` for router auto-creation.
+- An account's LP balance and allowances live in that pair's bound
+  `con_lp_token` instance — read `<lpToken>.balances` / `<lpToken>.approvals`,
+  not `con_pairs`. To remove liquidity, approve the router (`con_dex`) on the LP
+  token (`<lpToken>.approve(amount, to="con_dex")`) and then call
+  `removeLiquidity(...)`. Resolve the per-pair LP token from
+  `con_pairs.pairs[pair_id, "lpToken"]` (or `con_pairs.lpTokenFor(pair_id)`).
 - Fee-on-transfer tokens must be flagged with
   `set_fee_on_transfer_token(...)`; plain swap routes reject flagged tokens
   and require the supporting-fee router path instead.
