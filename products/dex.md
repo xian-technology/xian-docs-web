@@ -51,9 +51,11 @@ Behavior worth knowing before integrating:
 - The standard swap fee path is 30 bps. Router-owner-approved signers can be
   flagged with `set_zero_fee_trader(...)` for zero-fee routing through the
   router; direct pair swaps stay on the standard fee path.
-- Every pair binds an XSC-0001 LP token contract. Create pairs with
-  `createPair(tokenA, tokenB, lpToken=...)` or pass `lpToken=...` to
-  `addLiquidity` for router auto-creation.
+- Every pair binds an XSC-0001 LP token contract. The factory owner registers
+  the canonical LP token with `registerLpToken(tokenA, tokenB, lpToken)` before
+  the pair exists. `createPair(tokenA, tokenB)` and router auto-creation during
+  `addLiquidity` use the registered token; an optional `lpToken` argument is
+  accepted only when it matches that registration.
 - An account's LP balance and allowances live in that pair's bound
   `con_lp_token` instance — read `<lpToken>.balances` / `<lpToken>.approvals`,
   not `con_pairs`. To remove liquidity, approve the router (`con_dex`) on the LP
