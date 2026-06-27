@@ -63,9 +63,9 @@ Returns the current contract source fetched through the node's query layer.
 The dashboard reads `contract_source/<name>` and displays the canonical stored
 source plus Xian VM metadata.
 
-In the explorer UI, the contract page now renders that source with Python
-syntax highlighting, lets you jump from a listed function to its definition
-in the source pane, and enriches the page with runtime metadata such as owner,
+In the explorer UI, the contract page renders that source with Python syntax
+highlighting, lets you jump from a listed function to its definition in the
+source pane, and enriches the page with runtime metadata such as owner,
 developer, deployer, creator/initiator, creation tx, and indexed reward totals
 when BDS is available.
 
@@ -188,28 +188,28 @@ works from a host-local dashboard process instead of falling back to
 container-internal addresses.
 
 When BDS is enabled, additional query paths are available under the same ABCI
-query surface. These are still node queries, but backed by the optional BDS
-index instead of the raw current-state driver.
+query surface. These are node queries backed by the optional BDS index instead
+of the raw current-state driver.
 
 These indexed reads are eventually consistent. The validator finalizes the
 block first, then the BDS worker persists the indexed payload asynchronously.
 So raw `/get/...` reads reflect current state immediately, while BDS-backed
 history/index queries may lag briefly behind the latest committed block.
 To make this resilient without keeping disk I/O in the validator hot path,
-BDS now keeps newly finalized blocks in an in-memory pending buffer and
+BDS keeps finalized blocks in an in-memory pending buffer and
 persists them in strict contiguous height order. If the indexed head is
 missing a height, BDS fetches the missing blocks from local CometBFT RPC in
-the background while newer live blocks remain pending.
+the background while later live blocks remain pending.
 
-That means BDS can safely receive new block data while it is still catching up:
+That means BDS can receive live block data during catch-up:
 
 - if live block `N+2` arrives while `N+1` is missing, `N+2` stays pending
 - the catch-up worker fetches and builds `N+1`
 - BDS persists `N+1`, then `N+2`, preserving a single canonical chain order
 
-The local spool is still available for offline maintenance, snapshot import,
-and explicit recovery workflows, but it is no longer the primary live-path
-durability mechanism.
+The local spool supports offline maintenance, snapshot import, and explicit
+recovery workflows. The primary live-path durability mechanism is the BDS
+database plus contiguous-height catch-up.
 
 Current BDS-backed ABCI query paths include:
 
@@ -257,7 +257,7 @@ Operator-oriented BDS inspection:
 - `/bds_status` reports worker state, queue depth, spool size, indexed head,
   lag relative to the node's current block height, connection-pool posture,
   filesystem storage metrics, and warning/error alerts.
-- `catching_up` is the meaningful “still behind” signal. `queue_depth` may stay
+- `catching_up` is the meaningful "behind" signal. `queue_depth` may stay
   nonzero while the service is otherwise caught up, so treat indexed height,
   spool state, DB health, and `catching_up` as the primary recovery signals.
 - when present, the nested `pool` object reports `size`, `idle`, `in_use`,
@@ -278,8 +278,8 @@ Cursor-based event consumption:
 - `/events/<contract>/<event>/limit=.../after_id=...` returns events with
   strictly larger BDS event IDs in ascending order.
 - Use `after_id` for resumable consumers and long-running watchers.
-- The older `offset` form is still useful for ad hoc browsing, but `after_id`
-  is the better shape for application event consumers.
+- The `offset` form is useful for ad hoc browsing, but `after_id` is the better
+  shape for application event consumers.
 
 Shielded wallet history:
 
@@ -306,7 +306,7 @@ Developer reward aggregation:
 
 Current catch-up behavior:
 
-- during live operation, BDS keeps new finalized blocks pending in memory and
+- during live operation, BDS keeps finalized blocks pending in memory and
   backfills any missing heights from local CometBFT RPC automatically
 - if the node or database restarts, BDS resumes from the indexed head and
   continues catch-up from local or remote CometBFT RPC
@@ -315,7 +315,7 @@ Current catch-up behavior:
 - for full historical backfill, use `xian-bds-reindex` against local or remote
   CometBFT RPC
 - if the local node has already pruned away the required block history, local
-  reindex is no longer enough and an archival RPC source or imported BDS
+  reindex is insufficient and an archival RPC source or imported BDS
   snapshot is needed
 
 Use the raw node paths for authoritative current state:

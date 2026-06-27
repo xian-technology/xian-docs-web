@@ -201,7 +201,7 @@ are done.
 
 ## Client Configuration
 
-The SDK now exposes explicit config types for transport, retry, submission, and
+The SDK exposes explicit config types for transport, retry, submission, and
 watcher defaults:
 
 ```python
@@ -294,7 +294,7 @@ Transaction broadcast modes are explicit:
 - `"checktx"`: wait for mempool admission / `CheckTx`
 - `"commit"`: use CometBFT `broadcast_tx_commit`
 
-Returned fields now distinguish the lifecycle:
+Returned fields distinguish the lifecycle:
 
 - `submitted`
 - `accepted`
@@ -483,7 +483,7 @@ summary = client.get_developer_rewards("alice")
 print(summary.total_rewards, summary.tx_count, summary.contract_count)
 ```
 
-`get_tx(tx_hash)` and `wait_for_tx(tx_hash)` now return a `TransactionReceipt`
+`get_tx(tx_hash)` and `wait_for_tx(tx_hash)` return a `TransactionReceipt`
 that exposes the two important pieces separately:
 
 - `result.tx` is the original submitted transaction
@@ -492,7 +492,7 @@ that exposes the two important pieces separately:
   `receipt.transaction` and `receipt.execution`
 
 `wait_for_tx(tx_hash)` first uses the normal node `/tx` lookup path. If that
-index lags briefly on a live node, `xian-py` now falls back to recent block
+index lags briefly on a live node, `xian-py` falls back to recent block
 inspection so a just-finalized transaction can still be recovered by hash.
 
 `get_bds_status()` returns a typed `BdsStatus` model. The main high-signal
@@ -542,7 +542,7 @@ or the async context manager cleans it up.
 
 ## Watching Blocks And Events
 
-`xian-py` now includes polling-based watcher helpers for long-running
+`xian-py` includes polling-based watcher helpers for long-running
 application processes.
 
 ### watch_blocks
@@ -587,7 +587,7 @@ The default watcher batch size and poll interval come from
 
 ## Application Helper Clients
 
-`xian-py` now includes thin helper clients that reduce repetitive application
+`xian-py` includes thin helper clients that reduce repetitive application
 boilerplate without hiding the underlying network model.
 
 Available factories:
@@ -657,7 +657,7 @@ and wants both the current value and the indexed history view.
 
 ## Reusable Projector Primitives
 
-`xian-py` now also includes a small reusable layer for event-driven read
+`xian-py` includes a small reusable layer for event-driven read
 models and projector workers.
 
 Available primitives:
@@ -676,22 +676,21 @@ These primitives are intentionally thin. The SDK owns the repetitive event
 polling, ordering, and cursor plumbing; application code still owns its own
 projection tables, hydration strategy, and domain-specific apply logic.
 
-The three deeper reference-app slices now build on these shared primitives
+The three deeper reference-app slices build on these shared primitives
 instead of each carrying their own event-loop and cursor implementation.
 
 ## Service Integration Examples
 
-The `xian-py` repo now includes application-facing examples under
+The `xian-py` repo includes application-facing examples under
 `examples/` that show how the SDK fits into ordinary backend workflows.
 
-It also includes the first reference example set under
-`examples/credits_ledger/`, which turns the generic SDK primitives into a
+The `examples/credits_ledger/` slice turns the generic SDK primitives into a
 concrete credits-ledger backend pattern.
 
-It also includes `examples/registry_approval/`, which turns the same SDK
+The `examples/registry_approval/` slice turns the same SDK
 primitives into a shared registry with proposal and approval flow.
 
-It also includes `examples/workflow_backend/`, which turns the SDK into a
+The `examples/workflow_backend/` slice turns the SDK into a
 job-style workflow backend with a service/write path and an event-driven
 worker.
 
@@ -896,7 +895,7 @@ This is the third example set that demonstrates the deeper backend pattern:
 - authoritative decoded readonly `get_item` calls for projection hydration
 - a local projected read model for queue state and workflow activity
 
-The workflow bootstrap now also tops up configured workers with native balance
+The workflow bootstrap tops up configured workers with native balance
 by default so the documented processor path can actually claim and complete
 items in local/reference networks.
 
@@ -918,7 +917,7 @@ not depend on any external contract catalog.
 
 ## Structured Errors
 
-The SDK now exposes more precise error classes:
+The SDK exposes more precise error classes:
 
 - `TransportError`
 - `RpcError`

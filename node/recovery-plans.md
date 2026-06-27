@@ -52,7 +52,7 @@ That artifact is restored through the existing snapshot/node-home restore path.
 
 ## What The CLI Does
 
-`xian-cli` now provides two commands:
+`xian-cli` provides two commands:
 
 ```bash
 uv run xian recovery validate ./recovery-plan.json validator-1

@@ -28,8 +28,8 @@ uv run xian network join validator-1 --network testnet \
 For mainnet, pass the accepted `xian-mainnet-1` operator bundle manifest with
 `--network-manifest`; do not rely on product defaults for launch networks.
 
-For canonical networks, that profile now inherits pinned published
-`xian-node` image digests from the network manifest by default. Use
+For canonical networks, that profile inherits pinned published `xian-node`
+image digests from the network manifest by default. Use
 `--node-image-mode local_build` only when you intentionally want a
 source-built local override.
 
@@ -254,9 +254,9 @@ while still retaining or disabling specific manual override hooks.
 
 ## Reward Behavior
 
-The validator slice of transaction fees is no longer split equally per node.
+The validator slice of transaction fees is split by active validator power.
 
-The runtime now does this:
+The runtime distribution flow is:
 
 1. Take the validator bucket from the `rewards` contract split.
 2. Divide that bucket across active validators in proportion to

@@ -1,7 +1,7 @@
 # Staking Mechanics
 
-Xian's validator economics are now explicit on-chain behavior, not just an
-off-chain social process.
+Xian's validator economics are explicit on-chain behavior, not an off-chain
+social process.
 
 The canonical contracts are:
 
@@ -14,7 +14,7 @@ membership voting, and evidence-driven slashing. `rewards` defines the global
 fee split, and the runtime uses `validators` state to distribute the validator
 bucket.
 
-## What Exists Today
+## Current Model
 
 The current canonical model includes:
 
@@ -307,7 +307,7 @@ In non-manual selection modes:
 
 ## Current Bundled Reality
 
-The maintained `xian-configs` bundles currently pin:
+The maintained `xian-configs` bundles pin:
 
 - `selection_mode = "manual"`
 - `power_mode = "equal"`
@@ -316,7 +316,6 @@ The maintained `xian-configs` bundles currently pin:
 - `duplicate_vote_slash_bps = 500`
 - `light_client_attack_slash_bps = 1000`
 
-So the current public model is still validator-vote admission and removal, but
-the contract already supports automatic top-N selection, delegation-aware
-ranking, delegated reward routing, and evidence-triggered slashing when a
-network chooses to enable them.
+The bundled model uses validator-vote admission and removal. The contract also
+supports automatic top-N selection, delegation-aware ranking, delegated reward
+routing, and evidence-triggered slashing when a network chooses to enable them.

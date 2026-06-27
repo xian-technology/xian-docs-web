@@ -15,8 +15,8 @@ dashboard process defaults to `8080`.
 Once connected, you'll automatically receive `new_block` messages for every block the node commits. To receive state changes or contract events, you need to subscribe explicitly.
 
 The built-in dashboard UI uses that same socket for live node status and block
-updates. Recent event browsing itself now lives in the explorer on service
-nodes with BDS enabled instead of in a separate live-activity panel.
+updates. Service nodes with BDS enabled handle recent event browsing through the
+explorer.
 
 ## Message Types
 
@@ -348,7 +348,7 @@ Smart Contract Execution
 ## Notes
 
 - **No polling needed.** The server pushes updates only when matching changes occur.
-- **New blocks always broadcast** to all connected clients regardless of subscriptions.
+- **Block messages always broadcast** to all connected clients regardless of subscriptions.
 - **State change values are strings.** Parse them in your client if you need numeric types.
 - **Subscriptions are per-connection.** If you disconnect and reconnect, you need to re-subscribe.
 - **The dashboard must be enabled** on the node (`services.dashboard.enabled = true` in a node profile, or the equivalent stack flag). Not all nodes run the dashboard.

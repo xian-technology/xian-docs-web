@@ -104,7 +104,7 @@ Current behavior:
   fallback`: a recent eligible block used the parallel executor and the row is
   showing that block's execution summary
 
-That row is config-aware now, so it no longer looks disabled just because the
+That row is config-aware: an enabled executor appears as enabled even when the
 latest block was too small or not eligible.
 
 `doctor` is the broader workspace and node-health preflight:
@@ -114,8 +114,8 @@ uv run xian doctor validator-1
 uv run xian doctor validator-1 --skip-live-checks
 ```
 
-By default, `doctor <name>` now performs live health checks when the node name
-is known. That includes:
+By default, `doctor <name>` performs live health checks when the node name is
+known. That includes:
 
 - `xian-stack` backend reachability
 - RPC reachability and the current sync summary
@@ -126,8 +126,7 @@ is known. That includes:
 - trusted snapshot-manifest signing keys when the effective bootstrap source is
   manifest-backed
 
-Use `--skip-live-checks` when you want the older artifact-only behavior for an
-offline preflight.
+Use `--skip-live-checks` for an artifact-only offline preflight.
 
 ## Application Logs
 
@@ -231,7 +230,7 @@ python3 ./scripts/backend.py endpoints --bds-enabled --monitoring
 python3 ./scripts/backend.py health --bds-enabled --monitoring --no-check-disk
 ```
 
-The maintained stack now defaults to a fail-closed network posture:
+The maintained stack defaults to a fail-closed network posture:
 
 - CometBFT RPC binds to `127.0.0.1` unless you pass `--public-rpc`
 - CometBFT and Xian metrics bind to `127.0.0.1` unless you pass
@@ -456,8 +455,8 @@ GET /api/abci_query/state_patches_for_block/<height>
 Important boundary:
 
 - validators must already have the local bundle before the activation block
-- if the local bundle is malformed or mismatched, the runtime now fails hard
-  instead of silently skipping the patch
+- if the local bundle is malformed or mismatched, the runtime fails hard rather
+  than skipping the patch
 
 ### Consensus-Halt Emergency Recovery
 
@@ -571,7 +570,7 @@ make monitoring-fidelity-up
 make monitoring-fidelity-down
 ```
 
-The built-in monitoring commands now map to meaningful monitoring postures:
+The built-in monitoring commands map to meaningful monitoring postures:
 
 - `monitoring-up`: generic integrated monitoring with the overview dashboard
 - `monitoring-bds-up`: integrated BDS monitoring with the overview and BDS
@@ -841,8 +840,8 @@ What they do not contain:
 - BDS/Postgres data
 
 Use `snapshot_url` restore when you already have a full prepared node-home
-archive. In the normal node-profile flow this can now be either a direct
-archive URL with an explicit SHA256, or a signed snapshot manifest validated
+archive. In the normal node-profile flow this can be either a direct archive
+URL with an explicit SHA256, or a signed snapshot manifest validated
 against trusted Ed25519 public keys.
 
 Use `xian-state-snapshot` plus CometBFT state sync when you want protocol-level
@@ -891,8 +890,8 @@ implications, see [Pruning And History Retention](/node/pruning).
 
 ## BDS Snapshot Export and Import
 
-For faster bootstrap, migration, or recovery, BDS can now be exported and
-imported separately from the live chain state:
+For faster bootstrap, migration, or recovery, BDS can be exported and imported
+separately from the live chain state:
 
 ```bash
 uv run xian-bds-snapshot export --output-path ./xian-bds-snapshot.tar.gz
@@ -1008,7 +1007,7 @@ Important boundary:
 
 Interpretation note:
 
-- `current_block_height` and `height_lag` are now derived from the latest
+- `current_block_height` and `height_lag` are derived from the latest
   committed node height even when no block is currently being executed
 - `catching_up` reflects actual indexing lag or spool backlog
 - `queue_depth` still matters operationally, but a nonzero queue by itself does

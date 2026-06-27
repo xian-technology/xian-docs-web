@@ -45,5 +45,5 @@ Use this list before shipping a contract to a real network.
 ## Deployment Discipline
 
 - contract name is final and intentional
-- migration or rollback plan exists if this replaces older logic
+- migration or rollback plan exists if this replaces existing logic
 - metadata and operator/owner settings are correct

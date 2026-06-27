@@ -123,7 +123,7 @@ future selective note-discovery queries. Wallet sync flows should use
 the higher-level `shielded_wallet_history` feed first. That feed keeps the full
 commitment sequence in note-index order and only includes `output_payload` for
 rows whose indexed tag matches the wallet. If that feed is not available,
-`ShieldedWallet.sync_indexed_client(...)` falls back to the older
+`ShieldedWallet.sync_indexed_client(...)` falls back to the
 event/tag/transaction fan-out path.
 
 Browser and mobile wallet integrations can treat `state_snapshot` as a

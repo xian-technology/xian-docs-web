@@ -7,13 +7,11 @@ images.
 Each product has exactly one owning repo. The product repo owns active
 development, tests, apps, services, contract bundles, and bootstrap scripts.
 
-::: info Where products live now
-Products used to be distributed as contract packs in `xian-configs` and
-installed through dedicated `xian-cli` catalog commands. Both surfaces have
-been removed: `xian-configs` is now narrowed to system-level network assets
-(manifests, genesis, templates, canonical system contracts), and `xian-cli`
-keeps only generic contract helpers. Install every product from its owning
-repo as shown below.
+::: info Product ownership
+`xian-configs` owns system-level network assets: manifests, genesis, templates,
+and canonical system contracts. Product repos own their deployable app or
+protocol surfaces, while `xian-cli` provides generic contract helpers. Install
+every product from its owning repo as shown below.
 :::
 
 ## Available Products

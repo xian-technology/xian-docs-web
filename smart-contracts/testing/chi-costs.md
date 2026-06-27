@@ -41,14 +41,14 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `READ_COST_PER_BYTE` | 1 | legacy storage-read meter unit per byte |
+| `READ_COST_PER_BYTE` | 1 | storage-read meter unit per byte |
 | `WRITE_COST_PER_BYTE` | 25 | storage-write meter units per byte |
 | `CHI_PER_T` | 20 | How many chi one XIAN buys. `T` stands for the native token. |
 | Runtime raw safety ceiling | 50,000,000,000 raw units | overflow guard before the submitted chi budget cap |
 | Max write data | 128 KiB | Maximum write data per transaction |
 | Max return value | 128 KiB | Maximum serialized return payload |
 
-For `xian_vm_v1`, storage and payload accounting still matter, and compute is
+For `xian_vm_v1`, storage and payload accounting matter, and compute is
 charged through the VM-native gas schedule. The current VM host-operation
 schedule has its own read charge and shares the same `25` units-per-byte write
 cost.

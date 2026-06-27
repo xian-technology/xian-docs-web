@@ -6,7 +6,7 @@ the canonical result of the block.
 The important boundary is this:
 
 - `xian-contracting` does not execute multiple contracts concurrently inside a single Python process
-- `xian-contracting` now owns the native speculative execution controller
+- `xian-contracting` owns the native speculative execution controller
 - `xian-abci` wraps that controller for block processing, reward shaping, and
   node-facing metrics
 - final accepted state must stay equivalent to normal serial execution in block
@@ -47,7 +47,7 @@ flowchart TD
   Workers["Worker processes execute with auto_commit=false"]
   Metadata["Return result plus read/write/prefix metadata"]
   Accept["Accept conflict-free prefix in canonical order"]
-  Tail{"Tail still worth speculating?"}
+  Tail{"Tail worth speculating?"}
   Apply["Apply accepted results in block order"]
   Commit["Normal LMDB batch commit and app_hash"]
 
@@ -75,7 +75,7 @@ flowchart TD
    accepts the conflict-free prefix of that wave.
 5. If the tail conflicts with earlier accepted work, the node either
    respeculates that tail against the updated overlay or falls back to serial
-   execution when the remaining tail is no longer worth speculating.
+   execution when the remaining tail is not worth another speculative wave.
 6. Accepted speculative results are applied in canonical order.
 7. After the block is complete, the node commits the final block state through
    the normal LMDB batch write path.
@@ -114,8 +114,8 @@ At that point, the node does not reorder the block. It keeps `tx1`, `tx2`, and
 `tx3` exactly where they are, then handles the tail:
 
 - it can respeculate `tx4` against the updated overlay in a later wave
-- or it can execute `tx4` serially if the remaining tail is no longer worth
-  speculating
+- or it can execute `tx4` serially if the remaining tail is not worth another
+  speculative wave
 
 Either way, the final result must still match normal serial execution of
 `tx1 -> tx2 -> tx3 -> tx4`.
@@ -165,8 +165,8 @@ The runtime exposes two different operator-facing counters because they mean
 different things:
 
 - `serial_prefiltered`: the controller chose not to speculate a remaining head
-  transaction at all, usually because there were no longer at least two safe
-  front-of-queue candidates worth putting into a wave
+  transaction at all, usually because fewer than two safe front-of-queue
+  candidates were worth putting into a wave
 - `serial_fallbacks`: the transaction was part of speculative handling, but the
   accepted-prefix checks or a worker failure forced it back onto the serial path
 
@@ -184,8 +184,8 @@ This is real parallel execution, but not unsafe shared-state concurrency.
 - one in-process `Executor` still executes one transaction at a time
 - final acceptance stays serial-equivalent
 
-So Xian now uses multiple CPU cores for speculative contract execution, while
-keeping the correctness model tied to canonical block order.
+Xian uses multiple CPU cores for speculative contract execution while keeping
+the correctness model tied to canonical block order.
 
 ## The Reward-Delta Exception
 
@@ -217,7 +217,7 @@ allowed to commit what is still correct in serial order.
 
 ## Representative Throughput
 
-The runtime now includes a dedicated benchmark harness in
+The runtime includes a dedicated benchmark harness in
 `xian-contracting/tests/performance/benchmark_parallel_tps.py`.
 
 Representative local numbers from June 1, 2026 were collected on an Apple M1
@@ -251,7 +251,7 @@ The result is workload-dependent:
 
 - parallel execution is clearly useful when a block contains many transactions
   from different senders that touch disjoint state
-- it still helps when broad reads such as `Hash.all()` are pushed to the tail of
+- it helps when broad reads such as `Hash.all()` are pushed to the tail of
   a block, because the independent prefix can be accepted first
 - same-sender runs naturally collapse back to serial execution and are roughly
   neutral

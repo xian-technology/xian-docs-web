@@ -4,8 +4,8 @@ Pruning controls how much local CometBFT block history a node keeps. It is a
 disk-retention policy, not a consensus-state repair tool.
 
 Use it deliberately. A pruned node can keep validating and serving current Xian
-state, but it may no longer be able to answer old block-history requests or
-rebuild local indexes from the beginning of the chain.
+state, but it may be unable to answer historical block requests or rebuild local
+indexes from the beginning of the chain.
 
 ## What Pruning Does
 
@@ -31,7 +31,7 @@ Pruning affects:
 
 - local CometBFT block history available for RPC and replay
 - local BDS reindex/rebuild range
-- local forensic access to older block and transaction data
+- local forensic access to historical block and transaction data
 
 Pruning does not separately remove:
 
@@ -170,7 +170,7 @@ A common non-archival pattern is:
 1. bootstrap from a trusted application snapshot or state-sync source
 2. start the node and verify health
 3. enable pruning for local disk retention
-4. rely on an archival RPC source or BDS snapshots for older history
+4. rely on an archival RPC source or BDS snapshots for historical data
 
 Do not treat a pruned validator as an archival bootstrap source unless the
 retained window is intentionally large enough for that role.
@@ -223,9 +223,9 @@ decisions respectively.
 
 - Enable pruning only after deciding who keeps archival history.
 - Size `blocks_to_keep` by incident-response needs, not only by disk capacity.
-- Pruning preserves current Xian application state but removes old local block
+- Pruning preserves current Xian application state but removes historical block
   history over time.
 - BDS can keep indexed rows after pruning, but BDS reset from scratch needs
   retained history, an archival RPC source, or a BDS snapshot.
-- Once old local block history is pruned, turning pruning off does not bring it
+- Once local block history is pruned, turning pruning off does not bring it
   back.

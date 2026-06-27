@@ -144,10 +144,10 @@ Common examples:
 
 ## If Determinism Breaks
 
-When a validator no longer matches the network:
+When a validator diverges from the network:
 
 1. its application results diverge
-2. its `app_hash` no longer matches the validator majority
+2. its `app_hash` differs from the validator majority
 3. it falls out of consensus until the runtime and state are corrected
 
 Forward state patches are useful after consensus is live. They do not replace

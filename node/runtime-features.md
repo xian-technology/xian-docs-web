@@ -225,11 +225,11 @@ Important `[xian.bds]` families:
 These settings matter for indexed reads, recovery, and GraphQL. They do not
 change consensus behavior.
 
-Operationally, the live path now keeps newly finalized blocks in an in-memory
-pending buffer and only persists them once any missing earlier heights have
-been recovered from RPC. The local spool is still useful for offline
-maintenance and explicit recovery workflows, but it is no longer the primary
-live-path durability mechanism.
+Operationally, the live path keeps finalized blocks in an in-memory pending
+buffer and only persists them once any missing earlier heights have been
+recovered from RPC. The local spool supports offline maintenance and explicit
+recovery workflows; live-path durability comes from the BDS database plus
+contiguous-height catch-up.
 
 `catchup_enabled` only starts the background catch-up worker when `rpc_url` is
 also set. Stack localnets fill this with the RPC URL reachable from the BDS

@@ -87,9 +87,9 @@ The current maintained inventory is:
 
 | Asset type | Count | Current location |
 |------------|-------|------------------|
-| Canonical network manifests | 3 | `xian-configs/networks/local`, `devnet`, `testnet` |
+| Canonical network manifests | 4 | `xian-configs/networks/local`, `devnet`, `testnet`, `mainnet` |
 | Reusable network templates | 3 | `xian-configs/templates/*.json` |
-| Genesis contract bundles | 3 | `xian-configs/contracts/contracts_local.json`, `contracts_devnet.json`, `contracts_testnet.json` |
+| Genesis contract bundles | 4 | `contracts_local.json`, `contracts_devnet.json`, `contracts_testnet.json`, `contracts_mainnet.json` |
 | Product repos | 3 | `xian-dex`, `xian-stable-protocol`, `xian-nft` |
 | SDK example contract sets | 4 | `xian-py/examples/*/contracts` |
 
@@ -114,8 +114,8 @@ owns the genesis builder and runtime application behavior.
 
 The DEX is the clearest example of the split. `xian-dex` owns active DEX
 development, its pinned `contract-bundle.json`, its web app, and its bootstrap
-script. The base `local`, `devnet`, and `testnet` genesis bundles do not
-automatically make every network a DEX network.
+script. The canonical network bundles do not automatically make every network a
+DEX network.
 
 The same rule applies to the stable protocol and NFT marketplace. Their
 installable on-chain snapshots and bootstrap scripts live in one owning product

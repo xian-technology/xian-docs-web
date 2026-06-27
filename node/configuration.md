@@ -140,15 +140,15 @@ It contains BDS/Postgres-related settings such as:
 When a network pins published node images, `node_release_manifest` is the
 machine-readable provenance block that explains how those images were built.
 
-The current release manifest surface includes:
+The release manifest surface includes:
 
 - exact repo refs for the main runtime components
 - digest-pinned Python and Go base images
 - the CometBFT version plus a checksum-pinned source archive URL
 - the s6-overlay version plus architecture-specific SHA256 values
 
-That means the network manifest is no longer just saying "use this image." It
-also carries the pinned release inputs that produced that image.
+The network manifest carries both the selected image and the pinned release
+inputs that produced that image.
 
 ## Snapshot Bootstrap Vs State Sync
 
@@ -213,8 +213,7 @@ of those settings.
 
 ## Stack-Managed Exposure Defaults
 
-The maintained `xian-stack` backend now defaults to fail-closed host
-publishing:
+The maintained `xian-stack` backend defaults to fail-closed host publishing:
 
 - CometBFT P2P remains public-facing by default on `26656`
 - CometBFT RPC defaults to `127.0.0.1:26657`
@@ -238,7 +237,7 @@ node RPC.
 
 ## Network Manifest Shape
 
-Manifests use object families instead of flat legacy fields:
+Manifests use object families for related configuration:
 
 ```json
 {
@@ -267,10 +266,10 @@ This example shows the checked-in canonical testnet manifest shape. When you
 target a public RPC endpoint, use the chain ID reported by `/status`
 (`result.node_info.network`) for transaction payloads.
 
-For local workflows, `xian-stack` now generates `.stack-secrets.env` on first
+For local workflows, `xian-stack` generates `.stack-secrets.env` on first
 use. That file holds local BDS and PostGraphile passwords and should stay
-untracked. For BDS-enabled runs, PostGraphile now uses its own dedicated
-read-only database role instead of the primary BDS owner account.
+untracked. For BDS-enabled runs, PostGraphile uses its own dedicated read-only
+database role instead of the primary BDS owner account.
 
 ## Common Local Endpoints
 

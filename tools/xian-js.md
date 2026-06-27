@@ -15,7 +15,7 @@ It currently ships four public packages:
 - `@xian-tech/web-kit`: shared browser-app helpers for wallet connection, RPC
   client storage, formatting, toasts, and React integration
 
-The browser wallet product line now lives in the sibling
+The browser wallet product line lives in the sibling
 `xian-wallet-browser` repo, which consumes these SDK packages. The current
 wallet product surface is documented here under
 [xian-wallet-browser](/tools/xian-wallet-browser).
@@ -108,12 +108,12 @@ Install the packages directly from npm:
 npm install @xian-tech/client @xian-tech/provider @xian-tech/types @xian-tech/web-kit
 ```
 
-For local development against the monorepo itself, you can still work from the
+For local development against the monorepo itself, you can work from the
 workspace checkout.
 
 Inside the `xian-js` repo itself, the packages are already linked through the
 workspace. `examples/browser-dapp/` demonstrates the dapp side of the contract.
-The browser wallet implementation now lives in the sibling
+The browser wallet implementation lives in the sibling
 `xian-wallet-browser` repo.
 
 ## Public Imports
@@ -841,7 +841,7 @@ For the walkthrough of the maintained browser playground itself, see
 
 ## Browser Wallet Companion Repo
 
-The concrete browser wallet implementation now lives in the sibling
+The concrete browser wallet implementation lives in the sibling
 `xian-wallet-browser` repo.
 
 That repo currently owns:

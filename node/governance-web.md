@@ -51,9 +51,9 @@ Current-governance read support expects the node/API surface to include:
 - `/validators_vote_records/<proposal-id>`
 
 Those endpoints expose the per-voter validator-governance records used by the
-vote matrix. Older networks that do not yet have those contract/API changes can
-still expose proposal aggregates, but complete per-validator vote auditing is
-only available for proposals created after the vote-record upgrade.
+vote matrix. Nodes without those routes can expose proposal aggregates, but
+complete per-validator vote auditing requires the vote-record query surface and
+proposal records created with that surface enabled.
 
 ## Run Locally
 
@@ -75,11 +75,11 @@ Set the target network in `.env`:
 
 ```bash
 PORT=4173
-XIAN_NETWORK_ID=mainnet
-XIAN_NETWORK_NAME="Xian Mainnet"
+XIAN_NETWORK_ID=local
+XIAN_NETWORK_NAME="Local Xian"
 XIAN_CHAIN_ID=xian-local-1
-XIAN_RPC_URL=https://<rpc-host>
-XIAN_DASHBOARD_URL=https://<dashboard-host>
+XIAN_RPC_URL=http://127.0.0.1:26657
+XIAN_DASHBOARD_URL=http://127.0.0.1:18080
 XIAN_GOVERNANCE_CONTRACT=governance
 XIAN_MEMBERSHIP_CONTRACT=validators
 ```

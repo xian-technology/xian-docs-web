@@ -96,13 +96,13 @@ def add_item(item: str):
     data["list"] = items
 ```
 
-This still applies to:
+This applies to:
 
 - any mutable value stored in a `Hash`
 - nested mutable values inside a `Variable`
 - values returned by `Variable.get()`, because `.get()` returns a defensive copy
 
-For top-level mutable `Variable` values, you can now use helpers like
+For top-level mutable `Variable` values, you can use helpers like
 `settings["mode"] = "strict"` or `queue.append(item)` instead of the full
 read-modify-write cycle.
 

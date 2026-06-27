@@ -391,11 +391,11 @@ workflow runner.
 
 ## End-To-End Workflow Tests
 
-There are now two IntentKit-side workflow paths for this pattern:
+There are two IntentKit-side workflow paths for this pattern:
 
 ### Deterministic Skill/Trigger Harness
 
-This one is still useful for CI and focused development:
+The deterministic harness is useful for CI and focused development:
 
 1. a Xian indexed event wakes the event-trigger service
 2. the task checks a `price_change_pct` threshold
@@ -403,7 +403,7 @@ This one is still useful for CI and focused development:
 4. the agent posts to Telegram
 5. the agent posts to X
 
-It uses the real trigger service and real skills, but it still mocks:
+It uses the real trigger service and real skills, and mocks:
 
 - the indexed event feed
 - the DEX transport layer
@@ -442,7 +442,7 @@ REDIS_HOST=localhost uv run pytest -q \
 
 ### Live Localnet Workflow
 
-There is now also a real live runner for the same workflow. It uses:
+The live localnet runner exercises the same workflow with:
 
 - a real Xian localnet
 - a real node with BDS enabled
@@ -465,7 +465,7 @@ Required env vars in all modes:
 - `INTENTKIT_E2E_TELEGRAM_BOT_TOKEN`
 - `INTENTKIT_E2E_TELEGRAM_CHAT_ID`
 
-The live runner now supports two X posting modes:
+The live runner supports two X posting modes:
 
 - `linked_account`
   - set `INTENTKIT_E2E_TWITTER_AUTH_MODE=linked_account`

@@ -12,7 +12,7 @@ This server can hold private keys and submit transactions.
 Use it as a local tool. Do not expose it publicly and do not point it at
 production wallets unless you have deliberately accepted that risk.
 
-Secret-bearing wallet tools are now disabled by default. To enable wallet
+Secret-bearing wallet tools are disabled by default. To enable wallet
 creation/export, transaction submission helpers, signing, encryption, and
 decryption, set:
 
@@ -20,8 +20,8 @@ decryption, set:
 XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1
 ```
 
-Without that opt-in, the MCP server still exposes the safer read/query/indexed
-inspection surface, but it rejects the unsafe wallet operations.
+Without that opt-in, the MCP server exposes the safer read/query/indexed
+inspection surface and rejects the unsafe wallet operations.
 
 Those unsafe tools are also omitted from `tools/list` and the HTTP `/tools`
 discovery surface until you opt in, so downstream tool-calling systems only

@@ -248,7 +248,7 @@ Use `node_image_mode=local_build` when you intentionally want the profile to
 run whatever the local `xian-stack` workspace builds instead.
 
 The block policy only changes whether chain time advances while the chain is
-idle. Contract `now` still comes from the finalized consensus block timestamp.
+idle. Contract `now` comes from the finalized consensus block timestamp.
 
 Readonly simulation and speculative parallel execution are both node-local
 operator posture. They do not change consensus rules, but they do change how a
