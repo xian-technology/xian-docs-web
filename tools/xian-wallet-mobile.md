@@ -438,6 +438,13 @@ The Apps tab manages WalletConnect dApp sessions:
 - approve or reject per-request signing and transaction prompts
 - list and disconnect active sessions
 
+Transaction prompts can also create temporary auto-approval rules. Exact rules
+repeat the same request arguments for the same dApp session, account, network,
+method, contract, and function. Broad rules allow changed arguments for that
+contract function and require a second in-app confirmation before they are
+saved. Chi limits cap transaction fee/compute budget; they are not token amount
+limits. Revoke saved rules from the Apps tab when they are no longer needed.
+
 ### Gestures
 
 - **Swipe left** on a token - opens Send with that token pre-selected

@@ -691,6 +691,13 @@ Chain checks also apply when a dapp passes a prebuilt transaction to
 include `chain_id`, and that chain id must match the wallet's active
 `xian_chainId` before the wallet signs or broadcasts it.
 
+Wallet implementations that use `@xian-tech/provider` trusted-dapp policies
+should treat saved transaction permissions as exact-argument rules by default.
+An exact rule binds the request method, account, chain, contract, function,
+kwargs, and chi cap. Broad auto-approval is represented as an explicit
+`argumentScope: "any"` policy and should be shown as a separate higher-risk
+permission in wallet UI.
+
 ## In-Memory Provider Example
 
 ```ts

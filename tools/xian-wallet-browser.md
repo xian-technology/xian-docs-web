@@ -90,6 +90,22 @@ After loading the unpacked extension:
 - approve and reject connect / sign / send flows
 - export a backup and restore it into a clean browser profile
 
+### Dapp Auto-Approval Rules
+
+For transaction requests, the browser wallet can save a temporary auto-approval
+rule for the connected site, active account, network, method, contract, and
+function.
+
+The default rule is exact-argument auto-approval: the later request must keep
+the same transaction arguments, such as recipient, amount, swap route, and
+liquidity fields. The chi value is treated as a per-transaction fee/compute
+budget cap, not as a token amount cap.
+
+Users can also choose broad auto-approval for a contract function. Broad rules
+allow the same site to change transaction arguments without another prompt for
+the rule lifetime. The wallet shows a second in-app confirmation before saving
+that broader rule, and users can revoke rules from the connected-apps view.
+
 ## Initial Wallet Setup
 
 On first launch the extension shows three setup modes:
