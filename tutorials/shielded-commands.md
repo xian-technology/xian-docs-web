@@ -175,6 +175,11 @@ commands.deposit_shielded(
 After the deposit lands, sync the new note records into the local wallet before
 building the command plan.
 
+The command pool tracks shielded escrow internally. Direct token transfers to
+`con_shielded_commands` do not mint hidden notes; they show up through
+`get_excess_balance()` and the operator can recover them with
+`sweep_excess(to=...)` without changing shielded escrow.
+
 ## Step 5: Build A Command Plan
 
 Here the hidden sender wants to trade `100` units through the DEX adapter,
