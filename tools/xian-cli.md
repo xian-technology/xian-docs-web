@@ -59,8 +59,8 @@ High-value flows include:
   `network join` when the node should manage those optional sidecars
 - `xian snapshot restore ...` and `xian recovery apply ...` for restore and
   recovery workflows
-- `xian contract build-artifacts ...` when you need to build `xian_vm_v1`
-  deployment artifacts from contract source
+- `xian contract build-artifacts ...` when you need to inspect `xian_vm_v1`
+  artifacts from contract source
 - `xian contract bundle validate ...` when you need to verify hash-pinned
   contract bundle sources before bootstrap
 
@@ -295,7 +295,7 @@ The `tx` namespace signs and submits transactions.
 Available commands:
 
 - `xian client tx send`
-- `xian client tx submit-artifacts`
+- `xian client tx submit-source`
 - `xian client tx transfer`
 
 ### Supplying A Private Key
@@ -346,13 +346,13 @@ xian client tx send \
   --kwargs-json '{"to":"con_dex","amount":7}'
 ```
 
-### Submit Prebuilt Contract Artifacts
+### Submit Contract Source
 
 ```bash
-xian client tx submit-artifacts \
+xian client tx submit-source \
   --node-url http://127.0.0.1:26657 \
   --private-key-env XIAN_PRIVATE_KEY \
-  ./artifacts/my-contract.json
+  ./contracts/con_counter.s.py
 ```
 
 ## Submission Controls

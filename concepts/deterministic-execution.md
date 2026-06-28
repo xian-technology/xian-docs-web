@@ -32,7 +32,7 @@ That means the exact alignment rules depend on the selected execution engine:
 
 | Engine family | Validators must align on |
 |--------------|---------------------------|
-| `xian_vm_v1` | `xian-abci`, `xian-contracting`, native VM support, and deployment artifacts |
+| `xian_vm_v1` | `xian-abci`, `xian-contracting`, native VM support, and canonical source-to-IR compilation |
 
 The principle is always the same: validators must execute the same machine
 contract for the same source and state.
@@ -138,7 +138,7 @@ Real divergence risks tend to come from operator drift rather than exotic math.
 Common examples:
 
 - validators running different runtime versions
-- validators missing required deployment artifacts
+- validators running mismatched compiler or VM versions
 - local forks of consensus-sensitive repos
 - corrupted or inconsistent local state
 

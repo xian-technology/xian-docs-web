@@ -23,7 +23,7 @@ The contract language stays the same. What changes is the runtime beneath it.
 
 ## What `xian_vm_v1` Actually Uses
 
-Under `xian_vm_v1`, deployment is artifact-driven.
+Under `xian_vm_v1`, deployment is source-driven.
 
 The important stored artifacts are:
 
@@ -31,37 +31,28 @@ The important stored artifacts are:
   and inspection tooling
 - `__xian_ir_v1__`: the persisted Xian VM IR used by the native runtime
 
-Client and runtime tooling build and validate `deployment_artifacts`, which
-include:
-
-- `module_name`
-- `vm_profile`
-- `source`
-- `vm_ir_json`
-- content hashes for the canonical artifacts
-
-The runtime validates those artifacts against the canonical compiler output
-before deployment so forged or mismatched bundles are rejected.
+Clients submit cleartext source. Validators normalize, lint, and compile that
+source with the canonical compiler, then persist the resulting source and IR.
+Submitted `deployment_artifacts` are rejected so clients cannot choose the
+executable IR.
 
 ```mermaid
 flowchart TD
   Source["Restricted Python contract source"]
   Compiler["Canonical Xian compiler"]
-  Artifacts["deployment_artifacts"]
   SourceArtifact["Stored __source__"]
   IR["Stored __xian_ir_v1__"]
-  Validate["Runtime artifact validation"]
+  Admission["Validator deployment admission"]
   VM["Native xian_vm_v1 execution"]
   Host["Deterministic host operations"]
   State["Xian state, events, and imports"]
 
   Source --> Compiler
-  Compiler --> Artifacts
-  Artifacts --> SourceArtifact
-  Artifacts --> IR
-  SourceArtifact --> Validate
-  IR --> Validate
-  Validate --> VM
+  Compiler --> SourceArtifact
+  Compiler --> IR
+  SourceArtifact --> Admission
+  IR --> Admission
+  Admission --> VM
   VM --> Host
   Host --> State
 ```
@@ -79,14 +70,14 @@ On the current supported branch:
 
 - `xian_vm_v1` is the only supported node runtime
 - bytecode, gas schedule, and authority are internal VM constants
-- submitted contracts must provide deployment artifacts
+- submitted contracts must provide source code
 
 This keeps the execution contract explicit without exposing alternate engines.
 
 ## What The Native Runtime Does
 
 The native runtime is not a second unrestricted Python interpreter. It executes
-validated Xian VM artifacts and delegates explicit host operations back to the
+validator-derived Xian VM IR and delegates explicit host operations back to the
 Xian runtime boundary.
 
 That host boundary includes things such as:

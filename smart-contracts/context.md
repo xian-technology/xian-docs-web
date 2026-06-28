@@ -64,7 +64,7 @@ def get():
 
     submission.submit_contract(
         name=name,
-        deployment_artifacts=deployment_artifacts,
+        code=code,
     )
 ```
 

@@ -130,16 +130,16 @@ contract stores a verifier binding, pin the registry `vk_hash` alongside the
 already resolved one.
 
 Factory deployments use the built-in submission contract. Deployment takes
-prebuilt `xian_vm_v1` deployment artifacts, not raw source:
+contract source; validators derive the stored VM IR:
 
 ```python
 import submission
 
 @export
-def deploy_child(name: str, deployment_artifacts: dict, owner: str = None):
+def deploy_child(name: str, code: str, owner: str = None):
     submission.submit_contract(
         name=name,
-        deployment_artifacts=deployment_artifacts,
+        code=code,
         owner=owner,
         constructor_args={},
     )

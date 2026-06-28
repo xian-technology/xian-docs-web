@@ -32,7 +32,7 @@ Use it for:
 - unit tests of contract logic
 - storage and event assertions
 - cross-contract integration tests
-- building deployment artifacts before submission to a live network
+- checking source and artifacts before submitting source to a live network
 
 ## Related Guides
 

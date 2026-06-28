@@ -5,25 +5,21 @@ built-in `submission` contract.
 
 ## High-Level Flow
 
-1. a client prepares contract source, constructor args, and optionally
-   `deployment_artifacts`
+1. a client prepares contract source and constructor args
 2. the transaction calls `submission.submit_contract(...)`
-3. the runtime normalizes and lints the source
-4. if deployment artifacts are provided, the runtime validates them against the
-   canonical compiler output
+3. the runtime rejects client-supplied IR artifacts
+4. the runtime normalizes, lints, and compiles the source to canonical VM IR
 5. the child module body and constructor run under deployment context
 6. canonical source, execution artifacts, and metadata are written to chain
    state
 7. `ContractDeployed` is emitted
 
-## Source Submission Vs Artifact Submission
+## Source Submission
 
-Xian deployments are source-backed and artifact-backed.
+Xian deployments are source-backed.
 
-- `xian_vm_v1` requires valid `deployment_artifacts` for native deployment
-
-Those artifacts include the canonical source plus the VM artifact payload used
-by the native runtime.
+`xian_vm_v1` requires submitted source for native deployment. Validators derive
+the stored VM IR themselves and reject submitted `deployment_artifacts`.
 
 ## Important Constraints
 
@@ -71,7 +67,7 @@ Deployment is metered too. The cost is not only the final state writes.
 
 Deployment accounting includes:
 
-- submission analysis and validation work
+- submission analysis, source normalization, and VM compilation work
 - stored artifact size
 - metadata writes
 - constructor execution

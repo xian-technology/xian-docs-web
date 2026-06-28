@@ -33,10 +33,9 @@ result = client.deploy_contract(
 )
 ```
 
-`deploy_contract` lints the source, builds the `xian_vm_v1` deployment
-artifacts locally, and submits them. If you already have prebuilt artifacts
-(for example from `xian contract build-artifacts`), submit them directly with
-`client.submit_contract(name, deployment_artifacts)`.
+`deploy_contract` submits cleartext source. Validators lint and compile that
+source, then store the canonical source and VM IR. Prebuilt artifacts are useful
+for offline inspection, but they are not accepted as deployment payloads.
 
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts

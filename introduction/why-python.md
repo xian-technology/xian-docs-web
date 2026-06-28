@@ -92,7 +92,7 @@ One of the big advantages of the Xian design is that Python authorship and
 runtime execution are separate concerns.
 
 Today that language maps to `xian_vm_v1`, where validators align on a native
-runtime and deployment artifacts.
+runtime and canonical source-to-IR compilation.
 
 That gives Xian a path to more native execution and more stable machine-level
 semantics without forcing developers to abandon the authoring language.

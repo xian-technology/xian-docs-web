@@ -57,7 +57,7 @@ For `xian_vm_v1`, keep aligned:
 
 - `xian-abci` and `xian-contracting`
 - native VM runtime support
-- deployment artifacts for submitted contracts
+- canonical source-to-IR compilation for submitted contracts
 
 ## Preflight Checks
 

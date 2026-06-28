@@ -404,8 +404,8 @@ successful return value and raises if the readonly execution itself fails.
 
 ### deploy_contract / submit_contract
 
-Use `deploy_contract` when you have contract source. It lints the source,
-builds the `xian_vm_v1` deployment artifacts locally, and submits them:
+Use `deploy_contract` when you have contract source. It submits source to the
+network; validators compile and persist canonical VM IR:
 
 ```python
 code = """
@@ -429,9 +429,8 @@ result = client.deploy_contract(
 )
 ```
 
-Use `submit_contract(name, deployment_artifacts, args=...)` when you already
-have prebuilt deployment artifacts, for example from
-`xian contract build-artifacts` or `contracting.artifacts.build_contract_artifacts`.
+Use `submit_contract(name, code, args=...)` for the same source-backed
+deployment path when you do not want the `deploy_contract` alias.
 
 `name` must use lowercase ASCII letters, digits, and underscores only. For
 user contracts, keep the standard `con_` prefix.
@@ -489,7 +488,7 @@ that exposes the two important pieces separately:
 - `result.tx` is the original submitted transaction
 - `result.tx_result.data` is the decoded execution output
 - for convenience, `xian-py` also surfaces these as typed attributes:
-  `receipt.transaction` and `receipt.execution`
+  `receipt.transaction`, `receipt.execution`, and `receipt.chi_used`
 
 `wait_for_tx(tx_hash)` first uses the normal node `/tx` lookup path. If that
 index lags briefly on a live node, `xian-py` falls back to recent block
