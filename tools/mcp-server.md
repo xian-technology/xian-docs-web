@@ -27,6 +27,10 @@ Those unsafe tools are also omitted from `tools/list` and the HTTP `/tools`
 discovery surface until you opt in, so downstream tool-calling systems only
 see the read-safe default surface.
 
+HTTP mode binds to `127.0.0.1` by default and does not allow browser CORS by
+default. If you enable unsafe tools or bind HTTP to a non-loopback address, set
+`XIAN_MCP_HTTP_TOKEN` and send it as an `Authorization: Bearer ...` header.
+
 ## Network Configuration
 
 Configure the target network explicitly. Local current-code defaults are:
@@ -37,6 +41,11 @@ Configure the target network explicitly. Local current-code defaults are:
 | `XIAN_GRAPHQL` | GraphQL endpoint | `http://127.0.0.1:5000/graphql` |
 | `XIAN_CHAIN_ID` | Chain ID used for transaction payloads | `xian-local-1` |
 | `XIAN_INCLUDE_RAW` | Include raw SDK payloads in responses | `false` |
+| `XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS` | Enable wallet creation/import, sends, signing, encryption/decryption, and DEX trade helpers | `false` |
+| `HTTP_HOST` | HTTP bind address | `127.0.0.1` |
+| `HTTP_PORT` | HTTP bind port | `8100` |
+| `XIAN_MCP_HTTP_TOKEN` | Bearer token for HTTP tools; required for unsafe tools or non-loopback binds | unset |
+| `XIAN_MCP_HTTP_CORS_ORIGINS` | Comma-separated browser origins allowed to call HTTP mode | unset |
 
 When in doubt, read `result.node_info.network` from the node's `/status`
 response and use that value for `XIAN_CHAIN_ID`.
@@ -66,6 +75,30 @@ In HTTP mode, the same tool registry is exposed as:
 
 - `GET /tools` for discovery
 - `POST /tools/{name}` for invocation
+
+For local read-only HTTP use:
+
+```bash
+uv run xian-mcp-http
+curl http://localhost:8100/tools
+```
+
+For Docker Compose or unsafe wallet/signing tools, configure a token:
+
+```bash
+export XIAN_MCP_HTTP_TOKEN="$(openssl rand -hex 32)"
+export XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1
+docker compose up xian-mcp-http
+
+curl http://localhost:8100/tools \
+  -H "Authorization: Bearer ${XIAN_MCP_HTTP_TOKEN}"
+```
+
+Browser clients must opt in with exact origins:
+
+```bash
+XIAN_MCP_HTTP_CORS_ORIGINS=http://localhost:3000
+```
 
 ## What It Can Do
 
