@@ -277,3 +277,5 @@ the node.
 `services.dex_automation` enable flag, local host/port, and optional config
 path. The stack adapter generates the default config and service-wallet key file under
 `xian-stack/.artifacts/dex-automation/` when no explicit config is supplied.
+Set `XIAN_DEX_AUTOMATION_ADMIN_TOKEN` before starting the sidecar to use the
+admin UI/API beyond `GET /` and `GET /health`.

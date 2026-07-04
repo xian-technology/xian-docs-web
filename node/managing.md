@@ -216,6 +216,7 @@ python3 ./scripts/backend.py stop --bds-enabled --intentkit --intentkit-network-
 With stack-managed `xian-dex-automation`:
 
 ```bash
+export XIAN_DEX_AUTOMATION_ADMIN_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
 python3 ./scripts/backend.py start --no-bds-enabled --dex-automation
 python3 ./scripts/backend.py endpoints --no-bds-enabled --dex-automation
 python3 ./scripts/backend.py health --no-bds-enabled --dex-automation

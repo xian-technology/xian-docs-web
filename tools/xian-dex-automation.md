@@ -31,8 +31,9 @@ The built-in admin UI is for local operators. It lets them inspect status,
 generate or rotate a dedicated service-wallet key file, import a service key,
 edit rules, edit the YAML config, check wallet metadata, and manually evaluate
 pairs. It does not connect to the user's browser wallet and it does not return
-private key material through the API. Key changes force execution back to
-dry-run mode.
+private key material through the API. Operators unlock the non-health API with
+`XIAN_DEX_AUTOMATION_ADMIN_TOKEN`; non-loopback binds are rejected unless that
+token is configured. Key changes force execution back to dry-run mode.
 
 A future consumer setup UI should be browser-based because users already have
 their wallet in the browser extension. That UI can help users fund the
@@ -51,6 +52,10 @@ The current model is a dedicated automation wallet:
    file, or `XIAN_DEX_AUTOMATION_PRIVATE_KEY_FILE`
 4. keep dry-run mode enabled until the rule output is correct
 5. set `wallet.execute: true` only when the automation should trade
+
+The admin UI can generate, rotate, or import the configured service-wallet key
+file after it is unlocked with the admin token. It cannot change the key-file
+path over HTTP.
 
 ```mermaid
 flowchart TD
@@ -116,7 +121,9 @@ rules:
       max_slippage_bps: 100
 ```
 
-The API exposes:
+The API exposes `GET /` and `GET /health` publicly. Every other endpoint below
+requires `Authorization: Bearer <XIAN_DEX_AUTOMATION_ADMIN_TOKEN>`, and unsafe
+browser requests must be same-origin:
 
 - `GET /`
 - `GET /health`
@@ -182,6 +189,7 @@ Or directly through the stack backend:
 
 ```bash
 cd xian-stack
+export XIAN_DEX_AUTOMATION_ADMIN_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
 python3 ./scripts/backend.py start --no-bds-enabled --dex-automation
 python3 ./scripts/backend.py endpoints --no-bds-enabled --dex-automation
 ```
@@ -190,7 +198,8 @@ The default UI/API URL is `http://127.0.0.1:38280`. `xian-stack` generates
 `.artifacts/dex-automation/config.yaml` and
 `.artifacts/dex-automation/wallet.key` on first start. The generated wallet is
 a local service wallet; execution remains disabled until the operator enables
-`wallet.execute`.
+`wallet.execute`. Enter `XIAN_DEX_AUTOMATION_ADMIN_TOKEN` in the admin UI to
+manage rules, wallet settings, config, and manual evaluations.
 
 ## Local DEX Requirement
 
