@@ -72,11 +72,15 @@ xian-linter
 
 The default listen address is `http://localhost:8000`.
 
-You can also run the ASGI app explicitly:
+HTTP mode binds to loopback by default. To publish it beyond the local
+machine, set an explicit host and put it behind a rate-limited reverse proxy:
 
 ```bash
-uvicorn xian_linter.server:create_app --factory --host 0.0.0.0 --port 8000
+XIAN_LINTER_HOST=0.0.0.0 XIAN_LINTER_PORT=8000 xian-linter
 ```
+
+Browser CORS defaults to local origins. Set `XIAN_LINTER_CORS_ORIGINS` to a
+comma-separated allowlist when a hosted IDE or frontend needs browser access.
 
 ## HTTP Endpoints
 
@@ -86,9 +90,11 @@ The service accepts raw, base64, or gzip request bodies:
 - `POST /lint_base64`
 - `POST /lint_gzip`
 
-Request bodies are capped at `1,000,000` bytes before decoding. All endpoints
-also accept an optional comma-separated `whitelist_patterns` query parameter
-when a controlled integration needs to allow additional PyFlakes names:
+Request bodies are capped at `1,000,000` bytes before decoding. `/lint_gzip`
+also enforces the same cap after decompression and rejects extreme gzip
+compression ratios. All endpoints also accept an optional comma-separated
+`whitelist_patterns` query parameter when a controlled integration needs to
+allow additional PyFlakes names:
 
 ```text
 POST /lint?whitelist_patterns=my_helper,con_*
