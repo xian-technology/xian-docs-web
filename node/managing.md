@@ -364,6 +364,18 @@ ansible-playbook playbooks/restore-state-snapshot.yml
 Required remote variable:
 
 - `xian_state_snapshot_archive`
+- `xian_state_snapshot_sha256`
+- `xian_state_snapshot_expected_chain_id`
+- `xian_state_snapshot_expected_height`
+
+Optional additional pin:
+
+- `xian_state_snapshot_expected_app_hash`
+
+The remote restore playbook validates the local archive checksum and snapshot
+metadata before uploading it or stopping the remote runtime. For shared-network
+restores, take these values from a signed operator snapshot manifest or another
+release-approved publication path.
 
 ### Protocol State Sync
 

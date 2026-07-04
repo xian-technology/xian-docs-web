@@ -287,7 +287,8 @@ ansible-playbook playbooks/bootstrap-state-sync.yml
 ```
 
 Use `playbooks/restore-state-snapshot.yml` when you already have an exported
-Xian application-state snapshot archive.
+Xian application-state snapshot archive plus its expected SHA-256, chain ID,
+and height pins. The playbook validates those values before upload/import.
 
 Use `playbooks/bootstrap-state-sync.yml` when you want the remote node to join
 from trusted peers through CometBFT state sync.
