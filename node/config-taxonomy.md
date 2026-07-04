@@ -108,6 +108,12 @@ so Ansible inventories own published ports, host paths, database credentials,
 resource limits, and topology even when a profile includes local stack bind
 defaults.
 
+Remote deploy secrets belong in a private inventory, vault, or secret-manager
+handoff. `xian-deploy` rejects empty or weak BDS passwords, writes generated
+runtime secret files, including DSNs that may contain credentials, on the
+target host with private permissions, and keeps those values out of rendered
+Compose YAML.
+
 ## Deploy Bindings
 
 Deploy bindings are host-specific Ansible inputs: host paths, published ports,

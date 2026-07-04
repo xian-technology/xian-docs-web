@@ -263,6 +263,13 @@ only for lower-level runtime knobs that are not part of the profile flow.
 Use `xian-deploy` when you want the same runtime contract on remote Linux
 hosts.
 
+Keep remote inventories in a private repo or load sensitive values from
+Ansible Vault, SOPS, CI secrets, or an operator secret manager. BDS deployments
+must provide a non-empty password that is not a weak example value. The deploy
+playbooks write generated runtime secret files, including DSNs that may contain
+credentials, on the target host with private permissions and keep those values
+out of rendered Compose files.
+
 Typical path:
 
 ```bash
