@@ -79,7 +79,7 @@ wallet provider for writes:
 |-------|---------|
 | `/swap` | quote and execute swaps with live price impact, slippage, deadline, and approval handling |
 | `/pools` | searchable, sortable list of every pair with reserves and mid-prices |
-| `/pools/:id` | pair detail: reserves, prices, LP balance, and pool share |
+| `/pools/:id` | pair detail: live candlestick chart (1m–1W, built on the node's `/dex_candles` BDS endpoint), reserves, prices, LP balance, and pool share |
 | `/liquidity` | add/remove liquidity, new-pair creation, router and LP-token approvals |
 | `/portfolio` | all token balances plus every LP position |
 

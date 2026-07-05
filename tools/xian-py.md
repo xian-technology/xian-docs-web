@@ -462,6 +462,7 @@ Also available:
 - `list_shielded_output_tags(tag_value, kind=..., limit=..., offset=..., after_id=...)`
 - `get_events_for_tx(tx_hash)`
 - `list_events(contract, event, limit=..., offset=..., after_id=...)`
+- `list_dex_candles(market_id, source=None, contract=None, interval="1m", limit=..., offset=..., start=..., end=...)`
 - `get_state_history(key, limit=..., offset=...)`
 - `get_state_for_tx(tx_hash)`
 - `get_state_for_block(block_ref)`
@@ -513,6 +514,12 @@ cursor.
 output index directly. Prefer `list_shielded_wallet_history(...)` for wallet
 sync and recovery unless you specifically need tag-index rows.
 
+`list_dex_candles(market_id, ...)` returns typed OHLCV buckets from a whitelisted
+BDS candle source. The default source is `xian_pairs_v1`, derived from indexed
+`con_pairs.Swap` events. Use it for candlestick charts instead of pulling and
+aggregating raw swap events in application code. Price and volume fields are
+strings to preserve BDS decimal precision.
+
 ### BDS Indexed Query Example
 
 Use these helpers on nodes with BDS enabled:
@@ -524,6 +531,7 @@ with Xian("http://127.0.0.1:26657") as client:
     by_sender = client.list_txs_by_sender("<address>", limit=10)
     by_contract = client.list_txs_by_contract("currency", limit=10)
     events = client.list_events("currency", "Transfer", limit=10)
+    candles = client.list_dex_candles(7, interval="5m", limit=100)
     history = client.get_state_history("currency.balances:<address>", limit=10)
 ```
 

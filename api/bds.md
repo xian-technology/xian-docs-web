@@ -6,9 +6,9 @@ finalized blocks into Postgres and exposes indexed reads through two surfaces:
 - ABCI query paths on the node RPC endpoint
 - GraphQL through the optional PostGraphile sidecar
 
-Use BDS when you need block history, transaction history, event feeds, state
-history, token portfolios, shielded wallet feeds, developer reward summaries,
-or applied state patch history.
+Use BDS when you need block history, transaction history, event feeds, DEX OHLCV
+candles, state history, token portfolios, shielded wallet feeds, developer
+reward summaries, or applied state patch history.
 
 ## Endpoints
 
@@ -121,6 +121,29 @@ GET /api/abci_query/recent_events/limit=50/offset=0
 Use offset pagination for browsing. Use `after_id` for event consumers and
 projectors because it resumes from a stable event ID and returns events with
 larger IDs.
+
+### DEX Candles
+
+```text
+GET /api/abci_query/dex_candles/7/interval=5m/limit=100
+GET /api/abci_query/dex_candles/7/source=xian_pairs_v1/interval=1h/start=1767225600/end=1767312000
+```
+
+`/dex_candles/<market_id>` returns server-side OHLCV buckets from a whitelisted
+candle source. The default source is `xian_pairs_v1`, which derives candles from
+indexed `con_pairs.Swap` events using the indexed `pair` field. Future DEXes can
+add their own source specs without changing the public candle response shape.
+
+`interval` accepts seconds or `s`, `m`, `h`, `d`, and `w` suffixes. `start` and
+`end` accept Unix seconds, which is the preferred format for SDK and dashboard
+callers. `contract=...` is available only as a same-schema override for a source;
+use a new source spec for a DEX with different event fields.
+
+Each candle includes `source`, `market_id`, `pair_id` when numeric,
+`bucket_start`, `bucket_end`, `open`, `high`, `low`, `close`, `volume_token0`,
+`volume_token1`, `trade_count`, `first_block_height`, `last_block_height`,
+`first_event_id`, and `last_event_id`. Price and volume fields are strings so
+clients can preserve database decimal precision.
 
 ### State History
 
@@ -283,6 +306,7 @@ with Xian("http://127.0.0.1:26657") as client:
     by_sender = client.list_txs_by_sender("<address>", limit=10)
     by_contract = client.list_txs_by_contract("currency", limit=10)
     events = client.list_events("currency", "Transfer", limit=10)
+    candles = client.list_dex_candles(7, interval="5m", limit=100)
     history = client.get_state_history("currency.balances:<address>", limit=10)
 ```
 
@@ -300,6 +324,7 @@ const tx = await client.getIndexedTx("<tx_hash>");
 const bySender = await client.listTxsBySender("<address>", { limit: 10 });
 const byContract = await client.listTxsByContract("currency", { limit: 10 });
 const events = await client.listEvents("currency", "Transfer", { limit: 10 });
+const candles = await client.listDexCandles(7, { interval: "5m", limit: 100 });
 const history = await client.getStateHistory("currency.balances:<address>", {
   limit: 10,
 });
@@ -322,6 +347,8 @@ These commands emit JSON with `tx_hash`.
 - Keep `limit` bounded, especially on public query endpoints.
 - Use filtered routes such as sender, contract, event, state key, or block
   before broad scans.
+- Use `/dex_candles/<market_id>` for candlestick charts instead of aggregating
+  swap events in each client.
 - Prefer `after_id` for event consumers and `after_note_index` for shielded
   wallet recovery.
 - Treat BDS and GraphQL as indexed read models, not as the authoritative

@@ -238,6 +238,7 @@ GET /api/abci_query/contract_summary/<contract>
 GET /api/abci_query/events_for_tx/<hash>
 GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
 GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
+GET /api/abci_query/dex_candles/<market_id>/source=xian_pairs_v1/interval=5m/limit=100
 GET /api/abci_query/token_balances/<address>/limit=100/offset=0
 GET /api/abci_query/token_balances/<address>/limit=100/offset=0/include_zero=true
 GET /api/abci_query/shielded_output_tags/<tag>/limit=50/offset=0

@@ -316,13 +316,17 @@ const bySender = await client.listTxsBySender("<address>", { limit: 10 });
 const byContract = await client.listTxsByContract("currency", { limit: 10 });
 const events = await client.listEvents("currency", "Transfer", { limit: 10 });
 const recent = await client.getRecentEvents({ limit: 10 });
+const candles = await client.listDexCandles(7, { interval: "5m", limit: 100 });
 const history = await client.getStateHistory("currency.balances:<address>", {
   limit: 10,
 });
 ```
 
 `XianIndexedTransaction.txHash` is the canonical transaction-hash property for
-indexed transaction rows. For the full BDS route map, see
+indexed transaction rows. `listDexCandles(...)` returns DEX OHLCV buckets from
+the node's whitelisted candle sources. The default source is `xian_pairs_v1`,
+derived from indexed `con_pairs.Swap` events, with price and volume values
+preserved as strings. For the full BDS route map, see
 [BDS Indexed Queries](/api/bds).
 
 ## Simulation And Estimation
