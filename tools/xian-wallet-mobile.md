@@ -8,9 +8,8 @@ repo with Xcode.
 **Repository:** [xian-technology/xian-wallet-mobile](https://github.com/xian-technology/xian-wallet-mobile)
 
 The wallet shares the same seed derivation scheme as the browser wallet, so the
-same mnemonic can be used in both. Encrypted backup files are re-encrypted on
-import, because the mobile wallet uses a lower PBKDF2 iteration count than the
-browser wallet for device performance reasons.
+same mnemonic can be used in both. Encrypted backup files carry their own KDF
+parameters and are re-encrypted for local wallet storage on import.
 
 ## Platform Status
 
@@ -336,7 +335,7 @@ source exposed by `react-native-get-random-values`:
 | Primitive | Implementation |
 |-----------|---------------|
 | SHA-256 | `@noble/hashes/sha2` |
-| PBKDF2-HMAC-SHA256 | `@noble/hashes/pbkdf2`, 10,000 iterations for mobile wallet state and mobile-created backups |
+| PBKDF2-HMAC-SHA256 | `@noble/hashes/pbkdf2`, 250,000 iterations for mobile wallet state and 600,000 iterations for mobile-created backups |
 | AES-256-GCM | `@noble/ciphers/aes` |
 | Ed25519 | `@xian-tech/client` signer (`tweetnacl` under the hood) |
 | BIP39 | `@scure/bip39` (pure JS) |
@@ -348,10 +347,9 @@ source exposed by `react-native-get-random-values`:
 
 Seeds are interchangeable between browser and mobile wallets.
 
-**Note:** PBKDF2 uses 10,000 iterations for mobile wallet state vs 250,000 in
-the browser wallet to keep unlock responsive on mobile devices. Backup files
-carry their own encryption parameters, so imports decrypt the backup with the
-backup password and then re-encrypt wallet state for the target platform.
+Backup files carry their own encryption parameters, so imports decrypt the
+backup with the backup password and then re-encrypt wallet state for the target
+platform.
 
 ### Storage
 
