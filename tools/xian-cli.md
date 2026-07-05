@@ -226,19 +226,14 @@ Example output:
 }
 ```
 
-If you explicitly need the private key in output:
-
-```bash
-xian client wallet generate --include-private-key
-```
-
 Write the private key to a file:
 
 ```bash
 xian client wallet generate --private-key-out ./wallet.key
 ```
 
-By default, the private key is not printed.
+Private keys are not printed to stdout. Key files created by the CLI are
+written with owner-only permissions.
 
 ## Query Commands
 
@@ -302,9 +297,9 @@ Available commands:
 
 Choose exactly one of:
 
-- `--private-key`
 - `--private-key-env`
 - `--private-key-file`
+- `--private-key-stdin`
 
 Examples:
 
@@ -321,9 +316,9 @@ xian client tx transfer \
   <recipient> 1.25
 ```
 
-Using environment variables or files is usually better than passing private
-keys directly on the command line, because direct flags are easier to expose in
-shell history and process lists.
+Direct private-key command-line arguments are rejected because process
+arguments can leak through shell history and process lists. Use an environment
+variable, a `0600` key file, or stdin.
 
 ### Transfer Example
 
@@ -381,7 +376,7 @@ Practical guidance:
 For shell automation:
 
 - set `XIAN_NODE_URL` once per job or script
-- prefer `--private-key-env` or `--private-key-file`
+- prefer `--private-key-env`, `--private-key-file`, or `--private-key-stdin`
 - keep `--kwargs-json` stable and explicit
 - parse output with `jq`
 - treat non-zero exit codes as command failure
