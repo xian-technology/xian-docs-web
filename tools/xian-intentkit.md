@@ -20,6 +20,12 @@ With the stack-managed local/default ports:
 - frontend: `http://127.0.0.1:38000`
 - API: `http://127.0.0.1:38080`
 
+When the stack-managed host bind is IPv6 loopback, the bind value is the raw
+literal `::1` and browser URLs use brackets:
+
+- frontend: `http://[::1]:38000`
+- API: `http://[::1]:38080`
+
 For most users, the frontend is the normal way to:
 
 - create an agent
@@ -254,6 +260,9 @@ When a node profile enables `xian-intentkit`:
 - `xian node health <name>` includes IntentKit reachability checks
 - `xian-stack` generates `xian-intentkit/deployment/.env` from the IntentKit
   example env, current operator env, and stack-derived Xian values
+- the IntentKit API, worker, and scheduler join the Xian stack Docker network
+  so stack-managed agents reach the local node through the internal RPC URL
+  `http://abci:26657`
 
 This keeps upstream sync manageable because the stack does not copy the
 IntentKit service definitions into `xian-stack`.
@@ -268,6 +277,10 @@ Relevant node-profile fields:
 - `services.intentkit.host`
 - `services.intentkit.port`
 - `services.intentkit.api_port`
+
+`services.intentkit.host` is a host bind value, not a URL. Use raw literals
+such as `127.0.0.1` or `::1` there; bracket IPv6 literals only when using the
+rendered frontend, API, or static-file URLs.
 
 Common join flow for a BDS-backed IntentKit node:
 
@@ -512,6 +525,11 @@ Derived values include:
 - `XIAN_EVENT_TRIGGER_ENABLED`
 - `XIAN_EVENT_TRIGGER_POLL_INTERVAL_SECONDS`
 - `XIAN_EVENT_TRIGGER_BATCH_LIMIT`
+
+For stack-managed side-by-side deployments, `XIAN_<NETWORK>_RPC_URL` is the
+container-internal node URL `http://abci:26657`. User-facing values such as
+`APP_BASE_URL`, `AWS_S3_CDN_URL`, and `XIAN_AGENT_LOGO_URL` use the published
+host and bracket IPv6 literals, for example `http://[::1]:38000`.
 
 All other IntentKit settings still come from the normal IntentKit env contract.
 That includes LLM provider keys such as `OPENAI_API_KEY` or
