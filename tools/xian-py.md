@@ -505,12 +505,31 @@ address. Set `include_zero=True` when you need zero-balance indexed tokens too.
 `list_shielded_wallet_history(tag_value, ...)` is the higher-level shielded
 light-wallet recovery feed. It returns the canonical note-commitment sequence
 in note-index order and only exposes `output_payload` for outputs whose indexed
-tag matches the requested wallet tag. Use `after_note_index` as the resumable
+tag matches the requested wallet tag. Entries also carry the BDS `output_id`
+for diagnostics, but `after_note_index` is the wallet's durable resumable
 cursor.
 
 `list_shielded_output_tags(tag_value, ...)` exposes the lower-level tagged
 output index directly. Prefer `list_shielded_wallet_history(...)` for wallet
 sync and recovery unless you specifically need tag-index rows.
+
+### BDS Indexed Query Example
+
+Use these helpers on nodes with BDS enabled:
+
+```python
+with Xian("http://127.0.0.1:26657") as client:
+    status = client.get_bds_status()
+    tx = client.get_indexed_tx("<tx_hash>")
+    by_sender = client.list_txs_by_sender("<address>", limit=10)
+    by_contract = client.list_txs_by_contract("currency", limit=10)
+    events = client.list_events("currency", "Transfer", limit=10)
+    history = client.get_state_history("currency.balances:<address>", limit=10)
+```
+
+`IndexedTransaction.tx_hash` is the canonical transaction-hash attribute for
+indexed transaction rows. For the complete BDS route map, see
+[BDS Indexed Queries](/api/bds).
 
 ## Shielded Relayer Clients
 

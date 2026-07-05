@@ -238,6 +238,10 @@ The maintained stack defaults to a fail-closed network posture:
   `--public-metrics`
 - PostGraphile binds to `127.0.0.1` unless you enable BDS and pass
   `--public-query`
+- PostGraphile uses a dedicated read-only database role with statement timeout,
+  generated mutations disabled, and connection-style indexed reads by default
+- PostGraphile waits for the core BDS read-model tables before serving the
+  generated GraphQL schema
 - local BDS and PostGraphile credentials are generated once into
   `xian-stack/.stack-secrets.env`
 
@@ -683,8 +687,11 @@ Use the node's ABCI query surface for canonical reads:
 - performance reads like `/perf_status` to inspect recent block timing and
   tracer metadata
 
-Use GraphQL only when you want a convenience query layer over the BDS
-database.
+Use GraphQL only when you want a bounded convenience query layer over the BDS
+database. For public query endpoints, keep generated mutations disabled and use
+connection-style pagination. The stack waits for the core indexed tables before
+starting PostGraphile, but GraphQL can still lag the latest finalized block
+while BDS catches up.
 
 ## BDS Catch-Up and Reindex
 

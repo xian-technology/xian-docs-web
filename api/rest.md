@@ -75,8 +75,9 @@ when BDS is available.
 GET /api/addresses?limit=50&offset=0
 ```
 
-Returns the recent indexed sender set for the explorer address list. On nodes
-with BDS enabled this is backed by the canonical sender-history index.
+Returns recent indexed sender activity for the explorer address list. On nodes
+with BDS enabled this is backed by the BDS address activity projection, so it can
+serve recent address browsing without grouping the full transaction table.
 If the connected node does not expose that indexed address query, the dashboard
 returns the route as unavailable instead of synthesizing address rows from some
 other data source.
@@ -218,6 +219,9 @@ database plus contiguous-height catch-up.
 
 Current BDS-backed ABCI query paths include:
 
+For workflow examples, SDK usage, GraphQL equivalents, and field-shape notes,
+see [BDS Indexed Queries](/api/bds).
+
 ```text
 GET /api/abci_query/bds_status
 GET /api/abci_query/bds_spool/limit=50/offset=0
@@ -293,6 +297,8 @@ Shielded wallet history:
 - it returns the canonical note-commitment sequence in `note_index` order and
   only exposes `output_payload` for outputs whose indexed tag matches the
   requested `tag`
+- BDS stores shielded outputs as an indexed projection, so this feed does not
+  need to reconstruct wallet rows by scanning raw shielded events on each query
 - use `kind=sync_hint` for the normal wallet path; `kind=discovery_tag` is
   also accepted for lower-level tooling
 - use `after_note_index` as the durable cursor for resumable wallet sync

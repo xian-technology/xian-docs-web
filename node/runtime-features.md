@@ -297,6 +297,12 @@ environment variables:
 | `XIAN_BDS_STATEMENT_TIMEOUT_MS`, `XIAN_BDS_ACQUIRE_TIMEOUT_MS`, `XIAN_BDS_APPLICATION_NAME` | query/runtime behavior |
 | `XIAN_BDS_QUEUE_MAX_SIZE`, `XIAN_BDS_CATCHUP_ENABLED`, `XIAN_BDS_CATCHUP_POLL_SECONDS`, `XIAN_BDS_RPC_URL` | live BDS queue and catch-up behavior |
 | `XIAN_BDS_SPOOL_DIR`, `XIAN_BDS_SPOOL_WARN_ENTRIES`, `XIAN_BDS_SPOOL_WARN_BYTES`, `XIAN_BDS_DISK_FREE_WARN_BYTES` | recovery spool and warning thresholds |
+| `XIAN_POSTGRAPHILE_STATEMENT_TIMEOUT_MS` | statement timeout for the dedicated read-only GraphQL database role |
+| `XIAN_POSTGRAPHILE_BODY_SIZE_LIMIT_BYTES` | maximum PostGraphile request body size |
+| `XIAN_POSTGRAPHILE_DISABLE_DEFAULT_MUTATIONS` | disables generated write mutations by default |
+| `XIAN_POSTGRAPHILE_SIMPLE_COLLECTIONS` | controls generated simple collection fields; stack default is `omit` |
+| `XIAN_POSTGRAPHILE_SCHEMA_WAIT_TIMEOUT_SECONDS` | startup wait for required BDS tables before GraphQL serves a schema |
+| `XIAN_POSTGRAPHILE_REQUIRED_TABLES` | comma-separated BDS tables required by the PostGraphile startup wait |
 
 For the integrated stack, `XIAN_BDS_RPC_URL` defaults to
 `http://127.0.0.1:26657`, which is the CometBFT RPC endpoint reachable from the

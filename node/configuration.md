@@ -279,7 +279,12 @@ write URL-style hosts in bracketed form, such as `http://[::1]:26657` or
 For local workflows, `xian-stack` generates `.stack-secrets.env` on first
 use. That file holds local BDS and PostGraphile passwords and should stay
 untracked. For BDS-enabled runs, PostGraphile uses its own dedicated read-only
-database role instead of the primary BDS owner account.
+database role instead of the primary BDS owner account. The stack config also
+disables generated PostGraphile mutations by default, omits simple collection
+fields in favor of connection-style pagination, caps request body size, and sets
+a statement timeout on that read-only role. It also waits for the core BDS
+read-model tables before starting PostGraphile, so a partial schema is not
+exposed during node startup.
 
 ## Common Local Endpoints
 

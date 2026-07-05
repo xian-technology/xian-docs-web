@@ -9,6 +9,7 @@ different jobs and they are not all equally authoritative.
 |---------|-----------------|
 | CometBFT RPC | canonical node RPC for blocks, tx broadcast, tx lookup, and ABCI query |
 | ABCI query paths | current contract state, contract metadata, simulation, and optional indexed reads |
+| BDS indexed queries | optional ABCI query paths for indexed blocks, transactions, events, state history, token portfolios, shielded feeds, and patch history |
 | dashboard REST | optional convenience API for explorer and operator UX |
 | dashboard WebSocket | optional real-time subscriptions for dashboards, dapps, and monitors |
 | Xian app metrics | Prometheus metrics for runtime, execution, and BDS health |
@@ -54,6 +55,7 @@ Use optional convenience surfaces when you want ergonomics:
 
 - dashboard REST for explorer/operator UIs
 - dashboard WebSocket for live block and event subscriptions
+- BDS indexed queries for bounded history reads through ABCI query
 - GraphQL for richer indexed queries over BDS data
 
 ## Exposure Model In The Maintained Stack
@@ -88,7 +90,7 @@ Keep this split clear:
 
 - use RPC + ABCI query from wallets and SDKs
 - use dashboard APIs for explorer pages and operator dashboards
-- use BDS or GraphQL for analytics, history-heavy UIs, and shielded wallet
+- use [BDS indexed queries](/api/bds) or GraphQL for analytics, history-heavy UIs, and shielded wallet
   recovery feeds
 - use Prometheus metrics for alerting and fleet monitoring
 

@@ -259,6 +259,17 @@ Get a transaction receipt:
 xian client query tx <tx_hash>
 ```
 
+Get BDS-indexed transaction rows on a node with BDS enabled:
+
+```bash
+xian client query indexed-tx <tx_hash>
+xian client query txs-by-sender <address> --limit 10
+xian client query txs-by-contract currency --limit 10
+```
+
+These commands emit canonical `tx_hash` fields. For the full indexed query
+surface, see [BDS Indexed Queries](/api/bds).
+
 Get a block:
 
 ```bash

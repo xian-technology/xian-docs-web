@@ -27,6 +27,13 @@ In the maintained `xian-stack` runtime:
   `XIAN_PUBLIC_QUERY_ENABLED=1`
 - it runs against a dedicated read-only Postgres role, not the primary BDS
   owner account
+- generated default mutations are disabled in the stack PostGraphile preset
+- simple collection fields are omitted so table browsing uses connection-style
+  pagination
+- the PostGraphile request body size is capped, and the dedicated database role
+  has a statement timeout
+- startup waits for the core BDS read-model tables before GraphQL begins
+  serving the generated schema
 
 ## What It Is Good For
 
@@ -35,7 +42,7 @@ GraphQL is most useful when you want:
 - flexible filtering over indexed blocks, transactions, events, or state
   history
 - one endpoint for explorer or analytics-style read patterns
-- a developer-friendly schema browser through GraphiQL / introspection
+- generated schema introspection for query tooling
 
 ## What It Is Not
 
@@ -66,9 +73,65 @@ block during catch-up or recovery.
 - use GraphQL when indexed querying is more important than absolute immediacy
 - inspect the generated schema directly instead of hard-coding assumptions about
   every table-derived field name
+- prefer bounded connection queries, especially on public `--public-query`
+  endpoints
+
+## Common Queries
+
+Transaction rows use the generated PostGraphile field name `hash`. The direct
+ABCI BDS and SDK surfaces expose the same value as `tx_hash` or `txHash`.
+
+```graphql
+query TransactionByHash($hash: String!) {
+  transactionByHash(hash: $hash) {
+    hash
+    blockHeight
+    sender
+    contract
+    function
+    success
+    chiUsed
+  }
+}
+```
+
+Recent transactions:
+
+```graphql
+{
+  allTransactions(first: 20, orderBy: BLOCK_HEIGHT_DESC) {
+    nodes {
+      hash
+      blockHeight
+      contract
+      function
+      success
+    }
+  }
+}
+```
+
+Block heights are generated as `BigInt`, so pass height variables as strings:
+
+```graphql
+query BlockByHeight($height: BigInt!) {
+  blockByHeight(height: $height) {
+    height
+    blockHash
+    txCount
+  }
+}
+```
+
+Variables:
+
+```json
+{ "height": "123" }
+```
 
 ## Related Pages
 
+- [BDS Indexed Queries](/api/bds)
 - [REST API](/api/rest)
 - [WebSocket Subscriptions](/api/websockets)
 - [Runtime Features](/node/runtime-features)

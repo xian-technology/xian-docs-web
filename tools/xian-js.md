@@ -307,6 +307,24 @@ falls back to the direct state key if the simulation path fails.
 `getTokenBalances(...)` and `getShieldedWalletHistory(...)` require the
 BDS-backed ABCI query surface on the connected node.
 
+### BDS Indexed Query Helpers
+
+```ts
+const status = await client.getBdsStatus();
+const tx = await client.getIndexedTx("<tx_hash>");
+const bySender = await client.listTxsBySender("<address>", { limit: 10 });
+const byContract = await client.listTxsByContract("currency", { limit: 10 });
+const events = await client.listEvents("currency", "Transfer", { limit: 10 });
+const recent = await client.getRecentEvents({ limit: 10 });
+const history = await client.getStateHistory("currency.balances:<address>", {
+  limit: 10,
+});
+```
+
+`XianIndexedTransaction.txHash` is the canonical transaction-hash property for
+indexed transaction rows. For the full BDS route map, see
+[BDS Indexed Queries](/api/bds).
+
 ## Simulation And Estimation
 
 Use readonly simulation before signing or sending:

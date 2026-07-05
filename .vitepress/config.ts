@@ -214,6 +214,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/api/' },
             { text: 'REST API', link: '/api/rest' },
+            { text: 'BDS Indexed Queries', link: '/api/bds' },
             { text: 'WebSocket Subscriptions', link: '/api/websockets' },
             { text: 'GraphQL (BDS)', link: '/api/graphql' },
             { text: 'Estimating Chi', link: '/api/dry-runs' }
