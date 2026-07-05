@@ -75,6 +75,7 @@ Set the target network in `.env`:
 
 ```bash
 PORT=4173
+XIAN_GOVERNANCE_HOST=127.0.0.1
 XIAN_NETWORK_ID=local
 XIAN_NETWORK_NAME="Local Xian"
 XIAN_CHAIN_ID=xian-local-1
@@ -86,6 +87,10 @@ XIAN_MEMBERSHIP_CONTRACT=validators
 
 `XIAN_DASHBOARD_URL` is optional and is used only for navigation and
 observability. Voting does not require exposing a validator node endpoint.
+For IPv6 loopback, use raw host values for local binds and bracketed URL
+literals for endpoints, for example `XIAN_GOVERNANCE_HOST=::1`,
+`http://[::1]:4173`, `XIAN_RPC_URL=http://[::1]:26657`, and
+`XIAN_DASHBOARD_URL=http://[::1]:18080`.
 
 ## Voting Model
 

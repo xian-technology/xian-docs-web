@@ -28,7 +28,9 @@ discovery surface until you opt in, so downstream tool-calling systems only
 see the read-safe default surface.
 
 HTTP mode binds to `127.0.0.1` by default and does not allow browser CORS by
-default. If you enable unsafe tools or bind HTTP to a non-loopback address, set
+default. IPv6 loopback uses the raw bind host `::1`, while URLs bracket the
+literal, for example `http://[::1]:8100/tools`. If you enable unsafe tools or
+bind HTTP to a non-loopback address, including the IPv6 wildcard `::`, set
 `XIAN_MCP_HTTP_TOKEN` and send it as an `Authorization: Bearer ...` header.
 
 ## Network Configuration
@@ -43,6 +45,7 @@ Configure the target network explicitly. Local current-code defaults are:
 | `XIAN_INCLUDE_RAW` | Include raw SDK payloads in responses | `false` |
 | `XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS` | Enable wallet creation/import, sends, signing, encryption/decryption, and DEX trade helpers | `false` |
 | `HTTP_HOST` | HTTP bind address | `127.0.0.1` |
+| `HTTP_PUBLISH_HOST` | Docker Compose host-publish address; use raw `::1` for IPv6 loopback publishing | unset |
 | `HTTP_PORT` | HTTP bind port | `8100` |
 | `XIAN_MCP_HTTP_TOKEN` | Bearer token for HTTP tools; required for unsafe tools or non-loopback binds | unset |
 | `XIAN_MCP_HTTP_CORS_ORIGINS` | Comma-separated browser origins allowed to call HTTP mode | unset |
@@ -82,6 +85,11 @@ For local read-only HTTP use:
 uv run xian-mcp-http
 curl http://localhost:8100/tools
 ```
+
+For IPv6 loopback on a bare-metal process, set `HTTP_HOST=::1` and call
+`http://[::1]:8100/tools`. For Docker Compose host publishing, set
+`HTTP_PUBLISH_HOST=::1`; keep `HTTP_HOST` scoped to the container bind address
+you need.
 
 For Docker Compose or unsafe wallet/signing tools, configure a token:
 

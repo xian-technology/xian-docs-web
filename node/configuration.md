@@ -225,6 +225,12 @@ The maintained `xian-stack` backend defaults to fail-closed host publishing:
 - `xian-dex-automation` defaults to `127.0.0.1:38280` when enabled
 - the shielded relayer defaults to `127.0.0.1:38180` when enabled
 
+IPv6 loopback can be used for local stack binds and host-published services.
+Use raw host literals in bind and publish settings, for example `::1`; use
+bracketed literals in URLs, for example `http://[::1]:26657/status`. The IPv6
+wildcard `::` is a non-loopback bind and should be treated like explicit public
+exposure.
+
 Public exposure is explicit through the stack backend:
 
 - `--public-rpc` or `XIAN_PUBLIC_RPC_ENABLED=1`
@@ -266,6 +272,10 @@ This example shows the checked-in canonical testnet manifest shape. When you
 target a public RPC endpoint, use the chain ID reported by `/status`
 (`result.node_info.network`) for transaction payloads.
 
+When RPC, dashboard, seed, or persistent-peer addresses contain IPv6 literals,
+write URL-style hosts in bracketed form, such as `http://[::1]:26657` or
+`nodeid@[::1]:26656`.
+
 For local workflows, `xian-stack` generates `.stack-secrets.env` on first
 use. That file holds local BDS and PostGraphile passwords and should stay
 untracked. For BDS-enabled runs, PostGraphile uses its own dedicated read-only
@@ -289,6 +299,10 @@ enabled on every node or profile.
 | Grafana | `http://127.0.0.1:3000` | monitoring enabled |
 | DEX automation | `http://127.0.0.1:38280` | `xian-dex-automation` enabled |
 | Shielded relayer | `http://127.0.0.1:38180` | shielded relayer enabled |
+
+The same endpoints can be rendered on IPv6 loopback when the relevant bind or
+publish host is `::1`; URL literals must be bracketed, for example
+`http://[::1]:18080`.
 
 Related frontend dev servers are separate from the node runtime. The DEX UI
 uses `http://127.0.0.1:5173/` in `xian-dex/web`; the browser IDE uses Vite's

@@ -10,7 +10,8 @@ const ws = new WebSocket("ws://localhost:18080/ws");
 
 Replace `localhost:18080` with the dashboard address of the node you want to
 connect to. `18080` is the stack-managed template default host port; a direct
-dashboard process defaults to `8080`.
+dashboard process defaults to `8080`. For IPv6 literals, bracket the host, for
+example `ws://[::1]:18080/ws`.
 
 Once connected, you'll automatically receive `new_block` messages for every block the node commits. To receive state changes or contract events, you need to subscribe explicitly.
 

@@ -175,7 +175,9 @@ Use the same Wi-Fi network for the phone and the dev machine. Remote `http://`
 RPC endpoints are blocked unless the network preset has **Allow HTTP data
 transfers** enabled. Leave that off for public networks and prefer HTTPS; only
 enable it for local or private endpoints you trust. Loopback development URLs
-such as `http://127.0.0.1` are treated as local development endpoints.
+such as `http://127.0.0.1` are treated as local development endpoints. IPv6
+loopback presets use bracketed URL literals such as `http://[::1]:26657` and
+`http://[::1]:18080`.
 
 #### Android release APK
 

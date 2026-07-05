@@ -108,3 +108,6 @@ GET http://localhost:9108/metrics
 GET http://localhost:26660/metrics
 GET http://localhost:5000/graphql
 ```
+
+When a local endpoint uses an IPv6 literal, bracket the host in the URL, for
+example `GET http://[::1]:26657/status` or `GET http://[::1]:18080/api/status`.

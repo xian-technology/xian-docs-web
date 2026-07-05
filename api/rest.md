@@ -11,6 +11,8 @@ http://<dashboard-host>:18080
 
 `18080` is the stack-managed template default host port. If you run the
 dashboard process directly, its process default is `8080`.
+For IPv6 literal dashboard hosts, bracket the host, for example
+`http://[::1]:18080`.
 
 ## Core Endpoints
 
@@ -177,6 +179,9 @@ inspection through the same UI:
 ```text
 GET /explorer?rpc=http://10.0.0.25:26657
 ```
+
+For IPv6 RPC literals in the `rpc` parameter, use bracketed URL syntax, for
+example `http://[::1]:26657`.
 
 The backend only allows the default node RPC or currently connected peer RPC
 targets, so this stays scoped to known network peers instead of acting as a

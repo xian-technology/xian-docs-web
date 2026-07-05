@@ -57,6 +57,10 @@ The admin UI can generate, rotate, or import the configured service-wallet key
 file after it is unlocked with the admin token. It cannot change the key-file
 path over HTTP.
 
+Standalone local runs can bind the admin UI/API to IPv6 loopback with the raw
+host literal `::1`; browsers use bracketed URLs such as `http://[::1]:8787`.
+Non-loopback binds require `XIAN_DEX_AUTOMATION_ADMIN_TOKEN`.
+
 ```mermaid
 flowchart TD
   Events["Indexed DEX events and current pair state"]
@@ -200,6 +204,10 @@ The default UI/API URL is `http://127.0.0.1:38280`. `xian-stack` generates
 a local service wallet; execution remains disabled until the operator enables
 `wallet.execute`. Enter `XIAN_DEX_AUTOMATION_ADMIN_TOKEN` in the admin UI to
 manage rules, wallet settings, config, and manual evaluations.
+
+If the stack-managed sidecar is published on IPv6 loopback, the host/publish
+setting uses `::1` and the browser URL uses brackets, for example
+`http://[::1]:38280`.
 
 ## Local DEX Requirement
 

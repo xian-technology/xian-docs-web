@@ -207,6 +207,9 @@ export XIAN_NODE_URL=http://127.0.0.1:26657
 export XIAN_CHAIN_ID=xian-local-1
 ```
 
+IPv6 loopback URLs must bracket the literal host, for example
+`XIAN_NODE_URL=http://[::1]:26657`.
+
 After that, you can omit both flags in most commands.
 
 ## Wallet Commands

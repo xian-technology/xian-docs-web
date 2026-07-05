@@ -176,6 +176,9 @@ The base profile default binds Xian application metrics to `127.0.0.1`.
 Stack/container starter templates override this to `0.0.0.0` inside the
 container so Docker publishing can reach the process; the stack or deploy host
 bind variables still decide whether metrics are reachable outside the host.
+Profile service host fields accept IPv6 literals as raw bind values, for
+example `"::1"`. When the same address is used in an HTTP or WebSocket URL,
+bracket the literal, for example `http://[::1]:18080`.
 
 ## How Profiles Are Created
 

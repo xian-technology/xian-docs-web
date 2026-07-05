@@ -374,6 +374,9 @@ uv run xian-zk-prover-service \
   --insecure-dev-command
 ```
 
+For IPv6 loopback, pass `--host ::1` and use a bracketed base URL such as
+`http://[::1]:8787`.
+
 Clients can talk to that service directly:
 
 ```python
@@ -574,8 +577,10 @@ network rollout and rotation policy.
 `xian-zk-prover-service` assumes the prover is trusted with witness material,
 but it has basic bind-safety guardrails:
 
-- loopback binds are allowed without extra flags
-- non-loopback binds are refused unless `--unsafe-allow-remote-host` is passed
+- loopback binds, including `127.0.0.1` and `::1`, are allowed without extra
+  flags
+- non-loopback binds, including `::`, are refused unless
+  `--unsafe-allow-remote-host` is passed
 - non-loopback binds also require a non-empty `--auth-token`
 
 The intended posture is "local trusted prover first", with deliberate operator

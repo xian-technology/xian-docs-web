@@ -79,8 +79,17 @@ machine, set an explicit host and put it behind a rate-limited reverse proxy:
 XIAN_LINTER_HOST=0.0.0.0 XIAN_LINTER_PORT=8000 xian-linter
 ```
 
+For IPv6 loopback, use the raw bind host and a bracketed URL:
+
+```bash
+XIAN_LINTER_HOST=::1 XIAN_LINTER_PORT=8000 xian-linter
+# http://[::1]:8000
+```
+
 Browser CORS defaults to local origins. Set `XIAN_LINTER_CORS_ORIGINS` to a
 comma-separated allowlist when a hosted IDE or frontend needs browser access.
+The built-in local development allowlist includes Vite loopback origins such as
+`http://localhost:5173`, `http://127.0.0.1:5173`, and `http://[::1]:5173`.
 
 ## HTTP Endpoints
 

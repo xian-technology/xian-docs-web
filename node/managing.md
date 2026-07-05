@@ -241,6 +241,12 @@ The maintained stack defaults to a fail-closed network posture:
 - local BDS and PostGraphile credentials are generated once into
   `xian-stack/.stack-secrets.env`
 
+Loopback binds may use IPv4 `127.0.0.1` or IPv6 `::1`. Bind and host-publish
+settings use the raw IPv6 literal; endpoint URLs use brackets, such as
+`http://[::1]:26657/status`. Treat `::` as a non-loopback bind that requires
+the same deliberate exposure and authentication posture as other public
+interfaces.
+
 That split is intentional. `--public-query` publishes the read-only indexed
 surface. It does not also publish live CometBFT RPC, mempool access, or raw
 ABCI submission endpoints.
@@ -572,6 +578,9 @@ uv run --project /path/to/xian-abci python3 -m xian.dashboard.cli \
   --host 127.0.0.1 \
   --port 18080
 ```
+
+For IPv6 loopback, pass the raw bind host and bracket the RPC URL:
+`--host ::1 --rpc-url http://[::1]:26657`.
 
 Use Prometheus and Grafana for remote monitoring, alerting, and retention.
 They bind to loopback by default. If you publish either Prometheus or Grafana

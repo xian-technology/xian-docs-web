@@ -158,7 +158,8 @@ Remote `http://` RPC endpoints are blocked unless the selected preset has
 **Allow HTTP data transfers** enabled. Leave that off for public networks and
 prefer HTTPS. Use the HTTP opt-in only for trusted local or private endpoints.
 Loopback development URLs such as `http://127.0.0.1` are treated as local
-development endpoints.
+development endpoints; IPv6 loopback URLs use brackets, for example
+`http://[::1]:26657` and `http://[::1]:18080`.
 
 ## Release Flow
 
