@@ -286,6 +286,14 @@ verification, and the advanced parallel execution guardrails. Host-publish
 variables still decide which container ports are reachable outside the remote
 host.
 
+For remote shared-network deployments, third-party support-service images must
+be digest-pinned for each enabled service: `xian_postgres_image` when
+BDS/Postgres is enabled, and `xian_prometheus_image` /
+`xian_grafana_image` when monitoring is enabled. Local-development inventories
+may keep tag-only defaults. Set
+`xian_require_digest_pinned_third_party_images=true` when a private inventory
+should enforce the same rule outside shared-network profiles.
+
 Common entrypoints:
 
 ```bash
