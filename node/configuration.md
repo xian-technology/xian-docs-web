@@ -296,4 +296,7 @@ dev-server port selection and prints the actual URL when started.
 
 Those port numbers describe the service sockets, not a guarantee that the
 service is Internet-facing. In the maintained stack, only CometBFT P2P is
-public by default.
+public by default. Prometheus and Grafana stay loopback-only unless public
+monitoring is explicitly enabled and authenticated external access is confirmed
+with the stack or deploy monitoring guard variables documented in
+[Starting, Stopping & Monitoring](/node/managing#dashboard-and-graphql).

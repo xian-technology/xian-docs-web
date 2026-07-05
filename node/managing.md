@@ -566,6 +566,18 @@ uv run --project /path/to/xian-abci python3 -m xian.dashboard.cli \
 ```
 
 Use Prometheus and Grafana for remote monitoring, alerting, and retention.
+They bind to loopback by default. If you publish either Prometheus or Grafana
+on a non-loopback interface, explicitly opt in and put the published ports
+behind authenticated TLS reverse-proxy access or equivalent host/network
+controls. For local `xian-stack` runs that means setting both
+`XIAN_PUBLIC_MONITORING_ENABLED=1` and
+`XIAN_MONITORING_PUBLIC_AUTH_CONFIRMED=1`. For remote `xian-deploy`
+inventories that means setting both `xian_public_monitoring_enabled=true` and
+`xian_monitoring_public_auth_confirmed=true`.
+
+The stack and deploy templates keep Prometheus lifecycle/admin endpoints
+disabled, so runtime reload and shutdown actions are not exposed through the
+monitoring port.
 
 Profile-specific monitoring assets exist on top of the generic overview:
 
