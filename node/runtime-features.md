@@ -1,7 +1,7 @@
 # Runtime Features
 
 This page explains the runtime behavior that ends up in the rendered
-`config.toml` under `[xian]`, `[xian.execution.engine]`, and `[xian.bds]`.
+`config.toml` under `[xian]` and `[xian.bds]`.
 
 Use it with:
 
@@ -19,22 +19,12 @@ Different settings live at different layers.
 |------|------------------|
 | templates / manifests | block policy defaults, genesis, P2P seeds, image posture |
 | node profiles | BDS/service posture, logging, simulation, parallel execution, dashboard, monitoring, advanced runtime defaults |
-| rendered `config.toml` | effective runtime values, including execution engine policy |
+| rendered `config.toml` | effective runtime values for node-local runtime posture |
 | `xian-stack` environment | localnet and Docker-specific overrides, especially for stack-managed services |
 
 ## Execution Engine
 
-The most important runtime distinction is between the top-level tracer setting
-and the explicit execution-engine policy.
-
-### VM-Native Execution
-
-`xian_vm_v1` is the fixed node execution runtime:
-
-```toml
-[xian.execution.engine]
-mode = "xian_vm_v1"
-```
+`xian_vm_v1` is the fixed node execution runtime.
 
 Important rules:
 
@@ -42,6 +32,7 @@ Important rules:
 - bytecode, gas schedule, and authority are internal VM constants
 - operators configure runtime-adjacent behavior such as simulation and parallel
   execution, not alternate execution engines
+- `xian.execution` and `xian.tracer_mode` are invalid rendered config keys
 
 The high-level `xian-cli` profile flow exposes runtime-adjacent posture such as
 parallel execution and BDS/service settings. The VM execution policy itself is
@@ -252,12 +243,6 @@ you need to point catch-up at a different trusted RPC endpoint.
 | `tx_fee_mode`, `free_tx_max_chi`, `free_block_max_chi` | transaction fee policy and 0-fee chi caps |
 | `parallel_execution_*` | speculative parallel execution controls |
 | `pending_nonce_reservation_ttl_seconds` | local pending-nonce reservation TTL |
-
-### `[xian.execution.engine]` Keys
-
-| Key | Purpose |
-|-----|---------|
-| `mode` | fixed execution runtime, `xian_vm_v1` |
 
 ### `[xian.bds]` Keys
 

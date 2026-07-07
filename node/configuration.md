@@ -206,7 +206,10 @@ In practice:
 - readonly simulation lives under `[xian]`
 - transaction fee mode lives under `[xian]`
 - speculative parallel execution lives under `[xian]`
-- the execution engine policy lives under `[xian.execution.engine]`
+
+VM execution policy is fixed by the node runtime. Do not add `xian.execution`
+or `xian.tracer_mode` keys to `xian.toml`; the node treats those as invalid
+configuration.
 
 See [Runtime Features](/node/runtime-features) for the operator-facing meaning
 of those settings.

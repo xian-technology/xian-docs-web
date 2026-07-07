@@ -11,7 +11,8 @@ There are always two distinct questions in Xian:
 2. What machine executes that program on validators?
 
 Developers write a restricted Python subset. The network then chooses an
-execution engine for that authored contract.
+execution model for that authored contract. Current Xian nodes use the fixed
+`xian_vm_v1` execution model.
 
 ## Execution Mode
 
@@ -59,12 +60,7 @@ flowchart TD
 
 ## Execution Policy
 
-VM-native execution is the fixed node execution runtime:
-
-```toml
-[xian.execution.engine]
-mode = "xian_vm_v1"
-```
+VM-native execution is the fixed node execution runtime.
 
 On the supported branch:
 
@@ -72,7 +68,8 @@ On the supported branch:
 - bytecode, gas schedule, and authority are internal VM constants
 - submitted contracts must provide source code
 
-This keeps the execution contract explicit without exposing alternate engines.
+This keeps the execution contract explicit without exposing alternate engines
+or an operator-selectable execution policy section.
 
 ## What The Native Runtime Does
 
