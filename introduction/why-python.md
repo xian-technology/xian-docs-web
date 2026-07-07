@@ -4,7 +4,7 @@ Xian uses Python as the contract authoring language because the main product
 goal is usable decentralized infrastructure, not language novelty.
 
 The core idea is simple: developers should be able to read and write contract
-logic with ordinary software literacy, while the platform still enforces
+logic with ordinary software literacy, while the platform enforces
 deterministic execution, metering, and a narrow runtime boundary.
 
 ## Python Is The Frontend
@@ -65,7 +65,7 @@ The developer workflow stays short:
 You do not need a specialized contract compiler toolchain just to start
 learning the model.
 
-## Determinism Still Comes First
+## Determinism Comes First
 
 Python only works here because Xian narrows it aggressively.
 
@@ -121,9 +121,9 @@ The point is not to pretend Python is magically as fast as low-level systems
 languages. The point is to keep contract authorship simple while letting the
 runtime evolve underneath.
 
-### Runtime Discipline Still Matters
+### Runtime Discipline Matters
 
-Validators must still stay aligned on the supported runtime for the network
+Validators must stay aligned on the supported runtime for the network
 they are joining. The exact alignment rules depend on the execution engine, but
 the principle does not change: all validators must execute the same contract
 semantics.

@@ -8,10 +8,10 @@ The `ctx` object is available in every exported function. It tells you who calle
 |----------|------|-------------|
 | `ctx.caller` | `str` | The immediate caller — either a user address or a contract name |
 | `ctx.signer` | `str` | The original transaction signer (never changes in a call chain) |
-| `ctx.this` | `str` | The name of the currently executing contract |
+| `ctx.this` | `str` | The name of the executing contract |
 | `ctx.owner` | `str` or `None` | The runtime owner stored for the contract |
 | `ctx.entry` | `tuple` | `(contract_name, function_name)` of the transaction entry point |
-| `ctx.submission_name` | `str` or `None` | The name of the contract currently being deployed during module-body execution and `@construct` |
+| `ctx.submission_name` | `str` or `None` | The name of the contract being deployed during module-body execution and `@construct` |
 
 ## How Context Changes in Call Chains
 
@@ -144,8 +144,8 @@ In addition to `ctx`, exported functions have access to block-level environment 
 | Variable | Type | Description |
 |----------|------|-------------|
 | `now` | `Datetime` | Block timestamp (deterministic, agreed by validators) |
-| `block_num` | `int` | Current block height |
-| `block_hash` | `str` | Current block hash |
+| `block_num` | `int` | Block height for the executing transaction |
+| `block_hash` | `str` | Block hash for the executing transaction |
 | `chain_id` | `str` | Network chain identifier |
 
 ```python

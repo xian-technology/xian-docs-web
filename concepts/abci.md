@@ -92,5 +92,5 @@ The ABCI split keeps responsibilities clear:
 - CometBFT gives Xian finality and validator coordination
 - Xian defines the application state machine
 
-That is why Xian can remain Python-authored and contract-focused while still
+That is why Xian can remain Python-authored and contract-focused while
 using a mature BFT consensus engine underneath.

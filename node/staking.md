@@ -14,9 +14,9 @@ membership voting, and evidence-driven slashing. `rewards` defines the global
 fee split, and the runtime uses `validators` state to distribute the validator
 bucket.
 
-## Current Model
+## Staking Model
 
-The current canonical model includes:
+The canonical model includes:
 
 - registration bonds for validator candidates
 - self-bonding by validators
@@ -165,7 +165,8 @@ Instead they create a `pending_unbond` record with:
 - optional `reason`
 
 `unlock_at` is derived from `unbonding_period_days` in the membership policy.
-Current bundled networks pin this to `7`.
+The local, devnet, and testnet bundles pin this to `7`; the draft
+`xian-mainnet-1` rehearsal bundle pins it to `14`.
 
 Claim rules:
 
@@ -206,12 +207,12 @@ The membership contract supports governed slashing through
 Slash scope is broader than just live self-bond. A slash can apply pro rata
 across:
 
-- current validator self-bond
-- current live delegations
+- validator self-bond
+- live delegations
 - pending unbonds created after the infraction height
 
-Slashed funds are transferred to `slash_destination`, which the bundled
-networks currently set to `dao`.
+Slashed funds are transferred to `slash_destination`, which the maintained
+bundles set to `dao`.
 
 ## Evidence Penalties
 
@@ -226,19 +227,18 @@ Supported infraction types today:
 | `DUPLICATE_VOTE` | `500` bps | `true` |
 | `LIGHT_CLIENT_ATTACK` | `1000` bps | `true` |
 
-Current behavior:
+Evidence behavior:
 
 - evidence is deduplicated by `evidence_id`
-- if the validator is still known and jailing is enabled, the validator is
-  jailed
+- if the validator is known and jailing is enabled, the validator is jailed
 - in non-manual selection modes, the validator set is rebalanced immediately
   after an applied evidence penalty
 - pending unbonds are slashable only when the infraction height is less than or
   equal to the unbond's `created_block`
 
 That last rule is important. If a validator commits an infraction first and
-then exits or undelegates later, the resulting pending unbond can still be
-slashed. If the infraction happened after the unbond was created, that pending
+then exits or undelegates later, the resulting pending unbond remains
+slashable. If the infraction happened after the unbond was created, that pending
 unbond is left untouched.
 
 ## Policy Surface
@@ -268,7 +268,7 @@ runtime.
 
 ## Membership Vote Types
 
-`validators.propose_vote(...)` currently accepts these vote types:
+`validators.propose_vote(...)` accepts these vote types:
 
 - `add_member`
 - `remove_member`
@@ -290,13 +290,14 @@ Vote semantics:
 - only active validators with snapshotted voting weight can vote
 - the proposer automatically records the first `yes`
 - required approvals are snapshotted at proposal creation
-- the current bundled policy stores both a 4/5 count threshold and a 4/5
-  weight threshold
+- the local, devnet, and testnet bundled policy stores both a 4/5 count
+  threshold and a 4/5 weight threshold
 - approval is reached when `yes_weight` reaches the required weight threshold
-- vote count still participates in reporting and early-rejection logic
+- vote count participates in reporting and early-rejection logic
 - delegators do not vote directly; in `stake_weighted` networks, delegated
-  stake can indirectly increase the active validator's future voting weight
-- proposals expire after 7 days if still pending
+  stake can indirectly increase the active validator's voting weight in later
+  proposal snapshots
+- proposals expire after 7 days if pending
 
 In non-manual selection modes:
 
@@ -305,9 +306,9 @@ In non-manual selection modes:
   require `manual_override_enabled = true`
 - `slash_member` remains available regardless of manual override policy
 
-## Current Bundled Reality
+## Bundled Reality
 
-The maintained `xian-configs` bundles pin:
+The maintained local, devnet, and testnet `xian-configs` bundles pin:
 
 - `selection_mode = "manual"`
 - `power_mode = "equal"`
@@ -319,3 +320,8 @@ The maintained `xian-configs` bundles pin:
 The bundled model uses validator-vote admission and removal. The contract also
 supports automatic top-N selection, delegation-aware ranking, delegated reward
 routing, and evidence-triggered slashing when a network chooses to enable them.
+
+The draft `xian-mainnet-1` rehearsal bundle enables `auto_top_n`, caps the
+active set at `13`, keeps equal validator power, uses a 14-day unbonding
+period, and caps commission at `2000` bps. Those values are launch-preparation
+inputs until an accepted mainnet operator manifest is published.

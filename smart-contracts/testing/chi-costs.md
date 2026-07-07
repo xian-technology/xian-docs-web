@@ -49,7 +49,7 @@ The `+ 5` is the base transaction cost that every transaction pays regardless of
 | Max return value | 128 KiB | Maximum serialized return payload |
 
 For `xian_vm_v1`, storage and payload accounting matter, and compute is
-charged through the VM-native gas schedule. The current VM host-operation
+charged through the VM-native gas schedule. The VM host-operation
 schedule has its own read charge and shares the same `25` units-per-byte write
 cost.
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
 
 ## Out of Chi
 
-If a contract exceeds its chi limit, the transaction fails and all state changes are rolled back. The chi are still consumed (charged to the sender):
+If a contract exceeds its chi limit, the transaction fails and all state changes are rolled back. The chi are consumed (charged to the sender):
 
 ```python
 output = executor.execute(

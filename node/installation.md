@@ -252,8 +252,8 @@ If you need lower-level runtime tuning such as:
 
 see [Runtime Features](/node/runtime-features).
 
-The supported high-level `xian-cli` flow currently surfaces the common runtime
-settings operators need during setup, including transaction fee mode, readonly
+The supported high-level `xian-cli` flow surfaces the common runtime settings
+operators need during setup, including transaction fee mode, readonly
 simulation, parallel execution, logging, pruning, and optional sidecars. Use
 `xian-configure-node`, rendered config edits, or stack environment variables
 only for lower-level runtime knobs that are not part of the profile flow.
@@ -300,5 +300,5 @@ Xian supports two node-runtime paths on the same `xian-stack` backend:
 - canonical networks can pin published immutable `xian-node` images by digest
 - local and custom workflows can keep using source-built workspace images
 
-The local `xian-stack` checkout still matters in both cases because it owns the
+The local `xian-stack` checkout matters in both cases because it owns the
 Compose topology, backend control plane, and smoke-tested operator flow.

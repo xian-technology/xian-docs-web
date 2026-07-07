@@ -220,7 +220,7 @@ The maintained `xian-stack` backend defaults to fail-closed host publishing:
 - CometBFT metrics defaults to `http://127.0.0.1:26660/metrics`
 - Xian app metrics defaults to `http://127.0.0.1:9108/metrics`
 - dashboard process defaults to `127.0.0.1:8080`; maintained stack templates
-  currently publish it on host port `18080`
+  publish it on host port `18080`
 - PostGraphile defaults to `http://127.0.0.1:5000/graphql`
 - `xian-dex-automation` defaults to `127.0.0.1:38280` when enabled
 - the shielded relayer defaults to `127.0.0.1:38180` when enabled

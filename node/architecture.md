@@ -38,7 +38,7 @@ flowchart LR
 ```
 
 This is the preferred operational default because it is simpler to run and
-upgrade, while still using immutable images and proper container-native
+upgrade, while using immutable images and proper container-native
 supervision.
 
 ### Fidelity

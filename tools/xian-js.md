@@ -3,7 +3,7 @@
 `xian-js` is the JavaScript / TypeScript SDK workspace for integrating Xian
 from browser apps, wallets, dapps, and Node.js code that prefers TS.
 
-It currently ships four public packages:
+It publishes four public packages:
 
 - `@xian-tech/client`: typed RPC client, tx helpers, Ed25519 signing helpers, and
   websocket subscriptions
@@ -16,11 +16,11 @@ It currently ships four public packages:
   client storage, formatting, toasts, and React integration
 
 The browser wallet product line lives in the sibling
-`xian-wallet-browser` repo, which consumes these SDK packages. The current
-wallet product surface is documented here under
+`xian-wallet-browser` repo, which consumes these SDK packages. The wallet
+product surface is documented here under
 [xian-wallet-browser](/tools/xian-wallet-browser).
 
-## Current Status
+## Published Packages
 
 `xian-js` is available both as a maintained repo and as published npm packages:
 
@@ -108,7 +108,7 @@ Install the packages directly from npm:
 npm install @xian-tech/client @xian-tech/provider @xian-tech/types @xian-tech/web-kit
 ```
 
-For local development against the monorepo itself, you can work from the
+For local development against the SDK workspace, you can work from the
 workspace checkout.
 
 Inside the `xian-js` repo itself, the packages are already linked through the
@@ -118,7 +118,7 @@ The browser wallet implementation lives in the sibling
 
 ## Public Imports
 
-Current top-level imports from `@xian-tech/client` include:
+Public top-level imports from `@xian-tech/client` include:
 
 ```ts
 import {
@@ -155,7 +155,7 @@ import {
 } from "@xian-tech/client";
 ```
 
-Current top-level imports from `@xian-tech/provider` include:
+Public top-level imports from `@xian-tech/provider` include:
 
 ```ts
 import {
@@ -356,7 +356,7 @@ console.log(estimate.estimated);
 console.log(estimate.suggested);
 ```
 
-The current default policy adds proportional headroom plus a minimum floor,
+The default policy adds proportional headroom plus a minimum floor,
 matching the browser-first SDK design note for explicit but ergonomic tx
 submission.
 
@@ -560,7 +560,7 @@ interface XianProvider {
 }
 ```
 
-The current in-memory provider is a reference implementation for:
+The in-memory provider is a reference implementation for:
 
 - tests
 - demos
@@ -822,7 +822,7 @@ await provider.request({
 
 ## Provider Events
 
-The current provider emits:
+The provider emits:
 
 - `connect`
 - `disconnect`
@@ -873,7 +873,7 @@ For the walkthrough of the maintained browser playground itself, see
 The concrete browser wallet implementation lives in the sibling
 `xian-wallet-browser` repo.
 
-That repo currently owns:
+That repo owns:
 
 - `@xian-tech/wallet-core` for wallet-domain logic
 - `apps/wallet-extension/` for the MV3 extension wallet
@@ -881,7 +881,7 @@ That repo currently owns:
 During local development, `xian-wallet-browser` consumes `@xian-tech/client` and
 `@xian-tech/provider` from the `xian-js` checkout.
 
-See [xian-wallet-browser](/tools/xian-wallet-browser) for the current wallet
+See [xian-wallet-browser](/tools/xian-wallet-browser) for the wallet
 scope, build flow, and extension loading steps.
 
 ## Validation

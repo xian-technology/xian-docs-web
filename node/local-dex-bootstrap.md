@@ -146,9 +146,9 @@ deterministic trade executors by itself.
 
 DEX transactions emitted by the bootstrap use Xian VM datetime deadline
 payloads, so the same local setup is suitable for testing MCP DEX helper flows
-against the current VM runtime.
+against the supported VM runtime.
 
 After bootstrapping the contracts, start the deterministic sidecar with
 `--dex-automation` or a node profile created with `--enable-dex-automation`.
-The sidecar still starts in dry-run mode; enable `wallet.execute` only after
+The sidecar starts in dry-run mode; enable `wallet.execute` only after
 the rule output is correct.

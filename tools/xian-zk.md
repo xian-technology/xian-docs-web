@@ -119,7 +119,7 @@ sync_result = wallet.sync_records(candidates)
 ```
 
 Indexed note records expose `payload_tags`, which indexers can persist for
-future selective note-discovery queries. Wallet sync flows should use
+selective note-discovery queries. Wallet sync flows should use
 the higher-level `shielded_wallet_history` feed first. That feed keeps the full
 commitment sequence in note-index order and only includes `output_payload` for
 rows whose indexed tag matches the wallet. If that feed is not available,
@@ -353,7 +353,7 @@ logical expiry value the contract checks on-chain.
 Operational privacy notes:
 
 - the relayer is a trusted submission hop, not an anonymity network
-- the relayer can still observe submitter transport metadata unless another
+- the relayer can observe submitter transport metadata unless another
   anonymity layer sits in front of it
 - relayer job lookups are for short-lived operational status, not long-term
   privacy-preserving storage
@@ -390,7 +390,7 @@ proof = client.prove_deposit(deposit_plan.request)
 ```
 
 This is a trusted local companion service, not a true split-prover protocol.
-It improves browser/mobile deployment options, but the service still handles
+It improves browser/mobile deployment options, but the service handles
 the witness material.
 
 For relayed anonymous execution, use `ShieldedCommandWallet`:

@@ -36,7 +36,7 @@ and the explicit execution-engine policy.
 mode = "xian_vm_v1"
 ```
 
-Important current rules:
+Important rules:
 
 - `xian_vm_v1` is the only supported node runtime
 - bytecode, gas schedule, and authority are internal VM constants
@@ -54,8 +54,8 @@ runtime-feature map. These are consensus-level switches: every validator
 resolves the same values, and contracts that depend on a disabled feature are
 rejected at deployment.
 
-The currently supported feature is `zk`, which gates the zk host syscalls used
-by the shielded stack.
+The supported feature is `zk`, which gates the zk host syscalls used by the
+shielded stack.
 
 | Context | `zk` default |
 |---------|--------------|
@@ -144,15 +144,15 @@ free_tx_max_chi = 1000000
 free_block_max_chi = 20000000
 ```
 
-0-fee mode does not make execution unlimited. Transactions still need a chi
-budget, execution can still run out of chi, and receipts still report
+0-fee mode does not make execution unlimited. Transactions need a chi budget,
+execution can run out of chi, and receipts report
 `chi_used`. The difference is billing: the runtime does not debit the sender's
 native-token balance for execution and does not create validator/foundation/
 developer rewards from transaction fees.
 
 ## Parallel Execution
 
-Xian supports speculative parallel block execution while still committing the
+Xian supports speculative parallel block execution while committing the
 canonical serial-equivalent result.
 
 Relevant `[xian]` keys:
@@ -182,10 +182,9 @@ Practical guidance:
 - remember that it is process-level speculation with serial fallback, not
   unrestricted shared-memory concurrency
 
-The maintained `xian-cli` templates currently default this posture
-conservatively, while lower-level raw `xian-abci` defaults may differ. The
-effective value is whatever ends up in the rendered config for the node you
-actually start.
+The maintained `xian-cli` templates default this posture conservatively, while
+lower-level raw `xian-abci` defaults may differ. The effective value is
+whatever ends up in the rendered config for the node you actually start.
 
 ## Metrics And Health
 
@@ -258,7 +257,7 @@ you need to point catch-up at a different trusted RPC endpoint.
 
 | Key | Purpose |
 |-----|---------|
-| `mode` | fixed execution runtime, currently `xian_vm_v1` |
+| `mode` | fixed execution runtime, `xian_vm_v1` |
 
 ### `[xian.bds]` Keys
 

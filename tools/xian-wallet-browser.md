@@ -9,7 +9,7 @@ Xian tokens. It runs in Chrome, Brave, Edge, and other Chromium-based browsers.
 
 ### From GitHub Release
 
-1. Download the latest `xian-wallet-extension-X.Y.Z.zip` from
+1. Download the `xian-wallet-extension-X.Y.Z.zip` artifact for the version you want from
    [Releases](https://github.com/xian-technology/xian-wallet-browser/releases).
 2. Unzip the archive.
 3. Open `chrome://extensions` in your browser.
@@ -284,7 +284,7 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 - **Token list** - shows tracked assets with balances
 - **Manage assets** - drag to reorder, hide / show toggle per token
 - **Token detail** - balance, contract info, decimal places adjustment
-- **Auto-detection** - discovers on-chain tokens not yet tracked
+- **Auto-detection** - discovers on-chain tokens missing from the local token list
 
 ### Contacts
 

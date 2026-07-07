@@ -35,7 +35,7 @@ bind HTTP to a non-loopback address, including the IPv6 wildcard `::`, set
 
 ## Network Configuration
 
-Configure the target network explicitly. Local current-code defaults are:
+Configure the target network explicitly. Local development defaults are:
 
 | Variable | Purpose | Local default |
 |----------|---------|-------------------------------|
@@ -53,7 +53,7 @@ Configure the target network explicitly. Local current-code defaults are:
 When in doubt, read `result.node_info.network` from the node's `/status`
 response and use that value for `XIAN_CHAIN_ID`.
 
-For a current local stack node, point the MCP server at the local RPC and
+For a local stack node, point the MCP server at the local RPC and
 GraphQL endpoints (stack defaults shown):
 
 ```bash
@@ -110,7 +110,7 @@ XIAN_MCP_HTTP_CORS_ORIGINS=http://localhost:3000
 
 ## What It Can Do
 
-Current capability groups include:
+Capability groups include:
 
 - read balances, token holdings, contract state, and contract source
 - simulate transactions for chi estimation
@@ -140,7 +140,7 @@ The DEX tools use the canonical DEX contract names:
 transactions and therefore require `XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1`.
 
 The buy/sell helpers send exact decimal amount and slippage values and convert
-`deadline_min` into the Xian VM datetime payload expected by the current DEX
+`deadline_min` into the Xian VM datetime payload expected by the canonical DEX
 contracts. The target network must already have the canonical DEX contracts and
 liquidity for the requested pair.
 

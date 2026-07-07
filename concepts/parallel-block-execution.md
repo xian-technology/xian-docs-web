@@ -30,7 +30,7 @@ against the same committed LMDB state snapshot.
 
 So the model is:
 
-- one block still has one canonical transaction order
+- one block has one canonical transaction order
 - workers speculate independently on the last committed state
 - the main process decides which speculative results are safe to accept
 
@@ -80,7 +80,7 @@ flowchart TD
 7. After the block is complete, the node commits the final block state through
    the normal LMDB batch write path.
 
-The critical point is that speculation happens first, but acceptance still
+The critical point is that speculation happens first, but acceptance
 happens in normal block order.
 
 ## Worked Example
@@ -102,7 +102,7 @@ The worker results might look like this:
 - `tx3` writes `orders:1`
 - `tx4` records a prefix read on `orders:`
 
-Acceptance still walks the block in order:
+Acceptance walks the block in order:
 
 - `tx1` is accepted
 - `tx2` is accepted
@@ -117,7 +117,7 @@ At that point, the node does not reorder the block. It keeps `tx1`, `tx2`, and
 - or it can execute `tx4` serially if the remaining tail is not worth another
   speculative wave
 
-Either way, the final result must still match normal serial execution of
+Either way, the final result must match normal serial execution of
 `tx1 -> tx2 -> tx3 -> tx4`.
 
 ## What Metadata Is Tracked
@@ -146,7 +146,7 @@ This metadata comes from the runtime/storage layer:
 The main process falls back to serial execution when a speculative result is no
 longer safe relative to earlier accepted transactions.
 
-Current fallback conditions include:
+Fallback conditions include:
 
 - the same sender already appeared earlier in the accepted block path
 - a key this transaction read was written earlier
@@ -181,7 +181,7 @@ This is real parallel execution, but not unsafe shared-state concurrency.
 
 - multiple transactions can execute at the same time in separate worker
   processes
-- one in-process `Executor` still executes one transaction at a time
+- one in-process `Executor` executes one transaction at a time
 - final acceptance stays serial-equivalent
 
 Xian uses multiple CPU cores for speculative contract execution while keeping
@@ -191,9 +191,9 @@ the correctness model tied to canonical block order.
 
 Normal shared writes are treated conservatively as conflicts.
 
-The current explicit exception is reward accounting. Reward outputs are modeled
+The explicit exception is reward accounting. Reward outputs are modeled
 as additive deltas, not ordinary overwrites. Two transactions can both add to
-the same recipient balance and still be accepted speculatively because the
+the same recipient balance and be accepted speculatively because the
 merge operation is deterministic addition.
 
 But if another transaction reads that balance, or directly overwrites it, the
@@ -204,16 +204,16 @@ executor falls back to serial execution.
 This design is consensus-safe because it preserves serial semantics:
 
 - canonical block order never changes
-- validators can mix enabled and disabled parallel posture and still converge on
+- validators can mix enabled and disabled parallel posture and converge on
   the same final block result
 - speculative workers do not commit their writes to disk
 - accepted speculative results are revalidated against earlier accepted writes
-- conflicting transactions are re-run serially on the latest state
+- conflicting transactions are re-run serially on the accepted state
 - if the speculative executor itself fails, the node falls back to ordinary
   serial block execution
 
 In other words, the node is allowed to guess in parallel, but it is only
-allowed to commit what is still correct in serial order.
+allowed to commit what is correct in serial order.
 
 ## Representative Throughput
 
@@ -271,7 +271,7 @@ One important measurement boundary: this benchmark uses custom contract
 functions, so the node's conservative access estimator cannot know most shapes
 ahead of time. Built-in known shapes, such as common token transfer and approve
 patterns, can be prefiltered or staged earlier by the ABCI wrapper. Unknown
-contract shapes are still safe because the runtime records actual reads,
+contract shapes are safe because the runtime records actual reads,
 writes, and prefix reads before accepting speculative results.
 
 ## What It Does Not Do
@@ -283,7 +283,7 @@ Parallel block execution does not:
 - weaken deterministic execution requirements
 - let validators accept different speculative winners
 
-All validators still have to end the block with the same final state and the
+All validators have to end the block with the same final state and the
 same `app_hash`.
 
 ## Related Pages

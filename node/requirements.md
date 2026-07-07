@@ -15,7 +15,7 @@ The supported runtime path is Docker-based on both platforms.
 
 ## Python Versions
 
-Current package floors:
+Package version support:
 
 | Repo | Python |
 |------|--------|
@@ -39,8 +39,8 @@ especially with Docker or Podman plus system-level supervision.
 ### macOS
 
 macOS is supported, but hard memory limits are most practical through Docker
-Desktop rather than host-native process limits. This is the current documented
-path for operator testing on macOS.
+Desktop rather than host-native process limits. This is the documented path for
+operator testing on macOS.
 
 ## Recommended Validation
 

@@ -1,6 +1,6 @@
 # Node Operations
 
-This section documents the current operator path for running Xian nodes from
+This section documents the supported operator path for running Xian nodes from
 the maintained repos:
 
 - `xian-cli` owns operator workflows such as key generation, network join, node
@@ -79,7 +79,7 @@ pulls those immutable images by default through `xian-stack`. Use
 `--node-image-mode local_build` during setup when you need a dev override
 against the local workspace instead.
 
-The lower-level flow is still available:
+The lower-level flow is available for scripted operators:
 
 1. Generate validator key material with `xian-cli`
 2. Create or join a network manifest/profile manually
@@ -89,7 +89,7 @@ The lower-level flow is still available:
 
 ## Runtime Topologies
 
-Xian currently supports two runtime topologies in `xian-stack`:
+`xian-stack` supports two runtime topologies:
 
 - `integrated`: one container per node, with `xian-abci` and `CometBFT`
   supervised together by `s6-overlay`
@@ -109,7 +109,7 @@ deterministic validator path.
 - [Config Taxonomy](/node/config-taxonomy): templates, profiles, deploy
   bindings, bundles, products, solutions, and when to use each one
 - [Runtime Features](/node/runtime-features): execution-engine policy, tracer
-  modes, readonly simulation, parallel execution, and the current runtime keys
+  modes, readonly simulation, parallel execution, and runtime keys
 - [Pruning & Retention](/node/pruning): block-history pruning policy,
   `blocks_to_keep` sizing, and recovery implications
 - [Local DEX Bootstrap](/node/local-dex-bootstrap): opt-in local deployment of

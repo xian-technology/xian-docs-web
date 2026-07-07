@@ -67,7 +67,7 @@ The execution model does not change. Only idle-time progression changes.
 | `idle_interval` | after interval | yes |
 | `periodic` | yes | yes |
 
-Contracts remain deterministic under all three because `now` still comes from
+Contracts remain deterministic under all three because `now` comes from
 the finalized block header.
 
 ## Contract Design Rules
@@ -98,7 +98,7 @@ Bad assumptions:
 ### Permit Deadlines
 
 In the canonical `currency` contract, a permit is valid only if the inclusion
-block still satisfies:
+block satisfies:
 
 ```python
 assert now < deadline, "Permit has expired."
@@ -135,6 +135,6 @@ whose `now` is past that expiry.
 
 ## Important Caveat
 
-Even with `create_empty_blocks = false`, CometBFT may still produce a proof
+Even with `create_empty_blocks = false`, CometBFT may produce a proof
 block after state changes so the updated `app_hash` appears in a committed
 header. That is a consensus/proof requirement, not a separate wall-clock timer.

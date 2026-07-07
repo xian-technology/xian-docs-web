@@ -59,8 +59,12 @@ Allowed annotation types:
 - `int`
 - `float`
 - `bool`
+- `bytes`
+- `bytearray`
 - `dict`
 - `list`
+- `set`
+- `frozenset`
 - `Any`
 - `datetime.datetime`
 - `datetime.timedelta`
@@ -98,7 +102,7 @@ def summarize(items: list[int]) -> dict[str, int]:
     return {"count": len(items)}
 ```
 
-Invalid return annotations still fail linting:
+Invalid return annotations fail linting:
 
 ```python
 # BAD: custom types are not allowed in export signatures
@@ -174,11 +178,11 @@ Failed assertions:
 
 - abort execution
 - roll back writes and events from that transaction
-- still consume chi up to the failure point
+- consume chi up to the failure point
 
 ## Disallowed Function Patterns
 
-The function body still has to obey the language restrictions:
+The function body has to obey the language restrictions:
 
 - no nested functions
 - no classes

@@ -72,8 +72,9 @@ ABCI BDS responses use explicit transaction-hash names:
 - GraphQL follows the generated PostGraphile schema and exposes
   `Transaction.hash`
 
-Do not expect legacy `hash` fields in ABCI transaction rows returned by
-`/tx/...`, `/txs_by_sender/...`, `/txs_by_contract/...`, or the SDK helpers.
+ABCI transaction rows returned by `/tx/...`, `/txs_by_sender/...`,
+`/txs_by_contract/...`, and the SDK helpers use `tx_hash`, not a generic
+`hash` field.
 
 ## Common Queries
 
@@ -131,13 +132,13 @@ GET /api/abci_query/dex_candles/7/source=xian_pairs_v1/interval=1h/start=1767225
 
 `/dex_candles/<market_id>` returns server-side OHLCV buckets from a whitelisted
 candle source. The default source is `xian_pairs_v1`, which derives candles from
-indexed `con_pairs.Swap` events using the indexed `pair` field. Future DEXes can
-add their own source specs without changing the public candle response shape.
+indexed `con_pairs.Swap` events using the indexed `pair` field. Additional DEX
+source specs can be added without changing the public candle response shape.
 
 `interval` accepts seconds or `s`, `m`, `h`, `d`, and `w` suffixes. `start` and
 `end` accept Unix seconds, which is the preferred format for SDK and dashboard
-callers. `contract=...` is available only as a same-schema override for a source;
-use a new source spec for a DEX with different event fields.
+callers. `contract=...` is available only as a same-schema override for a
+source; define a separate source spec for a DEX with different event fields.
 
 Each candle includes `source`, `market_id`, `pair_id` when numeric,
 `bucket_start`, `bucket_end`, `open`, `high`, `low`, `close`, `volume_token0`,

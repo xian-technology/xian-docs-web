@@ -8,7 +8,7 @@ It is a curated contract catalog and deployment UI for the Xian ecosystem.
 
 The hub is meant for discovery and inspection, not only raw deployment.
 
-Current maintained features include:
+Maintained features include:
 
 - browsing and full-text searching curated Xian contracts
 - filtering by category, tag, and sort order
@@ -36,8 +36,8 @@ state.
 
 Treat it as a curated developer surface:
 
-- on-chain state is still authoritative for deployed contract metadata
-- the contract source repos are still authoritative for package maintenance and
+- on-chain state is authoritative for deployed contract metadata
+- the contract source repos are authoritative for package maintenance and
   code review
 
 ## Related Tools

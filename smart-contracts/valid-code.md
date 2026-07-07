@@ -51,11 +51,11 @@ The linter enforces that restricted subset before code is accepted.
 
 ## Allowed Builtins
 
-The current builtin allowlist is intentionally small:
+The builtin allowlist is intentionally small:
 
 ```text
 Exception False None True abs all any ascii bin bool bytearray bytes chr
-dict divmod filter float format frozenset hex int isinstance issubclass len
+dict divmod filter float format frozenset hex import int isinstance issubclass len
 list map max min oct ord pow range reversed round set sorted str sum tuple zip
 ```
 
@@ -63,7 +63,7 @@ Everything else is treated as forbidden.
 
 ## Allocation Guards
 
-Allowed builtins are still bounded by deterministic runtime limits:
+Allowed builtins are bounded by deterministic runtime limits:
 
 - `range(...)` may create at most `131,072` entries.
 - `bytes(n)` and `bytearray(n)` may allocate at most `131,072` bytes.
@@ -72,7 +72,7 @@ Allowed builtins are still bounded by deterministic runtime limits:
 - `int(...)` string and bytes inputs may be at most `8,192` characters or bytes.
 - three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus and rejects exponent values with more than `8,192` bits.
 - returned contract values may not exceed `131,072` bytes when serialized.
-- submitted contract source may not exceed `65,536` bytes.
+- submitted contract source may not exceed `131,072` bytes.
 
 These guards prevent contracts from allocating large in-memory objects or huge
 integers in a single operation while keeping validation deterministic.
@@ -126,7 +126,7 @@ def transfer(to: str, amount: float):
 No positional decorator arguments are allowed. The only supported keyword is
 `typecheck`, and it must be `True` or `False`.
 
-Invalid annotations still fail:
+Invalid annotations fail:
 
 ```python
 @export

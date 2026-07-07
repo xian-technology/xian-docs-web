@@ -1,6 +1,6 @@
 # Playgrounds
 
-Xian currently has two maintained playground-style surfaces.
+Xian has two maintained playground-style surfaces.
 
 ## 1. Browser dApp Example In `xian-js`
 

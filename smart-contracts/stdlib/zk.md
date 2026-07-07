@@ -134,7 +134,7 @@ Malformed inputs raise an assertion error instead of returning `False`.
 - Prefer `zk.verify_groth16(vk_id, proof, public_inputs)` for stable
   contract-facing integrations.
 
-## Current Proof-Backed Pattern
+## Proof-Backed Pattern
 
 The first real contract families using this verifier surface are the
 shielded-note token and shielded-command stack in `xian-contracts`.
@@ -159,8 +159,8 @@ The shipped `shielded_note_v4` flow uses:
 - a default tree depth of `20`
 - a shielded note capacity of `1,048,576`
 - exact withdraw support with `0` outputs when no change note is needed
-- recent-root proving, where a proof may target a still-accepted recent root
-  while outputs are still appended against the current canonical frontier
+- recent-root proving, where a proof may target an accepted recent root while
+  outputs are appended against the current canonical frontier
 - proof-bound output payload hashes, so encrypted note payloads cannot be
   swapped after proof generation without invalidating the proof
 

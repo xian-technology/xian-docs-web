@@ -43,7 +43,7 @@ All messages are JSON. Every message has a `type` field.
 Every action returns a JSON response with `"status": "ok"` or `"status": "error"`.
 
 `new_block` messages include a `txs` array with decoded payload summaries when
-the raw transaction could be decoded. Each tx summary currently includes:
+the raw transaction could be decoded. Each tx summary includes:
 
 - `tx_hash`
 - `contract`

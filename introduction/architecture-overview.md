@@ -83,9 +83,9 @@ flowchart LR
   Deploy --> Remote
 ```
 
-The current maintained inventory is:
+The maintained inventory is:
 
-| Asset type | Count | Current location |
+| Asset type | Count | Location |
 |------------|-------|------------------|
 | Canonical network manifests | 4 | `xian-configs/networks/local`, `devnet`, `testnet`, `mainnet` |
 | Reusable network templates | 3 | `xian-configs/templates/*.json` |

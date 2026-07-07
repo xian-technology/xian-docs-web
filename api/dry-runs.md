@@ -60,7 +60,7 @@ The payload is JSON, encoded to hex:
 
 ## Response Shape
 
-The current simulator returns:
+The simulator returns:
 
 ```json
 {
@@ -92,7 +92,7 @@ Key fields:
 - `state`: preview of writes that would occur
 - `result`: safe string representation of the function result or failure
 
-When the node refuses or aborts a dry run, you still get the same envelope with
+When the node refuses or aborts a dry run, you get the same envelope with
 `status = 1`. Typical operator-controlled failure cases are:
 
 - simulation disabled on this node
@@ -122,12 +122,13 @@ print(result["state"])
 ## Important Caveats
 
 - dry runs do not commit writes
-- dry runs are estimates against the node's current state view, not a future state
+- dry runs are estimates against the node's current state view, not a predicted
+  later state
 - nonce/signature admission rules are not the focus of the simulator itself
 - state can change between simulation and real submission
 - the simulator uses the node's current runtime view, including live in-memory
-  overlays that are not yet flushed to disk
-- `simulate_tx` is still free compute, so operators should not expose it as an
+  overlays that have not been flushed to disk
+- `simulate_tx` is free compute, so operators should not expose it as an
   unrestricted public validator RPC endpoint
 - if you expose dry runs to users, front them with gateway-level protections
   such as rate limiting, request timeouts, concurrency caps, and preferably a

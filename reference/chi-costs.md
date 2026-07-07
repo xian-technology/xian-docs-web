@@ -14,7 +14,7 @@ This page provides a detailed reference for chi costs across all operation types
 
 Byte count includes both the encoded key (e.g., `currency.balances:alice`) and the encoded value (e.g., `1000000`).
 
-`xian_vm_v1` uses the VM host-operation schedule. Current VM storage writes are
+`xian_vm_v1` uses the VM host-operation schedule. VM storage writes are
 charged at `25` units per byte, while VM storage reads are charged by the VM
 schedule. Cross-contract dispatch is charged as a fixed per-call cost; repeated
 contract calls do not add a progressive surcharge.
@@ -33,7 +33,7 @@ contract calls do not add a progressive surcharge.
 | Runtime raw safety ceiling | 50,000,000,000 raw units |
 | Maximum write data per transaction | 128 KiB |
 | Maximum return value size | 128 KiB |
-| Maximum submitted contract source | 64 KiB |
+| Maximum submitted contract source | 128 KiB |
 | Maximum sequence or binary allocation | 128 KiB |
 | Default chi allocation | 1,000,000 |
 
@@ -184,4 +184,4 @@ the node config to bound per-transaction and per-block work on 0-fee networks.
 Use dry-run simulation for operation-level estimates. Deployment includes more
 than final writes: it also pays for contract-analysis work and canonical source
 storage. Large comments are not preserved in stored `__source__`, but raw
-submitted source is still size-limited.
+submitted source remains size-limited.

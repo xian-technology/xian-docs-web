@@ -44,7 +44,7 @@ uv run xian node health validator-1
 - the `xian-stack` backend state when available
 - optional live RPC reachability
 - the age of the latest observed block so a stalled chain is visible even when
-  the RPC is still reachable
+  the RPC is reachable
 - the configured image mode plus registry image digests when the profile uses published images
 - the embedded release-manifest provenance block for canonical images, including component Git refs and build toolchain
 - the actual running container image names seen by Docker when the backend is reachable
@@ -94,7 +94,7 @@ to avoid collisions.
 When the optional dashboard is enabled, the `Execution Health -> Parallel` row
 is the quickest operator-facing check for speculative block execution posture.
 
-Current behavior:
+Behavior:
 
 - `disabled`: the node config has parallel execution turned off
 - `activated`: the node config has parallel execution turned on
@@ -133,7 +133,7 @@ Use `--skip-live-checks` for an artifact-only offline preflight.
 The Xian application runtime writes its own logs separately from CometBFT's
 logs.
 
-Current behavior:
+Behavior:
 
 - live stderr output follows `[xian].app_log_level`
 - rotated application log files live under `.cometbft/xian/logs`
@@ -293,7 +293,7 @@ The `xian_runtime` role exposes the same node-local runtime controls that
 `xian-configure-node` writes: logging, simulation, transaction fee mode,
 pending-nonce limits, metrics, state sync, BDS, P2P peers, snapshot
 verification, and the advanced parallel execution guardrails. Host-publish
-variables still decide which container ports are reachable outside the remote
+variables decide which container ports are reachable outside the remote
 host.
 
 For remote shared-network deployments, third-party support-service images must
@@ -434,7 +434,7 @@ Operator response:
 3. verify the snapshot URL, signed manifest keys, or state-sync trust data
 4. confirm at least two state-sync RPC servers are reachable and on the same
    chain
-5. confirm the trust height and trust hash came from that chain and are still
+5. confirm the trust height and trust hash came from that chain and remain
    inside the trust period
 6. retry the restore only after the inputs are corrected
 
@@ -463,7 +463,7 @@ Important boundaries:
 
 ### Forward State Patch Activation
 
-Use this when the chain is still live and the protocol issue can be corrected
+Use this when the chain is live and the protocol issue can be corrected
 forward without rewriting finalized history.
 
 Operator checklist:
@@ -504,7 +504,7 @@ Operator response:
 2. agree off-chain on the fixed runtime build and recovery procedure
 3. roll the validator set onto the same fixed deterministic runtime
 4. restart the network in a coordinated way
-5. if the resulting state still needs correction, use a governed forward patch after recovery
+5. if the resulting state needs correction, use a governed forward patch after recovery
 
 Treat this as a social-consensus / operator runbook event, not a normal
 contract-level governance action.
@@ -690,7 +690,7 @@ Use the node's ABCI query surface for canonical reads:
 Use GraphQL only when you want a bounded convenience query layer over the BDS
 database. For public query endpoints, keep generated mutations disabled and use
 connection-style pagination. The stack waits for the core indexed tables before
-starting PostGraphile, but GraphQL can still lag the latest finalized block
+starting PostGraphile, but GraphQL can lag the most recent finalized block
 while BDS catches up.
 
 ## BDS Catch-Up and Reindex
@@ -724,10 +724,10 @@ What these are for:
 
 - `compact`: remove stale spool files that are already covered by the indexed
   BDS head
-- `drain`: persist the currently pending local spool into Postgres on an
+- `drain`: persist the pending local spool into Postgres on an
   existing BDS database
 
-Use `drain` when BDS was temporarily unavailable but the local spool still has
+Use `drain` when BDS was temporarily unavailable but the local spool has
 the missing finalized blocks. Do not use it as a cold-bootstrap replacement for
 historical indexing.
 
@@ -917,7 +917,7 @@ uv run xian-configure-node \
   --statesync-trust-hash <trusted-block-hash>
 ```
 
-Current model:
+Model:
 
 - snapshot export is manual
 - snapshot serving/loading is implemented through the ABCI snapshot lifecycle
@@ -926,7 +926,7 @@ Current model:
 
 ## Pruning
 
-Current pruning is block-history pruning through `retain_height`.
+Pruning is block-history pruning through `retain_height`.
 
 The short operational rule is:
 
@@ -962,7 +962,7 @@ That backend command writes and reads the canonical archive at:
 .cometbft/snapshots/xian-bds-snapshot.tar.gz
 ```
 
-You can override it, but it must still live under `XIAN_COMETBFT_HOME` so the
+You can override it, but it must live under `XIAN_COMETBFT_HOME` so the
 stack container can access the file.
 
 Recommended use:
@@ -983,8 +983,8 @@ Snapshot import is the best path when:
 Operational requirement for shielded / indexed deployments:
 
 - keep at least one recent exported BDS snapshot from a healthy indexed node
-- keep at least one archival recovery source, or another node that can still
-  export a full BDS snapshot
+- keep at least one archival recovery source, or another node that can export a
+  full BDS snapshot
 - treat BDS snapshot export/import as part of normal recovery validation, not a
   one-off disaster procedure
 
@@ -1057,15 +1057,14 @@ Important boundary:
 Interpretation note:
 
 - `current_block_height` and `height_lag` are derived from the latest
-  committed node height even when no block is currently being executed
+  committed node height even when no block is being executed
 - `catching_up` reflects actual indexing lag or spool backlog
-- `queue_depth` still matters operationally, but a nonzero queue by itself does
+- `queue_depth` matters operationally, but a nonzero queue by itself does
   not necessarily mean BDS is behind
 
 Operational guidance:
 
-- on pruned nodes, local BDS reindex only works for heights the node still
-  retains
+- on pruned nodes, local BDS reindex only works for heights the node retains
 - on archival nodes, local BDS reindex can rebuild the full index directly from
   RPC
 - if neither local history nor spool is sufficient, use an archival RPC source

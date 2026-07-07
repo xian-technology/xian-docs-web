@@ -23,6 +23,7 @@ const getStartedSidebar = [
 
 export default defineConfig({
   base: '/',
+  srcExclude: ['README.md', 'AGENTS.md', '.meta/**', 'graphify-out/**'],
   vite: {
     build: {
       chunkSizeWarningLimit: 800

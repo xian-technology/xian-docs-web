@@ -3,7 +3,7 @@
 Node profiles are the operator contract shared by `xian-cli`, `xian-stack`,
 and `xian-deploy`.
 
-They are written as JSON and validated on read. The current schema is explicit:
+They are written as JSON and validated on read. The schema is explicit:
 
 ```json
 {
@@ -175,7 +175,7 @@ override only the nested keys you intentionally tune. Important families are:
 The base profile default binds Xian application metrics to `127.0.0.1`.
 Stack/container starter templates override this to `0.0.0.0` inside the
 container so Docker publishing can reach the process; the stack or deploy host
-bind variables still decide whether metrics are reachable outside the host.
+bind variables decide whether metrics are reachable outside the host.
 Profile service host fields accept IPv6 literals as raw bind values, for
 example `"::1"`. When the same address is used in an HTTP or WebSocket URL,
 bracket the literal, for example `http://[::1]:18080`.
@@ -220,7 +220,7 @@ flowchart TD
   Start --> Stack
 ```
 
-The current canonical templates standardize these postures:
+The canonical templates standardize these postures:
 
 - `single-node-dev`: `operator_profile=local_development`,
   `monitoring_profile=none`

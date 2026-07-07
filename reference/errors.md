@@ -38,7 +38,7 @@ These happen during contract execution:
 - out-of-chi
 - runtime exceptions
 
-Current execution outputs also classify these failures under `error_class`:
+Execution outputs also classify these failures under `error_class`:
 
 - `contract_assertion`: a contract `assert` failed
 - `contract_error`: another contract-level exception escaped
@@ -48,7 +48,7 @@ Current execution outputs also classify these failures under `error_class`:
 Effects:
 
 - state changes for that transaction are rolled back
-- consumed chi are still recorded; paid-fee networks charge the matching execution fee
+- consumed chi are recorded; paid-fee networks charge the matching execution fee
 - emitted events from that transaction are discarded
 
 ## Query/Service Errors
@@ -61,5 +61,5 @@ Optional services can also fail independently:
 - RPC or WebSocket connection failures
 
 Those are operational errors, not consensus errors. Raw current-state ABCI
-queries can still be healthy even when BDS-backed indexed reads are degraded or
+queries can be healthy even when BDS-backed indexed reads are degraded or
 catching up.

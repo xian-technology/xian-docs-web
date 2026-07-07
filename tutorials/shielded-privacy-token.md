@@ -30,7 +30,7 @@ surface, see [xian-zk](/tools/xian-zk).
   private
 - relayed shielded transfers can hide the note owner's public transaction sender
 
-## What Is Still Public
+## What Is Public
 
 - contract deployment and operator configuration
 - deposits into the shielded pool
@@ -245,7 +245,7 @@ token.get_vk_binding(action="relay_transfer", signer="sys")
 
 ## Step 4: Mint Public Supply
 
-Public balances are still useful because deposit and withdraw cross the public
+Public balances are useful because deposit and withdraw cross the public
 and shielded domains.
 
 ```python
@@ -520,7 +520,7 @@ and decrypting payloads with `recover_encrypted_notes(...)`.
 
 ## Optional: Hide The Public Transaction Sender With A Relayer
 
-The standard `transfer_shielded(...)` flow still exposes the caller as the
+The standard `transfer_shielded(...)` flow exposes the caller as the
 public L1 transaction sender. If you want the hidden note owner to stay off the
 public sender field, use `relay_transfer_shielded(...)` instead.
 
@@ -612,7 +612,7 @@ auditor_view = recover_viewable_notes(
 ```
 
 The auditor can read the disclosed note payload with
-`recover_viewable_notes(...)`, but cannot spend because they still do not know
+`recover_viewable_notes(...)`, but cannot spend because they do not know
 the recipient's `owner_secret`.
 
 If a wallet wants to separate those authorities cleanly, it can generate them
@@ -688,7 +688,7 @@ token.withdraw_shielded(
 At that point:
 
 - Alice public balance is `50`
-- Alice still holds a new shielded note for `25`
+- Alice holds a new shielded note for `25`
 - Bob holds a shielded note for `25`
 
 For a full exact exit, the built-in wallet helper will produce a zero-output
@@ -717,18 +717,18 @@ assert exact_exit.output_payloads == []
 - `ShieldedWallet` is the canonical Python-side wallet abstraction for seed
   backup, state snapshots, note sync, note selection, and request planning.
 - Encrypted payloads are proof-bound by per-output payload hashes. A wallet
-  should still decrypt the payload and recompute the commitment before trusting
+  should decrypt the payload and recompute the commitment before trusting
   the note, but an attacker cannot swap the stored payload without also
   breaking proof validity.
-- The contract accepts proofs against recent accepted roots, not only the
-  latest root. That gives wallets some concurrency room while the contract
-  still owns the canonical append frontier.
+- The contract accepts proofs against recent accepted roots, not only the most
+  recent root. That gives wallets some concurrency room while the contract owns
+  the canonical append frontier.
 - Viewing access and spend access are intentionally separate. Sharing a viewing
   key should never reveal an `owner_secret`.
 - Wallets should persist note material, note ownership metadata, and the roots
   they proved against.
 
-## Remaining Product Gaps
+## Productization Boundaries
 
 - define ceremony provenance, custody, and rotation policy for imported proving
   material

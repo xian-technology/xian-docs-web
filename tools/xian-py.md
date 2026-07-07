@@ -21,6 +21,8 @@ The published PyPI package name is `xian-tech-py`. The import package remains
 Optional extras:
 
 ```bash
+uv add "xian-tech-py[app]"  # FastAPI / app integration dependencies
+uv add "xian-tech-py[compile]" # offline source-to-artifact utilities
 uv add "xian-tech-py[hd]"   # mnemonic / HD wallet support
 uv add "xian-tech-py[eth]"  # Ethereum wallet helpers
 ```
@@ -77,6 +79,8 @@ from xian_py import (
     TokenBalance,
     TokenBalancePage,
     TokenClient,
+    TokenContract,
+    TokenContractPage,
     TransactionError,
     TransactionReceipt,
     TransactionSubmission,
@@ -369,7 +373,7 @@ print(result["chi_used"])
 print(result["state"])
 ```
 
-The dry-run result currently comes from the node simulator and uses:
+The dry-run result comes from the node simulator and uses:
 
 - `status`
 - `chi_used`
@@ -493,7 +497,7 @@ that exposes the two important pieces separately:
 
 `wait_for_tx(tx_hash)` first uses the normal node `/tx` lookup path. If that
 index lags briefly on a live node, `xian-py` falls back to recent block
-inspection so a just-finalized transaction can still be recovered by hash.
+inspection so a just-finalized transaction can be recovered by hash.
 
 `get_bds_status()` returns a typed `BdsStatus` model. The main high-signal
 fields are `indexed_height`, `current_block_height`, `height_lag`,
@@ -699,7 +703,7 @@ Available primitives:
   failing event context
 
 These primitives are intentionally thin. The SDK owns the repetitive event
-polling, ordering, and cursor plumbing; application code still owns its own
+polling, ordering, and cursor plumbing; application code owns its own
 projection tables, hydration strategy, and domain-specific apply logic.
 
 The three deeper reference-app slices build on these shared primitives

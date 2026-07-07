@@ -1,7 +1,7 @@
 # Creating a Fungible Token
 
 This tutorial builds a minimal XSC-0001-compatible fungible token and shows the
-parts that matter for the current runtime: balances, allowances, events, and a
+parts that matter for the supported runtime: balances, allowances, events, and a
 basic local deployment flow.
 
 ## The Standard Surface
@@ -85,7 +85,7 @@ def transfer(amount: float, to: str):
 
 ## Step 4: Implement Allowances
 
-Current Xian token contracts treat `approve` as an overwrite, not an additive
+Xian token contracts treat `approve` as an overwrite, not an additive
 increment:
 
 ```python
@@ -121,7 +121,7 @@ def balance_of(address: str) -> float:
     return balances[address]
 ```
 
-Return annotations like `-> float` are valid in the current linter as long as
+Return annotations like `-> float` are valid in the supported linter as long as
 they use the normal export allowlist.
 
 ## Complete Contract

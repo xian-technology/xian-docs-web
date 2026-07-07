@@ -11,13 +11,13 @@ Use a recovery plan only when:
 - the chain has already stalled or split
 - operators need a single canonical restore procedure
 
-If the chain is still progressing, prefer governed forward state patches.
+If the chain is progressing, prefer governed forward state patches.
 
 ## What A Recovery Plan Is
 
 A recovery plan is a JSON document consumed by `xian-cli`.
 
-Current required fields:
+Required fields:
 
 ```json
 {
@@ -44,7 +44,7 @@ Optional sections:
 - `follow_up_state_patch.bundle_hash`
 - `follow_up_state_patch.activation_height`
 
-Current supported artifact kinds:
+Supported artifact kinds:
 
 - `snapshot_url`
 
@@ -76,7 +76,7 @@ uv run xian recovery apply ./recovery-plan.json validator-1 --yes
 - verifies the archive `sha256` when the plan provides one
 - optionally starts the node again with `--start-node`
 
-Recovery plans still use the explicit archive-hash model in the plan itself.
+Recovery plans use the explicit archive-hash model in the plan itself.
 Signed snapshot manifests are supported in the normal node bootstrap path, but
 they are not the recovery-plan artifact format.
 
@@ -107,11 +107,11 @@ Important boundary:
 
 - the CLI can validate and restore artifacts
 - it cannot create social consensus for you
-- validators still need coordinated agreement on the plan before applying it
+- validators need coordinated agreement on the plan before applying it
 
 ## What The CLI Does Not Prove Automatically
 
-The recovery plan still includes trusted block/app hashes because those matter
+The recovery plan includes trusted block/app hashes because those matter
 operationally, but the restore helper cannot fully prove historical consensus
 for you from the archive alone.
 
@@ -129,9 +129,9 @@ the need for operator review.
 
 Use governed forward state patches when:
 
-- the chain is still finalizing blocks
+- the chain is finalizing blocks
 - you can correct state or contract logic going forward
-- governance can still approve the remedy on-chain
+- governance can approve the remedy on-chain
 
 Use a recovery plan when:
 
@@ -142,4 +142,4 @@ Use a recovery plan when:
 In practice:
 
 - live chain issue: governed forward patch
-- stalled or divergent chain: coordinated recovery plan first, forward patch second if still needed
+- stalled or divergent chain: coordinated recovery plan first, forward patch second if needed

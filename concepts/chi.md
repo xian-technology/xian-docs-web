@@ -15,7 +15,7 @@ When a transaction is submitted, it carries a chi limit.
   and the submitted limit is what matters for failure accounting
 
 On normal paid networks, used chi is converted into a native-token fee. On
-0-fee networks, chi is still the deterministic execution budget and receipt
+0-fee networks, chi remains the deterministic execution budget and receipt
 unit, but the runtime does not debit the sender's native-token balance for
 execution.
 
@@ -29,7 +29,7 @@ flowchart TD
   Success["Success: receipt records chi_used"]
   Fail["Out of chi: state rolls back, submitted limit is charged"]
   Fee["Paid mode: chi converts to native-token fee and reward split"]
-  Free["0-fee mode: no balance debit, chi still metered and reported"]
+  Free["0-fee mode: no balance debit, chi metered and reported"]
 
   Estimate --> Submit
   Submit --> Admit
@@ -55,7 +55,7 @@ flowchart TD
 
 ## Base Formula
 
-Tracer-backed execution currently uses the familiar compute-to-chi conversion:
+Tracer-backed execution uses the familiar compute-to-chi conversion:
 
 ```text
 chi_used = (raw_meter_cost // 1000) + 5
@@ -75,7 +75,7 @@ constant one-for-one.
 
 ### Computation
 
-Xian currently meters execution through `xian_vm_v1`, using the VM-native gas
+Xian meters execution through `xian_vm_v1`, using the VM-native gas
 schedule over VM operations and host calls.
 
 The network chooses the execution engine and metering policy. Applications and
@@ -90,7 +90,7 @@ schedule.
 ### Storage Writes
 
 Writing state costs `25` meter units per byte of encoded key plus encoded
-value under the current VM host-operation schedule.
+value under the VM host-operation schedule.
 
 Writes are intentionally much more expensive than reads because they expand the
 durable chain state.
@@ -116,14 +116,14 @@ explicit host operations instead of implicit Python work.
 | runtime raw safety ceiling | `50,000,000,000` raw units |
 | maximum write per transaction | `128 KiB` |
 | maximum returned value size | `128 KiB` |
-| maximum submitted contract source | `64 KiB` |
+| maximum submitted contract source | `128 KiB` |
 | maximum sequence or binary allocation | `128 KiB` |
 | default chi allocation | `1,000,000` |
 
 Those line/instruction ceilings are tracer-backend safety limits. VM-native
 execution uses its own gas schedule rather than those tracer-event counters.
 The raw safety ceiling is a runtime overflow guard; ordinary transaction
-success is still bounded by the `chi` supplied by the sender.
+success is bounded by the `chi` supplied by the sender.
 
 ## Converting Chi To Native Token Cost
 
@@ -144,7 +144,7 @@ Examples:
 | `100,000` | `5,000.0` |
 | `1,000,000` | `50,000.0` |
 
-## Current Local Reference Measurements
+## Local Reference Measurements
 
 The following values were measured on the rebuilt local BDS node in June 2026
 with `paid_metered` fees, `chi_cost = 20`, and fixed-cost cross-contract
@@ -168,16 +168,16 @@ the target network before submitting production transactions.
 Operators can run a network with `tx_fee_mode = "free_metered"` in the rendered
 Xian node config. In this mode:
 
-- transaction execution is still metered
-- each transaction still supplies a chi budget
-- receipts still report `chi_used`
+- transaction execution is metered
+- each transaction supplies a chi budget
+- receipts report `chi_used`
 - the runtime does not debit native-token fees for execution
 - fee-derived validator, foundation, and developer rewards are not generated
 - admission does not require a native-token balance just to cover chi
 
-This is different from disabling metering. Contracts still run under a fixed
-chi budget and can still fail with out-of-chi. Contract-level balances,
-allowances, and assertions are unchanged; a token transfer can still fail for
+This is different from disabling metering. Contracts run under a fixed
+chi budget and can fail with out-of-chi. Contract-level balances,
+allowances, and assertions are unchanged; a token transfer can fail for
 insufficient token balance.
 
 0-fee networks should set explicit resource caps:

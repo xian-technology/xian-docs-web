@@ -127,7 +127,7 @@ The standalone package supports two modes:
 | `python` | default source linting with the shared `xian-contracting` rules plus PyFlakes warnings |
 | `xian_vm_v1` | source linting, VM-profile compatibility, Xian VM IR lowering, and native IR validation when `xian_vm_core` is installed |
 
-The VM mode is still linting only. It does not execute the contract or simulate
+The VM mode is linting only. It does not execute the contract or simulate
 storage, imports, environment values, or host syscalls. Use runtime tests or
 node preflight flows for execution behavior.
 
@@ -223,5 +223,5 @@ are returned as `XVM002`.
 | `XVM001` | Xian VM IR lowering failed |
 | `XVM002` | native Xian VM IR validation failed |
 
-See [Valid Code & Restrictions](/smart-contracts/valid-code) for the current
+See [Valid Code & Restrictions](/smart-contracts/valid-code) for the supported
 language surface.

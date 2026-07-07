@@ -20,7 +20,7 @@ The recommended shape is a hybrid:
 
 - Python executor built on [`xian-py`](/tools/xian-py)
 - local admin UI served by the Python service
-- future browser setup UI built on [`xian-js`](/tools/xian-js) for wallet-approved funding or strategy setup
+- browser setup UI built on [`xian-js`](/tools/xian-js) for wallet-approved funding or strategy setup
 - DEX frontend kept focused on human trading and liquidity management
 
 The executor should be Python because it needs to run unattended, persist
@@ -35,16 +35,16 @@ private key material through the API. Operators unlock the non-health API with
 `XIAN_DEX_AUTOMATION_ADMIN_TOKEN`; non-loopback binds are rejected unless that
 token is configured. Key changes force execution back to dry-run mode.
 
-A future consumer setup UI should be browser-based because users already have
-their wallet in the browser extension. That UI can help users fund the
-automation wallet or, later, deposit into a strategy contract.
+A consumer setup UI belongs in the browser because users already have their
+wallet in the browser extension. That UI can help users fund the automation
+wallet or deposit into a strategy contract.
 
 ## Wallet Model
 
 The service cannot use a user's browser wallet in the background. Browser
 wallets are interactive and require the user to approve each transaction.
 
-The current model is a dedicated automation wallet:
+The implemented model is a dedicated automation wallet:
 
 1. create a separate Xian wallet
 2. fund it with only the amount the automation may trade
@@ -92,7 +92,7 @@ strategy or vault contract. The user connects a browser wallet, deposits a
 bounded budget, configures hard limits on-chain, and the Python keeper can only
 trigger actions the contract allows.
 
-## Current Service Interface
+## Service Interface
 
 Configuration is YAML-first:
 
@@ -143,7 +143,7 @@ browser requests must be same-origin:
 - `PUT /config.yaml`
 - `POST /evaluate/{pair_id}`
 
-`POST /evaluate/{pair_id}` is useful for testing a rule against current chain
+`POST /evaluate/{pair_id}` is useful for testing a rule against live chain
 state. In dry-run mode it records what would happen without submitting a
 transaction.
 
@@ -227,5 +227,5 @@ The DEX website is the human interface for swaps and liquidity. It should stay
 focused on active wallet-connected actions.
 
 `xian-dex-automation` is the unattended executor. Its admin UI configures the
-service process, but the long-running event watcher and signer still stay in
-the service process rather than inside the browser.
+service process, while the long-running event watcher and signer stay in the
+service process rather than inside the browser.

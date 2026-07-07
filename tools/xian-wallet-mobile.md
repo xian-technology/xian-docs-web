@@ -2,7 +2,7 @@
 
 The Xian mobile wallet is a React Native / Expo app for self-custody of Xian
 tokens. Android and iOS come from the same codebase. Android packaging is the
-current released path; iOS can be generated, built, and tested from the same
+published release path; iOS can be generated, built, and tested from the same
 repo with Xcode.
 
 **Repository:** [xian-technology/xian-wallet-mobile](https://github.com/xian-technology/xian-wallet-mobile)
@@ -22,7 +22,7 @@ parameters and are re-encrypted for local wallet storage on import.
 
 ### Android From GitHub Release
 
-1. Download the latest `xian-wallet-mobile-vX.Y.Z.apk` from
+1. Download the `xian-wallet-mobile-vX.Y.Z.apk` artifact for the version you want from
    [Releases](https://github.com/xian-technology/xian-wallet-mobile/releases).
 2. On your Android device, enable **Install from unknown sources** in system
    settings.
@@ -271,8 +271,8 @@ Run the same functional checks as Android:
 
 #### iOS TestFlight / App Store packaging
 
-The current repo is configured for local Expo / Xcode builds. There is no EAS
-configuration in this repo today, so the iOS release path is the standard Xcode
+The repo is configured for local Expo / Xcode builds. There is no EAS
+configuration, so the iOS release path is the standard Xcode
 archive flow:
 
 1. Generate the iOS project with `npx expo prebuild --platform ios`.
@@ -368,17 +368,17 @@ manual encrypted backup export when you need a portable recovery file.
 ### RPC Client
 
 The mobile wallet uses `@xian-tech/client` as its canonical transaction and RPC
-layer. A thin wrapper adds a few direct ABCI helpers for endpoints that are not
-yet modeled there.
+layer. A thin wrapper keeps wallet-specific result shaping and direct ABCI
+helpers for endpoints outside the shared client surface.
 
-Current important calls include:
+Important calls include:
 
-- `getBalance` - `/get/{contract}.balances:{address}` ABCI query
+- `getBalance` - shared `@xian-tech/client` balance helper
 - `getChainId` - shared `@xian-tech/client` chain-id read from `/genesis`
-- `estimateChi` - `/simulate` ABCI query
+- `estimateChi` - shared `@xian-tech/client` chi-estimation helper
 - `sendTransaction` - builds, signs, and broadcasts through the shared Xian JS client
-- `getTransactionHistory` - `/txs_by_sender/{address}` ABCI query
-- `waitForTx` - polls `/tx?hash=` until finalized
+- `getTransactionHistory` - direct `/txs_by_sender/{address}` ABCI query
+- `waitForTx` - shared `@xian-tech/client` finality polling helper
 
 ## Features
 
@@ -443,7 +443,7 @@ repeat the same request arguments for the same dApp session, account, network,
 method, contract, and function. Broad rules allow changed arguments for that
 contract function and require a second in-app confirmation before they are
 saved. Chi limits cap transaction fee/compute budget; they are not token amount
-limits. Revoke saved rules from the Apps tab when they are no longer needed.
+limits. Revoke saved rules from the Apps tab when they are unnecessary.
 
 ### Gestures
 

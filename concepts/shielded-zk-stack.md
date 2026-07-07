@@ -3,7 +3,7 @@
 Xian's shielded and zero-knowledge features are intentionally split across the
 runtime, off-chain tooling, and on-chain contracts.
 
-That split is what keeps the validator runtime narrow while still supporting
+That split is what keeps the validator runtime narrow while supporting
 real privacy-sensitive application flows.
 
 ## The Main Layers
@@ -65,7 +65,7 @@ This keeps contracts smaller and verification cheaper and more predictable.
 
 ## Shielded Note Model
 
-The current private asset design is note-based.
+The private asset design is note-based.
 
 A shielded note flow revolves around:
 
@@ -108,7 +108,7 @@ normal public sender account as the actor behind that action.
 Adapters are the application-specific bridge between proof-backed authorization
 and ordinary public contract behavior.
 
-Current maintained examples include:
+Maintained examples include:
 
 - shielded DEX adapter
 - shielded scheduler adapter
@@ -118,7 +118,7 @@ separate.
 
 ## What Is Private And What Is Public
 
-| Usually private | Still public |
+| Usually private | Public |
 |-----------------|--------------|
 | note ownership secrets | contract deployment and operator configuration |
 | shielded transfer amounts inside the note pool | nullifiers, commitments, and accepted roots |
@@ -130,7 +130,7 @@ This is privacy-preserving application logic, not invisible chain activity.
 
 ## Wallet Model
 
-The current wallet-side model separates spend and view authority.
+The wallet-side model separates spend and view authority.
 
 Important pieces are:
 
@@ -150,7 +150,7 @@ the public transaction.
 
 It does not turn Xian into an anonymity network.
 
-The relayer still learns things such as:
+The relayer learns things such as:
 
 - submission timing
 - relayer-bound proof material
@@ -161,7 +161,7 @@ Treat it as a trusted submission hop, not as magic privacy.
 
 ## Trust Model
 
-Zero-knowledge proofs make the *prover* untrusted, but the shielded stack still
+Zero-knowledge proofs make the *prover* untrusted, but the shielded stack
 rests on a few trust assumptions. Be explicit about them:
 
 - **The native verifier is a consensus requirement.** Proof verification runs

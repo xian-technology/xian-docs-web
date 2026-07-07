@@ -20,7 +20,7 @@ For the package-level toolkit and API surface, see [xian-zk](/tools/xian-zk).
 - proof-bound public spend budgets for adapter contracts
 - direct execution indexes by nullifier, command binding, and execution tag
 
-## What Is Still Public
+## What Is Public
 
 - the target contract being called
 - the adapter payload
@@ -113,7 +113,7 @@ for entry in manifest["registry_entries"]:
 For local development, `ShieldedCommandProver.build_insecure_dev_bundle()` is
 available, but it must never be used for a real network.
 
-The current command-family ids are:
+Command-family ids are:
 
 - `shielded-command-deposit-v5`
 - `shielded-command-execute-v5`
@@ -244,10 +244,10 @@ assert execution["fee"] == 5
 assert execution["public_amount"] == 100
 ```
 
-Wallet-side note recovery still works through the stored output payloads and
+Wallet-side note recovery works through the stored output payloads and
 their proof-bound payload hashes.
 
-## Current Product Split
+## Product Split
 
 - `shielded-note-token`: private value pool for private asset flows
 - `shielded-commands`: anonymous execution coordinator
@@ -256,8 +256,8 @@ their proof-bound payload hashes.
 
 ## Caveats
 
-- target calls and public side effects are still visible
-- the built-in random bundle generator is still a single-party setup, not an
+- target calls and public side effects are visible
+- the built-in random bundle generator is a single-party setup, not an
   MPC ceremony
 - the DEX adapter spends only the controller token and only the exact
   proof-bound `public_amount`

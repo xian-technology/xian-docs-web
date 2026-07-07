@@ -1,7 +1,7 @@
 # xian-intentkit
 
 `xian-intentkit` is the AI-agent stack for Xian-native wallets, balances,
-transfers, contract calls, transactions, indexed-event reads, current Xian DEX
+transfers, contract calls, transactions, indexed-event reads, Xian DEX
 quote/trade flows, and agent-facing automation flows.
 
 It stays its own repo and product. The Xian stack integration is intentionally
@@ -165,7 +165,7 @@ hoping the model follows a soft instruction forever.
 
 ## Autonomous Tasks
 
-IntentKit currently supports two important autonomous patterns for Xian:
+IntentKit supports two important autonomous patterns for Xian:
 
 - scheduled tasks
 - event-triggered tasks
@@ -206,7 +206,7 @@ single-node commands.
 ## A Good Default Pattern
 
 For a normal autonomous Xian trading or monitoring agent, the recommended
-current pattern is:
+pattern is:
 
 1. run `xian-intentkit` against a node with BDS enabled
 2. create an agent in the frontend
@@ -235,9 +235,8 @@ concerns:
 - keep clear cooldowns and thresholds
 - review autonomous chat history regularly
 
-The current system is capable enough for real autonomous workflows, but
-production safety still comes mostly from good wallet discipline and a narrow
-skill/config surface.
+The system can run real autonomous workflows, but production safety comes from
+good wallet discipline and a narrow skill/config surface.
 
 ## When Not To Use An Agent
 
@@ -259,7 +258,7 @@ When a node profile enables `xian-intentkit`:
 - `xian node endpoints <name>` prints the frontend and API URLs
 - `xian node health <name>` includes IntentKit reachability checks
 - `xian-stack` generates `xian-intentkit/deployment/.env` from the IntentKit
-  example env, current operator env, and stack-derived Xian values
+  example env, operator env, and stack-derived Xian values
 - the IntentKit API, worker, and scheduler join the Xian stack Docker network
   so stack-managed agents reach the local node through the internal RPC URL
   `http://abci:26657`
@@ -305,7 +304,7 @@ uv run xian node health testnet-agent-node
 
 ## Network Slot Mapping
 
-The stack integration maps node posture to one of four current IntentKit Xian
+The stack integration maps node posture to one of four IntentKit Xian
 slots:
 
 - operator-supplied mainnet manifest -> `xian-mainnet`
@@ -327,9 +326,9 @@ BDS-backed ABCI query paths are available.
 
 For Xian event-triggered agents, this is the normal recommended posture.
 
-## Current Xian Skill Surface
+## Xian Skill Surface
 
-The current Xian skill category inside `xian-intentkit` covers:
+The Xian skill category inside `xian-intentkit` covers:
 
 - wallet details and balances
 - token transfers and approvals
@@ -352,13 +351,13 @@ They are intentionally narrow and match the maintained Xian DEX contracts:
 - `con_pairs`
 - `con_dex_helper`
 
-Today they focus on single-pair quote and helper-based buy/sell execution.
-Advanced multi-hop routing and custom DEX integrations still use the generic
+They focus on single-pair quote and helper-based buy/sell execution.
+Advanced multi-hop routing and custom DEX integrations use the generic
 Xian contract-call and contract-transaction tools.
 
 ## Autonomous Trading Pattern
 
-For an autonomous Xian trading agent, the recommended current pattern is:
+For an autonomous Xian trading agent, the recommended pattern is:
 
 1. run `xian-intentkit` against a node with BDS enabled
 2. configure an autonomous task with:
@@ -531,7 +530,7 @@ container-internal node URL `http://abci:26657`. User-facing values such as
 `APP_BASE_URL`, `AWS_S3_CDN_URL`, and `XIAN_AGENT_LOGO_URL` use the published
 host and bracket IPv6 literals, for example `http://[::1]:38000`.
 
-All other IntentKit settings still come from the normal IntentKit env contract.
+All other IntentKit settings come from the normal IntentKit env contract.
 That includes LLM provider keys such as `OPENAI_API_KEY` or
 `OPENROUTER_API_KEY`.
 

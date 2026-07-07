@@ -25,7 +25,7 @@ allowances["alice", "dex"] = 500
 amount = allowances["alice", "dex"]
 ```
 
-The runtime currently allows up to 16 key dimensions.
+The runtime allows up to 16 key dimensions.
 
 ## Collection Helpers
 

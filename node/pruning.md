@@ -59,7 +59,7 @@ pruning_enabled = true
 blocks_to_keep = 100000
 ```
 
-The maintained templates currently default to:
+The maintained templates default to:
 
 ```json
 {
@@ -141,7 +141,7 @@ The important failure mode is rebuild:
 - if BDS is healthy, a pruned node can continue serving indexed reads from
   Postgres
 - if BDS is corrupted and must be reset, local rebuild only works for heights
-  still retained by CometBFT
+  retained by CometBFT
 - if old CometBFT history is gone, use an archival RPC source or import a BDS
   snapshot from a healthy indexed node
 
@@ -205,13 +205,13 @@ ansible-playbook playbooks/health.yml
 ## If Retention Was Too Short
 
 Disabling pruning later does not restore block history that has already been
-pruned. It only changes future retention behavior.
+pruned. It only changes subsequent retention behavior.
 
 If you need old history after it has been pruned locally, use one of these
 paths:
 
 - query or reindex from an archival RPC source
-- restore a full node-home archive that still contains the required history
+- restore a full node-home archive that contains the required history
 - import a BDS snapshot if the missing data is indexed-history data
 - use a recovery plan only when the consensus state itself must be restored
 

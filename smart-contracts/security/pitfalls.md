@@ -43,7 +43,7 @@ A common mistake is using `ctx.signer` for access control in a function that sho
 
 ```python
 # BAD -- a malicious contract could trick alice into calling it,
-# then call your contract; ctx.signer would still be "alice"
+# then call your contract; ctx.signer remains "alice"
 @export
 def admin_action():
     assert ctx.signer == owner.get(), "Only owner"
@@ -127,7 +127,7 @@ The real pitfalls are different:
 - do not compare against values that rely on extra digits beyond the supported
   scale
 
-Current policy:
+Policy:
 
 - `61` whole digits
 - `30` fractional digits

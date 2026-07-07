@@ -84,21 +84,21 @@ con_vaults.set_treasury_address(address='treasury')
 con_psm.set_treasury_address(address='treasury')
 ```
 
-Without these, fees fall back to the current governor — valid contract
+Without these, fees fall back to the configured governor — valid contract
 behavior, but not the intended production setup.
 
 ### Governance Handoff
 
 Bootstrap *starts* the transfer to the chain `governance` contract.
-Acceptance still happens through ordinary governance proposals that call
+Acceptance happens through ordinary governance proposals that call
 `accept_governance()` on each protocol contract. If handoff was skipped for
 local testing (`--no-start-governance-handoff`), start it later by re-running
 the bootstrap script.
 
 ## Status
 
-Strong reference implementation with a real Xian-stack bootstrap path — not
-yet a fully automated production protocol. Remaining hardening work is
+Strong reference implementation with a real Xian-stack bootstrap path. It is
+not a fully automated production protocol. Production hardening work is
 tracked in the repo's `docs/ROADMAP.md`.
 
 ## Related Pages

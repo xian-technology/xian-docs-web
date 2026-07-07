@@ -129,7 +129,7 @@ assert balance >= 500
 assert float(balance) == 1000.0
 ```
 
-Current decimal policy:
+Decimal policy:
 
 - up to `61` whole digits
 - up to `30` fractional digits

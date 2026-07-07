@@ -13,7 +13,7 @@ There are always two distinct questions in Xian:
 Developers write a restricted Python subset. The network then chooses an
 execution engine for that authored contract.
 
-## Current Execution Mode
+## Execution Mode
 
 | Mode | What executes |
 |------|----------------|
@@ -66,7 +66,7 @@ VM-native execution is the fixed node execution runtime:
 mode = "xian_vm_v1"
 ```
 
-On the current supported branch:
+On the supported branch:
 
 - `xian_vm_v1` is the only supported node runtime
 - bytecode, gas schedule, and authority are internal VM constants
@@ -94,7 +94,7 @@ syscalls.
 
 ## What Stays The Same For Contract Authors
 
-Contract authors still work with the familiar Xian model:
+Contract authors work with the familiar Xian model:
 
 - `@construct` and `@export`
 - `Variable`, `Hash`, and foreign state helpers
@@ -115,9 +115,9 @@ The Xian VM gives the platform a cleaner long-term machine contract:
 - performance-sensitive paths can move further into native code without forcing
   a new contract language on developers
 
-## Current Scope
+## Scope
 
-The current VM-native runtime already covers real authored contract behavior,
+The VM-native runtime covers real authored contract behavior,
 including storage flows, decimals, datetime helpers, hashing, Ed25519
 verification, imports, events, and the shielded contract helpers needed by the
 existing shielded stack.

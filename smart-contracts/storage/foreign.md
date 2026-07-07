@@ -50,5 +50,5 @@ def seed():
     balances.clone_from(legacy_balances)
 ```
 
-This copies the current stored entries into `balances`. Future writes to the
+This copies the current stored entries into `balances`. Subsequent writes to the
 source contract do not update the cloned hash automatically.

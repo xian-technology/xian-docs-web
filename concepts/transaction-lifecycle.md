@@ -106,7 +106,7 @@ same result as if the transactions were executed in block order, one after the
 other.
 
 Nodes may optionally speculate in parallel before acceptance, but any accepted
-speculative result still has to pass serial-equivalence checks against earlier
+speculative result has to pass serial-equivalence checks against earlier
 transactions in the block. Conflicting speculative results are re-executed
 serially.
 

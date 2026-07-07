@@ -73,7 +73,7 @@ not supersede profile runtime intent; they place that profile on a host.
 Templates are reusable starter defaults. They answer: "What kind of network or
 node profile should I create?"
 
-Current templates:
+Templates:
 
 - `single-node-dev`: minimal local development node.
 - `single-node-indexed`: local single-node network with BDS, dashboard, and
@@ -103,7 +103,7 @@ posture, block policy, images, metrics, P2P defaults, genesis references, state
 sync inputs, and other runtime intent.
 
 For remote deployment, the profile is the runtime source of truth. Inventory
-does not restate the profile. Host placement still belongs to deploy bindings,
+does not restate the profile. Host placement belongs to deploy bindings,
 so Ansible inventories own published ports, host paths, database credentials,
 resource limits, and topology even when a profile includes local stack bind
 defaults.

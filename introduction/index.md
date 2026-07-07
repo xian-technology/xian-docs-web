@@ -26,7 +26,7 @@ With Xian you can build:
 ### Python Authorship
 
 Contracts are written in a restricted, deterministic Python subset. That keeps
-contract code readable for normal software teams while still enforcing
+contract code readable for normal software teams while enforcing
 sandboxing, metering, and deterministic state transitions.
 
 ### Fixed Xian VM Runtime

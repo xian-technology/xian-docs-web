@@ -197,7 +197,7 @@ def propose_action(action: str):
 def execute_action():
     assert ctx.caller == owner.get(), "Only owner"
     assert pending_action.get() is not None, "No pending action"
-    assert now >= action_unlock_time.get(), "Action is still locked"
+    assert now >= action_unlock_time.get(), "Action locked"
 
     action = pending_action.get()
     pending_action.set(None)

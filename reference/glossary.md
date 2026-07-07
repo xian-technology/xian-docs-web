@@ -28,7 +28,7 @@ Xian's name for transaction execution energy and the unit of computation cost
 on the network, analogous to gas on Ethereum. Chi is not a separate token or an
 acronym. Every operation costs chi. In the default paid fee mode, chi are
 purchased with XIAN at a rate of 20 chi per XIAN. In `free_metered` mode, chi
-still meter execution but the runtime charges no native-token execution fee.
+meter execution without charging a native-token execution fee.
 
 ### CometBFT
 The Byzantine Fault Tolerant consensus engine used by Xian (formerly known as Tendermint). Handles peer-to-peer networking, block proposal, and validator voting.

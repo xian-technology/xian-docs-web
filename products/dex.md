@@ -133,8 +133,8 @@ const pair = await client.contract("con_pairs").call("pairFor", {
 ## Status
 
 `candidate`. Contracts are usable and covered by package-local tests, but
-still deserve deeper hardening before being treated as a polished production
-drop-in.
+deeper hardening is required before treating the package as a polished
+production drop-in.
 
 ## Related Pages
 

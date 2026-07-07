@@ -3,7 +3,7 @@
 Xian uses a small set of contract interface standards for token, NFT, and
 payment primitives that other tools expect.
 
-## Current Standards
+## Standards
 
 - [XSC-0001](/smart-contracts/standards/xsc-0001): fungible token core
 - [XSC-0002](/smart-contracts/standards/xsc-0002): permit-authorizer approvals

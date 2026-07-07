@@ -48,7 +48,7 @@ def seed(initial_supply: int = 1_000_000):
     balances[ctx.caller] = initial_supply
 ```
 
-Current rules:
+Rules:
 
 - only one constructor is allowed
 - constructor parameters do not need annotations
@@ -76,7 +76,7 @@ def summarize(items: list[int]) -> int:
     return len(items)
 ```
 
-Current rules:
+Rules:
 
 - a contract must expose at least one `@export`
 - every exported argument must have a whitelisted annotation
@@ -87,12 +87,12 @@ Current rules:
 Whitelisted annotation types are:
 
 ```python
-str, int, float, bool, dict, list, Any
+str, int, float, bool, bytes, bytearray, dict, list, set, frozenset, Any
 datetime.datetime, datetime.timedelta
 ```
 
-Subscripted `list[...]` and `dict[...]` forms are allowed too, as long as the
-base type is still one of those whitelisted types.
+Subscripted container forms are allowed too, as long as the base type is one of
+those whitelisted types.
 
 ## Private Helpers
 
@@ -113,7 +113,7 @@ Private helpers:
 
 - can be called only inside the same contract
 - do not need annotations
-- must still obey the same sandbox rules
+- must obey the same sandbox rules
 - cannot be nested inside another function
 
 ## Naming Rules

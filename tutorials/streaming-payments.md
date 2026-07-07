@@ -1,7 +1,7 @@
 # Streaming Payments
 
 The maintained streaming-payment implementation is the standalone
-`con_stream_payments` package in `xian-contracts`, not the current canonical
+`con_stream_payments` package in `xian-contracts`, not the canonical
 `currency` contract.
 
 ## What The Package Does
@@ -15,7 +15,7 @@ Each stream:
 - lets value accrue over time
 - lets the sender or receiver claim the accrued portion
 - lets the sender shorten the stream and recover the unvested refund
-- lets the receiver forfeit the future part of the stream
+- lets the receiver forfeit the unvested part of the stream
 - supports permit-style creation flows
 
 ## Token Dependency
@@ -52,7 +52,7 @@ The streamed token contract must expose:
 - `change_close_time(...)` supports shortening or immediate close, not arbitrary
   extension in place
 - `create_stream_from_permit(...)` authorizes the stream parameters, but the
-  token-side approval needed for escrow funding still has to exist
+  token-side approval needed for escrow funding has to exist
 
 ## Related Pages
 

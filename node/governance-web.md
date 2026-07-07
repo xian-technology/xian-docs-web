@@ -45,7 +45,7 @@ To run the console locally:
 - the Xian browser wallet for voting or proposal creation
 - a wallet account that is an active validator for governance actions
 
-Current-governance read support expects the node/API surface to include:
+Governance read support expects the node/API surface to include:
 
 - `/validators_vote/<proposal-id>`
 - `/validators_vote_records/<proposal-id>`
@@ -100,8 +100,8 @@ The signer is the wallet account, not the node process. Running a node or
 serving a public RPC endpoint does not create voting rights by itself.
 
 For protocol governance, the `governance` contract imports the membership
-contract and requires the caller to be a current member. On canonical networks,
-that membership contract is `validators`.
+contract and requires the caller to be a member. On canonical networks, that
+membership contract is `validators`.
 
 For validator governance, `validators` requires:
 
@@ -121,10 +121,10 @@ That means:
 
 ## Delegation And Voting Weight
 
-Delegators do not vote directly in governance. Delegation can still affect
+Delegators do not vote directly in governance. Delegation can affect
 governance indirectly through validator power, depending on network policy.
 
-Current bundled networks use:
+The local, devnet, testnet, and draft mainnet bundles use:
 
 ```text
 power_mode = "equal"
@@ -148,8 +148,8 @@ self_bond + total_delegated
 
 Governance snapshots that active validator power when a proposal is created.
 In stake-weighted networks, delegating to a validator can therefore increase
-that validator's future governance weight, but the delegator still does not
-cast a separate vote.
+that validator's voting weight in later proposal snapshots, but the delegator
+does not cast a separate vote.
 
 Delegation can also influence validator-set membership in `auto_top_n` and
 `hybrid` selection modes, where total bonded stake is part of candidate ranking
@@ -172,10 +172,10 @@ never expose validator signing keys or mutating admin RPC.
 
 ## State Patches
 
-Approving a state-patch proposal is not enough by itself. Validators still need
+Approving a state-patch proposal is not enough by itself. Validators need
 the exact approved patch bundle locally before the activation height.
 
 The console can compute and compare the canonical bundle hash, but operators
-must still distribute the bundle to validators and confirm node readiness.
+must distribute the bundle to validators and confirm node readiness.
 See [Protocol Governance & State Patches](/node/protocol-governance) for the
 full patch process.

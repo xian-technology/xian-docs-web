@@ -63,7 +63,7 @@ That means:
 - BDS indexes them asynchronously
 - GraphQL reflects the indexed database once that work is done
 
-So it is normal for GraphQL to lag slightly behind the very latest finalized
+So it is normal for GraphQL to lag slightly behind the most recent finalized
 block during catch-up or recovery.
 
 ## Practical Guidance

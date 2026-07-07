@@ -38,7 +38,7 @@ def transfer(to: str, amount: float):
     balances[to] += amount
 ```
 
-## Current Rules To Remember
+## Rules To Remember
 
 - module-level state declarations and imports are allowed
 - at least one `@export` function is required

@@ -1,6 +1,6 @@
 # Cheat Sheet
 
-Quick reference for current Xian contract development.
+Quick reference for Xian contract development.
 
 ## State Primitives
 
@@ -50,7 +50,7 @@ def helper():
 Allowed for exported arguments and exported return annotations:
 
 ```python
-str, int, float, bool, dict, list, Any
+str, int, float, bool, bytes, bytearray, dict, list, set, frozenset, Any
 datetime.datetime, datetime.timedelta
 ```
 

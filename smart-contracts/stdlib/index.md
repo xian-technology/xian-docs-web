@@ -22,7 +22,7 @@ Merkle-path derivation, and note scanning stay off-chain in tooling such as
 `xian_zk`.
 
 The `decimal` runtime is the bridge behind Xian's deterministic numeric model.
-Most contracts should still use normal `float` syntax in function signatures and
+Most contracts should use normal `float` syntax in function signatures and
 literals. The runtime converts those values into `ContractingDecimal` so users
 can write readable decimal code without dealing with binary floating-point
 behavior.

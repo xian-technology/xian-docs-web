@@ -51,7 +51,7 @@ flowchart TD
 
 Use the clean 5-node localnet when you only need a running network to inspect,
 debug, or attach tooling. Use the e2e and release-safety targets when you need
-evidence that the stack still works across real validators and live services.
+evidence that the stack works across real validators and live services.
 
 ## Layered E2E Command
 

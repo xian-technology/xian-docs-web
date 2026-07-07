@@ -61,7 +61,7 @@ result are separate:
 GET /api/contract/currency
 ```
 
-Returns the current contract source fetched through the node's query layer.
+Returns the stored contract source fetched through the node's query layer.
 The dashboard reads `contract_source/<name>` and displays the canonical stored
 source plus Xian VM metadata.
 
@@ -184,7 +184,7 @@ GET /explorer?rpc=http://10.0.0.25:26657
 For IPv6 RPC literals in the `rpc` parameter, use bracketed URL syntax, for
 example `http://[::1]:26657`.
 
-The backend only allows the default node RPC or currently connected peer RPC
+The backend only allows the default node RPC or connected peer RPC
 targets, so this stays scoped to known network peers instead of acting as a
 generic proxy.
 
@@ -217,7 +217,7 @@ The local spool supports offline maintenance, snapshot import, and explicit
 recovery workflows. The primary live-path durability mechanism is the BDS
 database plus contiguous-height catch-up.
 
-Current BDS-backed ABCI query paths include:
+BDS-backed ABCI query paths include:
 
 For workflow examples, SDK usage, GraphQL equivalents, and field-shape notes,
 see [BDS Indexed Queries](/api/bds).
@@ -272,7 +272,7 @@ Operator-oriented BDS inspection:
   spool state, DB health, and `catching_up` as the primary recovery signals.
 - when present, the nested `pool` object reports `size`, `idle`, `in_use`,
   `min_size`, `max_size`, and `utilization`
-- `/bds_spool` lists the block payloads currently present on the local spool
+- `/bds_spool` lists the block payloads present on the local spool
   for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,
   including recent block timing and tracer metadata.
@@ -316,7 +316,7 @@ Developer reward aggregation:
 - This is a BDS-backed aggregate. It requires BDS to be enabled on the node and
   reflects the indexed view, not an unindexed raw-state scan.
 
-Current catch-up behavior:
+Catch-up behavior:
 
 - during live operation, BDS keeps finalized blocks pending in memory and
   backfills any missing heights from local CometBFT RPC automatically
