@@ -145,17 +145,23 @@ After all transactions in the block are executed:
 
 ## Transaction Result
 
-After finalization, querying a transaction returns:
+After finalization, the decoded execution payload contains:
 
 | Field | Description |
 |-------|-------------|
 | `hash` | Transaction hash |
-| `height` | Block height |
 | `status` | `0` (success) or `1` (failure) |
 | `chi_used` | Actual chi consumed |
 | `result` | Return value from the contract function |
 | `state` | State changes made (key-value pairs) |
 | `events` | Events emitted by the contract |
+
+SDKs wrap that raw payload in higher-level receipt models. In `xian-py`,
+`get_tx(...)` and `wait_for_tx(...)` return a `TransactionReceipt` with
+`success`, `tx_hash`, `message`, `transaction`, `execution`, and `raw`. Block
+height is available from the surrounding CometBFT transaction lookup or indexed
+block/transaction surfaces, not as a top-level field inside the decoded
+execution dictionary itself.
 
 ## Failure Modes
 

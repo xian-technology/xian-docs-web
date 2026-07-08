@@ -55,6 +55,48 @@ result are separate:
 - the dashboard is outside the consensus path
 - the dashboard decodes ABCI `value` and `key` fields for convenience
 
+## Dashboard Security And Limits
+
+The dashboard is an operator and explorer convenience service. It does not add
+wallet authentication, TLS termination, or consensus authority. Keep it bound
+to loopback or a private network unless you intentionally put it behind a
+reverse proxy, firewall, TLS, and any access control required by your
+deployment.
+
+The maintained stack defaults the dashboard to `127.0.0.1:8080`. Public
+dashboard/query exposure requires explicit stack flags and the
+`XIAN_PUBLIC_QUERY_ENABLED=1` environment gate.
+
+The dashboard does apply local abuse controls to `/api/*` routes:
+
+| Limit | Default | CLI flag |
+|-------|---------|----------|
+| ordinary REST rate | `30` requests/second | `--rest-rate-limit-per-second` |
+| ordinary REST burst | `60` requests | `--rest-rate-limit-burst` |
+| expensive REST rate | `8` requests/second | `--expensive-rest-rate-limit-per-second` |
+| expensive REST burst | `16` requests | `--expensive-rest-rate-limit-burst` |
+| concurrent REST handlers | `32` | `--max-rest-concurrency` |
+| tracked rate-limit keys | `4096` | `--rate-limit-max-keys` |
+
+Expensive REST routes include the broad explorer and query routes:
+
+- `/api/addresses`
+- `/api/blockchain`
+- `/api/consensus`
+- `/api/contracts`
+- `/api/monitoring`
+- `/api/net_info`
+- `/api/recent_events`
+- `/api/unconfirmed_txs`
+- `/api/validator_dashboard`
+- `/api/validators`
+- routes under `/api/abci_query/`, `/api/address/`, `/api/block/`,
+  `/api/block_results/`, `/api/contract/`, and `/api/tx/`
+
+The `/api/abci_query/...` surface can proxy arbitrary ABCI query paths,
+including simulation paths. Treat public exposure as a resource-management
+decision, not merely a read-only explorer setting.
+
 ## Contract Source
 
 ```text
@@ -275,7 +317,7 @@ Operator-oriented BDS inspection:
 - `/bds_spool` lists the block payloads present on the local spool
   for offline recovery or maintenance workflows.
 - `/perf_status` reports the node's current execution/performance snapshot,
-  including recent block timing and tracer metadata.
+  including recent block timing and parallel-execution metadata.
 - `/token_balances/<address>` returns the BDS-backed token portfolio for one
   address. By default it omits zero balances; add `include_zero=true` when you
   need the full indexed token set for that address.

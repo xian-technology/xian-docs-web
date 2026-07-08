@@ -135,13 +135,13 @@ logs.
 
 Behavior:
 
-- live stderr output follows `[xian].app_log_level`
+- live stderr output follows `app_log_level` in `config/xian.toml`
 - rotated application log files live under `.cometbft/xian/logs`
-- rotation follows `[xian].app_log_rotation_hours`
-- retention follows `[xian].app_log_retention_days`
+- rotation follows `app_log_rotation_hours` in `config/xian.toml`
+- retention follows `app_log_retention_days` in `config/xian.toml`
 - both stderr and file logging are queued asynchronously to avoid blocking the
   runtime on every write
-- when `[xian].app_log_json = true`, both stderr and the rotated file sink are
+- when `app_log_json = true`, both stderr and the rotated file sink are
   structured JSON
 
 Use this logger when you need to answer questions like:
@@ -236,6 +236,8 @@ The maintained stack defaults to a fail-closed network posture:
 - CometBFT RPC binds to `127.0.0.1` unless you pass `--public-rpc`
 - CometBFT and Xian metrics bind to `127.0.0.1` unless you pass
   `--public-metrics`
+- dashboard binds to `127.0.0.1` unless you enable it and pass
+  `--public-query`
 - PostGraphile binds to `127.0.0.1` unless you enable BDS and pass
   `--public-query`
 - PostGraphile uses a dedicated read-only database role with statement timeout,
@@ -685,7 +687,7 @@ Use the node's ABCI query surface for canonical reads:
 - BDS operator reads like `/bds_status` and `/bds_spool/...` to inspect queue,
   spool, and indexed-head health
 - performance reads like `/perf_status` to inspect recent block timing and
-  tracer metadata
+  parallel-execution metadata
 
 Use GraphQL only when you want a bounded convenience query layer over the BDS
 database. For public query endpoints, keep generated mutations disabled and use

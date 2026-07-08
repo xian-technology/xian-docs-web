@@ -162,19 +162,19 @@ import {
   InjectedXianWallet,
   InMemoryXianProvider,
   ProviderBackedXianSigner,
+  WalletConnectXianProvider,
   ProviderChainMismatchError,
   ProviderDisconnectedError,
   ProviderUnauthorizedError,
   ProviderUnsupportedMethodError,
-  WalletConnectXianProvider,
+  XianProviderError,
   XIAN_WALLETCONNECT_EVENTS,
   XIAN_WALLETCONNECT_METHODS,
   XIAN_WALLETCONNECT_NAMESPACE,
-  XianProviderError,
-  XIAN_INITIALIZED_EVENT,
   createXianDappPolicyForRequest,
   evaluateXianDappPolicy,
   findMatchingXianDappPolicy,
+  XIAN_INITIALIZED_EVENT,
   getInjectedXianProvider,
   listInjectedXianProviders,
   parseXianDappAction,
@@ -404,6 +404,56 @@ const receipt = await client.waitForTx("ABC123", {
 });
 ```
 
+## Contract Deployment
+
+The current JS SDK has the same source/artifact split as `xian-py`:
+
+- `deployContract` compiles source to deployment artifacts and submits them
+- `submitContract` submits already-built deployment artifacts
+
+Source compilation in JS is backed by the `@xian-tech/compiler` WASM package
+or by an injected compiler implementation. If neither is available,
+`deployContract` fails before broadcasting. This means JS can compile in the
+current toolchain, but only through the Xian compiler artifact path.
+
+Install the compiler package when you want source deployment from JS:
+
+```bash
+npm install @xian-tech/client @xian-tech/compiler
+```
+
+Deploy source:
+
+```ts
+const result = await client.deployContract({
+  name: "con_counter",
+  source,
+  signer,
+  args: {},
+  chi: 500_000,
+  mode: "checktx",
+  waitForTx: true,
+});
+```
+
+Submit prebuilt artifacts:
+
+```ts
+const result = await client.submitContract({
+  name: "con_counter",
+  deploymentArtifacts,
+  signer,
+  args: {},
+  chi: 500_000,
+  mode: "checktx",
+  waitForTx: true,
+});
+```
+
+`vmProfile` defaults to `xian_vm_v1` for `deployContract`. The node requires
+`xian_contract_artifact_v1` deployment artifacts and rejects legacy
+`runtime_code` or `runtime_code_sha256` payloads.
+
 ## Convenience Helpers
 
 ### Contract Helper
@@ -567,6 +617,27 @@ The in-memory provider is a reference implementation for:
 - local browser examples
 
 It is not a replacement for a production injected or hosted wallet.
+
+`WalletConnectXianProvider` is the provider-side bridge for WalletConnect
+sessions. It wraps a WalletConnect request client, session topic, active chain,
+and approved accounts. Xian WalletConnect chains use the `xian:<chainId>` CAIP-2
+shape, and accounts use `xian:<chainId>:<address>` CAIP-10 values.
+
+Only the methods listed in `XIAN_WALLETCONNECT_METHODS` are sent to the remote
+wallet. Local session reads such as `xian_getWalletInfo`, `xian_accounts`, and
+`xian_chainId` are served from session state. `xian_switchChain` is rejected by
+the bridge because a WalletConnect session cannot switch to an unapproved chain.
+
+The provider package also exports dapp policy helpers:
+
+- `parseXianDappAction`
+- `createXianDappPolicyForRequest`
+- `evaluateXianDappPolicy`
+- `findMatchingXianDappPolicy`
+
+They cover scoped auto-approval checks for `xian_signTransaction`,
+`xian_sendTransaction`, and `xian_sendCall`, including origin, account, chain,
+contract, function, chi limit, and optional kwargs matching.
 
 ## Injected Wallet Contract
 

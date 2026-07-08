@@ -18,7 +18,10 @@ crypto.key_is_valid(key)
 - `signature` is a valid Ed25519 signature in hex
 - the signature matches the UTF-8 encoded `msg` string
 
-If verification fails, it returns `False`.
+If the key and signature decode cleanly but the signature does not verify, it
+returns `False`. Malformed hex inputs or an invalid Ed25519 public-key shape
+can raise before signature verification runs, so validate untrusted public keys
+with `crypto.key_is_valid(...)` before calling `crypto.verify(...)`.
 
 Typical uses include:
 

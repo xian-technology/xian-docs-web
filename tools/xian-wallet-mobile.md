@@ -361,6 +361,7 @@ platform.
 | Unlocked session | `expo-secure-store` | Active private key, mnemonic when available, and a derived session key while unlocked |
 | Contacts | `AsyncStorage` | Saved recipient addresses |
 | Preferences | `AsyncStorage` | Layout, label visibility |
+| Biometric session key | `expo-secure-store` | Optional device-auth protected unlock material |
 
 Android automatic app-data backup is disabled for wallet data. Use the wallet's
 manual encrypted backup export when you need a portable recovery file.
@@ -379,6 +380,11 @@ Important calls include:
 - `sendTransaction` - builds, signs, and broadcasts through the shared Xian JS client
 - `getTransactionHistory` - direct `/txs_by_sender/{address}` ABCI query
 - `waitForTx` - shared `@xian-tech/client` finality polling helper
+
+Contract compilation is intentionally unavailable in the mobile wallet. The
+mobile bundle includes a local compiler stub that throws for compiler APIs; use
+`xian-py`, `xian-cli contract build-artifacts`, or the JS client with the
+`@xian-tech/compiler` WASM package when you need deployment artifacts.
 
 ## Features
 
@@ -479,6 +485,21 @@ Transaction history with:
   connected node exposes that BDS surface
 - **Explorer** - open in browser
 - **Lock / Remove** wallet
+
+### Apps And WalletConnect
+
+The Apps tab is now an active WalletConnect surface, not only a placeholder.
+It can:
+
+- pair from a pasted or scanned WalletConnect URI
+- approve or reject session proposals and Xian provider requests
+- show active sessions and disconnect them
+- store temporary trusted-dapp policies for repeated scoped requests
+
+WalletConnect requires `EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID` or the matching
+Expo extra config value. The request handler supports the Xian provider
+namespace and rejects message-signing payloads that look like unsigned
+transactions or structured transaction payloads.
 
 ### UI
 

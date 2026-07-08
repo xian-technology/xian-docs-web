@@ -7,7 +7,7 @@ The maintained entrypoint lives in `xian-stack` and is designed to exercise the
 real runtime path with:
 
 - 5 validators
-- the native Rust tracer
+- the fixed `xian_vm_v1` runtime
 - one node with BDS enabled
 - real validator governance
 - governed forward state patches

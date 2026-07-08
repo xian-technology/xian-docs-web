@@ -3,10 +3,10 @@
 The simplest path is:
 
 1. test locally with `xian-contracting`
-2. submit with `xian-py`
+2. compile and deploy with an SDK
 3. inspect state and transaction results through the node APIs
 
-## Submit a Contract
+## Deploy A Contract
 
 ```python
 from xian_py import Wallet, Xian
@@ -14,7 +14,7 @@ from xian_py import Wallet, Xian
 wallet = Wallet(private_key="YOUR_PRIVATE_KEY")
 client = Xian("http://127.0.0.1:26657", wallet=wallet)
 
-code = """
+source = """
 balances = Hash(default_value=0)
 
 @construct
@@ -28,14 +28,15 @@ def balance_of(address: str) -> float:
 
 result = client.deploy_contract(
     name="con_example",
-    source=code,
+    source=source,
     chi=500_000,
 )
 ```
 
-`deploy_contract` submits cleartext source. Validators lint and compile that
-source, then store the canonical source and VM IR. Prebuilt artifacts are useful
-for offline inspection, but they are not accepted as deployment payloads.
+`deploy_contract` builds the current Xian VM deployment artifacts locally, then
+submits them through `submission.submit_contract`. Use
+`submit_contract(name, deployment_artifacts, ...)` only when you already have
+prebuilt artifacts.
 
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts

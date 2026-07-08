@@ -17,7 +17,8 @@ The linter enforces that restricted subset before code is accepted.
 | `return` | `return value` | |
 | `assert` | `assert ok, "message"` | main validation pattern |
 | collections | `list`, `dict`, `tuple`, `set()`, `frozenset()` | set literals and set comprehensions are blocked |
-| list comprehensions | `[x for x in items]` | generator expressions are not allowed |
+| list and dict comprehensions | `[x for x in items]`, `{k: v for k, v in items}` | generator expressions are not allowed |
+| ternary expressions | `"yes" if ok else "no"` | lowered into Xian VM IR and metered like other expressions |
 | subscripts / slices | `x[0]`, `x[1:3]` | |
 | imports | `import currency` | module-level only for deployed contracts |
 
@@ -25,7 +26,7 @@ The linter enforces that restricted subset before code is accepted.
 
 | Feature | Error Code | Why |
 |---------|------------|-----|
-| `try/except`, `with`, `lambda`, ternary expressions, `yield`, `yield from`, `nonlocal`, `@`, set literals, set comprehensions, semicolons, one-line compound statements | `E001` | blocked syntax in the sandbox or rejected to keep line-bucket metering predictable |
+| `try/except`, `with`, `lambda`, `yield`, `yield from`, `nonlocal`, `@`, set literals, set comprehensions, semicolons, one-line compound statements | `E001` | blocked syntax in the sandbox or rejected to keep line-bucket metering predictable |
 | names starting or ending with `_` | `E002` | blocks Python internals / escape paths |
 | import inside a function | `E003` | imports must be explicit and module-level |
 | `from x import y` | `E004` | use `import x` then `x.y` |

@@ -95,19 +95,21 @@ See [Node Profiles](/node/profiles) for the high-level JSON contract.
 Important contents include:
 
 - `config/config.toml`
+- `config/xian.toml`
 - `config/genesis.json`
 - `config/state-patches/`
 - `config/priv_validator_key.json`
 - `config/node_key.json`
 - `data/priv_validator_state.json`
 
-From here on, the rendered config is the effective runtime truth.
+From here on, the rendered config files are the effective runtime truth.
 
 ## Important Config Sections
 
-### `[xian]`
+### Top-Level Xian Keys
 
-This section carries the main Xian runtime toggles, including:
+The top level of `config/xian.toml` carries the main Xian runtime toggles,
+including:
 
 - pruning
 - metrics
@@ -121,7 +123,7 @@ This section carries the main Xian runtime toggles, including:
 gas schedule, and authority are internal VM constants, not operator-selectable
 settings.
 
-### `[xian.bds]`
+### `[bds]`
 
 This section is relevant when `bds_enabled = true` and the optional indexed
 stack is enabled.
@@ -134,6 +136,163 @@ It contains BDS/Postgres-related settings such as:
 - queue and catch-up settings
 - application name
 - spool location and warning thresholds
+
+## Current Configure Arguments
+
+`xian-configure-node` is the maintained node-home renderer. These are the
+current operator-facing arguments accepted by the tool.
+
+### Network And Genesis
+
+- `--discover-seed`
+- `--seed`
+- `--persistent-peer`
+- `--moniker`
+- `--allow-cors` / `--no-allow-cors`
+- `--snapshot-url`
+- `--snapshot-signing-key`
+- `--snapshot-expected-chain-id`
+- `--genesis-source`
+- `--genesis-bundle`
+- `--chain-id`
+- `--genesis-time`
+- `--validator-privkey`
+- `--prometheus` / `--no-prometheus`
+- `--bds-enabled` / `--no-bds-enabled`
+- `--enable-pruning` / `--no-enable-pruning`
+- `--blocks-to-keep`
+- `--block-policy-mode`
+- `--block-policy-interval`
+
+`--block-policy-mode` accepts the current policy modes `on_demand`,
+`idle_interval`, and `periodic`. The interval must be nonzero for
+`idle_interval` and `periodic`.
+
+### CometBFT State Sync
+
+- `--statesync-enable` / `--no-statesync-enable`
+- `--statesync-rpc-server`
+- `--statesync-trust-height`
+- `--statesync-trust-hash`
+- `--statesync-trust-period`
+
+### Metrics, Logging, And Readonly Simulation
+
+- `--metrics-enabled` / `--no-metrics-enabled`
+- `--metrics-host`
+- `--metrics-port`
+- `--metrics-bds-refresh-seconds`
+- `--transaction-trace-logging` / `--no-transaction-trace-logging`
+- `--app-log-level`
+- `--app-log-json` / `--no-app-log-json`
+- `--app-log-rotation-hours`
+- `--app-log-retention-days`
+- `--simulation-enabled` / `--no-simulation-enabled`
+- `--simulation-max-concurrency`
+- `--simulation-timeout-ms`
+- `--simulation-max-chi`
+
+### Parallel Execution
+
+- `--parallel-execution-enabled` / `--no-parallel-execution-enabled`
+- `--parallel-execution-workers`
+- `--parallel-execution-min-transactions`
+- `--parallel-execution-max-speculative-waves`
+- `--parallel-execution-min-wave-acceptance-ratio`
+- `--parallel-execution-low-acceptance-min-wave-size`
+- `--parallel-execution-warm-workers` / `--no-parallel-execution-warm-workers`
+- `--parallel-execution-access-estimates-enabled` /
+  `--no-parallel-execution-access-estimates-enabled`
+
+The current default posture keeps parallel execution disabled until an operator
+enables it. When enabled, the default worker count is `4`, the minimum block
+size is `8` transactions, the maximum speculative wave count is `4`, workers
+are warmed by default, and access estimates are enabled by default.
+
+### Pending Nonce Reservation
+
+- `--pending-nonce-reservation-ttl-seconds`
+- `--max-pending-nonces-per-sender`
+
+### BDS / Indexed Query Storage
+
+- `--bds-dsn`
+- `--bds-host`
+- `--bds-port`
+- `--bds-database`
+- `--bds-user`
+- `--bds-password`
+- `--bds-pool-min-size`
+- `--bds-pool-max-size`
+- `--bds-statement-timeout-ms`
+- `--bds-acquire-timeout-ms`
+- `--bds-application-name`
+- `--bds-queue-max-size`
+- `--bds-catchup-enabled` / `--no-bds-catchup-enabled`
+- `--bds-catchup-poll-seconds`
+- `--bds-rpc-url`
+- `--bds-spool-dir`
+- `--bds-spool-warn-entries`
+- `--bds-spool-warn-bytes`
+- `--bds-disk-free-warn-bytes`
+
+## Stack Backend Runtime Arguments
+
+The maintained `xian-stack` backend exposes service-hosting arguments in
+addition to the node-home renderer. The current runtime surface includes:
+
+Service posture:
+
+- `--bds-enabled` / `--no-bds-enabled`
+- `--dashboard` / `--no-dashboard`
+- `--monitoring` / `--no-monitoring`
+- `--dashboard-host`
+- `--dashboard-port`
+
+Public exposure:
+
+- `--public-rpc` / `--no-public-rpc`
+- `--public-query` / `--no-public-query`
+- `--public-metrics` / `--no-public-metrics`
+
+Node image selection:
+
+- `--node-image-mode`
+- `--node-integrated-image`
+- `--node-split-image`
+
+`--node-image-mode` accepts `local_build` and `registry`.
+
+Optional sidecars:
+
+- `--intentkit` / `--no-intentkit`
+- `--intentkit-network-id`
+- `--intentkit-host`
+- `--intentkit-port`
+- `--intentkit-api-port`
+- `--dex-automation` / `--no-dex-automation`
+- `--dex-automation-host`
+- `--dex-automation-port`
+- `--dex-automation-config`
+- `--shielded-relayer` / `--no-shielded-relayer`
+- `--shielded-relayer-host`
+- `--shielded-relayer-port`
+
+Command-specific health/start arguments:
+
+- `start --wait-for-health` / `start --no-wait-for-health`
+- `start --rpc-timeout-seconds`
+- `start --rpc-url`
+- `health --rpc-url`
+- `health --check-disk` / `health --no-check-disk`
+
+Public exposure flags are still gated by environment variables so accidental
+host publishing fails closed:
+
+- public RPC requires `XIAN_PUBLIC_RPC_ENABLED=1`
+- public query surfaces, including dashboard and indexed query services,
+  require `XIAN_PUBLIC_QUERY_ENABLED=1`
+- public metrics requires `XIAN_PUBLIC_METRICS_ENABLED=1`
 
 ## Release Provenance In Manifests
 
@@ -196,7 +355,7 @@ height.
 
 ## Metrics, Logging, Simulation, And Parallel Execution
 
-The rendered config is where all node-local runtime posture is finally
+The rendered config files are where all node-local runtime posture is finally
 materialized.
 
 In practice:
@@ -240,9 +399,9 @@ Public exposure is explicit through the stack backend:
 - `--public-metrics` or `XIAN_PUBLIC_METRICS_ENABLED=1`
 - `--public-query` or `XIAN_PUBLIC_QUERY_ENABLED=1`
 
-`public-query` is intentionally separate from `public-rpc`. It publishes the
-read-only indexed surface for BDS / GraphQL. It does not also expose the live
-node RPC.
+`public-query` is intentionally separate from `public-rpc`. It publishes
+query-facing services such as the dashboard and BDS / GraphQL surfaces. It does
+not also expose the live node RPC.
 
 ## Network Manifest Shape
 

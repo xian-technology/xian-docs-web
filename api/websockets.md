@@ -89,7 +89,7 @@ More pattern examples:
 | `currency.balances:*` | All balances on `currency` |
 | `con_mytoken.*` | All state keys on `con_mytoken` |
 | `*.balances:alice` | Alice's balance on any token contract |
-| `con_dex.pairs:*:*` | All trading pairs on a DEX |
+| `con_pairs.pairs:*:*` | All trading-pair fields on the canonical DEX pair registry |
 
 ### Unsubscribe
 
@@ -266,14 +266,20 @@ async def monitor_dex():
         await ws.send(json.dumps({
             "action": "subscribe",
             "type": "state",
-            "key": "con_dex.prices:*",
+            "key": "con_pairs.pairs:*:reserve*",
         }))
 
-        # Watch swap events
+        # Watch pair reserve syncs and swaps
         await ws.send(json.dumps({
             "action": "subscribe",
             "type": "event",
-            "contract": "con_dex",
+            "contract": "con_pairs",
+            "event": "Sync",
+        }))
+        await ws.send(json.dumps({
+            "action": "subscribe",
+            "type": "event",
+            "contract": "con_pairs",
             "event": "Swap",
         }))
 
@@ -281,12 +287,21 @@ async def monitor_dex():
             data = json.loads(message)
 
             if data["type"] == "state_change":
-                pair = data["key"].split(":")[-1]
-                print(f"Price update {pair}: {data['value']}")
+                print(f"Reserve update {data['key']}: {data['value']}")
 
             elif data["type"] == "contract_event":
-                swap = data["data"]
-                print(f"Swap: {swap['amount_in']} {swap['token_in']} -> {swap['token_out']}")
+                payload = data["data"]
+                if data["event"] == "Sync":
+                    print(
+                        f"Pair {payload['pair']} reserves: "
+                        f"{payload['reserve0']} / {payload['reserve1']}"
+                    )
+                elif data["event"] == "Swap":
+                    print(
+                        f"Swap on pair {payload['pair']}: "
+                        f"in {payload['amount0In']}/{payload['amount1In']} "
+                        f"out {payload['amount0Out']}/{payload['amount1Out']}"
+                    )
 
 asyncio.run(monitor_dex())
 ```

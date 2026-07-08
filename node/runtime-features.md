@@ -69,7 +69,7 @@ provides.
 
 Xian has its own application logger, separate from CometBFT logging.
 
-Relevant `[xian]` keys:
+Relevant top-level Xian keys:
 
 - `transaction_trace_logging`
 - `app_log_level`
@@ -91,7 +91,7 @@ debugging a specific runtime path.
 Readonly transaction simulation is a node-local service posture, not a
 consensus rule.
 
-Relevant `[xian]` keys:
+Relevant top-level Xian keys:
 
 - `simulation_enabled`
 - `simulation_max_concurrency`
@@ -146,7 +146,7 @@ developer rewards from transaction fees.
 Xian supports speculative parallel block execution while committing the
 canonical serial-equivalent result.
 
-Relevant `[xian]` keys:
+Relevant top-level Xian keys:
 
 - `parallel_execution_enabled`
 - `parallel_execution_workers`
@@ -179,7 +179,7 @@ whatever ends up in the rendered config for the node you actually start.
 
 ## Metrics And Health
 
-Relevant `[xian]` keys:
+Relevant top-level Xian keys:
 
 - `metrics_enabled`
 - `metrics_host`
@@ -200,7 +200,7 @@ When `bds_enabled = true`, the optional indexed stack becomes relevant. BDS is
 the Blockchain Data Service, one service under the node profile `services`
 object.
 
-Important `[xian.bds]` families:
+Important `[bds]` families:
 
 - connection settings for Postgres
 - pool sizing
@@ -230,7 +230,7 @@ you need to point catch-up at a different trusted RPC endpoint.
 
 ## Runtime Key Reference
 
-### Core `[xian]` Keys
+### Core Top-Level Xian Keys
 
 | Key | Purpose |
 |-----|---------|
@@ -275,7 +275,7 @@ environment variables:
 
 | Environment variable | Runtime key |
 |----------------------|-------------|
-| `XIAN_BDS_DSN` | `xian.bds.dsn` |
+| `XIAN_BDS_DSN` | `bds.dsn` |
 | `XIAN_BDS_HOST`, `XIAN_BDS_PORT`, `XIAN_BDS_DATABASE`, `XIAN_BDS_USER`, `XIAN_BDS_PASSWORD` | Postgres connection fields |
 | `XIAN_BDS_POOL_MIN_SIZE`, `XIAN_BDS_POOL_MAX_SIZE` | connection pool sizing |
 | `XIAN_BDS_STATEMENT_TIMEOUT_MS`, `XIAN_BDS_ACQUIRE_TIMEOUT_MS`, `XIAN_BDS_APPLICATION_NAME` | query/runtime behavior |

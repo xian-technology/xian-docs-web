@@ -18,7 +18,7 @@ Each parameter entry has:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `type` | Yes | A type or tuple of types (`str`, `int`, `float`, `bool`, `decimal`) |
+| `type` | Yes | A type or tuple of types (`str`, `int`, `float`, `bool`, `bytes`, `bytearray`, `set`, `frozenset`, or decimal values) |
 | `idx`  | No | If `True`, the parameter is indexed and searchable. Max **3 indexed** params per event. |
 
 You can also use the shorthand forms:
@@ -103,7 +103,8 @@ def transfer_from(amount: float, to: str, main_account: str):
 
 - **Max 3 indexed parameters** per event. Indexed params are searchable via CometBFT's `/tx_search` and via WebSocket subscriptions.
 - **Max 1024 bytes** per parameter value (UTF-8 encoded).
-- **Types must be** `str`, `int`, `float`, `bool`, or `decimal` (ContractingDecimal).
+- **Types must be** `str`, `int`, `float`, `bool`, `bytes`, `bytearray`,
+  `set`, `frozenset`, or decimal values.
 - **At least one parameter** is required per event.
 - **Non-indexed is the default**. Only indexed fields need `indexed(...)` or `idx: True`.
 - **Events cost chi** - both indexed and non-indexed parameters incur write-meter costs during execution (25 meter units per encoded byte).

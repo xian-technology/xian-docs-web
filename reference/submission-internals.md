@@ -5,21 +5,27 @@ built-in `submission` contract.
 
 ## High-Level Flow
 
-1. a client prepares contract source and constructor args
+1. a client builds deployment artifacts from contract source
 2. the transaction calls `submission.submit_contract(...)`
-3. the runtime rejects client-supplied IR artifacts
-4. the runtime normalizes, lints, and compiles the source to canonical VM IR
+3. the runtime validates the artifact format, hashes, source, and VM IR
+4. legacy `runtime_code` and `runtime_code_sha256` payloads are rejected
 5. the child module body and constructor run under deployment context
 6. canonical source, execution artifacts, and metadata are written to chain
    state
 7. `ContractDeployed` is emitted
 
-## Source Submission
+## Source-Authored, Artifact-Backed Submission
 
-Xian deployments are source-backed.
+Xian deployments are source-authored and artifact-backed.
 
-`xian_vm_v1` requires submitted source for native deployment. Validators derive
-the stored VM IR themselves and reject submitted `deployment_artifacts`.
+SDK deploy helpers compile source into deployment artifacts before submitting
+the transaction. SDK submit helpers expect those deployment artifacts to
+already exist.
+
+`xian_vm_v1` requires valid `deployment_artifacts` for deployment. Those
+artifacts include canonical source plus the VM IR used by the native runtime.
+The current format is `xian_contract_artifact_v1`, and the supported VM profile
+is `xian_vm_v1`.
 
 ## Important Constraints
 
@@ -27,8 +33,9 @@ the stored VM IR themselves and reject submitted `deployment_artifacts`.
 - contract names must use lowercase ASCII letters, digits, and underscores
 - imports resolve to deployed contracts, not Python packages
 - constructor args are supplied as a dictionary
-- source must pass the linter
+- source must pass the linter before artifacts are built
 - child deployments use the same submission surface
+- artifact hashes must match the canonical compiler output
 
 ## What Gets Stored
 

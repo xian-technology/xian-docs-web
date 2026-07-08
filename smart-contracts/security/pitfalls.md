@@ -152,6 +152,7 @@ means:
 def roll_dice():
     # This is deterministic -- all validators get the same result
     # But a sophisticated attacker could predict or influence the outcome
+    random.seed()
     return random.randint(1, 6)
 ```
 

@@ -64,7 +64,9 @@ updated independently.
 - keys are converted to strings
 - `.` and `:` are not allowed inside key parts
 - slices are not allowed
-- oversized keys are rejected
+- keys longer than `1024` characters are rejected
+- `key in hash` is intentionally unsupported; read the key and compare against
+  your chosen default / sentinel value instead
 
 ## When to Use
 

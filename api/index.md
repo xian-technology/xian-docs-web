@@ -70,11 +70,13 @@ The maintained `xian-stack` runtime keeps these surfaces private by default:
 Public exposure is explicit and split by job:
 
 - `public-rpc`: live node RPC, broadcast, tx lookup, raw `abci_query`
-- `public-query`: BDS / GraphQL indexed reads only
+- `public-query`: dashboard and BDS / GraphQL query surfaces
 - `public-metrics`: Prometheus endpoints
 
 `public-query` does not imply `public-rpc`. That separation lets operators keep
-analytics and explorer traffic away from the live validator RPC path.
+analytics and explorer traffic away from the live validator RPC path. The
+dashboard is part of this query surface, so exposing it publicly should be a
+deliberate operator decision.
 
 ## Current-State Vs Indexed Reads
 

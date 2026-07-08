@@ -199,6 +199,47 @@ merge operation is deterministic addition.
 But if another transaction reads that balance, or directly overwrites it, the
 executor falls back to serial execution.
 
+## Current Operator Controls
+
+Parallel execution is configured as top-level keys in the rendered
+`config/xian.toml`. The current controls are:
+
+- `parallel_execution_enabled`
+- `parallel_execution_workers`
+- `parallel_execution_min_transactions`
+- `parallel_execution_max_speculative_waves`
+- `parallel_execution_min_wave_acceptance_ratio`
+- `parallel_execution_low_acceptance_min_wave_size`
+- `parallel_execution_warm_workers`
+- `parallel_execution_access_estimates_enabled`
+
+`parallel_execution_enabled` defaults to `false`, so operators must opt in.
+When enabled, the current defaults warm worker processes and use access
+estimates to plan speculative stages before falling back to runtime conflict
+checks.
+
+The performance snapshot reports both planning and execution counters,
+including:
+
+- `estimated_known_transactions`
+- `estimated_unknown_transactions`
+- `estimated_stage_count`
+- `estimated_parallelizable_transactions`
+- `estimated_known_shapes`
+- `estimated_unknown_shapes`
+- `planned_stage_count`
+- `planned_parallelizable_transactions`
+- `speculative_wave_count`
+- `speculative_accepted`
+- `speculative_rejected`
+- `serial_prefiltered`
+- `serial_fallbacks`
+- `guardrail_fallbacks`
+
+`guardrail_fallbacks` means the controller stopped speculating because the
+acceptance-ratio or low-acceptance guardrails said the remaining work should run
+serially.
+
 ## Why This Is Safe
 
 This design is consensus-safe because it preserves serial semantics:

@@ -24,11 +24,12 @@ Typical sources of nondeterminism in ordinary software include:
 
 Xian removes or controls those sources explicitly.
 
-## Execution Engines Must Agree
+## Runtime Must Agree
 
 Xian separates contract authorship from contract execution.
 
-That means the exact alignment rules depend on the selected execution engine:
+On the current supported branch, validators execute the fixed Xian VM artifact
+path. The alignment rule is:
 
 | Engine family | Validators must align on |
 |--------------|---------------------------|
@@ -69,7 +70,7 @@ That means:
 Chi accounting is part of execution semantics, so it must be deterministic.
 
 `xian_vm_v1` meters directly at the VM and host-operation layer through the
-selected VM gas schedule.
+fixed VM gas schedule.
 
 In all cases, the user-visible transaction chi budget remains the hard bound
 that determines whether execution succeeds or rolls back.
@@ -162,5 +163,5 @@ the need to restore deterministic execution first.
 | file/network I/O | forbidden by the sandbox |
 | floating-point drift | decimal-backed contract values |
 | hidden mutable process state | durable state lives in contract storage, not module globals |
-| runtime-version drift | validators must align on the selected execution engine and its supported runtime |
+| runtime-version drift | validators must align on the supported `xian_vm_v1` runtime and artifact format |
 | encoding differences | deterministic compact encoding rules |

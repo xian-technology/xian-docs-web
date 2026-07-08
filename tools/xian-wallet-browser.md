@@ -330,7 +330,9 @@ Transaction history fetched from the node's `/txs_by_sender` ABCI endpoint:
 
 ### dApp Integration
 
-The extension injects a `window.xian` provider conforming to `@xian-tech/provider`:
+The extension registers a default provider at `window.xian.provider` and in the
+`window.xian.providers` / `window.xianProviders` registries, conforming to
+`@xian-tech/provider`:
 
 - `xian_requestAccounts` - connect and get accounts
 - `xian_accounts` - list connected accounts
@@ -345,6 +347,10 @@ Approval requests are shown inline in the wallet (side panel mode) or in a
 dedicated popup window.
 
 Events: `accountsChanged`, `chainChanged`, `connect`, `disconnect`.
+
+Trusted dApp policies can auto-approve narrowly scoped repeated transaction
+requests for 30 days. The wallet surfaces those policies in the connected-apps
+view and lets the user revoke them.
 
 ## Development
 

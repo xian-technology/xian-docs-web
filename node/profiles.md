@@ -48,7 +48,26 @@ They are written as JSON and validated on read. The schema is explicit:
   "monitoring_profile": "local_stack",
   "services": {
     "bds": {
-      "enabled": true
+      "enabled": true,
+      "dsn": "",
+      "host": "",
+      "port": 5432,
+      "database": "xian",
+      "user": "",
+      "password": "",
+      "pool_min_size": 1,
+      "pool_max_size": 10,
+      "statement_timeout_ms": 0,
+      "acquire_timeout_ms": 10000,
+      "application_name": "xian-bds",
+      "queue_max_size": 128,
+      "catchup_enabled": true,
+      "catchup_poll_seconds": 1.0,
+      "rpc_url": null,
+      "spool_dir": "",
+      "spool_warn_entries": 256,
+      "spool_warn_bytes": 536870912,
+      "disk_free_warn_bytes": 2147483648
     },
     "dashboard": {
       "enabled": false,
@@ -145,7 +164,7 @@ They are written as JSON and validated on read. The schema is explicit:
 | `parallel_execution_enabled` | enables speculative parallel block execution for this node |
 | `parallel_execution_workers` | worker count for speculative execution on this node; defaults to `4` and must be greater than zero when parallel execution is enabled |
 | `parallel_execution_min_transactions` | minimum block size before speculative execution is attempted |
-| `services.bds.enabled` | enables Blockchain Data Service indexing and the BDS-backed read stack |
+| `services.bds` | BDS enable flag plus connection, pool, statement-timeout, queue, catch-up, RPC, spool, and disk-warning settings |
 | `services.dashboard` | optional dashboard enable flag and local stack bind defaults; remote published ports are deploy bindings |
 | `services.monitoring.enabled` | starts Prometheus and Grafana through the `xian-stack` backend |
 | `services.intentkit` | optional stack-managed `xian-intentkit` enable flag, network slot, and published ports |

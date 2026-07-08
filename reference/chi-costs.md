@@ -45,7 +45,7 @@ chi_used = (raw_meter_cost // 1000) + 5
 
 Where:
 - `raw_meter_cost` = compute, storage, transaction-byte, return-value, and
-  runtime-bridge costs charged by the selected execution backend
+  runtime-bridge costs charged by the fixed Xian VM backend
 - `5` = base transaction cost
 - the final value is capped by the transaction's submitted chi budget
 

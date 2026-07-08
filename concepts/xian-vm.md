@@ -20,11 +20,12 @@ execution model for that authored contract. Current Xian nodes use the fixed
 |------|----------------|
 | `xian_vm_v1` | validated Xian VM artifacts under a native runtime |
 
-The contract language stays the same. What changes is the runtime beneath it.
+The contract language stays the same. The currently supported node runtime is
+fixed to the VM artifact path.
 
 ## What `xian_vm_v1` Actually Uses
 
-Under `xian_vm_v1`, deployment is source-driven.
+Under `xian_vm_v1`, deployment is source-authored and artifact-backed.
 
 The important stored artifacts are:
 
@@ -32,15 +33,16 @@ The important stored artifacts are:
   and inspection tooling
 - `__xian_ir_v1__`: the persisted Xian VM IR used by the native runtime
 
-Clients submit cleartext source. Validators normalize, lint, and compile that
-source with the canonical compiler, then persist the resulting source and IR.
-Submitted `deployment_artifacts` are rejected so clients cannot choose the
-executable IR.
+Client tooling builds `deployment_artifacts` before submission. Those artifacts
+include canonical source, VM IR, and hashes that the runtime validates before
+persisting source and IR. Legacy `runtime_code` and `runtime_code_sha256`
+deployment fields are rejected.
 
 ```mermaid
 flowchart TD
   Source["Restricted Python contract source"]
   Compiler["Canonical Xian compiler"]
+  Artifacts["deployment_artifacts"]
   SourceArtifact["Stored __source__"]
   IR["Stored __xian_ir_v1__"]
   Admission["Validator deployment admission"]
@@ -49,10 +51,10 @@ flowchart TD
   State["Xian state, events, and imports"]
 
   Source --> Compiler
-  Compiler --> SourceArtifact
-  Compiler --> IR
-  SourceArtifact --> Admission
-  IR --> Admission
+  Compiler --> Artifacts
+  Artifacts --> Admission
+  Admission --> SourceArtifact
+  Admission --> IR
   Admission --> VM
   VM --> Host
   Host --> State
@@ -66,7 +68,7 @@ On the supported branch:
 
 - `xian_vm_v1` is the only supported node runtime
 - bytecode, gas schedule, and authority are internal VM constants
-- submitted contracts must provide source code
+- submitted contracts must provide validated deployment artifacts
 
 This keeps the execution contract explicit without exposing alternate engines
 or an operator-selectable execution policy section.
@@ -119,8 +121,8 @@ including storage flows, decimals, datetime helpers, hashing, Ed25519
 verification, imports, events, and the shielded contract helpers needed by the
 existing shielded stack.
 
-That means the Xian VM is not just a design note. It is a real execution path
-that the node stack can select deliberately.
+That means the Xian VM is not just a design note. It is the supported
+execution path for current node deployments.
 
 ## Related Pages
 

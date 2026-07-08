@@ -246,9 +246,10 @@ python3 ./scripts/backend.py stop --no-bds-enabled --no-dashboard --no-monitorin
 
 If you need lower-level runtime tuning such as:
 
-- `xian_vm_v1` bytecode or gas schedule policy
 - speculative parallel transaction execution
-- direct `[xian]` metrics or mempool settings
+- Xian application metrics and logging
+- readonly simulation limits
+- BDS service posture
 
 see [Runtime Features](/node/runtime-features).
 

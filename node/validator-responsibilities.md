@@ -15,21 +15,16 @@ Validators are expected to:
 
 ## Determinism Discipline
 
-The exact alignment rules depend on the network's execution engine.
+The current supported validator runtime is the fixed `xian_vm_v1` path.
 
-Tracer-backed networks require validators to stay aligned on:
-
-- `xian-abci` and `xian-contracting`
-- tracer mode
-- the supported CPython minor version
-
-`xian_vm_v1` networks require validators to stay aligned on:
+Validators must stay aligned on:
 
 - `xian-abci` and `xian-contracting`
 - the native VM runtime capability
 - canonical source-to-IR compilation for submitted contracts
 
-In both cases, ad hoc local runtime changes are dangerous.
+Ad hoc local runtime changes are dangerous because validators replay the same
+artifact-driven state machine.
 
 ## Operational Safety
 

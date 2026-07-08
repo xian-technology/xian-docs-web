@@ -136,10 +136,10 @@ print(result["state"])
 
 ## Operator Controls
 
-Readonly simulation is node-local and configurable under `[xian]`:
+Readonly simulation is node-local and configurable as top-level keys in
+`config/xian.toml`:
 
 ```toml
-[xian]
 simulation_enabled = true
 simulation_max_concurrency = 2
 simulation_timeout_ms = 3000

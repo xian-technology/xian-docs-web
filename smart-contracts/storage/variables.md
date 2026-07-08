@@ -35,6 +35,7 @@ def enqueue(item: str):
 Supported top-level helpers include:
 
 - dict-style `variable[key]`, `variable[key] = value`, and `del variable[key]`
+- membership and length checks with `key in variable` and `len(variable)`
 - `update(...)`, `pop(...)`, and `clear()` for dict values
 - list-style index assignment like `queue[0] = value`
 - `append(...)`, `extend(...)`, `insert(...)`, `remove(...)`, `pop(...)`, and

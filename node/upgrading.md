@@ -1,9 +1,9 @@
 # Upgrading
 
 Xian upgrades should preserve runtime alignment across the validator set. The
-details vary slightly by execution engine, but the operator goal is always the
-same: move validators onto the same supported runtime without introducing
-application divergence.
+current supported node path uses the fixed `xian_vm_v1` runtime, so the
+operator goal is to move validators onto the same supported runtime, compiler,
+and artifact-validation stack without introducing application divergence.
 
 ## Safe Upgrade Sequence
 
@@ -51,11 +51,7 @@ Always keep aligned:
 - `xian-abci` and `xian-contracting`
 - canonical network manifests and pinned release images, when the network uses
   them
-- the execution engine selected by the network
-
-For `xian_vm_v1`, keep aligned:
-
-- `xian-abci` and `xian-contracting`
+- the fixed `xian_vm_v1` runtime path
 - native VM runtime support
 - canonical source-to-IR compilation for submitted contracts
 
@@ -83,6 +79,6 @@ After the node comes back:
 
 - confirm it is healthy and not stuck
 - confirm it is on the expected height and chain
-- confirm the runtime posture matches the intended execution engine
+- confirm the runtime posture matches the intended `xian_vm_v1` release
 - confirm any optional BDS and sidecar components recover cleanly if they are
   part of your deployment

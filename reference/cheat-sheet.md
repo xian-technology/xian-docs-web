@@ -136,14 +136,25 @@ contract source; validators derive the stored VM IR:
 import submission
 
 @export
-def deploy_child(name: str, code: str, owner: str = None):
+def deploy_child(
+    name: str,
+    deployment_artifacts: dict,
+    owner: str = None,
+    constructor_args: dict = None,
+):
+    if constructor_args is None:
+        constructor_args = {}
+
     submission.submit_contract(
         name=name,
-        code=code,
+        deployment_artifacts=deployment_artifacts,
         owner=owner,
-        constructor_args={},
+        constructor_args=constructor_args,
     )
 ```
+
+Factories do not compile source on chain. The caller or factory author must
+provide artifacts built by the current Xian compiler for the child contract.
 
 Deployed contracts record immutable provenance in state:
 

@@ -29,12 +29,14 @@ Top-level namespaces:
 - `xian keys ...`
 - `xian setup ...`
 - `xian network ...`
+- `xian network template ...`
 - `xian node ...`
 - `xian snapshot ...`
 - `xian recovery ...`
 - `xian doctor ...`
 - `xian contract build-artifacts ...`
 - `xian contract bundle ...`
+- `xian contract build-artifacts ...`
 - `xian client ...`
 
 The `client` namespace is the JSON-first surface for wallet, query, and
@@ -51,6 +53,9 @@ High-value flows include:
 - `xian network create ...` for local or private network manifests
 - `xian network join ...` for generating a local node profile from a canonical
   network manifest
+- `xian network template list|show ...` for inspecting canonical templates
+- `xian network package-operator-bundle ...` for producing a shareable
+  operator bundle
 - `xian node init|start|stop|status|health|endpoints ...` for local lifecycle
   and inspection
 - `--validator-selection-mode` on local genesis creation when a fresh chain
@@ -63,6 +68,9 @@ High-value flows include:
   artifacts from contract source
 - `xian contract bundle validate ...` when you need to verify hash-pinned
   contract bundle sources before bootstrap
+- `xian contract build-artifacts ...` when you need prebuilt `xian_vm_v1`
+  deployment artifacts for `client tx submit-artifacts`
+- `xian keys validator generate ...` when you need validator key material
 
 ```mermaid
 flowchart TD

@@ -199,7 +199,7 @@ contracts.
 There are two separate concerns to keep distinct:
 
 1. Contract authors write restricted Python source.
-2. The network chooses how that source is executed.
+2. The network accepts a specific artifact format for validator execution.
 
 Today Xian supports `xian_vm_v1`, which executes validated Xian VM artifacts
 through a native runtime and explicit execution policy.
@@ -254,6 +254,7 @@ integration, but validators do not need them to agree on state.
 - privacy-sensitive applications additionally use `xian-zk`,
   `zk_registry`, shielded contracts, and optionally the relayer surface
 
-That combination is the practical Xian architecture: one contract language,
-multiple execution runtimes, and a surrounding stack that treats decentralized
-infrastructure like a real software platform instead of an isolated VM.
+That combination is the practical Xian architecture: one contract language, a
+fixed Xian VM runtime on the current supported branch, and a surrounding stack
+that treats decentralized infrastructure like a real software platform instead
+of an isolated VM.

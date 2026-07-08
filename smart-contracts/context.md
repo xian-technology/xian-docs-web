@@ -36,6 +36,11 @@ This distinction is critical for security. A token contract should check `ctx.ca
 Contracts can deploy child contracts by calling the built-in `submission`
 contract.
 
+Factories do not compile child source on-chain. Build the child's
+`deployment_artifacts` off-chain with `xian-py`, `xian-js` plus the WASM
+compiler package, or `ContractingClient.build_deployment_artifacts(...)`, then
+pass those artifacts into the factory call.
+
 During child module-body execution and the child `@construct`, the child sees
 its own deployment context:
 
@@ -43,28 +48,10 @@ its own deployment context:
 import submission
 
 @export
-def deploy(name: str):
-    code = """
-value = Variable()
-
-@construct
-def seed():
-    value.set({
-        "this": ctx.this,
-        "caller": ctx.caller,
-        "signer": ctx.signer,
-        "entry": ctx.entry,
-        "submission_name": ctx.submission_name,
-    })
-
-@export
-def get():
-    return value.get()
-"""
-
+def deploy(name: str, deployment_artifacts: dict):
     submission.submit_contract(
         name=name,
-        code=code,
+        deployment_artifacts=deployment_artifacts,
     )
 ```
 

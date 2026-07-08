@@ -17,6 +17,8 @@ Each stream:
 - lets the sender shorten the stream and recover the unvested refund
 - lets the receiver forfeit the unvested part of the stream
 - supports permit-style creation flows
+- exposes `claimable_amount(...)` and `stream_info(...)` read helpers for
+  clients
 
 ## Token Dependency
 
@@ -46,6 +48,8 @@ The streamed token contract must expose:
   - `StreamCloseChanged`
   - `StreamForfeited`
   - `StreamFinalized`
+- duplicate schedules from the same sender are separated by a sender nonce in
+  the stream id
 
 ## Caveats
 

@@ -424,7 +424,7 @@ It uses the real trigger service and real skills, and mocks:
 Run it from the IntentKit repo:
 
 ```bash
-cd /Users/endogen/Projekte/xian/xian-intentkit
+cd ~/xian/xian-intentkit
 uv run python scripts/test_xian_trade_social_workflow.py --threshold-pct 3.0
 ```
 
@@ -444,7 +444,7 @@ The script prints a JSON summary with:
 For automated validation, the targeted test set is:
 
 ```bash
-cd /Users/endogen/Projekte/xian/xian-intentkit
+cd ~/xian/xian-intentkit
 REDIS_HOST=localhost uv run pytest -q \
   tests/skills/test_telegram.py \
   tests/skills/test_twitter.py \
@@ -468,7 +468,7 @@ The live localnet runner exercises the same workflow with:
 The live runner is:
 
 ```bash
-cd /Users/endogen/Projekte/xian/xian-intentkit
+cd ~/xian/xian-intentkit
 uv run python scripts/test_xian_trade_social_live.py --allow-live-posts
 ```
 
@@ -519,11 +519,9 @@ Derived values include:
 
 - `APP_BASE_URL`
 - `AWS_S3_CDN_URL`
+- `XIAN_AGENT_LOGO_URL`
 - the selected `XIAN_<NETWORK>_RPC_URL`
 - the selected `XIAN_<NETWORK>_CHAIN_ID`
-- `XIAN_EVENT_TRIGGER_ENABLED`
-- `XIAN_EVENT_TRIGGER_POLL_INTERVAL_SECONDS`
-- `XIAN_EVENT_TRIGGER_BATCH_LIMIT`
 
 For stack-managed side-by-side deployments, `XIAN_<NETWORK>_RPC_URL` is the
 container-internal node URL `http://abci:26657`. User-facing values such as
@@ -532,7 +530,9 @@ host and bracket IPv6 literals, for example `http://[::1]:38000`.
 
 All other IntentKit settings come from the normal IntentKit env contract.
 That includes LLM provider keys such as `OPENAI_API_KEY` or
-`OPENROUTER_API_KEY`.
+`OPENROUTER_API_KEY` and event-trigger controls such as
+`XIAN_EVENT_TRIGGER_ENABLED`, `XIAN_EVENT_TRIGGER_POLL_INTERVAL_SECONDS`, and
+`XIAN_EVENT_TRIGGER_BATCH_LIMIT`.
 
 ## Pricing
 

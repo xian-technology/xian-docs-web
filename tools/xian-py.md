@@ -71,6 +71,7 @@ from xian_py import (
     ShieldedRelayerPoolClient,
     ShieldedRelayerQuote,
     ShieldedRelayerQuoteResult,
+    ShieldedWalletHistoryEntry,
     SimulationError,
     SQLiteProjectionState,
     StateKeyClient,
@@ -229,9 +230,10 @@ with Xian("http://127.0.0.1:26657", config=config) as client:
     status = client.get_node_status()
 ```
 
-Retry policy applies only to read-side operations such as status queries,
-ABCI reads, tx lookup, and watcher polling. Transaction broadcasts are not
-retried automatically.
+Retry policy applies to read-side operations such as status queries, ABCI
+reads, tx lookup, and watcher polling. Broadcasts also retry transport failures
+through the same policy, but chain responses, mempool rejections, and execution
+failures are not retried as if they were transient network errors.
 
 If you need retry visibility, attach `RetryPolicy(on_retry=...)`. The callback
 receives a typed `RetryEvent` with the operation kind, the failed attempt
@@ -408,11 +410,11 @@ successful return value and raises if the readonly execution itself fails.
 
 ### deploy_contract / submit_contract
 
-Use `deploy_contract` when you have contract source. It submits source to the
-network; validators compile and persist canonical VM IR:
+Use `deploy_contract` when you have contract source. It builds deployment
+artifacts locally, then submits those artifacts to the network:
 
 ```python
-code = """
+source = """
 counter = Variable()
 
 @construct
@@ -427,14 +429,14 @@ def increment() -> int:
 
 result = client.deploy_contract(
     name="con_counter",
-    source=code,
+    source=source,
     args={},
     chi=500_000,
 )
 ```
 
-Use `submit_contract(name, code, args=...)` for the same source-backed
-deployment path when you do not want the `deploy_contract` alias.
+Use `submit_contract(name, deployment_artifacts, args=...)` when another step
+has already built the deployment artifacts.
 
 `name` must use lowercase ASCII letters, digits, and underscores only. For
 user contracts, keep the standard `con_` prefix.
@@ -789,7 +791,6 @@ first credits-ledger workflow and the first deeper reference-app slice:
   summary views through a small FastAPI service
 - `projector_worker.py`: rebuild a local SQLite read model from indexed
   `Issue`, `Transfer`, and `Burn` events
-- `event_worker.py`: compatibility wrapper around `projector_worker.py`
 
 Typical runs:
 
@@ -877,7 +878,6 @@ deeper reference-app slice:
 - `projector_worker.py`: rebuild a local SQLite workflow projection from
   indexed events and hydrate rich proposal/record state from authoritative
   contract reads
-- `event_worker.py`: compatibility wrapper around `projector_worker.py`
 
 Typical runs:
 
@@ -906,7 +906,6 @@ deeper reference-app slice:
 - `processor_worker.py`: claim submitted items and complete or fail them
 - `projector_worker.py`: rebuild a local SQLite queue/activity projection from
   indexed events and authoritative `get_item` reads
-- `event_worker.py`: compatibility wrapper around `processor_worker.py`
 
 Typical runs:
 

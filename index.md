@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Xian
   text: Build With Python. Run Decentralized.
-  tagline: Python-authored smart contracts, configurable execution runtimes, indexed services, and shielded application building blocks.
+  tagline: Python-authored smart contracts, a fixed Xian VM runtime, indexed services, and shielded application building blocks.
   actions:
     - theme: brand
       text: Get Started

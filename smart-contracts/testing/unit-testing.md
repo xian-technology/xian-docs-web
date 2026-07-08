@@ -34,6 +34,12 @@ client = ContractingClient(signer="sys")
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `signer` | `str` | `"sys"` | Default transaction signer for all operations |
+| `submission_filename` | `str` | internal default | Built-in submission contract source used when bootstrapping the client |
+| `storage_home` | `str` or `None` | `None` | Optional filesystem-backed storage location |
+| `driver` | driver or `None` | `None` | Existing storage driver to reuse |
+| `metering` | `bool` | `False` | Enable local metering for contract calls |
+| `compiler` | compiler or `None` | `None` | Compiler object used for building deployment artifacts |
+| `environment` | `dict` or `None` | `None` | Block/runtime environment overrides for tests |
 
 The `signer` sets the default `ctx.caller` and `ctx.signer` for all contract calls made through this client.
 
@@ -50,10 +56,15 @@ client.submit(f, name="con_my_contract", constructor_args={})
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `f` | function | A Python function whose source code is the contract |
-| `name` | `str` | The on-chain name for the contract |
-| `constructor_args` | `dict` | Arguments passed to the `@construct` function |
+| `name` | `str` or `None` | The on-chain name for the contract |
+| `metering` | `bool` or `None` | Per-submit metering override |
+| `owner` | `str` or `None` | Runtime owner metadata for the submitted contract |
+| `constructor_args` | `dict` or `None` | Arguments passed to the `@construct` function |
+| `signer` | `str` or `None` | Per-submit signer override |
 
-The function `f` is not called directly. Its **source code** is extracted, compiled, and executed in the sandbox. This means you define your contract as a regular Python function:
+The function `f` is not called directly. Its **source code** is extracted,
+compiled into `xian_vm_v1` deployment artifacts, and executed in the sandbox.
+This means you define your contract as a regular Python function:
 
 ```python
 def my_token():

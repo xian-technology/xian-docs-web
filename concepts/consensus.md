@@ -40,8 +40,8 @@ validators must stay aligned on:
 
 - network configuration
 - `xian-abci` and `xian-contracting` versions
-- the selected execution engine and its policy
-- the supported runtime for that engine
+- the fixed `xian_vm_v1` execution runtime
+- the supported VM artifact and gas policy
 
 For `xian_vm_v1`, that includes the native runtime and the same deployment
 artifacts for submitted contracts.

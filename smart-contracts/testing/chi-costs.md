@@ -14,8 +14,8 @@ from contracting.local import ContractingClient
 client = ContractingClient(metering=True)
 ```
 
-With metering enabled, contract calls use the same tracer mode that the runtime
-would use on-chain.
+With metering enabled, local calls are useful for regression tests and
+relative cost comparisons.
 
 `xian_vm_v1` meters through its VM gas schedule. Simulation remains the best
 way to estimate final receipt values before submitting a transaction.
@@ -80,8 +80,8 @@ def simple_contract():
 
 client.submit(simple_contract, name="con_counter")
 
-# Use Executor with metering
-executor = Executor(metering=True)
+# Use Executor with metering against the same test driver
+executor = Executor(metering=True, driver=client.raw_driver)
 
 output = executor.execute(
     sender="sys",
@@ -103,7 +103,7 @@ The output dictionary contains:
 | `chi_used` | Total chi consumed by the transaction |
 | `result` | The return value of the function |
 | `status_code` | `0` for success, `1` for failure |
-| `state` | List of state changes made |
+| `writes` | List of state changes made |
 
 ## Example: Comparing Chi Costs
 
@@ -140,7 +140,7 @@ class TestChiCosts(unittest.TestCase):
         self.client = ContractingClient()
         self.client.flush()
         self.client.submit(cost_test_contract, name="con_cost")
-        self.executor = Executor(metering=True)
+        self.executor = Executor(metering=True, driver=self.client.raw_driver)
 
     def execute(self, function_name, kwargs=None):
         return self.executor.execute(

@@ -23,6 +23,9 @@ zk.has_verifying_key(vk_id)
 zk.get_vk_info(vk_id)
 zk.verify_groth16(vk_id, proof_hex, public_inputs)
 zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
+zk.warm_verified_proofs(requests)
+zk.clear_prepared_vk_cache()
+zk.clear_verified_proof_cache()
 ```
 
 The runtime module also exposes low-level shielded helper functions used by the
@@ -44,6 +47,13 @@ zk.shielded_command_public_inputs(...)
 Treat those as protocol helpers for the maintained shielded contracts, not as a
 general dapp API. Most contract integrations should use the higher-level
 shielded contract patterns rather than composing these helpers directly.
+
+`zk.warm_verified_proofs(...)` verifies a list of registry-backed proof
+requests through the grouped native verifier and stores the results in the
+runtime proof cache. `zk.clear_prepared_vk_cache()` and
+`zk.clear_verified_proof_cache()` clear the local verifier caches. These are
+low-level runtime helpers for controlled environments; ordinary contracts should
+prefer direct calls to `zk.verify_groth16(...)`.
 
 ## `zk.is_available()`
 
