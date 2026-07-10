@@ -3,7 +3,7 @@
 The simplest path is:
 
 1. test locally with `xian-contracting`
-2. compile and deploy with an SDK
+2. deploy reviewed source with an SDK
 3. inspect state and transaction results through the node APIs
 
 ## Deploy A Contract
@@ -33,14 +33,16 @@ result = client.deploy_contract(
 )
 ```
 
-`deploy_contract` builds the current Xian VM deployment artifacts locally, then
-submits them through `submission.submit_contract`. Use
-`submit_contract(name, deployment_artifacts, ...)` only when you already have
-prebuilt artifacts.
+`deploy_contract` submits cleartext source. Validators lint and compile that
+source, then store the canonical source and VM IR. Prebuilt artifacts are useful
+for offline inspection, but they are not accepted as deployment payloads.
+Submitted source is limited to 128 KiB and must also stay within the compiler's
+deterministic syntax-node, nesting, and token bounds described in the
+[linter reference](/tools/linter#response-shape).
 
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts
-should keep the `con_` prefix, so names like `con_example_token` are valid
+must use the `con_` prefix, so names like `con_example_token` are valid
 while names like `con-example`, `con.example`, or `1con_bad` are rejected.
 
 ## Simulate Before You Send

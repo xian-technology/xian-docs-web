@@ -62,7 +62,7 @@ the repo-owned bootstrap against a healthy node:
 
 ```bash
 uv run --project ../xian-cli xian contract bundle validate contract-bundle.json
-uv run python scripts/bootstrap_protocol.py --skip-sample-tokens
+uv run --group deploy python scripts/bootstrap_protocol.py --skip-sample-tokens
 ```
 
 The bootstrap deploys any missing protocol contracts, enables `con_vaults`
@@ -95,11 +95,12 @@ Acceptance happens through ordinary governance proposals that call
 local testing (`--no-start-governance-handoff`), start it later by re-running
 the bootstrap script.
 
-## Status
+## Deployment Readiness
 
-Strong reference implementation with a real Xian-stack bootstrap path. It is
-not a fully automated production protocol. Production hardening work is
-tracked in the repo's `docs/ROADMAP.md`.
+This is a deployable reference implementation, not an automatically safe
+production stablecoin. Before using it with material value, review oracle
+governance, collateral parameters, liquidation/auction behavior, fee routing,
+controller permissions, emergency actions, monitoring, and governance handoff.
 
 ## Related Pages
 

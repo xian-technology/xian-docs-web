@@ -22,7 +22,7 @@ Required fields:
 ```json
 {
   "schema_version": 1,
-  "name": "metering-incident-20260327",
+  "name": "metering-incident-001",
   "chain_id": "xian-local-1",
   "target_height": 123456,
   "trusted_block_hash": "ABCD...",

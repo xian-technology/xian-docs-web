@@ -31,7 +31,7 @@ def seed():
     balances[ctx.caller] = 1_000_000
 
 @export
-def transfer(to: str, amount: float):
+def transfer(amount: float, to: str):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount
@@ -62,5 +62,6 @@ def transfer(to: str, amount: float):
 - [Standard Library](/smart-contracts/stdlib/)
 - [Imports & Interfaces](/smart-contracts/imports/)
 - [Contract Standards](/smart-contracts/standards/)
+- [Curated Multi-Token Staking](/smart-contracts/staking)
 - [Testing](/smart-contracts/testing/)
 - [Security](/smart-contracts/security/)

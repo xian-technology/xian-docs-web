@@ -5,7 +5,9 @@ the error makes debugging much faster.
 
 ## Linter Errors
 
-The contract linter reports structured `E001`-style errors such as:
+The contract linter reports structured Rust compiler diagnostics. Semantic
+rules use `xian.lint.E###`; parser, IR, and admission-limit failures use
+`xian.syntax.*`, `xian.ir.*`, and `xian.limit.*` respectively. These include:
 
 - forbidden syntax
 - illegal imports

@@ -16,6 +16,7 @@ The linter enforces that restricted subset before code is accepted.
 | functions | `def f():` | top-level only |
 | `return` | `return value` | |
 | `assert` | `assert ok, "message"` | main validation pattern |
+| f-strings | `f"Hello {name}"` | basic interpolation and allowed expressions only; conversions (`!r`, `!s`, `!a`), debug syntax (`{name=}`), and format specifications (`:04d`) are unsupported |
 | collections | `list`, `dict`, `tuple`, `set()`, `frozenset()` | set literals and set comprehensions are blocked |
 | list and dict comprehensions | `[x for x in items]`, `{k: v for k, v in items}` | generator expressions are not allowed |
 | ternary expressions | `"yes" if ok else "no"` | lowered into Xian VM IR and metered like other expressions |
@@ -119,7 +120,7 @@ def balance_of(address: str) -> float:
     return balances[address]
 
 @export(typecheck=True)
-def transfer(to: str, amount: float):
+def transfer(amount: float, to: str):
     balances[ctx.caller] -= amount
     balances[to] += amount
 ```

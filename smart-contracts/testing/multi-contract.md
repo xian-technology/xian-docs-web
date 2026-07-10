@@ -136,9 +136,8 @@ class TestDex(unittest.TestCase):
         self.token.transfer(amount=500, to="alice")
 
         # Alice deposits
-        self.client.signer = "alice"
-        self.token.approve(amount=500, to="con_dex")
-        self.dex.deposit(amount=500)
+        self.token.approve(amount=500, to="con_dex", signer="alice")
+        self.dex.deposit(amount=500, signer="alice")
 
         self.assertEqual(self.dex.pool_balance(address="sys"), 1000)
         self.assertEqual(self.dex.pool_balance(address="alice"), 500)
@@ -152,20 +151,17 @@ if __name__ == "__main__":
 
 Understanding how `ctx` changes is critical when testing multi-contract interactions:
 
-```
-self.client.signer = "alice"
-self.dex.deposit(amount=100)
-```
+```mermaid
+sequenceDiagram
+  participant User as alice
+  participant DEX as con_dex
+  participant Token as con_token
 
-Inside `con_dex.deposit()`:
-- `ctx.caller` = `"alice"` (the user called the DEX)
-- `ctx.signer` = `"alice"`
-- `ctx.this` = `"con_dex"`
-
-When `con_dex` calls `con_token.transfer_from()`:
-- `ctx.caller` = `"con_dex"` (the DEX is calling the token)
-- `ctx.signer` = `"alice"` (unchanged)
-- `ctx.this` = `"con_token"`
+  User->>DEX: deposit(amount=100)
+  Note over DEX: caller = alice<br/>signer = alice<br/>this = con_dex
+  DEX->>Token: transfer_from(...)
+  Note over Token: caller = con_dex<br/>signer = alice<br/>this = con_token
+```
 
 This is why the DEX uses `transfer_from` with `main_account=ctx.caller` -- inside the token contract, `ctx.caller` is `"con_dex"`, which must have an allowance from `"alice"`.
 

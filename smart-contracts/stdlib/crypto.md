@@ -14,7 +14,7 @@ crypto.key_is_valid(key)
 
 `crypto.verify(vk, msg, signature)` returns `True` when:
 
-- `vk` is a valid Ed25519 public key in lowercase hex
+- `vk` is a valid 32-byte Ed25519 public key encoded as hex
 - `signature` is a valid Ed25519 signature in hex
 - the signature matches the UTF-8 encoded `msg` string
 

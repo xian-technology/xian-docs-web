@@ -120,7 +120,9 @@ A signed message that instructs the network to execute a contract function with 
 ## V
 
 ### Validator
-A node that participates in consensus. Validators propose blocks, vote on block validity, and execute transactions. Validators must stake XIAN and run the same software version.
+A node that participates in consensus. Validators propose blocks, vote on
+block validity, and execute transactions. They must run the network's supported
+runtime and satisfy its configured membership and bonding policy.
 
 ### Variable
 A single-value storage primitive that persists on-chain. Declared with `Variable()` or `Variable(default_value=0)`. Use `.set(value)` and `.get()` to write and read.

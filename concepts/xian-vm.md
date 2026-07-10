@@ -1,7 +1,7 @@
 # The Xian VM
 
 The Xian VM is the execution layer that lets Xian keep Python as the contract
-authoring language without tying consensus forever to CPython bytecode.
+authoring language without making CPython bytecode the consensus format.
 
 ## The Two Layers To Keep Separate
 
@@ -10,22 +10,21 @@ There are always two distinct questions in Xian:
 1. What language does the developer write?
 2. What machine executes that program on validators?
 
-Developers write a restricted Python subset. The network then chooses an
-execution model for that authored contract. Current Xian nodes use the fixed
-`xian_vm_v1` execution model.
+Developers write a restricted Python subset. Nodes execute it through the fixed
+`xian_vm_v1` model.
 
 ## Execution Mode
 
 | Mode | What executes |
 |------|----------------|
-| `xian_vm_v1` | validated Xian VM artifacts under a native runtime |
+| `xian_vm_v1` | validator-derived canonical IR under a native runtime |
 
-The contract language stays the same. The currently supported node runtime is
-fixed to the VM artifact path.
+The contract language stays the same. The supported node runtime is fixed to
+the VM artifact path.
 
 ## What `xian_vm_v1` Actually Uses
 
-Under `xian_vm_v1`, deployment is source-authored and artifact-backed.
+Under `xian_vm_v1`, deployment is source-driven.
 
 The important stored artifacts are:
 
@@ -33,16 +32,16 @@ The important stored artifacts are:
   and inspection tooling
 - `__xian_ir_v1__`: the persisted Xian VM IR used by the native runtime
 
-Client tooling builds `deployment_artifacts` before submission. Those artifacts
-include canonical source, VM IR, and hashes that the runtime validates before
-persisting source and IR. Legacy `runtime_code` and `runtime_code_sha256`
-deployment fields are rejected.
+Clients submit cleartext source. Validators normalize, lint, and compile that
+source with the canonical Rust compiler, then persist the resulting source and
+IR.
+Submitted `deployment_artifacts` are rejected so clients cannot choose the
+executable IR.
 
 ```mermaid
 flowchart TD
   Source["Restricted Python contract source"]
   Compiler["Canonical Xian compiler"]
-  Artifacts["deployment_artifacts"]
   SourceArtifact["Stored __source__"]
   IR["Stored __xian_ir_v1__"]
   Admission["Validator deployment admission"]
@@ -51,10 +50,10 @@ flowchart TD
   State["Xian state, events, and imports"]
 
   Source --> Compiler
-  Compiler --> Artifacts
-  Artifacts --> Admission
-  Admission --> SourceArtifact
-  Admission --> IR
+  Compiler --> SourceArtifact
+  Compiler --> IR
+  SourceArtifact --> Admission
+  IR --> Admission
   Admission --> VM
   VM --> Host
   Host --> State
@@ -68,7 +67,7 @@ On the supported branch:
 
 - `xian_vm_v1` is the only supported node runtime
 - bytecode, gas schedule, and authority are internal VM constants
-- submitted contracts must provide validated deployment artifacts
+- submitted contracts must provide source code
 
 This keeps the execution contract explicit without exposing alternate engines
 or an operator-selectable execution policy section.
@@ -105,14 +104,12 @@ developer-facing contract model.
 
 ## Why The Xian VM Matters
 
-The Xian VM gives the platform a cleaner long-term machine contract:
+The Xian VM gives the platform an explicit machine contract:
 
 - execution semantics become Xian-defined instead of CPython-bytecode-defined
 - metering can be attached directly to VM operations and host calls
-- deployment can be validated from canonical artifacts
+- submitted source can be validated and compiled into canonical IR
 - replay and parity testing become easier to reason about
-- performance-sensitive paths can move further into native code without forcing
-  a new contract language on developers
 
 ## Scope
 
@@ -121,8 +118,7 @@ including storage flows, decimals, datetime helpers, hashing, Ed25519
 verification, imports, events, and the shielded contract helpers needed by the
 existing shielded stack.
 
-That means the Xian VM is not just a design note. It is the supported
-execution path for current node deployments.
+It is the supported execution path for node deployments.
 
 ## Related Pages
 

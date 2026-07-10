@@ -1,748 +1,215 @@
 # Building a Shielded Privacy Token
 
-This tutorial uses the existing `con_shielded_note_token` contract plus the
-`xian_zk` proving toolkit to deploy and use a note-based privacy token on
-Xian.
+This guide uses the maintained `con_shielded_note_token` contract and
+`xian_zk` wallet/prover toolkit.
 
-This implementation works end to end with the existing contract and tooling.
-The wallet stack is `candidate`, not a finished production wallet experience.
+The flow is note-based: public tokens enter a shielded pool, private transfers
+spend and create notes, and withdrawals return value to a public address.
 
-For the package-level `xian_zk` reference, deployment CLI, and wallet API
-surface, see [xian-zk](/tools/xian-zk).
+## Privacy Boundary
 
-## What You Get
+Shielded transfers hide note ownership and transfer amounts. The chain still
+publishes commitments, nullifiers, accepted roots, encrypted payloads, and
+transaction timing. Deposits and public withdrawals expose their amounts and
+public accounts. A relayer can hide the note owner from the public transaction
+sender field but does not provide network-layer anonymity.
 
-- a normal public token surface for minting, balances, approvals, and transfer
-- a shielded pool backed by Groth16 proofs
-- recipient public shielded addresses instead of recipient spending-secret
-  sharing
-- encrypted note payloads carried in transaction history for wallet-side note
-  recovery
-- shielded deposit, transfer, and withdraw flows
-- optional relayed shielded transfers where the public tx sender is a relayer
-  instead of the hidden note owner
-- a depth-20 shielded tree with capacity for `1,048,576` notes
+## Prerequisites
 
-## What Is Private
-
-- shielded transfer values stay inside the proof domain
-- note ownership stays off-chain as long as the wallet keeps note material
-  private
-- relayed shielded transfers can hide the note owner's public transaction sender
-
-## What Is Public
-
-- contract deployment and operator configuration
-- deposits into the shielded pool
-- withdraw amounts and withdraw recipients
-- nullifiers, output commitments, and accepted roots
-- the relayer account and relayer fee for relayed transfers
-
-## Caveats
-
-- there is no standardized network-wide viewing policy yet
-- there is no polished end-user GUI or mobile wallet UX yet
-- the built-in deployment generator is a single-party random setup, not a
-  multi-party ceremony
-- `ShieldedNoteProver.build_insecure_dev_bundle()` is local test tooling only
-  and must never be used for a real network
-- wallet note sync depends on indexed transaction history, not just contract
-  state
-
-## Cost Profile
-
-Shielded transactions are much cheaper than the original all-Python contract
-path because tree updates and relay-digest hot paths run through native
-`xian-zk` bindings inside the runtime.
-
-Local benchmark reference values from June 2026:
-
-- normal public transfer on the rebuilt local stack: about `69` chi
-- shielded exact withdraw with no new output: about `2,242` chi
-- shielded withdraw with 1 input / 1 new output: about `3,435` chi
-- shielded deposit with 2 outputs: about `3,645` chi
-- shielded transfer with 2 inputs / 2 outputs: about `3,926` chi
-- relayed hidden-sender shielded transfer: about `6,126` chi
-
-Those remain more expensive than a public transfer, but are below the
-five-digit chi range of the all-Python path.
-
-## Before You Start
-
-You need:
-
-- a node/runtime with zk verification enabled
-- a `zk_registry` contract available on the network
-- the `con_shielded_note_token.py` source from `xian-contracts`
-- the `xian_zk` Python package from `xian-contracting`
-
-On a real network, register verifying keys generated from your own trusted
-setup ceremony. The deterministic dev bundle is only for local development and
-tests.
-
-## Step 1: Deploy The Registry And Token
-
-On a local chain, deploy `zk_registry` first if it does not already exist:
-
-```python
-from pathlib import Path
-
-from contracting.local import ContractingClient
-
-client = ContractingClient()
-client.flush()
-
-zk_registry_source = Path(
-    "xian-configs/contracts/zk_registry.s.py"
-).read_text()
-shielded_token_source = Path(
-    "xian-contracts/contracts/shielded-note-token/src/con_shielded_note_token.py"
-).read_text()
-
-client.submit(zk_registry_source, name="zk_registry", signer="sys")
-zk_registry = client.get_contract_proxy("zk_registry")
-zk_registry.seed(owner="sys", signer="sys")
-
-client.submit(
-    shielded_token_source,
-    name="con_private_usd",
-    constructor_args={
-        "token_name": "Private USD",
-        "token_symbol": "pUSD",
-        "operator_address": "sys",
-        "root_window_size": 32,
-    },
-    signer="sys",
-)
-token = client.get_contract_proxy("con_private_usd")
-```
-
-On a live network, `zk_registry` should already exist as a system contract.
-
-## Step 2: Register The Verifying Keys
-
-The shielded token needs one verifying key for each shielded action:
-
-- `deposit`
-- `transfer`
-- `withdraw`
-- `relay_transfer`
-
-For a production-style deployment, start from ceremony-generated note and
-relay-command bundles and promote them into network handoff artifacts:
+- a chain with the `zk` runtime feature and native verifier on every validator
+- the system `zk_registry` contract
+- `con_shielded_note_token.py` from `xian-contracts`
+- `xian-tech-zk` for proving and wallet operations
+- a BDS-enabled node for resumable wallet history
 
 ```bash
-uv run xian-zk-shielded-bundle promote \
-  --network testnet \
-  --contract-name con_private_usd \
-  --note-bundle ./ceremony-note-bundle.json \
-  --relay-command-bundle ./ceremony-relay-command-bundle.json \
-  --output-dir ./artifacts/private-usd-testnet
+uv add xian-tech-py xian-tech-zk
 ```
 
-The command writes:
+## 1. Prepare Verifying Keys
 
-- `shielded-note-bundle.json`: private proving bundle, keep offline
-- `shielded-note-registry-manifest.json`: public verifying-key manifest
-- `shielded-relay-command-bundle.json`: private relay proving bundle, keep
-  offline
-- `shielded-relay-registry-manifest.json`: public relay verifying-key manifest
-- `register_and_bind.py`: importable helper for registration and binding
-- `promotion-summary.json`: operator handoff summary
-- `catalog-artifacts-snippet.json`: starting point for the network privacy
-  artifact catalog
-
-If `zk_registry` is governance-owned, use the generated `registry_entries` as
-the payload for governance proposals that call `zk_registry.register_vk(...)`.
-The generated helper is useful for operator automation, but it does not bypass
-governance or multisig ownership.
-
-For private networks or test deployments that explicitly accept single-party
-setup trust, the note bundle generator is available:
+For a value-bearing deployment, start with ceremony-derived note and relay
+bundles and promote them into operator artifacts:
 
 ```bash
-uv run xian-zk-shielded-bundle generate-note \
-  --output-dir ./artifacts/private-usd-testnet \
+xian-zk-shielded-bundle promote \
+  --network private-net \
   --contract-name con_private_usd \
-  --vk-id-prefix private-usd-testnet-20260611
+  --note-bundle ./ceremony/note.json \
+  --relay-command-bundle ./ceremony/relay.json \
+  --output-dir ./artifacts/private-usd
 ```
 
-That path is not an MPC ceremony. If the token enables `relay_transfer`, also
-provision and register a relay-command manifest before binding the token.
+The output includes private prover bundles, public registry manifests, a
+registration/binding helper, a summary, and a privacy-catalog snippet. Keep
+private bundles offline. Register public entries through the authority that
+owns `zk_registry`, then call `configure_vk(action, vk_id)` on the token.
 
-Load the manifests that match your setup path:
-
-```python
-import json
-from pathlib import Path
-
-manifest_paths = [
-    Path("./artifacts/private-usd-testnet/shielded-note-registry-manifest.json"),
-    Path("./artifacts/private-usd-testnet/shielded-relay-registry-manifest.json"),
-]
-manifests = [json.loads(path.read_text()) for path in manifest_paths]
-```
-
-Then register the manifest entries. Each entry carries the registry metadata
-surface, including setup provenance and artifact hashes. Remove the helper-only
-`action` field before calling `register_vk(...)`:
+For local tests only:
 
 ```python
-for manifest in manifests:
-    for entry in manifest["registry_entries"]:
-        args = dict(entry)
-        args.pop("action", None)
-        zk_registry.register_vk(**args, signer="sys")
-```
-
-For local development, the deterministic dev bundles contain matching
-verifying keys:
-
-```python
-from xian_zk import ShieldedNoteProver, ShieldedRelayTransferProver
+from xian_zk import ShieldedNoteProver
 
 prover = ShieldedNoteProver.build_insecure_dev_bundle()
-relay_prover = ShieldedRelayTransferProver.build_insecure_dev_bundle()
-manifests = [prover.registry_manifest(), relay_prover.registry_manifest()]
-
-for manifest in manifests:
-    for entry in manifest["registry_entries"]:
-        args = dict(entry)
-        args.pop("action", None)
-        zk_registry.register_vk(**args, signer="sys")
+manifest = prover.registry_manifest()
 ```
 
-This registers these verifier ids:
+The deterministic development bundle exposes toxic waste and must never secure
+real value. A single-party random setup is also not an MPC ceremony.
 
-- `shielded-deposit-v4`
-- `shielded-transfer-v4`
-- `shielded-withdraw-v4`
-- `shielded-command-execute-v5` (registered under the `relay_transfer` action
-  by the relay-transfer prover manifest)
+Load an accepted private proving bundle on the proving host with
+`ShieldedNoteProver(Path("bundle.json").read_text())`.
 
-## Step 3: Bind The Keys To The Token
+## 2. Deploy and Configure the Token
 
-The token operator pins each action to a registry key id. The contract also
-stores the registry `vk_hash`, so a later registry drift cannot silently
-change the live circuit semantics.
+Deploy source through the normal source-backed submission path with constructor
+arguments such as token name, symbol, operator, and root-window size. Register
+the manifest entries in `zk_registry`, then bind each action:
+
+Submit `configure_vk(action, vk_id)` through the operator or governance
+transaction path for every entry in `manifest["configure_actions"]`. Verify
+each stored `vk_id` and `vk_hash` before minting supply.
+
+## 3. Create and Back Up a Shielded Wallet
 
 ```python
-for manifest in manifests:
-    for binding in manifest["configure_actions"]:
-        token.configure_vk(
-            action=binding["action"],
-            vk_id=binding["vk_id"],
-            signer="sys",
-        )
+import os
+
+from xian_py import Wallet, Xian
+from xian_zk import ShieldedWallet
+
+account = Wallet(private_key=os.environ["XIAN_PRIVATE_KEY"])
+client = Xian("http://127.0.0.1:26657", wallet=account)
+token = client.contract("con_private_usd")
+
+asset_id = token.call("asset_id")
+alice = ShieldedWallet.generate(asset_id)
+
+seed_backup = alice.export_seed_json()
+state_snapshot = alice.to_json()
 ```
 
-You can inspect the binding at any time:
+The seed backup contains spend and view authority. The state snapshot also
+contains synced commitments, notes, and cursors. Protect both; the snapshot is
+not a substitute for the seed backup.
+
+On an indexed node, sync before planning an action:
 
 ```python
-token.get_vk_binding(action="deposit", signer="sys")
-token.get_vk_binding(action="relay_transfer", signer="sys")
+alice.sync_indexed_client(client, contract="con_private_usd")
 ```
 
-## Step 4: Mint Public Supply
+This uses `shielded_wallet_history` when available and resumes by note index.
 
-Public balances are useful because deposit and withdraw cross the public
-and shielded domains.
+## 4. Deposit Public Value
+
+Mint or acquire public balance first. Then plan, prove, and submit:
 
 ```python
-token.mint_public(amount=100, to="alice", signer="sys")
+plan = alice.build_deposit(amount=60)
+proof = prover.prove_deposit(plan.request)
 
-assert token.balance_of(account="alice", signer="sys") == 100
-assert token.get_supply_state(signer="sys") == {
-    "total_supply": 100,
-    "public_supply": 100,
-    "shielded_supply": 0,
-}
+token.send(
+    "deposit_shielded",
+    kwargs={
+        "amount": 60,
+        "old_root": proof.old_root,
+        "output_commitments": proof.output_commitments,
+        "proof_hex": proof.proof_hex,
+        "output_payloads": plan.output_payloads,
+    },
+    wait_for_tx=True,
+)
 ```
 
-## Step 5: Create Shielded Keys And Deposit
+The contract reduces Alice's public balance, increases shielded supply, appends
+commitments, and verifies that encrypted payload hashes were bound by the
+proof. Sync the wallet after finalization before planning the next action.
 
-The production-shaped model has two pieces per user:
+## 5. Transfer Privately
 
-- an `owner_secret`, which controls spending inside the shielded pool
-- a viewing keypair, which lets the sender encrypt the note payload for the
-  recipient or any disclosed auditor
-
-The sender does not need the recipient's `owner_secret`. They only need the
-recipient's public shielded address and viewing public key.
+The recipient shares a public shielded recipient bundle, not an owner secret.
 
 ```python
-import secrets
+from xian_zk import ShieldedWallet
 
-from xian_zk import (
-    ShieldedDepositRequest,
-    ShieldedKeyBundle,
-    ShieldedNote,
-    note_records_from_transactions,
-    recover_encrypted_notes,
-)
-from xian_py import Xian
+bob = ShieldedWallet.generate(asset_id)
 
-FIELD_MODULUS = (
-    21888242871839275222246405745257275088548364400416034343698204186575808495617
-)
+alice.sync_indexed_client(client, contract="con_private_usd")
+plan = alice.build_transfer(recipient=bob.recipient, amount=25)
+proof = prover.prove_transfer(plan.request)
 
-
-def rand_field() -> str:
-    return f"0x{secrets.randbelow(FIELD_MODULUS):064x}"
-
-
-indexed_client = Xian("http://127.0.0.1:26657")
-
-
-def load_all_records(indexed_client, contract_name):
-    txs = []
-    offset = 0
-    while True:
-        page = indexed_client.list_txs_by_contract(
-            contract_name,
-            limit=128,
-            offset=offset,
-        )
-        if not page:
-            break
-        txs.extend(page)
-        if len(page) < 128:
-            break
-        offset += len(page)
-    return note_records_from_transactions(txs)
-
-
-alice_keys = ShieldedKeyBundle.generate()
-alice_note_1 = ShieldedNote(
-    owner_secret=alice_keys.owner_secret,
-    amount=60,
-    rho=rand_field(),
-    blind=rand_field(),
-)
-
-deposit = prover.prove_deposit(
-    ShieldedDepositRequest(
-        asset_id=token.asset_id(signer="sys"),
-        old_root=token.current_shielded_root(signer="sys"),
-        append_state=token.get_tree_state(signer="sys"),
-        amount=60,
-        outputs=[alice_note_1.to_output()],
-    )
-)
-
-deposit_payloads = [
-    alice_note_1.to_output().encrypt_for(
-        asset_id=token.asset_id(signer="sys"),
-        viewing_public_key=alice_keys.viewing_public_key,
-    )
-]
-
-token.deposit_shielded(
-    amount=60,
-    old_root=deposit.old_root,
-    output_commitments=deposit.output_commitments,
-    proof_hex=deposit.proof_hex,
-    output_payloads=deposit_payloads,
-    signer="alice",
-)
-
-records = load_all_records(indexed_client, "con_private_usd")
-alice_discovered = recover_encrypted_notes(
-    asset_id=token.asset_id(signer="sys"),
-    commitments=[record.commitment for record in records],
-    payloads=[record.payload for record in records],
-    owner_secret=alice_keys.owner_secret,
-    viewing_private_key=alice_keys.viewing_private_key,
+token.send(
+    "transfer_shielded",
+    kwargs={
+        "old_root": proof.old_root,
+        "input_nullifiers": proof.input_nullifiers,
+        "output_commitments": proof.output_commitments,
+        "proof_hex": proof.proof_hex,
+        "output_payloads": plan.output_payloads,
+    },
+    wait_for_tx=True,
 )
 ```
 
-After the deposit:
-
-- Alice public balance drops from `100` to `40`
-- shielded supply rises from `0` to `60`
-- the contract stores the new commitment plus the proof-bound payload hash
-- the encrypted payload remains available in indexed transaction history
-- Alice can recover the note from `list_txs_by_contract(...)`
-
-Newer payloads use anonymous discovery tags instead of embedding the recipient
-viewing key in cleartext, so indexed history is less searchable by recipient.
-
-## Step 5A: Sync And Backup A Wallet Snapshot
-
-The canonical Python-side wallet abstraction is `ShieldedWallet`. It tracks
-your keys, synced note records, commitment history, spendable balance, and
-seed/state backups.
+After finalization, mark spent notes and sync outputs before another spend:
 
 ```python
-from xian_zk import ShieldedKeyBundle, ShieldedWallet
-
-alice_wallet = ShieldedWallet.from_parts(
-    asset_id=token.asset_id(signer="sys"),
-    owner_secret=alice_keys.owner_secret,
-    viewing_private_key=alice_keys.viewing_private_key,
+alice.refresh_spent_status(
+    lambda value: token.call("is_nullifier_spent", nullifier=value)
 )
-
-alice_wallet.sync_transactions(
-    indexed_client.list_txs_by_contract(
-        "con_private_usd",
-        limit=128,
-        offset=0,
-    )
-)
-
-assert alice_wallet.available_balance() == 60
-
-seed_backup = alice_wallet.export_seed_json()
-state_snapshot = alice_wallet.to_json()
-restored_wallet = ShieldedWallet.from_json(state_snapshot)
+alice.sync_indexed_client(client, contract="con_private_usd")
+bob.sync_indexed_client(client, contract="con_private_usd")
 ```
 
-`seed_backup` is the minimal recovery backup. `state_snapshot` is the richer
-resume snapshot that also keeps synced commitments and wallet note state so the
-wallet can continue scanning and planning without rebuilding everything first.
-
-The browser and mobile wallet apps treat this `state_snapshot` as a first-class
-backup primitive: users can store shielded snapshots in wallet
-settings, include them automatically in full encrypted wallet backups, and
-export individual shielded snapshots when needed. They can also check whether
-indexed shielded history already contains newer notes after a stored snapshot,
-which is the user-facing signal that a restore file is stale and should be
-refreshed before spending.
-
-`ShieldedWallet.sync_transactions(...)` prefilters note payloads before full
-decryption. If you already materialized note records from indexed transactions,
-you can prefilter first:
+## 6. Withdraw
 
 ```python
-records = load_all_records(indexed_client, "con_private_usd")
-candidates = alice_wallet.candidate_records(records)
-alice_wallet.sync_records(candidates)
-```
+plan = alice.build_withdraw(amount=10, recipient=account.public_key)
+proof = prover.prove_withdraw(plan.request)
 
-On live indexed nodes, newer wallet sync can also use the higher-level
-`shielded_wallet_history` feed instead of reconstructing note records through
-separate event, tag, and transaction reads.
-
-The same wallet can also build deposit, transfer, and withdraw requests plus
-their encrypted payloads directly:
-
-```python
-next_recipient = ShieldedKeyBundle.generate().recipient
-
-transfer_plan = alice_wallet.build_transfer(
-    recipient=next_recipient,
-    amount=25,
-)
-
-withdraw_plan = alice_wallet.build_withdraw(
-    amount=10,
-    recipient="alice",
+token.send(
+    "withdraw_shielded",
+    kwargs={
+        "amount": 10,
+        "to": account.public_key,
+        "old_root": proof.old_root,
+        "input_nullifiers": proof.input_nullifiers,
+        "output_commitments": proof.output_commitments,
+        "proof_hex": proof.proof_hex,
+        "output_payloads": plan.output_payloads,
+    },
+    wait_for_tx=True,
 )
 ```
 
-## Step 6: Transfer Privately To Another Shielded Recipient
+When the selected notes exactly equal the withdrawal amount, the plan has no
+change output. Otherwise it creates an encrypted change note for Alice.
 
-The recipient shares only their public shielded address bundle.
+The recipient and withdrawn amount are public.
 
-```python
-from xian_zk import ShieldedOutput, ShieldedTransferRequest
+## Relayed Transfers and Disclosure
 
-bob_keys = ShieldedKeyBundle.generate()
-bob_note_1 = ShieldedNote(
-    owner_secret=bob_keys.owner_secret,
-    amount=25,
-    rho=rand_field(),
-    blind=rand_field(),
-)
-alice_note_2 = ShieldedNote(
-    owner_secret=alice_keys.owner_secret,
-    amount=35,
-    rho=rand_field(),
-    blind=rand_field(),
-)
+`ShieldedRelayTransferWallet` and `ShieldedRelayTransferProver` bind a relayer,
+chain ID, fee, expiry, nullifiers, commitments, and payload hashes into the
+proof. The relayer becomes the public sender and can receive a proof-bound fee.
 
-transfer = prover.prove_transfer(
-    ShieldedTransferRequest(
-        asset_id=token.asset_id(signer="sys"),
-        old_root=token.current_shielded_root(signer="sys"),
-        append_state=token.get_tree_state(signer="sys"),
-        inputs=[alice_discovered[0].to_input()],
-        outputs=[
-            ShieldedOutput.for_recipient(
-                bob_keys.recipient,
-                amount=bob_note_1.amount,
-                rho=bob_note_1.rho,
-                blind=bob_note_1.blind,
-            ),
-            alice_note_2.to_output(),
-        ],
-    )
-)
+Output encryption can include additional viewing keys for selective disclosure.
+A viewer can decrypt the disclosed note but cannot spend it without the owner
+secret.
 
-transfer_payloads = [
-    ShieldedOutput.for_recipient(
-        bob_keys.recipient,
-        amount=bob_note_1.amount,
-        rho=bob_note_1.rho,
-        blind=bob_note_1.blind,
-    ).encrypt_for(
-        asset_id=token.asset_id(signer="sys"),
-        viewing_public_key=bob_keys.viewing_public_key,
-    ),
-    alice_note_2.to_output().encrypt_for(
-        asset_id=token.asset_id(signer="sys"),
-        viewing_public_key=alice_keys.viewing_public_key,
-    ),
-]
+## Operational Requirements
 
-token.transfer_shielded(
-    old_root=transfer.old_root,
-    input_nullifiers=transfer.input_nullifiers,
-    output_commitments=transfer.output_commitments,
-    proof_hex=transfer.proof_hex,
-    output_payloads=transfer_payloads,
-    signer="alice",
-)
-```
+- pin circuit family, tree depth, bundle hash, `vk_id`, and `vk_hash`
+- keep proving material offline or in an authenticated trusted prover service
+- retain accepted-root history and wallet state needed for concurrent proofs
+- monitor BDS history compatibility and wallet sync cursors
+- never trust an encrypted payload until decryption and commitment checks pass
+- simulate only when the node's simulation chi cap covers proof verification;
+  otherwise use reviewed explicit chi limits
 
-That transfer keeps the value split private inside the proof. On-chain, the
-network sees only:
-
-- the accepted `old_root`
-- spent nullifiers
-- the new output commitments
-- the transaction-carried encrypted payload blobs
-- the proof-bound payload hashes
-- the next accepted root
-
-Bob recovers the incoming note by reading indexed contract transactions
-and decrypting payloads with `recover_encrypted_notes(...)`.
-
-## Optional: Hide The Public Transaction Sender With A Relayer
-
-The standard `transfer_shielded(...)` flow exposes the caller as the
-public L1 transaction sender. If you want the hidden note owner to stay off the
-public sender field, use `relay_transfer_shielded(...)` instead.
-
-That relayed flow keeps the note spend private while making the relayer the
-public transaction sender:
-
-```python
-from xian_zk import (
-    ShieldedRelayTransferProver,
-    ShieldedRelayTransferWallet,
-)
-
-alice_relay_wallet = ShieldedRelayTransferWallet.from_json(alice_wallet.to_json())
-
-relay_plan = alice_relay_wallet.build_relay_transfer(
-    recipient=bob_keys.recipient,
-    amount=10,
-    relayer="relayer-1",
-    chain_id="xian-local-1",
-    fee=2,
-)
-
-relay_proof = relay_prover.prove_relay_transfer(relay_plan.request)
-
-token.relay_transfer_shielded(
-    old_root=relay_proof.old_root,
-    input_nullifiers=relay_proof.input_nullifiers,
-    output_commitments=relay_proof.output_commitments,
-    proof_hex=relay_proof.proof_hex,
-    relayer_fee=relay_proof.relayer_fee,
-    output_payloads=relay_plan.output_payloads,
-    signer="relayer-1",
-)
-```
-
-What the network learns in this mode:
-
-- the relayer account
-- the relayer fee
-- nullifiers, output commitments, and roots
-
-What stays hidden:
-
-- the hidden note owner's public transaction sender
-- the hidden recipient inside the note payload
-- the transferred shielded amount
-
-If Alice wants to disclose the transfer to an auditor without giving up spend
-authority, she can add an extra viewer:
-
-```python
-from xian_zk import (
-    ShieldedViewer,
-    ShieldedViewingKeyBundle,
-    recover_viewable_notes,
-)
-
-auditor_keys = ShieldedViewingKeyBundle.generate()
-
-transfer_payloads = [
-    ShieldedOutput.for_recipient(
-        bob_keys.recipient,
-        amount=bob_note_1.amount,
-        rho=bob_note_1.rho,
-        blind=bob_note_1.blind,
-    ).encrypt_for(
-        asset_id=token.asset_id(signer="sys"),
-        viewing_public_key=bob_keys.viewing_public_key,
-        viewers=[
-            ShieldedViewer(
-                viewing_public_key=auditor_keys.viewing_public_key,
-                label="auditor",
-            )
-        ],
-    ),
-    alice_note_2.to_output().encrypt_for(
-        asset_id=token.asset_id(signer="sys"),
-        viewing_public_key=alice_keys.viewing_public_key,
-    ),
-]
-
-records = load_all_records(indexed_client, "con_private_usd")
-auditor_view = recover_viewable_notes(
-    asset_id=token.asset_id(signer="sys"),
-    commitments=[record.commitment for record in records],
-    payloads=[record.payload for record in records],
-    viewing_private_key=auditor_keys.viewing_private_key,
-)
-```
-
-The auditor can read the disclosed note payload with
-`recover_viewable_notes(...)`, but cannot spend because they do not know
-the recipient's `owner_secret`.
-
-If a wallet wants to separate those authorities cleanly, it can generate them
-independently:
-
-```python
-from xian_zk import ShieldedViewingKeyBundle, ShieldedKeyBundle, generate_owner_secret
-
-alice_owner_secret = generate_owner_secret()
-alice_viewing = ShieldedViewingKeyBundle.generate()
-alice_keys = ShieldedKeyBundle.from_parts(
-    owner_secret=alice_owner_secret,
-    viewing_private_key=alice_viewing.viewing_private_key,
-)
-```
-
-## Step 7: Withdraw Back To A Public Balance
-
-Withdraw is public on the exit side, but the wallet-side note recovery
-and change-note flow stay the same. When the selected notes add up exactly to
-the public withdraw amount, the proof can use `outputs=[]` and the
-contract accepts a full exit without forcing a change note.
-
-```python
-from xian_zk import ShieldedWithdrawRequest
-
-records = load_all_records(token)
-alice_notes = recover_encrypted_notes(
-    asset_id=token.asset_id(signer="sys"),
-    commitments=[record["commitment"] for record in records],
-    payloads=[record["payload"] for record in records],
-    owner_secret=alice_keys.owner_secret,
-    viewing_private_key=alice_keys.viewing_private_key,
-)
-alice_change = alice_notes[-1]
-
-alice_note_3 = ShieldedNote(
-    owner_secret=alice_keys.owner_secret,
-    amount=25,
-    rho=rand_field(),
-    blind=rand_field(),
-)
-
-withdraw = prover.prove_withdraw(
-    ShieldedWithdrawRequest(
-        asset_id=token.asset_id(signer="sys"),
-        old_root=token.current_shielded_root(signer="sys"),
-        append_state=token.get_tree_state(signer="sys"),
-        amount=10,
-        recipient="alice",
-        inputs=[alice_change.to_input()],
-        outputs=[alice_note_3.to_output()],
-    )
-)
-
-token.withdraw_shielded(
-    amount=10,
-    to="alice",
-    old_root=withdraw.old_root,
-    input_nullifiers=withdraw.input_nullifiers,
-    output_commitments=withdraw.output_commitments,
-    proof_hex=withdraw.proof_hex,
-    output_payloads=[
-        alice_note_3.to_output().encrypt_for(
-            asset_id=token.asset_id(signer="sys"),
-            viewing_public_key=alice_keys.viewing_public_key,
-        )
-    ],
-    signer="alice",
-)
-```
-
-At that point:
-
-- Alice public balance is `50`
-- Alice holds a new shielded note for `25`
-- Bob holds a shielded note for `25`
-
-For a full exact exit, the built-in wallet helper will produce a zero-output
-withdraw automatically:
-
-```python
-exact_exit = alice_wallet.build_withdraw(
-    amount=25,
-    recipient="alice",
-)
-
-assert exact_exit.request.outputs == []
-assert exact_exit.output_payloads == []
-```
-
-## Operational Notes
-
-- The shielded note circuit family is `shielded_note_v4`; relayed note
-  transfers use the `shielded_command_v5` statement family for the
-  `relay_transfer` action.
-- Tree depth is fixed per circuit family. If you want a different depth, you
-  need a new circuit and new verifying keys.
-- The on-chain payload channel is for note delivery and optional viewer
-  disclosure. It is not what authorizes spending; only `owner_secret` does
-  that.
-- `ShieldedWallet` is the canonical Python-side wallet abstraction for seed
-  backup, state snapshots, note sync, note selection, and request planning.
-- Encrypted payloads are proof-bound by per-output payload hashes. A wallet
-  should decrypt the payload and recompute the commitment before trusting
-  the note, but an attacker cannot swap the stored payload without also
-  breaking proof validity.
-- The contract accepts proofs against recent accepted roots, not only the most
-  recent root. That gives wallets some concurrency room while the contract owns
-  the canonical append frontier.
-- Viewing access and spend access are intentionally separate. Sharing a viewing
-  key should never reveal an `owner_secret`.
-- Wallets should persist note material, note ownership metadata, and the roots
-  they proved against.
-
-## Productization Boundaries
-
-- define ceremony provenance, custody, and rotation policy for imported proving
-  material
-- define the network-level policy for who gets disclosed viewing access and how
-  that is audited
-- build a real network-origin privacy story beyond the relayed execution
-  primitives
-- ship a polished end-user wallet interface on top of `ShieldedWallet`
-  and `xian_zk` flow
-- improve indexer / app-facing read paths so large live pools do not depend only
-  on direct contract paging
-
-See also:
+## Related Pages
 
 - [xian-zk](/tools/xian-zk)
-- [ZK Stdlib](/smart-contracts/stdlib/zk)
-- [Creating a Fungible Token](/tutorials/creating-a-token)
+- [ZK Contract API](/smart-contracts/stdlib/zk)
+- [Shielded and ZK Stack](/concepts/shielded-zk-stack)

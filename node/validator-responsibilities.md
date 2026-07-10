@@ -21,10 +21,11 @@ Validators must stay aligned on:
 
 - `xian-abci` and `xian-contracting`
 - the native VM runtime capability
-- canonical source-to-IR compilation for submitted contracts
+- the fixed native VM gas schedule
+- canonical Rust source-to-IR compilation for submitted contracts
 
 Ad hoc local runtime changes are dangerous because validators replay the same
-artifact-driven state machine.
+deterministic VM state machine.
 
 ## Operational Safety
 

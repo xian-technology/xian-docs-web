@@ -1,173 +1,108 @@
 # Transaction Lifecycle
 
-Every transaction on Xian follows a defined path from creation to finalization. Understanding this lifecycle helps you debug failed transactions, optimize chi usage, and build reliable applications.
-
-## Overview
+A Xian transaction moves through signing, mempool admission, consensus,
+deterministic execution, atomic commit, and optional indexing.
 
 ```mermaid
 flowchart TD
-  SDK["1-2 SDK creates payload and signs with Ed25519"]
-  RPC["3 Broadcast through CometBFT RPC"]
-  Check["4-7 CHECK_TX validates signature, chain id, nonce, and fee policy"]
-  Reject["Rejected before mempool"]
-  Mempool["8 Mempool waits for block inclusion"]
-  Consensus["9 CometBFT BFT consensus fixes block order"]
-  Finalize["10-14 FINALIZE_BLOCK executes and meters contract calls"]
-  Outcome{"Execution succeeds?"}
-  Buffer["Buffer state changes, chi, return value, and events"]
-  Rollback["Rollback state changes and account for consumed chi"]
-  Commit["15-17 Atomic LMDB commit and app_hash calculation"]
-  Finalized["18-20 RPC queries, indexing, and WebSocket notifications"]
+  Build["Build payload with chain ID, nonce, call, and chi limit"]
+  Sign["Sign with Ed25519"]
+  Broadcast["Broadcast through CometBFT RPC"]
+  Check["CheckTx admission"]
+  Mempool["Mempool"]
+  Consensus["CometBFT orders and finalizes block"]
+  Execute["FinalizeBlock executes xian_vm_v1"]
+  Commit["Atomic LMDB commit and app hash"]
+  Read["RPC, WebSocket, and BDS reads"]
 
-  SDK --> RPC
-  RPC --> Check
-  Check -->|invalid| Reject
-  Check -->|valid| Mempool
-  Mempool --> Consensus
-  Consensus --> Finalize
-  Finalize --> Outcome
-  Outcome -->|yes| Buffer
-  Outcome -->|no| Rollback
-  Buffer --> Commit
-  Rollback --> Commit
-  Commit --> Finalized
+  Build --> Sign --> Broadcast --> Check
+  Check -->|accepted| Mempool --> Consensus --> Execute --> Commit --> Read
 ```
 
-## Step-by-Step
+## Payload and Signature
 
-### 1. Transaction Creation
+The signed payload includes:
 
-Using the Python SDK (`xian-py`), construct a transaction payload:
+- sender, chain ID, and nonce
+- target contract and exported function
+- keyword arguments
+- submitted chi limit
 
-```python
-from xian_py import Wallet, Xian
+The chain ID prevents cross-network replay. The nonce orders transactions from
+one sender and prevents reuse on the same chain.
 
-wallet = Wallet()
-xian = Xian("http://localhost:26657", "xian-local-1", wallet=wallet)
+SDKs support `async`, `checktx`, and `commit` broadcast modes. `checktx`
+returns mempool admission; it does not prove final execution success. Use a
+receipt wait when the application needs finality.
 
-result = xian.send_tx(
-    contract="currency",
-    function="transfer",
-    kwargs={"amount": 100, "to": "recipient_address"},
-    chi=50000,
-)
-```
+## CheckTx
 
-The payload contains:
-- `contract` -- the target contract name
-- `function` -- the exported function to call
-- `kwargs` -- keyword arguments for the function
-- `chi` -- maximum chi to spend
-- `chain_id` -- network identifier (prevents cross-chain replay)
-- `nonce` -- sequential counter (prevents replay on the same chain)
+Before mempool admission, the application checks payload shape, signature,
+chain ID, nonce, and fee policy. Paid mode requires enough native-token balance
+to cover the submitted chi limit. Free-metered mode enforces configured
+transaction and block chi caps.
 
-### 2. Signing
+A CheckTx rejection does not enter the mempool or change chain state.
 
-The SDK signs the transaction payload with the sender's Ed25519 private key. The signature is attached to the transaction and verified by validators.
+## Consensus and Execution
 
-### 3. Broadcasting
+CometBFT fixes transaction order and the block timestamp. During
+`FinalizeBlock`, every validator executes the same ordered calls through
+`xian_vm_v1`.
 
-The signed transaction is sent to a CometBFT node via its RPC interface. Two modes:
+For each transaction, the runtime:
 
-| Mode | Behavior |
-|------|----------|
-| `broadcast_tx_sync` | Waits for CHECK_TX result, then returns |
-| `broadcast_tx_async` | Returns immediately, no validation feedback |
+1. injects `ctx` and block metadata
+2. dispatches the exported function
+3. meters VM operations, storage, and host calls
+4. buffers writes, events, return value, and fee/reward effects
+5. discards application writes and events on failure
 
-### 4-7. CHECK_TX (Mempool Validation)
+Optional parallel execution may speculate in worker processes, but accepted
+results must remain equivalent to serial block order. Conflicts run serially.
 
-Before entering the mempool, the transaction passes through validation:
+## Commit
 
-1. **Signature verification** -- the Ed25519 signature must be valid for the payload and sender's public key
-2. **Chain ID check** -- the transaction's chain_id must match the network
-3. **Nonce check** -- the nonce must be the next expected value for this sender
-4. **Fee-policy check** -- in `paid_metered` mode, the sender must have enough XIAN to cover the requested chi limit; in `free_metered` mode, the submitted chi budget is checked against configured transaction and block caps instead
+Successful transaction effects and required fee accounting are assembled into
+one block transition. Xian commits state, nonce data, height, block time, and
+the state-root marker atomically in LMDB. The resulting `app_hash` is returned
+to CometBFT for the next block header.
 
-If any check fails, the transaction is rejected and never enters the mempool.
-Local pending-nonce reservations only happen after the transaction passes the
-static checks above, so bad signatures, wrong `chain_id` values, and malformed
-wire payloads do not temporarily block the sender's next valid nonce.
+The LMDB marker is authoritative on restart; auxiliary JSON metadata is only a
+repairable convenience copy.
 
-### 8. Mempool
+## Results
 
-Valid transactions sit in the mempool until a block proposer includes them in a block proposal.
+The decoded execution payload includes:
 
-### 9. Consensus
+| Field | Meaning |
+| --- | --- |
+| `hash` | transaction hash |
+| `status` | `0` success, `1` failure |
+| `chi_used` | metered chi charged/reported |
+| `result` | encoded function result or error |
+| `state` | committed writes, including fee effects where applicable |
+| `events` | committed contract events |
 
-CometBFT runs Byzantine Fault Tolerant consensus. Once 2/3+ of validators agree on the block contents and order, the block is finalized.
+SDK receipts wrap this together with the original transaction, RPC metadata,
+and success/error helpers.
 
-The block header also fixes the timestamp that contracts will see as `now`
-during execution of that block.
+## Failure Boundaries
 
-### 10-14. FINALIZE_BLOCK (Execution)
+| Failure | State/effects |
+| --- | --- |
+| CheckTx rejection | no mempool entry, no state, no fee |
+| assertion or runtime error | application writes/events roll back; paid mode charges consumed chi |
+| out of chi | application writes/events roll back; failed execution reports a bounded cost up to the submitted limit |
 
-Canonical block semantics are sequential: every validator must end up with the
-same result as if the transactions were executed in block order, one after the
-other.
+## Indexing
 
-Nodes may optionally speculate in parallel before acceptance, but any accepted
-speculative result has to pass serial-equivalence checks against earlier
-transactions in the block. Conflicting speculative results are re-executed
-serially.
+CometBFT RPC and transaction search expose finalized data. Dashboard WebSockets
+provide live non-durable notifications. BDS indexes blocks asynchronously, so
+history/event rows can appear shortly after finality.
 
-See [Parallel Block Execution](/concepts/parallel-block-execution) for the
-mechanism.
+## Related Pages
 
-Per transaction, the execution flow is:
-
-1. **Sandbox setup** -- the contract runtime initializes with the sender's context (`ctx.caller`, `ctx.signer`)
-2. **Function dispatch** -- the specified `@export` function is called with the provided kwargs
-3. **Metering** -- the VM runtime charges compute units through the fixed gas
-   schedule
-4. **Storage operations** -- reads and writes are charged per byte according to
-   the fixed execution policy; VM-native execution
-   charges storage through the VM host-operation schedule
-5. **Block time injection** -- all transactions in the block observe the same
-   consensus timestamp as `now`
-6. **Completion or failure**:
-   - **Success** -- state changes are buffered for commit, chi consumed are recorded
-   - **Failure** (assertion, out of chi, runtime error) -- state changes are rolled back, chi are recorded, and paid networks charge the matching execution fee
-
-### 15-17. Commit
-
-After all transactions in the block are executed:
-
-1. All successful state changes are assembled in pending state
-2. The `app_hash` cache is updated as a Merkle root over consensus state
-3. The app_hash is returned to CometBFT for inclusion in the next block header
-4. Commit persists the pending state to LMDB in a single atomic batch
-
-### 18-20. Post-Finalization
-
-- **Event indexing** -- CometBFT indexes events emitted during execution, making them searchable via `/tx_search`
-- **WebSocket notifications** -- subscribers receive real-time event data
-- **RPC availability** -- the block, transactions, and results are queryable via the CometBFT RPC
-
-## Transaction Result
-
-After finalization, the decoded execution payload contains:
-
-| Field | Description |
-|-------|-------------|
-| `hash` | Transaction hash |
-| `status` | `0` (success) or `1` (failure) |
-| `chi_used` | Actual chi consumed |
-| `result` | Return value from the contract function |
-| `state` | State changes made (key-value pairs) |
-| `events` | Events emitted by the contract |
-
-SDKs wrap that raw payload in higher-level receipt models. In `xian-py`,
-`get_tx(...)` and `wait_for_tx(...)` return a `TransactionReceipt` with
-`success`, `tx_hash`, `message`, `transaction`, `execution`, and `raw`. Block
-height is available from the surrounding CometBFT transaction lookup or indexed
-block/transaction surfaces, not as a top-level field inside the decoded
-execution dictionary itself.
-
-## Failure Modes
-
-| Failure | When | State Changes | Fee Charged |
-|---------|------|---------------|-------------|
-| CHECK_TX rejection | Before mempool | None | None |
-| Assertion error | During execution | Rolled back | Paid networks charge consumed chi; 0-fee networks charge `0` |
-| Out of chi | During execution | Rolled back | Paid networks charge the bounded failed-execution cost; 0-fee networks charge `0` |
-| Runtime error | During execution | Rolled back | Paid networks charge consumed chi; 0-fee networks charge `0` |
+- [Parallel Block Execution](/concepts/parallel-block-execution)
+- [Chi and Metering](/concepts/chi)
+- [BDS Indexed Queries](/api/bds)

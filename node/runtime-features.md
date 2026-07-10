@@ -1,298 +1,117 @@
 # Runtime Features
 
-This page explains the runtime behavior that ends up in the rendered
-`config.toml` under `[xian]` and `[xian.bds]`.
+Runtime features are rendered from manifests and node profiles into
+`config/xian.toml`. Validators on one chain must agree on settings that affect
+transaction validity, fees, or deterministic execution.
 
-Use it with:
+## Execution Runtime
 
-- [Configuration](/node/configuration) for the overall layer model
-- [Node Profiles](/node/profiles) for the high-level JSON contract
-- [Parallel Block Execution](/concepts/parallel-block-execution) for the
-  execution model
-- [The Xian VM](/concepts/xian-vm) for VM-native execution semantics
-
-## Where Runtime Features Live
-
-Different settings live at different layers.
-
-| Layer | Typical settings |
-|------|------------------|
-| templates / manifests | block policy defaults, genesis, P2P seeds, image posture |
-| node profiles | BDS/service posture, logging, simulation, parallel execution, dashboard, monitoring, advanced runtime defaults |
-| rendered `config.toml` | effective runtime values for node-local runtime posture |
-| `xian-stack` environment | localnet and Docker-specific overrides, especially for stack-managed services |
-
-## Execution Engine
-
-`xian_vm_v1` is the fixed node execution runtime.
-
-Important rules:
-
-- `xian_vm_v1` is the only supported node runtime
-- bytecode, gas schedule, and authority are internal VM constants
-- operators configure runtime-adjacent behavior such as simulation and parallel
-  execution, not alternate execution engines
-- `xian.execution` and `xian.tracer_mode` are invalid rendered config keys
-
-The high-level `xian-cli` profile flow exposes runtime-adjacent posture such as
-parallel execution and BDS/service settings. The VM execution policy itself is
-fixed.
+`xian_vm_v1` is the only supported execution runtime. Validators derive
+canonical IR from submitted source and execute it through the native VM. There
+is no supported operator switch to a second engine or gas schedule.
 
 ## Chain Runtime Features
 
-Separate from node-local posture, the chain itself carries an explicit
-runtime-feature map. These are consensus-level switches: every validator
-resolves the same values, and contracts that depend on a disabled feature are
-rejected at deployment.
+Network manifests can enable consensus-relevant features such as `zk`.
+Every validator must have the matching native backend before joining a chain
+that enables one. A feature mismatch is a startup or consensus safety problem,
+not a node-local preference.
 
-The supported feature is `zk`, which gates the zk host syscalls used by the
-shielded stack.
+## Logging
 
-| Context | `zk` default |
-|---------|--------------|
-| Real-network chain default | disabled; networks opt in explicitly |
-| Local in-process dev client | enabled |
-| Stack localnet | enabled (set `XIAN_LOCALNET_RUNTIME_FEATURE_ZK=0` to disable) |
+Important keys are:
 
-Resolution order at node startup:
-
-1. committed chain state (`__runtime_features.zk`)
-2. genesis entries generated with `configure_node --runtime-feature-zk`
-3. the chain default (disabled)
-
-Deploying a contract whose IR uses zk syscalls fails with an explicit error
-when the feature is disabled on that chain. See
-[Shielded & ZK Stack](/concepts/shielded-zk-stack) for what the zk surface
-provides.
-
-## Application Logging
-
-Xian has its own application logger, separate from CometBFT logging.
-
-Relevant top-level Xian keys:
-
-- `transaction_trace_logging`
 - `app_log_level`
 - `app_log_json`
 - `app_log_rotation_hours`
 - `app_log_retention_days`
+- `transaction_trace_logging`
 
-Use these for:
-
-- compact per-transaction debugging
-- structured JSON logs
-- rotated application log retention under `.cometbft/xian/logs`
-
-For normal operation, keep transaction-level tracing off unless you are
-debugging a specific runtime path.
+Keep transaction tracing off during normal operation. Use `DEBUG` for focused
+diagnosis and reserve `TRACE` for short-lived deep inspection because it can
+emit large transaction result payloads.
 
 ## Readonly Simulation
 
-Readonly transaction simulation is a node-local service posture, not a
-consensus rule.
-
-Relevant top-level Xian keys:
+Simulation runs contract calls without committing state. Configure it with:
 
 - `simulation_enabled`
 - `simulation_max_concurrency`
 - `simulation_timeout_ms`
 - `simulation_max_chi`
 
-Operationally:
-
-- simulation runs in bounded worker processes
-- it is meant for SDKs, wallets, and developer tooling
-- it should not be treated as free unbounded public compute
+Simulation is useful for wallets and SDKs, but it is operator-funded compute.
+Bound and rate-limit it on any exposed endpoint.
 
 ## Transaction Fee Mode
 
-The transaction fee mode is a network-level runtime policy. Every validator on
-the same chain must render the same fee-mode settings.
-
-Relevant `[xian]` keys:
-
-- `tx_fee_mode`
-- `free_tx_max_chi`
-- `free_block_max_chi`
-
-Supported modes:
-
 | Mode | Behavior |
-|------|----------|
-| `paid_metered` | default; execution is metered, senders must have enough native-token balance for the submitted chi limit, used chi is charged, and fee-derived rewards are generated |
-| `free_metered` | execution is metered, but native-token fee debits and fee-derived rewards are disabled |
+| --- | --- |
+| `paid_metered` | sender covers the submitted chi limit; used chi is charged and fee rewards are produced |
+| `free_metered` | execution remains metered, but no native-token execution fee or fee-derived reward is created |
 
-Use `free_metered` only with explicit chi caps. `free_tx_max_chi` limits the
-submitted chi budget for one transaction, and `free_block_max_chi` limits the
-total submitted chi budget accepted into one proposed block. The block cap must
-be greater than or equal to the transaction cap.
-
-Example rendered config:
-
-```toml
-tx_fee_mode = "free_metered"
-free_tx_max_chi = 1000000
-free_block_max_chi = 20000000
-```
-
-0-fee mode does not make execution unlimited. Transactions need a chi budget,
-execution can run out of chi, and receipts report
-`chi_used`. The difference is billing: the runtime does not debit the sender's
-native-token balance for execution and does not create validator/foundation/
-developer rewards from transaction fees.
+`free_metered` requires explicit `free_tx_max_chi` and
+`free_block_max_chi` caps. It does not make execution unlimited.
 
 ## Parallel Execution
 
-Xian supports speculative parallel block execution while committing the
-canonical serial-equivalent result.
+Parallel execution speculates in isolated workers and commits only results
+equivalent to serial block order. It is disabled by default.
 
-Relevant top-level Xian keys:
+Key settings include:
 
 - `parallel_execution_enabled`
 - `parallel_execution_workers`
 - `parallel_execution_min_transactions`
-- `parallel_execution_max_speculative_waves`
-- `parallel_execution_min_wave_acceptance_ratio`
-- `parallel_execution_low_acceptance_min_wave_size`
-- `parallel_execution_warm_workers`
-- `parallel_execution_access_estimates_enabled`
+- speculative-wave and acceptance guardrails
+- worker warming and access estimates
 
-Practical guidance:
+Test against the real workload and watch acceptance and fallback counters.
+Independent state access benefits most; hot shared state and broad scans often
+fall back to serial execution. See [Parallel Block Execution](/concepts/parallel-block-execution).
 
-- `parallel_execution_workers` defaults to `4`
-- if parallel execution is enabled, workers must be greater than zero
-- enable it deliberately, not blindly
-- treat it as a rollout-managed operator feature
-- validate it against your actual workload
-- expect the largest gains when blocks contain many different senders touching
-  disjoint state
-- expect little or negative gain when blocks repeatedly touch the same hot
-  state key or alternate writes with broad prefix scans
-- watch the parallel execution counters; sustained `serial_fallbacks` or
-  `guardrail_fallbacks` means the workload is behaving more like serial work
-- remember that it is process-level speculation with serial fallback, not
-  unrestricted shared-memory concurrency
+## Metrics and Health
 
-The maintained `xian-cli` templates default this posture conservatively, while
-lower-level raw `xian-abci` defaults may differ. The effective value is
-whatever ends up in the rendered config for the node you actually start.
+Xian application metrics and CometBFT metrics are separate endpoints. App
+metrics include runtime timing and, when BDS is enabled, indexer lag, queue,
+pool, spool, and storage posture.
 
-## Metrics And Health
+Use:
 
-Relevant top-level Xian keys:
+```bash
+xian node health <name>
+xian node endpoints <name>
+```
 
-- `metrics_enabled`
-- `metrics_host`
-- `metrics_port`
-- `metrics_bds_refresh_seconds`
-- `pending_nonce_reservation_ttl_seconds`
+for the effective service and endpoint view.
 
-These control the Xian application metrics endpoint and some node-local runtime
-bookkeeping behavior.
+## BDS
 
-The app metrics endpoint is separate from CometBFT's built-in metrics exporter.
-When BDS is enabled, the app metrics exporter also mirrors the queue, lag,
-storage, and connection-pool posture from `/bds_status`.
+BDS is the optional Postgres-backed history index. Its settings cover:
 
-## BDS Runtime
+- database connection and pool limits
+- statement and acquisition timeouts
+- pending queue size
+- contiguous-height catch-up and trusted RPC source
+- local recovery spool and disk warning thresholds
 
-When `bds_enabled = true`, the optional indexed stack becomes relevant. BDS is
-the Blockchain Data Service, one service under the node profile `services`
-object.
+BDS does not change consensus. Its results can lag finalized state. Use direct
+ABCI state queries for authoritative current values and BDS for history,
+events, portfolios, candles, shielded feeds, and projections.
 
-Important `[bds]` families:
+## Block Policy
 
-- connection settings for Postgres
-- pool sizing
-- statement timeout
-- queue capacity
-- live catch-up polling
-- optional RPC URL override
-- application name
-- spool location
-- warning thresholds for queued or disk-heavy recovery conditions
+`block_policy_mode` controls idle block production:
 
-These settings matter for indexed reads, recovery, and GraphQL. They do not
-change consensus behavior.
+- `on_demand`: no scheduled idle blocks
+- `idle_interval`: create an empty block after a configured idle period
+- `periodic`: maintain scheduled empty-block production
 
-Operationally, the live path keeps finalized blocks in an in-memory pending
-buffer and only persists them once any missing earlier heights have been
-recovered from RPC. The local spool supports offline maintenance and explicit
-recovery workflows; live-path durability comes from the BDS database plus
-contiguous-height catch-up.
+Contract `now` always comes from finalized block time. See
+[Time and Block Policy](/concepts/time-and-blocks).
 
-`catchup_enabled` only starts the background catch-up worker when `rpc_url` is
-also set. Stack localnets fill this with the RPC URL reachable from the BDS
-process: loopback for integrated containers, and the CometBFT service name for
-split fidelity containers. `xian-deploy` derives the same topology-aware
-default for remote hosts when BDS is enabled; set `xian_bds_rpc_url` only when
-you need to point catch-up at a different trusted RPC endpoint.
+## Related Pages
 
-## Runtime Key Reference
-
-### Core Top-Level Xian Keys
-
-| Key | Purpose |
-|-----|---------|
-| `bds_enabled` | BDS / indexed-stack posture |
-| `pruning_enabled` | enable block-history pruning |
-| `blocks_to_keep` | retain-height window when pruning is enabled |
-| `metrics_enabled`, `metrics_host`, `metrics_port`, `metrics_bds_refresh_seconds` | Xian application metrics |
-| `transaction_trace_logging`, `app_log_*` | Xian application logging |
-| `simulation_*` | readonly simulation controls |
-| `tx_fee_mode`, `free_tx_max_chi`, `free_block_max_chi` | transaction fee policy and 0-fee chi caps |
-| `parallel_execution_*` | speculative parallel execution controls |
-| `pending_nonce_reservation_ttl_seconds` | local pending-nonce reservation TTL |
-
-### `[xian.bds]` Keys
-
-| Key family | Purpose |
-|------------|---------|
-| `dsn`, `host`, `port`, `database`, `user`, `password` | Postgres connectivity |
-| `pool_min_size`, `pool_max_size` | connection pool sizing |
-| `statement_timeout_ms`, `acquire_timeout_ms`, `application_name` | query/runtime behavior |
-| `queue_max_size`, `catchup_enabled`, `catchup_poll_seconds`, `rpc_url` | live BDS queue and catch-up behavior |
-| `spool_dir`, `spool_warn_entries`, `spool_warn_bytes`, `disk_free_warn_bytes` | recovery spool and warning thresholds |
-
-## Stack / Localnet Environment Knobs
-
-The Docker stack exposes additional environment knobs for localnet and
-stack-managed runs.
-
-Important examples:
-
-- `XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED`
-- `XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS`
-- `XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS`
-- `XIAN_APP_METRICS_ENABLED`
-- `XIAN_APP_METRICS_HOST`
-- `XIAN_APP_METRICS_PORT`
-- `XIAN_PERF_ENABLED`
-- `XIAN_PERF_RECENT_BLOCKS`
-
-For single-node stack BDS runs, the stack also mirrors the BDS runtime keys as
-environment variables:
-
-| Environment variable | Runtime key |
-|----------------------|-------------|
-| `XIAN_BDS_DSN` | `bds.dsn` |
-| `XIAN_BDS_HOST`, `XIAN_BDS_PORT`, `XIAN_BDS_DATABASE`, `XIAN_BDS_USER`, `XIAN_BDS_PASSWORD` | Postgres connection fields |
-| `XIAN_BDS_POOL_MIN_SIZE`, `XIAN_BDS_POOL_MAX_SIZE` | connection pool sizing |
-| `XIAN_BDS_STATEMENT_TIMEOUT_MS`, `XIAN_BDS_ACQUIRE_TIMEOUT_MS`, `XIAN_BDS_APPLICATION_NAME` | query/runtime behavior |
-| `XIAN_BDS_QUEUE_MAX_SIZE`, `XIAN_BDS_CATCHUP_ENABLED`, `XIAN_BDS_CATCHUP_POLL_SECONDS`, `XIAN_BDS_RPC_URL` | live BDS queue and catch-up behavior |
-| `XIAN_BDS_SPOOL_DIR`, `XIAN_BDS_SPOOL_WARN_ENTRIES`, `XIAN_BDS_SPOOL_WARN_BYTES`, `XIAN_BDS_DISK_FREE_WARN_BYTES` | recovery spool and warning thresholds |
-| `XIAN_POSTGRAPHILE_STATEMENT_TIMEOUT_MS` | statement timeout for the dedicated read-only GraphQL database role |
-| `XIAN_POSTGRAPHILE_BODY_SIZE_LIMIT_BYTES` | maximum PostGraphile request body size |
-| `XIAN_POSTGRAPHILE_DISABLE_DEFAULT_MUTATIONS` | disables generated write mutations by default |
-| `XIAN_POSTGRAPHILE_SIMPLE_COLLECTIONS` | controls generated simple collection fields; stack default is `omit` |
-| `XIAN_POSTGRAPHILE_SCHEMA_WAIT_TIMEOUT_SECONDS` | startup wait for required BDS tables before GraphQL serves a schema |
-| `XIAN_POSTGRAPHILE_REQUIRED_TABLES` | comma-separated BDS tables required by the PostGraphile startup wait |
-
-For the integrated stack, `XIAN_BDS_RPC_URL` defaults to
-`http://127.0.0.1:26657`, which is the CometBFT RPC endpoint reachable from the
-BDS process. To stop catch-up, disable `XIAN_BDS_CATCHUP_ENABLED`; do not rely
-on an empty RPC URL as a disable switch.
-
-Use those primarily for localnet, stack debugging, or deliberate Docker-side
-overrides. For normal operator workflows, prefer manifests, profiles, and the
-rendered config first.
+- [Configuration](/node/configuration)
+- [Pruning and Retention](/node/pruning)
+- [BDS Indexed Queries](/api/bds)

@@ -32,7 +32,6 @@ The runtime allows up to 16 key dimensions.
 ```python
 balances.all()
 balances.all("alice")
-balances._items()
 balances.clear()
 balances.clear("alice")
 ```

@@ -1,21 +1,10 @@
 # ZK
 
-The contract runtime exposes a narrow `zk` module for proof verification.
+The contract runtime exposes a narrow `zk` module for Groth16/BN254 proof
+verification and protocol helpers used by the maintained shielded contracts.
+Proof generation, witnesses, wallet sync, and proving keys remain off-chain.
 
-This is a verifier surface inside contracts.
-
-The first real proof-backed contract flow using this module is the
-shielded-note token work in `xian-contracts`.
-
-Validators that enable zk verification need the native verifier bindings
-installed in the node image. Wallet-side proving, witness construction, and
-proving-key material stay outside the consensus path.
-
-The shielded-note circuit family is `shielded_note_v4`, built around Merkle
-auth paths and a chain-owned append frontier rather than whole-tree witnesses.
-The shielded-command execution family is `shielded_command_v5`.
-
-## Available Functions
+## Verification API
 
 ```python
 zk.is_available()
@@ -23,281 +12,93 @@ zk.has_verifying_key(vk_id)
 zk.get_vk_info(vk_id)
 zk.verify_groth16(vk_id, proof_hex, public_inputs)
 zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
-zk.warm_verified_proofs(requests)
-zk.clear_prepared_vk_cache()
-zk.clear_verified_proof_cache()
 ```
 
-The runtime module also exposes low-level shielded helper functions used by the
-maintained shielded-note and shielded-command contract families:
+`verify_groth16` is the preferred contract API. It loads an active verifying
+key from `zk_registry` and caches its prepared form by `(vk_id, vk_hash)`.
 
-```python
-zk.shielded_note_append_commitments(...)
-zk.shielded_command_nullifier_digest(...)
-zk.shielded_command_binding(...)
-zk.shielded_command_execution_tag(...)
-zk.shielded_output_payload_hash(...)
-zk.shielded_output_payload_hashes(...)
-zk.shielded_deposit_public_inputs(...)
-zk.shielded_transfer_public_inputs(...)
-zk.shielded_withdraw_public_inputs(...)
-zk.shielded_command_public_inputs(...)
-```
+`verify_groth16_bn254` is the lower-level raw-key form. It sends the full key
+through the call and therefore has a larger payload and metering cost.
 
-Treat those as protocol helpers for the maintained shielded contracts, not as a
-general dapp API. Most contract integrations should use the higher-level
-shielded contract patterns rather than composing these helpers directly.
+Both verification functions return `True` or `False` for well-formed inputs.
+Malformed encodings raise an assertion error.
 
-`zk.warm_verified_proofs(...)` verifies a list of registry-backed proof
-requests through the grouped native verifier and stores the results in the
-runtime proof cache. `zk.clear_prepared_vk_cache()` and
-`zk.clear_verified_proof_cache()` clear the local verifier caches. These are
-low-level runtime helpers for controlled environments; ordinary contracts should
-prefer direct calls to `zk.verify_groth16(...)`.
+## Input Encoding
 
-## `zk.is_available()`
+- verifying keys and proofs are `0x`-prefixed compressed canonical bytes
+- every public input is a `0x`-prefixed, exactly 32-byte, big-endian BN254 field
+  element
+- shortened field encodings are rejected
 
-Returns `True` when the native zk verifier backend is installed in the node
-runtime.
+Limits:
 
-This is mainly useful for tests and tooling. Validator nodes **enforce** the
-backend at startup: `xian-abci` refuses to boot without the native verifier,
-because a node missing it would raise instead of returning a verdict for
-shielded-contract calls, compute a different transaction outcome, and fork the
-chain. Treat the verifier as a hard node requirement (it ships via
-`xian-tech-contracting[zk]`), not an optional add-on.
+| Input | Maximum |
+| --- | ---: |
+| verifying-key hex | 8,192 characters |
+| proof hex | 4,096 characters |
+| public inputs | 32 |
+| verifying-key ID | 128 characters |
 
-## `zk.has_verifying_key(...)`
+## Registry Binding
 
-Returns `True` when an active verifying key exists in the system `zk_registry`
-contract.
+Contracts that keep a long-lived verifier binding should store and recheck:
 
-This is a probe helper for contracts that want to branch cleanly before
-attempting proof verification.
+- `vk_id`
+- `vk_hash`
+- any required circuit family, statement version, tree depth, and input/output
+  bounds from `zk.get_vk_info(vk_id)`
 
-This only answers whether an active registry entry exists. If a contract stores
-an ongoing verifier binding, it should also persist and re-check the registry
-`vk_hash` so a later registry drift cannot silently change live proof
+This prevents an unexpected registry update from silently changing proof
 semantics.
 
-## `zk.get_vk_info(...)`
-
-Returns the active registry metadata for a verifying key id, or `None` when the
-id is unknown. Shielded contracts use this to bind against fields such as
-`vk_hash`, `circuit_family`, `statement_version`, `tree_depth`, IO bounds, and
-setup metadata before accepting proofs.
-
-## `zk.verify_groth16(...)`
-
-Verifies a Groth16 proof on BN254 using a registered verifying key id and
-returns:
-
-- `True` for a valid proof
-- `False` for an invalid proof with well-formed inputs
-
-Malformed inputs raise an assertion error instead of returning `False`.
-
-### Input Format
-
-- `vk_id`: non-empty verifying-key id registered in `zk_registry`
-- `proof_hex`: non-empty `0x`-prefixed hex string of the compressed proof bytes
-- `public_inputs`: list of `0x`-prefixed 32-byte big-endian field elements
-  using exact 32-byte encodings
-
-Shortened field encodings are rejected. For example, `0x02` is not accepted in
-place of `0x0000000000000000000000000000000000000000000000000000000000000002`.
-
-### Registry Model
-
-The preferred runtime path is registry-backed:
-
-- a system contract named `zk_registry` stores active verifying keys
-- the runtime loads the registered verifying key by `vk_id`
-- the runtime keeps a local prepared-key cache keyed by `(vk_id, vk_hash)`
-
-This is the recommended contract API because:
-
-- contracts do not need to pass the full verifying key on every call
-- metering stays simpler and more predictable
-- prepared-key reuse is possible inside the validator runtime
-
-## `zk.verify_groth16_bn254(...)`
-
-Verifies a Groth16 proof on BN254 and returns:
-
-- `True` for a valid proof
-- `False` for an invalid proof with well-formed inputs
-
-Malformed inputs raise an assertion error instead of returning `False`.
-
-### Input Format
-
-- `vk_hex`: `0x`-prefixed hex string of the compressed verifying key bytes
-- `proof_hex`: non-empty `0x`-prefixed hex string of the compressed proof bytes
-- `public_inputs`: list of `0x`-prefixed 32-byte big-endian field elements
-  using exact 32-byte encodings
-
-### Notes
-
-- This is the low-level raw-key API.
-- It passes the verifying key in every call, so it is intentionally metered.
-- Prefer `zk.verify_groth16(vk_id, proof, public_inputs)` for stable
-  contract-facing integrations.
-
-## Proof-Backed Pattern
-
-The first real contract families using this verifier surface are the
-shielded-note token and shielded-command stack in `xian-contracts`.
-
-The pattern is:
-
-- prove note membership against an accepted `old_root`
-- keep witness construction, Merkle auth paths, and note scanning off-chain
-- address outputs to recipient `owner_public` values rather than recipient
-  spending secrets
-- let the contract derive the next root from canonical on-chain note storage
-- optionally persist encrypted note payloads on-chain for recipient recovery
-- separate spend authority (`owner_secret`) from viewing authority, with
-  optional per-output disclosed viewers
-- use a wallet-side sync and backup layer to track note records and commitment
-  history off-chain
-- use a chain-owned append frontier for post-state projection
-
-The shipped `shielded_note_v4` flow uses:
-
-- Merkle auth paths instead of whole-tree witnesses
-- a default tree depth of `20`
-- a shielded note capacity of `1,048,576`
-- exact withdraw support with `0` outputs when no change note is needed
-- recent-root proving, where a proof may target an accepted recent root while
-  outputs are appended against the current canonical frontier
-- proof-bound output payload hashes, so encrypted note payloads cannot be
-  swapped after proof generation without invalidating the proof
-
-The shipped `shielded_command_v5` flow adds:
-
-- note-spending command proofs on top of the same root / nullifier model
-- binding to a target contract, payload digest, relayer, expiry, and chain id
-- proof-bound relayer fees
-- proof-bound public spend budgets for allowlisted adapter contracts
-- execution indexes by nullifier, binding, and execution tag
-
-For the full contract-level deployment and wallet-side usage flow, see
-[Building a Shielded Privacy Token](/tutorials/shielded-privacy-token).
-
-For the off-chain prover, wallet, and deployment-tool reference itself, see
-[xian-zk](/tools/xian-zk).
-
-For that workflow, off-chain tooling such as `xian_zk` tracks:
-
-- the accepted root being proved
-- the append frontier state
-- the input notes and their Merkle auth paths
-- wallet-side snapshots of note records, keys, and commitment history
-
-Operator tooling can generate a random shielded-note bundle plus a
-registry-ready verifying-key manifest. Use that for private networks or test
-deployments that explicitly accept single-party setup trust. It is not an MPC
-ceremony.
-
-For ceremony-generated material, operators should use
-`xian-zk-shielded-bundle promote` to validate and package note, command, and
-relay-command bundles into registry manifests, a `register_and_bind.py` helper,
-and a catalog snippet for the network privacy artifact catalog.
-
-Deterministic dev proving bundles remain local test tooling only. They are not
-network-ready setup material.
-
-## Security Model
-
-- proof verification is deterministic
-- verification is metered
-- payload sizes are bounded before native verification runs
-- this module verifies proofs only; it does not generate them
-- public inputs must be canonical BN254 field elements, not arbitrary 32-byte
-  hashes
-- the shielded circuits hash commitments, nullifiers, and Merkle nodes with
-  Poseidon over BN254 (a binding, collision-resistant algebraic hash); the
-  native verifier is the single source of truth and the in-circuit gadget is
-  proven equal to it by parity tests
-
-## Trust Assumptions
-
-Zero-knowledge proofs remove the need to trust the *prover*, but two parties
-remain trusted and a soundness break in either lets them forge proofs (i.e.
-counterfeit shielded value). Make these explicit in any deployment:
-
-- **Trusted setup.** Groth16 needs a per-circuit setup. Whoever ran it holds the
-  toxic waste and can forge proofs unless it was destroyed by a multi-party
-  ceremony. The deterministic dev bundles expose the toxic waste by design and
-  are test-only; the single-party bundle is for testnets; **mainnet requires an
-  MPC ceremony.** `zk.get_vk_info(...)` reports `setup_mode`/`setup_ceremony` so
-  contracts and reviewers can check provenance.
-- **Registry owner.** The `zk_registry` owner decides which verifying keys are
-  active, so a malicious or compromised owner can register a key from a
-  trapdoored setup. Ownership should sit behind governance (a DAO / multisig /
-  timelock). The registry supports a two-step ownership transfer
-  (`transfer_ownership` + `accept_ownership`) so it can be handed to such a
-  contract without being stranded. Contracts should pin and re-check `vk_hash`
-  (`vk_hash = sha3(vk_hex)`) so a later registry change cannot silently alter
-  live proof semantics.
-
-## Metering And Limits
-
-| Item | Limit or cost |
-|------|---------------|
-| verifying-key hex payload | `8,192` characters |
-| proof hex payload | `4,096` characters |
-| public inputs | `32` |
-| registry verifying-key id | `128` characters |
-| raw Groth16 verify base | `750,000` meter units |
-| registry-backed Groth16 verify base | `500,000` meter units |
-| registry prepared-key setup | `250,000` meter units |
-| public input | `50,000` meter units each |
-| raw Groth16 payload byte | `50` meter units |
-| registry-backed payload byte | `25` meter units |
-| shielded tree append base | `250,000` meter units |
-| shielded tree append commitment | `500,000` meter units each |
-| shielded command digest input | `50,000` meter units each |
-
-## Typical Use
-
 ```python
 @export
-def verify_join(vk_id: str, proof_hex: str, public_inputs: list):
-    assert zk.has_verifying_key(vk_id), "Unknown verifying key!"
-    return zk.verify_groth16(
-        vk_id=vk_id,
-        proof_hex=proof_hex,
-        public_inputs=public_inputs,
-    )
+def verify_join(vk_id: str, expected_hash: str, proof: str, inputs: list):
+    info = zk.get_vk_info(vk_id)
+    assert info is not None and info["active"], "Unknown verifying key"
+    assert info["vk_hash"] == expected_hash, "Verifying key changed"
+    return zk.verify_groth16(vk_id, proof, inputs)
 ```
 
-Low-level raw-key verification is available when a contract must work with an
-explicit verifying key:
+## Shielded Protocol Helpers
 
-```python
-@export
-def verify_raw(vk_hex: str, proof_hex: str, public_inputs: list):
-    return zk.verify_groth16_bn254(
-        vk_hex=vk_hex,
-        proof_hex=proof_hex,
-        public_inputs=public_inputs,
-    )
-```
+The module also exposes helpers for shielded tree appends, public-input
+construction, nullifier digests, command bindings, execution tags, and output
+payload hashes. These functions are part of the maintained shielded-note and
+shielded-command protocols; application contracts should use those higher-level
+contracts instead of designing a new protocol from the helpers alone.
 
-## Design Guidance
+## Node Requirement
 
-- bind every public input on-chain before verification
-- prefer registry-backed `vk_id` usage for contract-facing integrations
-- if a contract stores a verifier binding, persist both `vk_id` and `vk_hash`
-  from `zk_registry`
-- if a contract relies on specific circuit metadata, also validate the
-  registry-reported family, statement version, tree depth, and IO bounds
-- derive the next state from canonical contract storage instead of trusting
-  caller-supplied transition metadata
-- when using recent-root proving, treat `old_root` and append-state as separate
-  concepts
-- keep proof generation and witness construction outside the validator runtime
-- treat deterministic dev proving bundles as local test tooling only, not as
-  network-ready setup material
+A chain with the `zk` runtime feature requires the native verifier on every
+validator. `xian-abci` fails closed when the required backend is unavailable.
+`zk.is_available()` is useful for tests and tooling, not for treating verifier
+availability as optional during consensus.
+
+## Security Requirements
+
+- bind every public input to the intended contract state and action
+- derive post-state from canonical on-chain state, not caller-provided metadata
+- keep witnesses and proof generation outside the validator runtime
+- use registry governance and two-step ownership transfer
+- never use deterministic development setup material for value-bearing
+  networks
+- require an accepted multi-party ceremony and checksum-pinned artifacts for
+  mainnet proving keys
+
+Groth16 setup integrity and `zk_registry` control are both trust assumptions.
+A compromised setup or malicious registry authority can invalidate proof
+soundness.
+
+## Metering
+
+Verification is metered by a fixed base, public-input count, and payload size.
+Registry-backed verification has a lower per-byte rate and supports prepared-key
+reuse. See [Chi Cost Table](/reference/chi-costs) for current constants and use
+readonly simulation for a complete transaction estimate.
+
+## Related Pages
+
+- [Shielded and ZK Stack](/concepts/shielded-zk-stack)
+- [xian-zk](/tools/xian-zk)
+- [Shielded Privacy Token](/tutorials/shielded-privacy-token)

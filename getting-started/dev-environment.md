@@ -28,7 +28,7 @@ Useful optional siblings depending on your work:
 
 | Tool | Recommended version / note |
 |------|-----------------------------|
-| Python | `3.14+` for the core repos |
+| Python | `3.14` for the core repos |
 | `uv` | preferred Python environment and command runner |
 | Docker | required for `xian-stack`, localnet, and most node workflows |
 | Git | needed for the sibling workspace |

@@ -51,6 +51,9 @@ Behavior worth knowing before integrating:
 - The standard swap fee path is 30 bps. Router-owner-approved signers can be
   flagged with `set_zero_fee_trader(...)` for zero-fee routing through the
   router; direct pair swaps stay on the standard fee path.
+- Factory-owner calls to `con_pairs.enableFee(...)` advance the protocol-fee
+  epoch. Each pair establishes a fresh `kLast` baseline at its next liquidity
+  event, so fee-off growth is not charged retroactively after re-enabling.
 - Every pair binds an XSC-0001 LP token contract. The factory owner registers
   the canonical LP token with `registerLpToken(tokenA, tokenB, lpToken)` before
   the pair exists. `createPair(tokenA, tokenB)` and router auto-creation during
@@ -130,11 +133,11 @@ const pair = await client.contract("con_pairs").call("pairFor", {
 });
 ```
 
-## Status
+## Deployment Readiness
 
-`candidate`. Contracts are usable and covered by package-local tests, but
-deeper hardening is required before treating the package as a polished
-production drop-in.
+The package is a candidate deployment: its contracts and bootstrap are tested,
+but operators should complete independent review, workload testing, monitoring,
+and incident planning before using it with material value.
 
 ## Related Pages
 

@@ -1,327 +1,100 @@
 # Staking Mechanics
 
-Xian's validator economics are explicit on-chain behavior, not an off-chain
-social process.
+The on-chain `validators` contract owns registration bonds, self-bonding,
+delegation, unbonding, commission, membership, and slashing. `rewards` defines
+the global fee split; the runtime uses validator state to distribute the
+validator portion.
 
-The canonical contracts are:
+## Registration Bond and Stake
 
-- `validators.s.py`, deployed as `validators`
-- `rewards.s.py`
-- `governance.s.py`
+These are different balances:
 
-`validators` owns validator registration, self-bonding, delegation, unbonding,
-membership voting, and evidence-driven slashing. `rewards` defines the global
-fee split, and the runtime uses `validators` state to distribute the validator
-bucket.
+- the registration bond is escrowed in `holdings[validator]`
+- self-bond and delegations contribute to the validator's bonded stake
 
-## Staking Model
+On a clean leave, governed removal, or candidate withdrawal, the registration
+bond is refunded immediately. Self-bond and delegations become pending unbonds
+and wait for the configured unbonding period.
 
-The canonical model includes:
+## Main Functions
 
-- registration bonds for validator candidates
-- self-bonding by validators
-- delegation to validators
-- explicit validator commission in basis points
-- separate reward payout keys for validators and delegators
-- unbonding queues with claim-after-unlock semantics
-- governance votes for validator admission, removal, jailing, slashing, and
-  policy changes
-- system-driven evidence penalties for supported CometBFT misbehavior types
-
-## Contract Surfaces
-
-The main exported staking and validator-lifecycle functions are:
-
-| Function | What it does |
+| Function | Purpose |
 | --- | --- |
-| `register(...)` | creates a pending validator registration and escrows the registration bond |
-| `update_registration(...)` | updates requested power and profile fields for a pending or approved candidate |
-| `update_profile(...)` | updates reward routing and metadata for an active or approved validator |
-| `announce_leave()` | starts the fixed leave-delay timer |
-| `leave()` | exits after the leave delay, refunds registration bond, and unbonds stake into pending claims |
-| `unregister()` | withdraws a pending / approved candidate before activation |
-| `bond_self(amount)` | adds validator self-bond |
-| `unbond_self(amount)` | removes self-bond into a pending unbond record |
-| `delegate(validator, amount, reward_key=None)` | adds delegated stake to a validator |
-| `undelegate(validator, amount)` | removes delegated stake into a pending unbond record |
-| `claim_unbond(unbond_id)` | claims unlocked pending unbond funds |
-
-Read surfaces relevant to staking include:
-
-- `get_validator(account)`
-- `get_active_validators()`
-- `get_pending_candidates()`
-- `get_delegation(delegator, validator)`
-- `get_delegators(validator)`
-- `get_pending_unbond(unbond_id)`
-- `get_pending_unbond_ids(owner)`
-- `get_reward_distribution_info(validator)`
-- `get_policy_config()`
-
-## Registration Bond vs Bonded Stake
-
-There are two different value flows:
-
-- the registration bond goes into `holdings[validator]`
-- self-bond and delegations go into `self_bond` and `delegations`
-
-That distinction matters operationally:
-
-- the registration bond is refunded immediately on clean leave, governed
-  removal, or unregister
-- self-bond and delegations do not return immediately
-- self-bond and delegations become `pending_unbond` records and must wait out
-  the unbonding period before claim
-
-## Validator Status Lifecycle
-
-The membership contract tracks one status per validator. Jailing is a
-separate flag on top of the status, not a status of its own.
-
-```mermaid
-stateDiagram-v2
-    [*] --> pending: register()
-    pending --> approved: add_member vote approved
-    pending --> withdrawn: unregister()
-    approved --> active: activation (delay / rebalance)
-    active --> approved: rebalance demotion
-    approved --> withdrawn: unregister()
-    active --> leaving: announce_leave()
-    leaving --> approved: leave cancelled
-    leaving --> left: leave() after leave delay
-    active --> removed: remove_member vote
-    approved --> removed: remove_member vote
-    left --> [*]
-    removed --> [*]
-    withdrawn --> [*]
-```
-
-Every terminal exit (`left`, `removed`, `withdrawn`) refunds the registration
-bond immediately and sweeps self-bond and delegations into pending unbonds
-that wait out the unbonding period.
-
-## Bonding and Delegation Rules
+| `register(...)` | create a pending candidate and escrow registration bond |
+| `update_registration(...)` | update candidate power/profile fields |
+| `update_profile(...)` | update active/approved reward and metadata fields |
+| `bond_self(amount)` | add validator self-bond |
+| `unbond_self(amount)` | create a pending self-unbond |
+| `delegate(validator, amount, reward_key=None)` | delegate stake |
+| `undelegate(validator, amount)` | create a pending delegation unbond |
+| `claim_unbond(id)` | claim an unlocked unbond |
+| `announce_leave()` / `leave()` | planned validator exit |
+| `unregister()` | withdraw an inactive candidate |
 
-The contract lets a validator accept bond only while it is:
-
-- `pending`
-- `active`
-- `approved`
+Bonding is closed for jailed, leaving, or terminal validators. Self-delegation
+through `delegate()` is rejected; validators use `bond_self()`.
 
-Bonding is closed when a validator is:
+## Rewards and Commission
 
-- jailed
-- `leaving`
-- `left`
-- `removed`
-- `withdrawn`
+The runtime first divides the validator reward bucket by active voting power.
+For each validator:
 
-Additional rules:
+1. commission is paid to the validator reward key
+2. the remainder is distributed pro rata across self-bond and active
+   delegations
+3. delegators receive rewards at their configured reward key or account
 
-- `bond_self()` cannot be used by a jailed validator
-- `delegate()` cannot target a jailed validator
-- self-delegation through `delegate()` is rejected; validators must use
-  `bond_self()`
-- delegation and self-bond amounts must be positive
+If a validator has no bonded stake, its validator share goes to its reward key.
 
-## Reward Routing and Commission
+## Unbonding
 
-Validator fee rewards are computed in two stages.
+An unbond record stores owner, validator, amount, kind, creation block/time,
+unlock time, reason, and claimed state. Only its owner can claim it after
+`now >= unlock_at`.
 
-First, the runtime takes the validator bucket from the `rewards` contract split
-and divides it across active validators by `powers`.
+The checked-in local/dev/test bundles use a 7-day unbonding period. The draft
+mainnet rehearsal bundle uses 14 days. The policy active on the target chain is
+authoritative.
 
-Second, each validator's share is split using `validators` state:
+Active validators also have a fixed leave-announcement delay before `leave()`.
+After leave, removal, or withdrawal, stake follows the normal unbonding clock.
 
-1. The validator's `commission_bps` is taken off the top.
-2. The remainder is distributed pro rata across:
-   - the validator's `self_bond`
-   - every active delegation to that validator
-3. The validator also receives its self-bond share of that remainder.
+## Slashing and Evidence
 
-Reward routing keys:
+Governance can slash a validator. The runtime can also apply supported
+CometBFT evidence during block finalization.
 
-- the validator share goes to `reward_key`, or the validator key if unset
-- each delegator may set a per-validator reward key in `delegate(...)`
-- if a delegator does not set one, rewards go to the delegator account itself
+Slashable value can include self-bond, live delegations, and pending unbonds
+created after the infraction height. This prevents a validator or delegator
+from escaping a known earlier infraction by unbonding.
 
-If a validator has no self-bond or delegations at all, its full validator share
-is paid directly to the operator reward key.
+Checked-in development bundles apply these defaults:
 
-## Pending Unbonds
+| Evidence | Slash | Jail |
+| --- | ---: | --- |
+| duplicate vote | 500 bps | yes |
+| light-client attack | 1,000 bps | yes |
 
-`unbond_self()` and `undelegate()` do not transfer funds out immediately.
-Instead they create a `pending_unbond` record with:
+Evidence IDs are deduplicated. Slashed value is sent to the configured
+`slash_destination`.
 
-- `id`
-- `owner`
-- `validator`
-- `amount`
-- `kind` (`self_bond` or `delegation`)
-- `created_block`
-- `created_at`
-- `unlock_at`
-- `claimed`
-- optional `reason`
-
-`unlock_at` is derived from `unbonding_period_days` in the membership policy.
-The local, devnet, and testnet bundles pin this to `7`; the draft
-`xian-mainnet-1` rehearsal bundle pins it to `14`.
-
-Claim rules:
+## Policy
 
-- only the recorded `owner` can claim
-- the record must not already be claimed
-- `now` must be greater than or equal to `unlock_at`
+Governance can update:
 
-## Exit Behavior
-
-`announce_leave()` starts a fixed 7-day leave timer. That delay is separate
-from the configurable unbonding period.
-
-When `leave()` succeeds:
-
-- the validator status becomes `left`
-- the registration bond is refunded immediately
-- `self_bond` is zeroed and turned into a pending unbond with reason `left`
-- all live delegations are zeroed and turned into pending unbonds with reason
-  `left`
-- the validator is removed from the active set
-
-The same bonding sweep happens for:
-
-- `remove_member` votes, with reason `removed`
-- `unregister()`, with reason `withdrawn`
-
-That means validator exit has two clocks:
-
-1. a fixed 7-day leave announcement delay for active validators
-2. the configured unbonding delay before self-bond and delegations can be
-   claimed
-
-## Slashing
-
-The membership contract supports governed slashing through
-`type_of_vote="slash_member"` and system-driven evidence penalties.
-
-Slash scope is broader than just live self-bond. A slash can apply pro rata
-across:
-
-- validator self-bond
-- live delegations
-- pending unbonds created after the infraction height
-
-Slashed funds are transferred to `slash_destination`, which the maintained
-bundles set to `dao`.
-
-## Evidence Penalties
-
-The runtime submits evidence penalties internally during `finalize_block`
-through `validators.apply_evidence_penalty(...)`. Normal users cannot call
-that surface directly.
-
-Supported infraction types today:
-
-| Infraction | Default slash | Default jail |
-| --- | --- | --- |
-| `DUPLICATE_VOTE` | `500` bps | `true` |
-| `LIGHT_CLIENT_ATTACK` | `1000` bps | `true` |
-
-Evidence behavior:
-
-- evidence is deduplicated by `evidence_id`
-- if the validator is known and jailing is enabled, the validator is jailed
-- in non-manual selection modes, the validator set is rebalanced immediately
-  after an applied evidence penalty
-- pending unbonds are slashable only when the infraction height is less than or
-  equal to the unbond's `created_block`
-
-That last rule is important. If a validator commits an infraction first and
-then exits or undelegates later, the resulting pending unbond remains
-slashable. If the infraction happened after the unbond was created, that pending
-unbond is left untouched.
-
-## Policy Surface
-
-`update_policy` votes can change the validator-selection and staking policy at
-runtime.
-
-| Key | Meaning |
-| --- | --- |
-| `selection_mode` | `manual`, `auto_top_n`, or `hybrid` |
-| `max_validators` | active-set cap in auto / hybrid modes |
-| `power_mode` | `equal`, `requested`, or `stake_weighted` |
-| `rebalance_interval` | blocks per rebalance epoch |
-| `activation_delay_epochs` | epochs a candidate must wait before eligibility |
-| `unbonding_period_days` | delay before pending unbonds can be claimed |
-| `min_self_bond` | minimum self-bond required for eligibility |
-| `min_total_bond` | minimum self-bond plus delegation required for eligibility |
-| `max_commission_bps` | upper bound for validator commission |
-| `max_active_set_churn` | max incumbent replacements per rebalance epoch |
-| `min_bond_margin_bps` | extra bond margin a challenger must beat to replace an incumbent |
-| `manual_override_enabled` | enables selected manual governance actions in non-manual modes |
-| `slash_destination` | recipient of slashed stake |
-| `duplicate_vote_slash_bps` | slash rate for duplicate vote evidence |
-| `duplicate_vote_jail` | whether duplicate vote evidence jails |
-| `light_client_attack_slash_bps` | slash rate for light-client attack evidence |
-| `light_client_attack_jail` | whether light-client attack evidence jails |
-
-## Membership Vote Types
-
-`validators.propose_vote(...)` accepts these vote types:
-
-- `add_member`
-- `remove_member`
-- `jail_member`
-- `unjail_member`
-- `slash_member`
-- `set_member_power`
-- `change_registration_fee`
-- `reward_change`
-- `dao_payout`
-- `chi_cost_change`
-- `change_types`
-- `update_policy`
-- `topic_vote`
-
-Vote semantics:
-
-- only active validators can propose
-- only active validators with snapshotted voting weight can vote
-- the proposer automatically records the first `yes`
-- required approvals are snapshotted at proposal creation
-- the local, devnet, and testnet bundled policy stores both a 4/5 count
-  threshold and a 4/5 weight threshold
-- approval is reached when `yes_weight` reaches the required weight threshold
-- vote count participates in reporting and early-rejection logic
-- delegators do not vote directly; in `stake_weighted` networks, delegated
-  stake can indirectly increase the active validator's voting weight in later
-  proposal snapshots
-- proposals expire after 7 days if pending
-
-In non-manual selection modes:
-
-- `add_member` votes are allowed only in `hybrid`
-- `remove_member`, `set_member_power`, `jail_member`, and `unjail_member`
-  require `manual_override_enabled = true`
-- `slash_member` remains available regardless of manual override policy
-
-## Bundled Reality
-
-The maintained local, devnet, and testnet `xian-configs` bundles pin:
-
-- `selection_mode = "manual"`
-- `power_mode = "equal"`
-- `unbonding_period_days = 7`
-- `manual_override_enabled = true`
-- `duplicate_vote_slash_bps = 500`
-- `light_client_attack_slash_bps = 1000`
-
-The bundled model uses validator-vote admission and removal. The contract also
-supports automatic top-N selection, delegation-aware ranking, delegated reward
-routing, and evidence-triggered slashing when a network chooses to enable them.
-
-The draft `xian-mainnet-1` rehearsal bundle enables `auto_top_n`, caps the
-active set at `13`, keeps equal validator power, uses a 14-day unbonding
-period, and caps commission at `2000` bps. Those values are launch-preparation
-inputs until an accepted mainnet operator manifest is published.
+- selection and power modes
+- active-set size, rebalance interval, and activation delay
+- minimum self/total bond and maximum commission
+- churn and replacement margin
+- unbonding period
+- manual override posture
+- slash destination and evidence penalties
+
+Policy changes affect validator economics and membership safety. Rehearse them
+on a private network and verify the resulting active set and reward routing.
+
+## Related Pages
+
+- [Becoming a Validator](/node/validators)
+- [Validator Operations Runbook](/node/validator-operations-runbook)
+- [Protocol Governance](/node/protocol-governance)

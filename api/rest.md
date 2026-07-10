@@ -1,396 +1,104 @@
 # REST API Reference
 
-The REST API described here belongs to the optional dashboard service, not to
-CometBFT itself. It proxies selected RPC calls and adds convenience endpoints.
+The REST API belongs to the optional Xian dashboard service. It proxies selected
+CometBFT calls and adds explorer-oriented convenience routes. It is not the
+node's consensus RPC.
 
-Base URL:
-
-```text
-http://<dashboard-host>:18080
-```
-
-`18080` is the stack-managed template default host port. If you run the
-dashboard process directly, its process default is `8080`.
-For IPv6 literal dashboard hosts, bracket the host, for example
-`http://[::1]:18080`.
-
-## Core Endpoints
-
-### Node / Network
-
-- `GET /api/config`
-- `GET /api/status`
-- `GET /api/net_info`
-- `GET /api/validators`
-- `GET /api/validator_dashboard`
-- `GET /api/consensus`
-- `GET /api/monitoring`
-
-### Blocks / Transactions
-
-- `GET /api/blockchain`
-- `GET /api/block/{height}`
-- `GET /api/block_results/{height}`
-- `GET /api/tx/{hash}`
-- `GET /api/unconfirmed_txs`
-
-For transaction lookups, the original submitted transaction and the execution
-result are separate:
-
-- `result.tx` is the submitted transaction input
-- `result.tx_result.data` is Xian's decoded execution output
-
-### Contracts / ABCI
-
-- `GET /api/contract/{name}`
-- `GET /api/addresses`
-- `GET /api/address/{address}`
-- `GET /api/contracts`
-- `GET /api/recent_events`
-- `GET /api/abci_query/{path}`
-
-## Important Notes
-
-- the dashboard must be running for these routes to exist
-- the dashboard is outside the consensus path
-- the dashboard decodes ABCI `value` and `key` fields for convenience
-
-## Dashboard Security And Limits
-
-The dashboard is an operator and explorer convenience service. It does not add
-wallet authentication, TLS termination, or consensus authority. Keep it bound
-to loopback or a private network unless you intentionally put it behind a
-reverse proxy, firewall, TLS, and any access control required by your
-deployment.
-
-The maintained stack defaults the dashboard to `127.0.0.1:8080`. Public
-dashboard/query exposure requires explicit stack flags and the
-`XIAN_PUBLIC_QUERY_ENABLED=1` environment gate.
-
-The dashboard does apply local abuse controls to `/api/*` routes:
-
-| Limit | Default | CLI flag |
-|-------|---------|----------|
-| ordinary REST rate | `30` requests/second | `--rest-rate-limit-per-second` |
-| ordinary REST burst | `60` requests | `--rest-rate-limit-burst` |
-| expensive REST rate | `8` requests/second | `--expensive-rest-rate-limit-per-second` |
-| expensive REST burst | `16` requests | `--expensive-rest-rate-limit-burst` |
-| concurrent REST handlers | `32` | `--max-rest-concurrency` |
-| tracked rate-limit keys | `4096` | `--rate-limit-max-keys` |
-
-Expensive REST routes include the broad explorer and query routes:
-
-- `/api/addresses`
-- `/api/blockchain`
-- `/api/consensus`
-- `/api/contracts`
-- `/api/monitoring`
-- `/api/net_info`
-- `/api/recent_events`
-- `/api/unconfirmed_txs`
-- `/api/validator_dashboard`
-- `/api/validators`
-- routes under `/api/abci_query/`, `/api/address/`, `/api/block/`,
-  `/api/block_results/`, `/api/contract/`, and `/api/tx/`
-
-The `/api/abci_query/...` surface can proxy arbitrary ABCI query paths,
-including simulation paths. Treat public exposure as a resource-management
-decision, not merely a read-only explorer setting.
-
-## Contract Source
+Stack-managed default:
 
 ```text
-GET /api/contract/currency
+http://127.0.0.1:8080
 ```
 
-Returns the stored contract source fetched through the node's query layer.
-The dashboard reads `contract_source/<name>` and displays the canonical stored
-source plus Xian VM metadata.
+## Endpoints
 
-In the explorer UI, the contract page renders that source with Python syntax
-highlighting, lets you jump from a listed function to its definition in the
-source pane, and enriches the page with runtime metadata such as owner,
-developer, deployer, creator/initiator, creation tx, and indexed reward totals
-when BDS is available.
+| Area | Routes |
+| --- | --- |
+| node | `/api/config`, `/api/status`, `/api/net_info`, `/api/validators`, `/api/validator_dashboard`, `/api/consensus`, `/api/monitoring` |
+| blocks and txs | `/api/blockchain`, `/api/block/{height}`, `/api/block_results/{height}`, `/api/tx/{hash}`, `/api/unconfirmed_txs` |
+| contracts | `/api/contract/{name}`, `/api/contracts`, `/api/recent_events` |
+| addresses | `/api/addresses`, `/api/address/{address}` |
+| Xian queries | `/api/abci_query/{path}` |
 
-```text
-GET /api/addresses?limit=50&offset=0
-```
-
-Returns recent indexed sender activity for the explorer address list. On nodes
-with BDS enabled this is backed by the BDS address activity projection, so it can
-serve recent address browsing without grouping the full transaction table.
-If the connected node does not expose that indexed address query, the dashboard
-returns the route as unavailable instead of synthesizing address rows from some
-other data source.
-
-```text
-GET /api/address/<address>?limit=50&offset=0
-```
-
-Returns indexed sender history for the address on nodes with BDS enabled,
-plus the developer-reward aggregate for that same address when available.
-
-For the persisted Xian VM IR, query:
-
-```text
-GET /api/abci_query/contract_ir/currency
-```
+Address, event, and history-oriented routes require BDS when their underlying
+indexed query is not available from current node state.
 
 ## ABCI Query Pass-Through
 
-The dashboard exposes arbitrary ABCI query paths under:
-
-```text
-GET /api/abci_query/{path}
-```
-
-Examples:
+The dashboard decodes ABCI key/value fields and exposes the node query path
+under `/api/abci_query/`:
 
 ```text
 GET /api/abci_query/get/currency.balances:alice
-GET /api/abci_query/keys/currency.balances/limit=100
-GET /api/abci_query/keys/currency.balances/limit=100/after=alice
+GET /api/abci_query/keys/currency.balances/limit=50
 GET /api/abci_query/get_next_nonce/<address>
 GET /api/abci_query/contract_source/currency
-GET /api/abci_query/contracts/limit=50/offset=0/sort=submitted_at/order=desc
-GET /api/abci_query/contract_info/currency
 GET /api/abci_query/contract_ir/currency
 GET /api/abci_query/contract_methods/currency
-GET /api/abci_query/contract_vars/currency
-GET /api/abci_query/health
 GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
-GET /api/abci_query/validators_policy
-GET /api/abci_query/validators_active
-GET /api/abci_query/validators_candidates
-GET /api/abci_query/validators_validator/<address>
-GET /api/abci_query/validators_pending_unbonds/<address>
-GET /api/abci_query/validators_open_votes/limit=50/offset=0
-GET /api/abci_query/validators_vote/<proposal-id>
-GET /api/abci_query/validators_vote_records/<proposal-id>
 ```
 
-For paginated key scans over a contract hash prefix, the `/keys/...` form
-returns the suffixes under that prefix together with `limit`, `after`,
-`next_after`, and `has_more`. Use `next_after` as the cursor when you need to
-walk large hashes without loading every key at once.
+For key scans, follow the returned `next_after` cursor instead of loading an
+unbounded prefix.
 
-## Monitoring Summary
+See [BDS Indexed Queries](/api/bds) for indexed block, transaction, event,
+state-history, token, candle, shielded, reward, and patch paths.
+
+## Contract and Transaction Responses
+
+`GET /api/contract/{name}` returns stored canonical source and VM metadata
+through the node query layer. The stored IR is available through
+`contract_ir/<name>`.
+
+For transaction lookups:
+
+- `result.tx` is the submitted transaction
+- `result.tx_result.data` contains Xian's encoded execution output
+
+SDKs should normally decode these shapes instead of duplicating dashboard
+response handling.
+
+## Explorer
+
+The dashboard includes:
 
 ```text
-GET /api/monitoring
+/explorer
+/explorer/contracts
+/explorer/addresses
+/explorer/events
 ```
 
-This route backs the dashboard's operator cards. It aggregates:
+Indexed address and event views require BDS. The explorer may support
+inspection of a connected peer, but the backend restricts targets to the
+configured node and known peers; it is not a general HTTP proxy.
 
-- the node's decoded `/perf_status` ABCI query
-- the node's decoded `/bds_status` ABCI query when BDS is enabled
-- CometBFT `unconfirmed_txs`
+## Consistency
 
-The dashboard home view combines that monitoring summary with:
+Direct `/get/...` queries read committed application state. BDS-backed routes
+are derived asynchronously from finalized blocks and may lag during catch-up.
+Check `/api/abci_query/bds_status` when an indexed read must include a recent
+transaction.
 
-- `/api/status` for sync state, validator identity, and latest block metadata
-- `/api/net_info` for peer count and peer details
-- `/api/validators` for live validator-set and voting-power visibility
+## Security
 
-Use it for explorer/operator UX. For canonical reads, keep using CometBFT RPC
-and direct ABCI query paths.
+The dashboard does not provide wallet authentication or TLS termination. Bind
+it to loopback/private infrastructure or place it behind a protected reverse
+proxy.
 
-## Explorer Views
+The maintained stack requires both `--public-query` and
+`XIAN_PUBLIC_QUERY_ENABLED=1` before publishing query services. This does not
+publish the live CometBFT RPC.
 
-The built-in explorer routes are:
+The dashboard enforces configurable REST rate, burst, concurrency, and tracked
+client limits. Broad explorer and `/api/abci_query/...` routes use the more
+restrictive expensive-route limits. Treat simulation as bounded operator-funded
+compute even though it does not commit state.
 
-```text
-GET /explorer
-GET /explorer/contracts
-GET /explorer/addresses
-GET /explorer/events
-```
+## Related Pages
 
-- `/explorer` is the block explorer view
-- `/explorer/contracts` lists deployed contracts, sorted by creation date by
-  default, with optional client-side switching to name sorting
-- `/explorer/addresses` lists recent indexed addresses and also acts as the
-  address drill-down entrypoint; selecting an address shows its indexed
-  submitted transactions and lets you open each tx detail again
-- `/explorer/events` lists recent indexed contract events when BDS is enabled
-
-The dashboard also accepts an optional `rpc` query parameter for peer-targeted
-inspection through the same UI:
-
-```text
-GET /explorer?rpc=http://10.0.0.25:26657
-```
-
-For IPv6 RPC literals in the `rpc` parameter, use bracketed URL syntax, for
-example `http://[::1]:26657`.
-
-The backend only allows the default node RPC or connected peer RPC
-targets, so this stays scoped to known network peers instead of acting as a
-generic proxy.
-
-For the standard localnet layout (`node-0`, `node-1`, … with host-port stride
-`100`), the dashboard also infers host-routable peer RPC URLs so peer switching
-works from a host-local dashboard process instead of falling back to
-container-internal addresses.
-
-When BDS is enabled, additional query paths are available under the same ABCI
-query surface. These are node queries backed by the optional BDS index instead
-of the raw current-state driver.
-
-These indexed reads are eventually consistent. The validator finalizes the
-block first, then the BDS worker persists the indexed payload asynchronously.
-So raw `/get/...` reads reflect current state immediately, while BDS-backed
-history/index queries may lag briefly behind the latest committed block.
-To make this resilient without keeping disk I/O in the validator hot path,
-BDS keeps finalized blocks in an in-memory pending buffer and
-persists them in strict contiguous height order. If the indexed head is
-missing a height, BDS fetches the missing blocks from local CometBFT RPC in
-the background while later live blocks remain pending.
-
-That means BDS can receive live block data during catch-up:
-
-- if live block `N+2` arrives while `N+1` is missing, `N+2` stays pending
-- the catch-up worker fetches and builds `N+1`
-- BDS persists `N+1`, then `N+2`, preserving a single canonical chain order
-
-The local spool supports offline maintenance, snapshot import, and explicit
-recovery workflows. The primary live-path durability mechanism is the BDS
-database plus contiguous-height catch-up.
-
-BDS-backed ABCI query paths include:
-
-For workflow examples, SDK usage, GraphQL equivalents, and field-shape notes,
-see [BDS Indexed Queries](/api/bds).
-
-```text
-GET /api/abci_query/bds_status
-GET /api/abci_query/bds_spool/limit=50/offset=0
-GET /api/abci_query/perf_status
-GET /api/abci_query/blocks/limit=50/offset=0
-GET /api/abci_query/block/123
-GET /api/abci_query/block_by_hash/<hash>
-GET /api/abci_query/tx/<hash>
-GET /api/abci_query/txs_for_block/123
-GET /api/abci_query/addresses/limit=50/offset=0
-GET /api/abci_query/txs_by_sender/<address>/limit=50/offset=0
-GET /api/abci_query/txs_by_contract/<contract>/limit=50/offset=0
-GET /api/abci_query/contract_summary/<contract>
-GET /api/abci_query/events_for_tx/<hash>
-GET /api/abci_query/events/<contract>/<event>/limit=50/offset=0
-GET /api/abci_query/events/<contract>/<event>/limit=50/after_id=500
-GET /api/abci_query/dex_candles/<market_id>/source=xian_pairs_v1/interval=5m/limit=100
-GET /api/abci_query/token_balances/<address>/limit=100/offset=0
-GET /api/abci_query/token_balances/<address>/limit=100/offset=0/include_zero=true
-GET /api/abci_query/shielded_output_tags/<tag>/limit=50/offset=0
-GET /api/abci_query/shielded_output_tags/<tag>/limit=50/after_id=500/kind=sync_hint
-GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0
-GET /api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0/kind=sync_hint
-GET /api/abci_query/recent_events/limit=50/offset=0
-GET /api/abci_query/developer_rewards/<recipient_key>
-GET /api/abci_query/state/<prefix>/limit=50/offset=0
-GET /api/abci_query/state_previous/<key>
-GET /api/abci_query/state_history/<key>/limit=50/offset=0
-GET /api/abci_query/state_for_tx/<hash>
-GET /api/abci_query/state_for_block/123
-GET /api/abci_query/token_contracts/limit=100/offset=0
-GET /api/abci_query/contracts/limit=50/offset=0
-GET /api/abci_query/state_patch_bundles
-GET /api/abci_query/scheduled_state_patches/123
-GET /api/abci_query/state_patches
-GET /api/abci_query/state_patches_for_block/123
-GET /api/abci_query/state_patch/<hash>
-GET /api/abci_query/state_changes_for_patch/<hash>
-```
-
-Operator-oriented BDS inspection:
-
-- `/bds_status` reports worker state, queue depth, spool size, indexed head,
-  lag relative to the node's current block height, connection-pool posture,
-  filesystem storage metrics, and warning/error alerts.
-- `catching_up` is the meaningful "behind" signal. `queue_depth` may stay
-  nonzero while the service is otherwise caught up, so treat indexed height,
-  spool state, DB health, and `catching_up` as the primary recovery signals.
-- when present, the nested `pool` object reports `size`, `idle`, `in_use`,
-  `min_size`, `max_size`, and `utilization`
-- `/bds_spool` lists the block payloads present on the local spool
-  for offline recovery or maintenance workflows.
-- `/perf_status` reports the node's current execution/performance snapshot,
-  including recent block timing and parallel-execution metadata.
-- `/token_balances/<address>` returns the BDS-backed token portfolio for one
-  address. By default it omits zero balances; add `include_zero=true` when you
-  need the full indexed token set for that address.
-- `/shielded_wallet_history/<tag>` is the preferred shielded light-wallet sync
-  feed. `/shielded_output_tags/<tag>` is the lower-level tag index used by
-  tooling that needs direct access to tagged output rows.
-
-Cursor-based event consumption:
-
-- `/events/<contract>/<event>/limit=.../after_id=...` returns events with
-  strictly larger BDS event IDs in ascending order.
-- Use `after_id` for resumable consumers and long-running watchers.
-- The `offset` form is useful for ad hoc browsing, but `after_id` is the better
-  shape for application event consumers.
-
-Shielded wallet history:
-
-- `/shielded_wallet_history/<tag>/limit=.../after_note_index=...` is the
-  protocol-shaped light-wallet recovery feed for shielded note wallets.
-- it returns the canonical note-commitment sequence in `note_index` order and
-  only exposes `output_payload` for outputs whose indexed tag matches the
-  requested `tag`
-- BDS stores shielded outputs as an indexed projection, so this feed does not
-  need to reconstruct wallet rows by scanning raw shielded events on each query
-- use `kind=sync_hint` for the normal wallet path; `kind=discovery_tag` is
-  also accepted for lower-level tooling
-- use `after_note_index` as the durable cursor for resumable wallet sync
-
-Developer reward aggregation:
-
-- `/developer_rewards/<recipient_key>` returns the cumulative indexed
-  `developer_reward` total for that recipient across contract executions.
-- The payload also includes reward row count, distinct transaction count,
-  distinct rewarded source-contract count, and first/last indexed block and
-  timestamp fields.
-- Developer rewards are attributed across participating contracts by metered
-  execution share, not only to the top-level transaction contract.
-- This is a BDS-backed aggregate. It requires BDS to be enabled on the node and
-  reflects the indexed view, not an unindexed raw-state scan.
-
-Catch-up behavior:
-
-- during live operation, BDS keeps finalized blocks pending in memory and
-  backfills any missing heights from local CometBFT RPC automatically
-- if the node or database restarts, BDS resumes from the indexed head and
-  continues catch-up from local or remote CometBFT RPC
-- the local spool remains useful for explicit offline recovery and imported
-  payloads, but it is not required for ordinary live catch-up
-- for full historical backfill, use `xian-bds-reindex` against local or remote
-  CometBFT RPC
-- if the local node has already pruned away the required block history, local
-  reindex is insufficient and an archival RPC source or imported BDS
-  snapshot is needed
-
-Use the raw node paths for authoritative current state:
-
-```text
-GET /api/abci_query/get/<state_key>
-GET /api/abci_query/contract_source/<name>
-GET /api/abci_query/contract_methods/<name>
-GET /api/abci_query/contract_vars/<name>
-GET /api/abci_query/get_next_nonce/<address>
-GET /api/abci_query/simulate_tx/<hex_payload>
-GET /api/abci_query/perf_status
-GET /api/abci_query/state_patch_bundles
-GET /api/abci_query/scheduled_state_patches/123
-```
-
-State patch query split:
-
-- `/state_patch_bundles` returns the node's local governed patch bundle
-  inventory and does not require BDS
-- `/scheduled_state_patches/<height>` returns the node's on-chain view of
-  approved scheduled patches for that height and does not require BDS
-- `/state_patches...` and `/state_changes_for_patch/...` are BDS-backed
-  historical/indexed views of patches that were actually applied
+- [API Overview](/api/)
+- [BDS Indexed Queries](/api/bds)
+- [WebSocket Subscriptions](/api/websockets)
+- [GraphQL](/api/graphql)

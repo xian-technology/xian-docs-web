@@ -31,13 +31,15 @@ flowchart LR
 
 | Contract | Role |
 |----------|------|
-| `con_xsc005` | XSC-0005 interface checker; collections are registered and verified through `is_XSC005` |
+| `con_xsc005` | XSC-0005 interface checker exposed through `is_XSC005` |
 | `con_xsc005_nft` | reference collection and marketplace contract: minting, listing, buying, royalties, approvals, likes, ownership proofs, chunked content, and PixelGrid support |
 
 The reference collection implements the full
 [XSC-0005 standard](/smart-contracts/standards/xsc-0005), including the
 PixelGrid extension for fully on-chain pixel art with palettes and animation
-frames.
+frames. Its marketplace accepts only the seeded chain `currency` contract for
+settlement; listings that name arbitrary interface-compatible contracts fail
+closed before any purchase can occur.
 
 ## PixelSnek Marketplace
 
@@ -48,7 +50,7 @@ full XSC-0005 surface:
 - collection browsing, registration of any XSC-0005 collection by contract
   address, and auto-discovery of new collections via indexer events
 - token detail with buy, list, cancel, transfer, burn, like, and
-  prove-ownership actions
+  prove-ownership actions; list and buy settle in native XIAN (`currency`)
 - minting into any collection you operate, including an in-browser
   pixel-grid editor with palette and animation-frame support
 - per-token and collection-wide approval management

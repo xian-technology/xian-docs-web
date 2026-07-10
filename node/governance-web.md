@@ -1,59 +1,17 @@
 # Governance Web Console
 
-`xian-governance-web` is the validator-facing governance operations console.
-It is a separate app from a validator node. It reads governance state through a
-configured Xian RPC endpoint and submits votes only through the connected Xian
-browser wallet.
-
-Repository:
-
-- `https://github.com/xian-technology/xian-governance-web`
-
-## What It Provides
-
-Use the console to:
-
-- inspect protocol-governance and validator-governance proposals, with
-  layer / status / type / needs-my-vote / emergency / expiring-soon filters
-  and free-text search
-- see proposal status, thresholds, voting weight, and a per-validator vote
-  matrix that distinguishes "not voted" from "ineligible"
-- see your own vote eligibility per proposal; the dashboard "needs your
-  vote" queue reflects real eligibility for the connected account
-- review an effect-and-risk preview on proposal detail before voting
-- connect the Xian browser wallet
-- submit validator votes through wallet signing
-- create guided protocol and validator-governance proposals through typed
-  forms
-- inspect active validators and candidates, including a validator detail
-  panel
-- review network settings (governance parameters and membership policy)
-- verify state-patch bundle hashes before activation, with a state-patch
-  detail panel
-- open off-chain proposal references such as GitHub discussions or pull
-  requests
-
-The console is not a comment system and does not store validator private keys.
-Proposal discussion should happen in the linked off-chain venue.
+`xian-governance-web` is a validator-facing console for inspecting proposals,
+creating supported proposal types, and submitting votes through the Xian
+browser wallet. It is an optional application, not part of a validator node.
 
 ## Requirements
 
-To run the console locally:
-
 - Node.js and npm
-- access to a Xian RPC endpoint
-- the Xian browser wallet for voting or proposal creation
-- a wallet account that is an active validator for governance actions
+- a trusted Xian RPC endpoint
+- the Xian browser wallet for signed actions
+- an active validator account for proposal and voting actions
 
-Governance read support expects the node/API surface to include:
-
-- `/validators_vote/<proposal-id>`
-- `/validators_vote_records/<proposal-id>`
-
-Those endpoints expose the per-voter validator-governance records used by the
-vote matrix. Nodes without those routes can expose proposal aggregates, but
-complete per-validator vote auditing requires the vote-record query surface and
-proposal records created with that surface enabled.
+Read-only users can inspect governance state without validator authority.
 
 ## Run Locally
 
@@ -65,13 +23,7 @@ cp .env.example .env
 npm run dev
 ```
 
-The default local URL is:
-
-```text
-http://127.0.0.1:4173
-```
-
-Set the target network in `.env`:
+Minimal local configuration:
 
 ```bash
 PORT=4173
@@ -80,102 +32,43 @@ XIAN_NETWORK_ID=local
 XIAN_NETWORK_NAME="Local Xian"
 XIAN_CHAIN_ID=xian-local-1
 XIAN_RPC_URL=http://127.0.0.1:26657
-XIAN_DASHBOARD_URL=http://127.0.0.1:18080
 XIAN_GOVERNANCE_CONTRACT=governance
 XIAN_MEMBERSHIP_CONTRACT=validators
 ```
 
-`XIAN_DASHBOARD_URL` is optional and is used only for navigation and
-observability. Voting does not require exposing a validator node endpoint.
-For IPv6 loopback, use raw host values for local binds and bracketed URL
-literals for endpoints, for example `XIAN_GOVERNANCE_HOST=::1`,
-`http://[::1]:4173`, `XIAN_RPC_URL=http://[::1]:26657`, and
-`XIAN_DASHBOARD_URL=http://[::1]:18080`.
+`XIAN_DASHBOARD_URL` is optional and used for navigation and observability.
 
 ## Voting Model
 
-Only active validators can vote.
+The connected wallet account is the signer. Running a node or publishing an
+RPC endpoint does not create voting authority.
 
-The signer is the wallet account, not the node process. Running a node or
-serving a public RPC endpoint does not create voting rights by itself.
+- Only active validators can create or vote on supported proposals.
+- Eligible voters, voting weights, and the threshold are snapshotted when a
+  proposal opens.
+- A validator added later cannot vote on that proposal.
+- Delegators do not vote directly. Delegation affects later validator power
+  only on networks whose policy uses stake-weighted power or stake-ranked
+  membership.
 
-For protocol governance, the `governance` contract imports the membership
-contract and requires the caller to be a member. On canonical networks, that
-membership contract is `validators`.
-
-For validator governance, `validators` requires:
-
-- `ctx.caller` to be in the active validator set to open a proposal
-- the caller to have snapshotted voting weight on that proposal to vote
-
-That means:
-
-- active validator wallet accounts can create proposals and vote
-- non-validator wallets can observe but cannot vote
-- BDS nodes, dashboards, and public RPC nodes observe unless the
-  connected wallet account is also an active validator
-- a validator added after a proposal opens cannot vote on that already-open
-  proposal
-- weight changes after proposal creation do not change that proposal's voting
-  weight or threshold
-
-## Delegation And Voting Weight
-
-Delegators do not vote directly in governance. Delegation can affect
-governance indirectly through validator power, depending on network policy.
-
-The local, devnet, testnet, and draft mainnet bundles use:
+The vote matrix requires these node query routes:
 
 ```text
-power_mode = "equal"
+/validators_vote/<proposal-id>
+/validators_vote_records/<proposal-id>
 ```
 
-In that mode, every active validator has the same active voting power. Delegated
-stake affects staking economics and rewards, but it does not change governance
-weight on those networks.
+## Operator Safety
 
-When a network uses:
+- Confirm the wallet, RPC response, manifest, and console all show the same
+  chain ID.
+- Review the exact proposal target, function, payload, voter snapshot, and
+  threshold before signing.
+- Keep validator consensus keys out of the browser wallet and console.
+- Treat state-patch approval and patch distribution as separate steps. Every
+  validator needs the exact approved bundle before activation.
+- Use a linked off-chain venue for discussion; the console is not a comment
+  system.
 
-```text
-power_mode = "stake_weighted"
-```
-
-active validator power is based on:
-
-```text
-self_bond + total_delegated
-```
-
-Governance snapshots that active validator power when a proposal is created.
-In stake-weighted networks, delegating to a validator can therefore increase
-that validator's voting weight in later proposal snapshots, but the delegator
-does not cast a separate vote.
-
-Delegation can also influence validator-set membership in `auto_top_n` and
-`hybrid` selection modes, where total bonded stake is part of candidate ranking
-and eligibility.
-
-## Node Endpoints
-
-Validator node endpoints are optional for the governance console.
-
-The minimum useful setup is wallet plus RPC:
-
-- the RPC endpoint provides proposal and validator state
-- the browser wallet signs governance transactions
-- private keys stay in the wallet
-
-Validators may publish a read-only node or dashboard endpoint in their
-validator profile for observability. The console can use those endpoints for
-health and readiness views, but they are not part of authorization and should
-never expose validator signing keys or mutating admin RPC.
-
-## State Patches
-
-Approving a state-patch proposal is not enough by itself. Validators need
-the exact approved patch bundle locally before the activation height.
-
-The console can compute and compare the canonical bundle hash, but operators
-must distribute the bundle to validators and confirm node readiness.
-See [Protocol Governance & State Patches](/node/protocol-governance) for the
-full patch process.
+See [Protocol Governance & State Patches](/node/protocol-governance) and the
+[Validator Operations Runbook](/node/validator-operations-runbook).

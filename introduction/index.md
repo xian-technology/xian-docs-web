@@ -5,6 +5,12 @@ combines a deterministic contract language, a node/runtime stack, SDKs,
 operator tooling, optional indexed services, and shielded execution building
 blocks into one ecosystem.
 
+::: warning Network status
+The current codebase has no active public testnet or mainnet. Use local or
+operator-managed networks. The checked-in `xian-mainnet-1` manifest is a launch
+rehearsal asset, not a public endpoint announcement.
+:::
+
 The important framing is that Xian is not only "a smart-contract language." It
 is the full path from contract authoring to node operations to application
 integration.
@@ -32,7 +38,7 @@ sandboxing, metering, and deterministic state transitions.
 ### Fixed Xian VM Runtime
 
 Python is the source language. Validators execute deployed contracts through
-the fixed `xian_vm_v1` runtime, using validated Xian VM artifacts.
+the fixed `xian_vm_v1` runtime using validator-derived canonical IR.
 
 ### Full Operator Stack
 
