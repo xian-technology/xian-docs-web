@@ -129,7 +129,7 @@ export default defineConfig({
             { text: 'Overview', link: '/smart-contracts/standards/' },
             { text: 'XSC-0001: Fungible Token', link: '/smart-contracts/standards/xsc-0001' },
             { text: 'XSC-0002: Permit Authorizer', link: '/smart-contracts/standards/xsc-0002' },
-            { text: 'XSC-0003: Streaming Payments', link: '/smart-contracts/standards/xsc-0003' },
+            { text: 'XSC-0003: Streaming Token', link: '/smart-contracts/standards/xsc-0003' },
             { text: 'XSC-0004: Wrapped Token', link: '/smart-contracts/standards/xsc-0004' },
             { text: 'XSC-0005: Non-Fungible Token', link: '/smart-contracts/standards/xsc-0005' }
           ]
@@ -238,7 +238,7 @@ export default defineConfig({
             { text: 'xian-js', link: '/tools/xian-js' },
             { text: 'xian-wallet-browser', link: '/tools/xian-wallet-browser' },
             { text: 'xian-wallet-mobile', link: '/tools/xian-wallet-mobile' },
-            { text: 'xian-js Playground', link: '/tools/playground' },
+            { text: 'Playgrounds', link: '/tools/playground' },
             { text: 'xian-py', link: '/tools/xian-py' },
             { text: 'xian-intentkit', link: '/tools/xian-intentkit' },
             { text: 'xian-dex-automation', link: '/tools/xian-dex-automation' },

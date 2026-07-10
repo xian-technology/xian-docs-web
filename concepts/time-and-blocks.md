@@ -97,7 +97,7 @@ Bad assumptions:
 
 ### Permit Deadlines
 
-In the canonical `currency` contract, a permit is valid only if the inclusion
+In the XSC-0002 permit authorizer, a permit is valid only if the inclusion
 block satisfies:
 
 ```python

@@ -14,7 +14,7 @@ runtime, use `importlib.call(...)` instead of generic reflection:
 return importlib.call(
     contract_name,
     "balance_of",
-    {"account": account},
+    {"address": account},
 )
 ```
 
@@ -28,7 +28,7 @@ if importlib.exists(contract_name) and importlib.has_export(
     return importlib.call(
         contract_name,
         "balance_of",
-        {"account": account},
+        {"address": account},
     )
 ```
 

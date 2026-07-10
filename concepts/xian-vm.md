@@ -1,7 +1,7 @@
 # The Xian VM
 
 The Xian VM is the execution layer that lets Xian keep Python as the contract
-authoring language without tying consensus forever to CPython bytecode.
+authoring language without making CPython bytecode the consensus format.
 
 ## The Two Layers To Keep Separate
 
@@ -10,18 +10,17 @@ There are always two distinct questions in Xian:
 1. What language does the developer write?
 2. What machine executes that program on validators?
 
-Developers write a restricted Python subset. The network then chooses an
-execution model for that authored contract. Current Xian nodes use the fixed
-`xian_vm_v1` execution model.
+Developers write a restricted Python subset. Nodes execute it through the fixed
+`xian_vm_v1` model.
 
 ## Execution Mode
 
 | Mode | What executes |
 |------|----------------|
-| `xian_vm_v1` | validated Xian VM artifacts under a native runtime |
+| `xian_vm_v1` | validator-derived canonical IR under a native runtime |
 
-The contract language stays the same. The currently supported node runtime is
-fixed to the VM artifact path.
+The contract language stays the same. The supported node runtime is fixed to
+the VM artifact path.
 
 ## What `xian_vm_v1` Actually Uses
 
@@ -91,13 +90,6 @@ That host boundary includes things such as:
 Those operations are deterministic runtime calls, not arbitrary operating-system
 syscalls.
 
-Assignment targets are metered through that same active host boundary. For a
-write such as `matrix[indexes["row"]][column] = value`, the native VM charges
-the container path, storage-backed index reads, and index expressions exactly
-once before rebuilding the immutable container path. Augmented assignment and
-mutating methods on nested receivers follow the same rule. If target evaluation
-runs out of chi, the container is not mutated.
-
 ## What Stays The Same For Contract Authors
 
 Contract authors work with the familiar Xian model:
@@ -112,14 +104,12 @@ developer-facing contract model.
 
 ## Why The Xian VM Matters
 
-The Xian VM gives the platform a cleaner long-term machine contract:
+The Xian VM gives the platform an explicit machine contract:
 
 - execution semantics become Xian-defined instead of CPython-bytecode-defined
 - metering can be attached directly to VM operations and host calls
-- deployment can be validated from canonical artifacts
+- submitted source can be validated and compiled into canonical IR
 - replay and parity testing become easier to reason about
-- performance-sensitive paths can move further into native code without forcing
-  a new contract language on developers
 
 ## Scope
 
@@ -128,8 +118,7 @@ including storage flows, decimals, datetime helpers, hashing, Ed25519
 verification, imports, events, and the shielded contract helpers needed by the
 existing shielded stack.
 
-That means the Xian VM is not just a design note. It is the supported execution
-path for current node deployments.
+It is the supported execution path for node deployments.
 
 ## Related Pages
 

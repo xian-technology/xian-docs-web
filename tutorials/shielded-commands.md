@@ -35,10 +35,14 @@ You need:
 
 - a node/runtime with zk verification enabled
 - a `zk_registry` contract available on the network
+- a deployed XSC-0001 token used as the command pool's fee/spend asset
 - the `con_shielded_commands.py` source from `xian-contracts`
 - at least one allowlisted adapter such as
   `con_shielded_dex_adapter.py` or `con_shielded_scheduler_adapter.py`
 - the `xian_zk` Python package from `xian-contracting`
+
+The DEX example also assumes that `con_dex` and the referenced pair path are
+deployed and funded.
 
 ## Step 1: Deploy The Registry, Command Pool, And Adapter
 
@@ -53,6 +57,9 @@ client.flush()
 zk_registry_source = Path(
     "xian-configs/contracts/zk_registry.s.py"
 ).read_text()
+currency_source = Path(
+    "xian-configs/contracts/currency.s.py"
+).read_text()
 shielded_commands_source = Path(
     "xian-contracts/contracts/shielded-commands/src/con_shielded_commands.py"
 ).read_text()
@@ -60,9 +67,23 @@ shielded_dex_adapter_source = Path(
     "xian-contracts/contracts/shielded-dex-adapter/src/con_shielded_dex_adapter.py"
 ).read_text()
 
-client.submit(zk_registry_source, name="zk_registry", signer="sys")
+client.submit(
+    zk_registry_source,
+    name="zk_registry",
+    constructor_args={"owner": "sys"},
+    signer="sys",
+)
 zk_registry = client.get_contract_proxy("zk_registry")
-zk_registry.seed(owner="sys", signer="sys")
+
+client.submit(
+    currency_source,
+    name="currency",
+    constructor_args={
+        "vk": "sys",
+        "initial_balances": {"sys": 1_000_000},
+    },
+    signer="sys",
+)
 
 client.submit(
     shielded_commands_source,
@@ -89,14 +110,18 @@ client.submit(
 
 ## Step 2: Register The Verifying Keys
 
-Generate a real random bundle for deployment:
+For a value-bearing deployment, promote ceremony-derived bundles with the
+`xian-zk-shielded-bundle` CLI and register the public manifest through the
+authority that owns `zk_registry`.
+
+For a private test network that explicitly accepts single-party setup trust:
 
 ```python
 from xian_zk import ShieldedCommandProver
 
 prover = ShieldedCommandProver.build_random_bundle(
     contract_name="con_shielded_commands",
-    vk_id_prefix="shielded-command-mainnet-20260404",
+    vk_id_prefix="private-test-command",
 )
 manifest = prover.registry_manifest()
 ```
@@ -110,8 +135,9 @@ for entry in manifest["registry_entries"]:
     zk_registry.register_vk(**args, signer="sys")
 ```
 
-For local development, `ShieldedCommandProver.build_insecure_dev_bundle()` is
-available, but it must never be used for a real network.
+`build_random_bundle()` is a single-party setup, not an MPC ceremony. For
+local development, `ShieldedCommandProver.build_insecure_dev_bundle()` is
+available, but it must never secure real value.
 
 Command-family ids are:
 
@@ -162,6 +188,14 @@ deposit_plan = wallet.build_deposit(
 
 deposit_proof = prover.prove_deposit(deposit_plan.request)
 
+currency = client.get_contract_proxy("currency")
+currency.transfer(amount=150, to="alice", signer="sys")
+currency.approve(
+    amount=150,
+    to="con_shielded_commands",
+    signer="alice",
+)
+
 commands.deposit_shielded(
     amount=150,
     old_root=deposit_proof.old_root,
@@ -173,7 +207,21 @@ commands.deposit_shielded(
 ```
 
 After the deposit lands, sync the new note records into the local wallet before
-building the command plan.
+building the command plan. For this fresh local tree, the deposited note is at
+index `0`:
+
+```python
+wallet.sync_records([
+    {
+        "index": 0,
+        "commitment": deposit_proof.output_commitments[0],
+        "payload": deposit_plan.output_payloads[0],
+    }
+])
+```
+
+On an indexed network, use `wallet.sync_indexed_client(...)` instead of
+constructing records manually.
 
 The command pool tracks shielded escrow internally. Direct token transfers to
 `con_shielded_commands` do not mint hidden notes; they show up through
@@ -186,19 +234,26 @@ Here the hidden sender wants to trade `100` units through the DEX adapter,
 allow a `5` unit relayer fee, and keep the remaining value as a hidden change
 note.
 
+Assume `chain_time` was read from the latest finalized block:
+
 ```python
+import datetime
+
+expires_at = chain_time + datetime.timedelta(minutes=10)
+
 command_plan = wallet.build_command(
     target_contract="con_shielded_dex_adapter",
     relayer="relayer-1",
     chain_id="xian-local-1",
     fee=5,
     public_amount=100,
+    expires_at=expires_at,
     payload={
         "action": "swap_exact_in",
-        "pair": 7,
+        "path": [7],
         "recipient": "alice",
         "amount_out_min": 95,
-        "deadline": "2026-04-04 13:00:00",
+        "deadline_seconds": 600,
     },
 )
 
@@ -207,6 +262,9 @@ command_proof = prover.prove_execute(command_plan.request)
 
 Important detail: `public_amount` is part of the proof statement. The adapter
 cannot spend more than that budget during execution.
+Derive `expires_at` from recent finalized chain time, not the local machine
+clock. The DEX adapter derives its own absolute deadline from contract `now`
+and the bounded `deadline_seconds` value.
 
 ## Step 6: Relay The Command
 

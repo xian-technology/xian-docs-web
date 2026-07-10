@@ -1,305 +1,111 @@
 # Unit Testing with ContractingClient
 
-`ContractingClient` is the primary tool for testing Xian smart contracts locally. It simulates the on-chain environment with an in-memory state database, letting you submit contracts, call functions, inspect state, and switch signers.
+`ContractingClient` compiles and executes contracts locally without a node.
+Use it to call exports, change signers, inspect state, and test rollback.
 
 ## Setup
 
-Install the contracting library:
-
 ```bash
-uv add xian-tech-contracting
+uv add xian-tech-contracting pytest
 ```
 
-Create your test file:
-
 ```python
-import unittest
-from contracting.local import ContractingClient
+import pytest
 
-class TestMyContract(unittest.TestCase):
-    def setUp(self):
-        self.client = ContractingClient()
-        self.client.flush()  # clear all state between tests
-
-    def tearDown(self):
-        self.client.flush()
-```
-
-## Constructor
-
-```python
-client = ContractingClient(signer="sys")
-```
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `signer` | `str` | `"sys"` | Default transaction signer for all operations |
-| `submission_filename` | `str` | internal default | Built-in submission contract source used when bootstrapping the client |
-| `storage_home` | `str` or `None` | `None` | Optional filesystem-backed storage location |
-| `driver` | driver or `None` | `None` | Existing storage driver to reuse |
-| `metering` | `bool` | `False` | Enable local metering for contract calls |
-| `compiler` | compiler or `None` | `None` | Compiler object used for building deployment artifacts |
-| `environment` | `dict` or `None` | `None` | Block/runtime environment overrides for tests |
-
-The `signer` sets the default `ctx.caller` and `ctx.signer` for all contract calls made through this client.
-
-## Submitting Contracts
-
-### submit()
-
-Submit a contract to the local environment:
-
-```python
-client.submit(f, name="con_my_contract", constructor_args={})
-```
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `f` | function | A Python function whose source code is the contract |
-| `name` | `str` or `None` | The on-chain name for the contract |
-| `metering` | `bool` or `None` | Per-submit metering override |
-| `owner` | `str` or `None` | Runtime owner metadata for the submitted contract |
-| `constructor_args` | `dict` or `None` | Arguments passed to the `@construct` function |
-| `signer` | `str` or `None` | Per-submit signer override |
-
-The function `f` is not called directly. Its **source code** is extracted,
-compiled into `xian_vm_v1` deployment artifacts, and executed in the sandbox.
-This means you define your contract as a regular Python function:
-
-```python
-def my_token():
-    balances = Hash(default_value=0)
-    owner = Variable()
-
-    @construct
-    def seed(initial_supply=1000000):
-        balances[ctx.caller] = initial_supply
-        owner.set(ctx.caller)
-
-    @export
-    def transfer(to: str, amount: float):
-        assert amount > 0, "Amount must be positive"
-        assert balances[ctx.caller] >= amount, "Insufficient balance"
-        balances[ctx.caller] -= amount
-        balances[to] += amount
-
-    @export
-    def balance_of(address: str):
-        return balances[address]
-
-client.submit(my_token, name="con_my_token", constructor_args={"initial_supply": 500000})
-```
-
-If you use the lower-level storage API directly:
-
-```python
-from contracting.storage.contract import Contract
-
-Contract(driver=client.raw_driver).submit(
-    name="con_fixture",
-    code=source,
-    constructor_args={"initial_supply": 500000},
-)
-```
-
-the deployment and its `@construct` writes use that same driver. That keeps
-constructor state visible to the rest of the current test client instead of
-writing into a separate temporary driver.
-
-## Getting a Contract Handle
-
-### get_contract_proxy()
-
-Returns a contract object you can call functions on:
-
-```python
-contract = client.get_contract_proxy("con_my_token")
-```
-
-Call exported functions directly on the handle:
-
-```python
-contract.transfer(to="bob", amount=100)
-balance = contract.balance_of(address="bob")
-```
-
-## Reading and Writing State
-
-### get_var()
-
-Read a state variable directly:
-
-```python
-# Read a Variable
-owner = client.get_var("con_my_token", "owner")
-
-# Read a Hash entry
-balance = client.get_var("con_my_token", "balances", arguments=["alice"])
-
-# Read a multi-dimensional Hash entry
-approval = client.get_var("con_my_token", "approvals", arguments=["alice", "bob"])
-```
-
-### set_var()
-
-Write a state variable directly (useful for test setup):
-
-```python
-# Set a Variable
-client.set_var("con_my_token", "owner", value="new_owner")
-
-# Set a Hash entry
-client.set_var("con_my_token", "balances", arguments=["alice"], value=1000)
-```
-
-## Changing the Signer
-
-### signer property
-
-Change who is signing transactions:
-
-```python
-# Default signer is "sys"
-contract.transfer(to="bob", amount=100)  # ctx.caller = "sys"
-
-# Change signer
-client.signer = "alice"
-contract.transfer(to="bob", amount=50)   # ctx.caller = "alice"
-
-# Change again
-client.signer = "bob"
-contract.transfer(to="carol", amount=25) # ctx.caller = "bob"
-```
-
-## Flushing State
-
-### flush()
-
-Clear all contracts and state from the local environment:
-
-```python
-client.flush()
-```
-
-Always call `flush()` in `setUp()` or `tearDown()` to isolate tests from each other.
-
-## Complete Example
-
-A full unittest file testing a token contract:
-
-```python
-import unittest
 from contracting.local import ContractingClient
 
 
+@pytest.fixture
+def client():
+    local = ContractingClient()
+    local.flush()
+    yield local
+    local.flush()
+```
+
+## Submit and Call
+
+```python
 def token_contract():
     balances = Hash(default_value=0)
-    approvals = Hash(default_value=0)
-    metadata = Hash()
 
     @construct
-    def seed():
-        balances[ctx.caller] = 1_000_000
-        metadata["name"] = "Test Token"
-        metadata["symbol"] = "TST"
+    def seed(initial_supply: int):
+        balances[ctx.caller] = initial_supply
 
     @export
-    def transfer(to: str, amount: float):
+    def transfer(amount: float, to: str):
         assert amount > 0, "Amount must be positive"
         assert balances[ctx.caller] >= amount, "Insufficient balance"
         balances[ctx.caller] -= amount
         balances[to] += amount
 
     @export
-    def balance_of(address: str):
+    def balance_of(address: str) -> float:
         return balances[address]
 
-    @export
-    def approve(to: str, amount: float):
-        assert amount >= 0, "Amount must be non-negative"
-        approvals[ctx.caller, to] = amount
 
-    @export
-    def transfer_from(to: str, amount: float, main_account: str):
-        assert amount > 0, "Amount must be positive"
-        assert approvals[main_account, ctx.caller] >= amount, "Not enough approved"
-        assert balances[main_account] >= amount, "Insufficient balance"
-        approvals[main_account, ctx.caller] -= amount
-        balances[main_account] -= amount
-        balances[to] += amount
+def test_transfer(client):
+    client.submit(
+        token_contract,
+        name="con_token",
+        constructor_args={"initial_supply": 1_000},
+    )
+    token = client.get_contract_proxy("con_token")
 
+    token.transfer(to="alice", amount=100)
 
-class TestToken(unittest.TestCase):
-    def setUp(self):
-        self.client = ContractingClient()
-        self.client.flush()
-        self.client.submit(token_contract, name="con_token")
-        self.token = self.client.get_contract_proxy("con_token")
-
-    def tearDown(self):
-        self.client.flush()
-
-    def test_initial_balance(self):
-        # Constructor runs as "sys" (default signer)
-        balance = self.token.balance_of(address="sys")
-        self.assertEqual(balance, 1_000_000)
-
-    def test_transfer(self):
-        self.token.transfer(to="alice", amount=1000)
-        self.assertEqual(self.token.balance_of(address="alice"), 1000)
-        self.assertEqual(self.token.balance_of(address="sys"), 999_000)
-
-    def test_transfer_insufficient_balance(self):
-        with self.assertRaises(AssertionError):
-            self.client.signer = "alice"
-            self.token.transfer(to="bob", amount=100)
-
-    def test_transfer_negative_amount(self):
-        with self.assertRaises(AssertionError):
-            self.token.transfer(to="alice", amount=-10)
-
-    def test_approve_and_transfer_from(self):
-        # sys approves alice to spend 500
-        self.token.approve(to="alice", amount=500)
-
-        # alice transfers from sys to bob
-        self.client.signer = "alice"
-        self.token.transfer_from(to="bob", amount=200, main_account="sys")
-
-        self.assertEqual(self.token.balance_of(address="bob"), 200)
-        self.assertEqual(self.token.balance_of(address="sys"), 999_800)
-
-    def test_transfer_from_exceeds_allowance(self):
-        self.token.approve(to="alice", amount=100)
-
-        self.client.signer = "alice"
-        with self.assertRaises(AssertionError):
-            self.token.transfer_from(to="bob", amount=200, main_account="sys")
-
-    def test_metadata(self):
-        name = self.client.get_var("con_token", "metadata", arguments=["name"])
-        symbol = self.client.get_var("con_token", "metadata", arguments=["symbol"])
-        self.assertEqual(name, "Test Token")
-        self.assertEqual(symbol, "TST")
-
-    def test_direct_state_manipulation(self):
-        # Directly set a balance for test setup
-        self.client.set_var("con_token", "balances", arguments=["charlie"], value=9999)
-        self.assertEqual(self.token.balance_of(address="charlie"), 9999)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    assert token.balance_of(address="alice") == 100
+    assert client.get_var("con_token", "balances", arguments=["sys"]) == 900
 ```
 
-Run the tests:
+The default signer is `sys`. Override it for a call when testing another
+account:
 
-```bash
-python -m pytest test_token.py -v
+```python
+token.transfer(to="bob", amount=25, signer="alice")
 ```
 
-Or with unittest:
+A proxy captures `client.signer` when the proxy is created. If you change the
+client-wide signer instead, create a new proxy afterward.
 
-```bash
-python -m unittest test_token.py -v
+## Direct State Helpers
+
+Use direct state access only for assertions and controlled test setup:
+
+```python
+owner = client.get_var("con_app", "owner")
+balance = client.get_var("con_token", "balances", arguments=["alice"])
+
+client.set_var("con_token", "balances", arguments=["alice"], value=500)
 ```
+
+These helpers are local-test APIs, not network mutation endpoints.
+
+## Test Failures and Rollback
+
+```python
+with pytest.raises(AssertionError, match="Insufficient balance"):
+    token.transfer(to="bob", amount=10_000)
+```
+
+After a failed call, assert that state and emitted events were not partially
+committed.
+
+## Metering
+
+Pass `metering=True` when a test needs local chi measurements. Treat those
+values as regression signals; use node simulation for estimates against the
+effective network runtime and configuration.
+
+## Isolation
+
+Create a fresh client per test or call `flush()` between tests. Do not let
+contracts, state, signer selection, or environment overrides leak across test
+cases.
+
+## Related Pages
+
+- [Your First Smart Contract](/getting-started/first-contract)
+- [Measuring Chi Costs](/smart-contracts/testing/chi-costs)
+- [Multi-Contract Testing](/smart-contracts/testing/multi-contract)

@@ -1,483 +1,125 @@
 # Configuration
 
-Xian node configuration is easiest to understand as three layers:
+Xian node configuration has three layers:
 
-1. network manifests and templates
-2. node profiles
-3. the rendered CometBFT home
-
-The higher layers describe operator intent. The rendered home is what the node
-actually runs.
-
-If you are deciding between templates, profiles, deploy bindings, bundles,
-products, and solutions, start with [Config Taxonomy](/node/config-taxonomy).
-Its precedence table is the canonical reference for which layer wins during
-manifest/profile creation, local runtime, and remote deployment.
+1. a network manifest defines network-wide identity and defaults
+2. a node profile records operator-local intent
+3. `xian node init` renders the CometBFT home used at runtime
 
 ```mermaid
 flowchart TD
-  Templates["Reusable templates"]
-  Manifests["Network manifests"]
-  Profile["Node profile"]
-  Home["Rendered CometBFT home"]
-  Runtime["Running node"]
-  Patches["Local state-patch bundles"]
-  Governance["On-chain governance approval"]
-
-  Templates --> Profile
-  Manifests --> Profile
-  Profile --> Home
-  Home --> Runtime
-  Patches --> Home
-  Governance --> Runtime
-  Patches --> Runtime
+  Template["Reusable template"] --> Manifest["Network manifest"]
+  Manifest --> Profile["Node profile"]
+  Profile --> Home["Rendered CometBFT home"]
+  Home --> Runtime["Running node"]
 ```
 
-## Network Manifests And Templates
+Use [Config Taxonomy](/node/config-taxonomy) for precedence and ownership
+rules.
 
-Network manifests describe network-wide defaults such as:
+## Network Manifests
 
-- chain and network identity
-- genesis declaration
-- canonical P2P seeds and persistent peers
-- snapshot bootstrap URLs
-- image posture
-- block policy defaults
-- optional pinned release images and their provenance metadata
-- optional shielded/privacy packaging metadata such as approved privacy artifact
-  catalogs and shielded history commitments
+Canonical assets live in `xian-configs/networks/<name>/manifest.json`.
+Manifests may define:
 
-Canonical manifests live under `xian-configs/networks/<name>/manifest.json`.
-Reusable starter templates live under `xian-configs/templates/`.
+- chain identity and genesis source or bundle
+- seeds and persistent peers
+- snapshot bootstrap and trust material
+- block-production policy
+- pinned node images and release provenance
+- runtime features and privacy artifact policy
 
-The important distinction is:
+The checked-in `local`, `devnet`, and `testnet` manifests are development or
+rehearsal assets. The `xian-mainnet-1` manifest is a draft launch asset. None
+of them implies that a public endpoint is live.
 
-- templates are reusable starting points
-- manifests describe a specific network
-
-For canonical published networks, the manifest can also pin:
-
-- `node_release_manifest`: the exact repo refs and build inputs that produced
-  the published node images
-- `privacy_artifact_catalog`: a checksum-pinned catalog of approved shielded
-  registry manifests for that network
-- `shielded_history_policy`: the compatibility and retention commitment for the
-  `shielded_wallet_history` feed
-- `privacy_submission_policy`: operator-facing relayer and disclosure posture
+Templates under `xian-configs/templates/` are reusable starting points, not
+networks.
 
 ## Node Profiles
 
-Node profiles are operator-local JSON files, usually created by `xian-cli`
-under `./nodes/<name>.json`.
+Profiles are JSON files normally created under `nodes/` by `xian-cli`. They
+select local paths, keys, images, peers, pruning, block policy, fee mode,
+logging, simulation, parallel execution, and optional services.
 
-Profiles capture node-local intent such as:
+See [Node Profiles](/node/profiles) for the profile contract. Prefer changing a
+manifest or profile and re-rendering over hand-editing generated files.
 
-- moniker and validator key reference
-- stack checkout path
-- image mode and optional pinned images copied from a manifest
-- P2P seeds and persistent peers
-- optional node-local genesis override
-- BDS and other service posture
-- pruning
-- dashboard and monitoring settings
-- application logging settings
-- readonly simulation settings
-- parallel execution settings
-- advanced runtime defaults and overrides
+## Rendered Home
 
-See [Node Profiles](/node/profiles) for the high-level JSON contract.
-
-## Rendered CometBFT Home
-
-`xian node init` materializes the final runnable home, typically under the
-`xian-stack` checkout.
-
-Important contents include:
-
-- `config/config.toml`
-- `config/xian.toml`
-- `config/genesis.json`
-- `config/state-patches/`
-- `config/priv_validator_key.json`
-- `config/node_key.json`
-- `data/priv_validator_state.json`
-
-From here on, the rendered config files are the effective runtime truth.
-
-## Important Config Sections
-
-### Top-Level Xian Keys
-
-The top level of `config/xian.toml` carries the main Xian runtime toggles,
-including:
-
-- pruning
-- metrics
-- application logging
-- readonly simulation
-- transaction fee mode and 0-fee chi caps
-- parallel execution
-- local pending-nonce reservation behavior
-
-`xian_vm_v1` is the only supported node runtime. Execution mode, bytecode,
-gas schedule, and authority are internal VM constants, not operator-selectable
-settings.
-
-### `[bds]`
-
-This section is relevant when `bds_enabled = true` and the optional indexed
-stack is enabled.
-
-It contains BDS/Postgres-related settings such as:
-
-- connection info
-- pool sizing
-- statement timeout
-- queue and catch-up settings
-- application name
-- spool location and warning thresholds
-
-## Current Configure Arguments
-
-`xian-configure-node` is the maintained node-home renderer. These are the
-current operator-facing arguments accepted by the tool.
-
-### Network And Genesis
-
-- `--discover-seed`
-- `--seed`
-- `--persistent-peer`
-- `--moniker`
-- `--allow-cors` / `--no-allow-cors`
-- `--snapshot-url`
-- `--snapshot-signing-key`
-- `--snapshot-expected-chain-id`
-- `--genesis-source`
-- `--genesis-bundle`
-- `--chain-id`
-- `--genesis-time`
-- `--validator-privkey`
-- `--prometheus` / `--no-prometheus`
-- `--bds-enabled` / `--no-bds-enabled`
-- `--enable-pruning` / `--no-enable-pruning`
-- `--blocks-to-keep`
-- `--block-policy-mode`
-- `--block-policy-interval`
-
-`--block-policy-mode` accepts the current policy modes `on_demand`,
-`idle_interval`, and `periodic`. The interval must be nonzero for
-`idle_interval` and `periodic`.
-
-### CometBFT State Sync
-
-- `--statesync-enable` / `--no-statesync-enable`
-- `--statesync-rpc-server`
-- `--statesync-trust-height`
-- `--statesync-trust-hash`
-- `--statesync-trust-period`
-
-### Metrics, Logging, And Readonly Simulation
-
-- `--metrics-enabled` / `--no-metrics-enabled`
-- `--metrics-host`
-- `--metrics-port`
-- `--metrics-bds-refresh-seconds`
-- `--transaction-trace-logging` / `--no-transaction-trace-logging`
-- `--app-log-level`
-- `--app-log-json` / `--no-app-log-json`
-- `--app-log-rotation-hours`
-- `--app-log-retention-days`
-- `--simulation-enabled` / `--no-simulation-enabled`
-- `--simulation-max-concurrency`
-- `--simulation-timeout-ms`
-- `--simulation-max-chi`
-
-### Parallel Execution
-
-- `--parallel-execution-enabled` / `--no-parallel-execution-enabled`
-- `--parallel-execution-workers`
-- `--parallel-execution-min-transactions`
-- `--parallel-execution-max-speculative-waves`
-- `--parallel-execution-min-wave-acceptance-ratio`
-- `--parallel-execution-low-acceptance-min-wave-size`
-- `--parallel-execution-warm-workers` / `--no-parallel-execution-warm-workers`
-- `--parallel-execution-access-estimates-enabled` /
-  `--no-parallel-execution-access-estimates-enabled`
-
-The current default posture keeps parallel execution disabled until an operator
-enables it. When enabled, the default worker count is `4`, the minimum block
-size is `8` transactions, the maximum speculative wave count is `4`, workers
-are warmed by default, and access estimates are enabled by default.
-
-### Pending Nonce Reservation
-
-- `--pending-nonce-reservation-ttl-seconds`
-- `--max-pending-nonces-per-sender`
-
-### BDS / Indexed Query Storage
-
-- `--bds-dsn`
-- `--bds-host`
-- `--bds-port`
-- `--bds-database`
-- `--bds-user`
-- `--bds-password`
-- `--bds-pool-min-size`
-- `--bds-pool-max-size`
-- `--bds-statement-timeout-ms`
-- `--bds-acquire-timeout-ms`
-- `--bds-application-name`
-- `--bds-queue-max-size`
-- `--bds-catchup-enabled` / `--no-bds-catchup-enabled`
-- `--bds-catchup-poll-seconds`
-- `--bds-rpc-url`
-- `--bds-spool-dir`
-- `--bds-spool-warn-entries`
-- `--bds-spool-warn-bytes`
-- `--bds-disk-free-warn-bytes`
-
-## Stack Backend Runtime Arguments
-
-The maintained `xian-stack` backend exposes service-hosting arguments in
-addition to the node-home renderer. The current runtime surface includes:
-
-Service posture:
-
-- `--bds-enabled` / `--no-bds-enabled`
-- `--dashboard` / `--no-dashboard`
-- `--monitoring` / `--no-monitoring`
-- `--dashboard-host`
-- `--dashboard-port`
-
-Public exposure:
-
-- `--public-rpc` / `--no-public-rpc`
-- `--public-query` / `--no-public-query`
-- `--public-metrics` / `--no-public-metrics`
-
-Node image selection:
-
-- `--node-image-mode`
-- `--node-integrated-image`
-- `--node-split-image`
-
-`--node-image-mode` accepts `local_build` and `registry`.
-
-Optional sidecars:
-
-- `--intentkit` / `--no-intentkit`
-- `--intentkit-network-id`
-- `--intentkit-host`
-- `--intentkit-port`
-- `--intentkit-api-port`
-- `--dex-automation` / `--no-dex-automation`
-- `--dex-automation-host`
-- `--dex-automation-port`
-- `--dex-automation-config`
-- `--shielded-relayer` / `--no-shielded-relayer`
-- `--shielded-relayer-host`
-- `--shielded-relayer-port`
-
-Command-specific health/start arguments:
-
-- `start --wait-for-health` / `start --no-wait-for-health`
-- `start --rpc-timeout-seconds`
-- `start --rpc-url`
-- `health --rpc-url`
-- `health --check-disk` / `health --no-check-disk`
-
-Public exposure flags are still gated by environment variables so accidental
-host publishing fails closed:
-
-- public RPC requires `XIAN_PUBLIC_RPC_ENABLED=1`
-- public query surfaces, including dashboard and indexed query services,
-  require `XIAN_PUBLIC_QUERY_ENABLED=1`
-- public metrics requires `XIAN_PUBLIC_METRICS_ENABLED=1`
-
-## Release Provenance In Manifests
-
-When a network pins published node images, `node_release_manifest` is the
-machine-readable provenance block that explains how those images were built.
-
-The release manifest surface includes:
-
-- exact repo refs for the main runtime components
-- digest-pinned Python and Go base images
-- the CometBFT version plus a checksum-pinned source archive URL
-- the s6-overlay version plus architecture-specific SHA256 values
-
-The network manifest carries both the selected image and the pinned release
-inputs that produced that image.
-
-## Snapshot Bootstrap Vs State Sync
-
-There are two different snapshot concepts in the stack.
-
-### Snapshot Bootstrap
-
-`snapshot_url` is an operator bootstrap path. It restores a prepared node-home
-archive.
-
-This URL can point either to:
-
-- a snapshot archive directly, in which case the operator must supply an
-  explicit expected SHA256
-- a signed snapshot manifest JSON, in which case the node validates the
-  manifest signature, `chain_id`, and embedded archive hash against trusted
-  Ed25519 public keys before restoring the archive
-
-### CometBFT State Sync
-
-CometBFT `[statesync]` settings are protocol-level sync controls that require:
-
-- trusted RPC servers
-- trust height
-- trust hash
-- trust period
-
-For Xian application snapshots, the trusted CometBFT app hash is the state-root
-Merkle commitment. During import, Xian recomputes that root from the downloaded
-contract state and nonce state before accepting the snapshot.
-
-These are not the same mechanism.
-
-## State Patch Bundles
-
-Governed forward state patches are local bundle files stored under:
+The effective runtime home contains:
 
 ```text
-<cometbft-home>/config/state-patches
+config/config.toml
+config/xian.toml
+config/genesis.json
+config/state-patches/
+config/priv_validator_key.json
+config/node_key.json
+data/priv_validator_state.json
 ```
 
-They are not ordinary config keys. The runtime loads them only when the
-on-chain governance state approves the matching bundle hash and activation
-height.
+`config.toml` controls CometBFT. `xian.toml` controls Xian application
+settings. Genesis, validator state, and keys must not be changed casually on an
+existing network.
 
-## Metrics, Logging, Simulation, And Parallel Execution
+`xian_vm_v1` is the only supported execution runtime. Execution mode, VM
+bytecode, and gas schedule are not operator-selectable configuration.
 
-The rendered config files are where all node-local runtime posture is finally
-materialized.
+## Runtime Settings
 
-In practice:
+Top-level Xian settings cover:
 
-- application metrics live under `[xian]`
-- Xian application logging lives under `[xian]`
-- readonly simulation lives under `[xian]`
-- transaction fee mode lives under `[xian]`
-- speculative parallel execution lives under `[xian]`
+- pruning and retained block history
+- application metrics and logging
+- readonly simulation limits
+- transaction fee mode and free-metered chi caps
+- speculative parallel execution
+- pending nonce reservation
 
-VM execution policy is fixed by the node runtime. Do not add `xian.execution`
-or `xian.tracer_mode` keys to `xian.toml`; the node treats those as invalid
-configuration.
+The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
+and spool behavior. See [Runtime Features](/node/runtime-features).
 
-See [Runtime Features](/node/runtime-features) for the operator-facing meaning
-of those settings.
+## Snapshot and State Sync
 
-## Stack-Managed Exposure Defaults
+These are separate mechanisms:
 
-The maintained `xian-stack` backend defaults to fail-closed host publishing:
+- `snapshot_url` restores a prepared node-home or Xian application-state
+  archive. Signed manifests can pin the archive hash, chain ID, and signer.
+- CometBFT state sync uses trusted RPC servers, height, hash, and trust period
+  to join through the consensus protocol.
 
-- CometBFT P2P remains public-facing by default on `26656`
-- CometBFT RPC defaults to `127.0.0.1:26657`
-- CometBFT metrics defaults to `http://127.0.0.1:26660/metrics`
-- Xian app metrics defaults to `http://127.0.0.1:9108/metrics`
-- dashboard process defaults to `127.0.0.1:8080`; maintained stack templates
-  publish it on host port `18080`
-- PostGraphile defaults to `http://127.0.0.1:5000/graphql`
-- `xian-dex-automation` defaults to `127.0.0.1:38280` when enabled
-- the shielded relayer defaults to `127.0.0.1:38180` when enabled
+Use [Recovery Plans](/node/recovery-plans) for supported recovery paths.
 
-IPv6 loopback can be used for local stack binds and host-published services.
-Use raw host literals in bind and publish settings, for example `::1`; use
-bracketed literals in URLs, for example `http://[::1]:26657/status`. The IPv6
-wildcard `::` is a non-loopback bind and should be treated like explicit public
-exposure.
+## Public Exposure
 
-Public exposure is explicit through the stack backend:
+The maintained stack binds RPC, query services, and metrics to loopback by
+default. Public publishing requires both a command flag and its environment
+gate:
 
-- `--public-rpc` or `XIAN_PUBLIC_RPC_ENABLED=1`
-- `--public-metrics` or `XIAN_PUBLIC_METRICS_ENABLED=1`
-- `--public-query` or `XIAN_PUBLIC_QUERY_ENABLED=1`
+| Surface | Flag | Environment gate |
+| --- | --- | --- |
+| CometBFT RPC | `--public-rpc` | `XIAN_PUBLIC_RPC_ENABLED=1` |
+| dashboard/BDS/GraphQL | `--public-query` | `XIAN_PUBLIC_QUERY_ENABLED=1` |
+| metrics | `--public-metrics` | `XIAN_PUBLIC_METRICS_ENABLED=1` |
 
-`public-query` is intentionally separate from `public-rpc`. It publishes
-query-facing services such as the dashboard and BDS / GraphQL surfaces. It does
-not also expose the live node RPC.
-
-## Network Manifest Shape
-
-Manifests use object families for related configuration:
-
-```json
-{
-  "schema_version": 1,
-  "name": "testnet",
-  "chain_id": "xian-testnet-1",
-  "genesis": {
-    "kind": "bundle",
-    "bundle": "testnet",
-    "genesis_time": "2026-03-30T00:00:00.000000Z"
-  },
-  "p2p": {
-    "seeds": [],
-    "persistent_peers": []
-  }
-}
-```
-
-`genesis.kind = "source"` points at a materialized `genesis.json` by URL or
-file path. `genesis.kind = "bundle"` tells tooling to render deterministic
-genesis from a named contract bundle such as `local`, `devnet`, or `testnet`.
-When tooling generates a source genesis from a bundle, it may also record
-`genesis_build` provenance beside the manifest.
-
-This example shows the checked-in canonical testnet manifest shape. When you
-target a public RPC endpoint, use the chain ID reported by `/status`
-(`result.node_info.network`) for transaction payloads.
-
-When RPC, dashboard, seed, or persistent-peer addresses contain IPv6 literals,
-write URL-style hosts in bracketed form, such as `http://[::1]:26657` or
-`nodeid@[::1]:26656`.
-
-For local workflows, `xian-stack` generates `.stack-secrets.env` on first
-use. That file holds local BDS and PostGraphile passwords and should stay
-untracked. For BDS-enabled runs, PostGraphile uses its own dedicated read-only
-database role instead of the primary BDS owner account. The stack config also
-disables generated PostGraphile mutations by default, omits simple collection
-fields in favor of connection-style pagination, caps request body size, and sets
-a statement timeout on that read-only role. It also waits for the core BDS
-read-model tables before starting PostGraphile, so a partial schema is not
-exposed during node startup.
+`--public-query` does not publish the live RPC or mempool. Put any published
+surface behind appropriate firewall, TLS, authentication, rate limits, and
+monitoring.
 
 ## Common Local Endpoints
 
-These are the usual local endpoints a node runner may see. Not every service is
-enabled on every node or profile.
+| Surface | Default |
+| --- | --- |
+| CometBFT P2P | `26656` |
+| CometBFT RPC | `http://127.0.0.1:26657` |
+| CometBFT metrics | `http://127.0.0.1:26660/metrics` |
+| Xian metrics | `http://127.0.0.1:9108/metrics` |
+| dashboard | `http://127.0.0.1:8080` |
+| GraphQL | `http://127.0.0.1:5000/graphql` |
+| Prometheus | `http://127.0.0.1:9090` |
+| Grafana | `http://127.0.0.1:3000` |
 
-| Surface | Default local endpoint | When it exists |
-|---------|------------------------|----------------|
-| CometBFT P2P | `26656` | node runtime |
-| CometBFT RPC | `http://127.0.0.1:26657/status` | node runtime |
-| CometBFT metrics | `http://127.0.0.1:26660/metrics` | CometBFT Prometheus metrics enabled |
-| Xian metrics/perf | `http://127.0.0.1:9108/metrics` | Xian application metrics enabled |
-| Dashboard process | `http://127.0.0.1:8080` | dashboard service enabled |
-| Dashboard stack host | `http://127.0.0.1:18080` | maintained stack templates that publish the dashboard on a separate host port |
-| BDS GraphQL | `http://127.0.0.1:5000/graphql` | BDS and PostGraphile enabled |
-| Prometheus | `http://127.0.0.1:9090` | monitoring enabled |
-| Grafana | `http://127.0.0.1:3000` | monitoring enabled |
-| DEX automation | `http://127.0.0.1:38280` | `xian-dex-automation` enabled |
-| Shielded relayer | `http://127.0.0.1:38180` | shielded relayer enabled |
-
-The same endpoints can be rendered on IPv6 loopback when the relevant bind or
-publish host is `::1`; URL literals must be bracketed, for example
-`http://[::1]:18080`.
-
-Related frontend dev servers are separate from the node runtime. The DEX UI
-uses `http://127.0.0.1:5173/` in `xian-dex/web`; the browser IDE uses Vite's
-dev-server port selection and prints the actual URL when started.
-
-Those port numbers describe the service sockets, not a guarantee that the
-service is Internet-facing. In the maintained stack, only CometBFT P2P is
-public by default. Prometheus and Grafana stay loopback-only unless public
-monitoring is explicitly enabled and authenticated external access is confirmed
-with the stack or deploy monitoring guard variables documented in
-[Starting, Stopping & Monitoring](/node/managing#dashboard-and-graphql).
+Not every profile enables every service. Run `xian node endpoints <name>` for
+the effective catalog. Bracket IPv6 literals in URLs, for example
+`http://[::1]:26657`.

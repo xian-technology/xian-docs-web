@@ -1,135 +1,70 @@
 # Node Operations
 
-This section documents the supported operator path for running Xian nodes from
-the maintained repos:
+The operator path spans several focused repositories:
 
-- `xian-cli` owns operator workflows such as key generation, network join, node
-  initialization, start, stop, status, snapshot restore, and doctor checks.
-- `xian-deploy` owns the Linux-focused remote deployment path, including remote
-  health checks, state-snapshot restore, and state-sync bootstrap playbooks.
-- `xian-stack` owns the Docker images, Compose topology, backend lifecycle
-  script, localnet, and optional dashboard/BDS services.
-- `xian-abci` owns the deterministic node process, config rendering primitives,
-  CometBFT-facing behavior, and application snapshot serving/loading.
-- `xian-configs` owns canonical network bundles and contract bundles.
+- `xian-cli`: network, profile, node lifecycle, recovery, and diagnostics
+- `xian-stack`: images, Compose topology, localnet, monitoring, and backend
+  commands
+- `xian-abci`: deterministic node application, snapshots, BDS, metrics, and
+  optional dashboard
+- `xian-configs`: manifests, templates, genesis bundles, and launch assets
+- `xian-deploy`: remote Linux deployment playbooks
 
-## Recommended Flow
+The current codebase has no active public testnet or mainnet. Use a local
+network or an explicitly accepted operator manifest.
 
-The supported workflow is:
-
-1. Run `xian setup node` to choose local setup or network join
-2. Choose validator key mode and the `basic` or `indexed` runtime preset
-3. Let the wizard create or join the network, write the node profile, and
-   materialize the local CometBFT home
-4. Start and stop the runtime through `xian-stack`
-5. Use `xian node status`, `xian node endpoints`, `xian node health`,
-   monitoring, and the optional dashboard for inspection
-
-```mermaid
-flowchart TD
-  Setup["xian setup node"]
-  Keys["Generate or reference validator keys"]
-  Profile["Network manifest and node profile"]
-  Init["xian node init renders the CometBFT home"]
-  Start["xian node start delegates runtime to xian-stack"]
-  Observe["Inspect status, endpoints, health, monitoring, and dashboard"]
-  Remote["Prepare remote host material"]
-  Deploy["xian-deploy bootstrap, health, recovery, and runbooks"]
-
-  Setup --> Keys
-  Keys --> Profile
-  Profile --> Init
-  Init --> Start
-  Start --> Observe
-  Profile --> Remote
-  Remote --> Deploy
-```
-
-For remote Linux hosts, keep the local `xian-cli` network/profile flow, then
-use `xian-deploy` for bootstrap, deployment, remote health, and recovery
-runbooks.
-
-Typical commands:
+## Local Workflow
 
 ```bash
-uv run xian setup node --mode local --network local-dev --name validator-1 \
+xian setup node --mode local --network local-dev --name validator-1 \
   --preset basic --key-mode generate --start --yes
-uv run xian node status validator-1
-uv run xian node endpoints validator-1
-uv run xian node health validator-1
-uv run xian node stop validator-1
+
+xian node status validator-1
+xian node endpoints validator-1
+xian node health validator-1
+xian node stop validator-1
 ```
 
-For joining an existing canonical network with indexed services and monitoring
-defaults:
+For a shared operator-managed network, pass its reviewed manifest explicitly:
 
 ```bash
-uv run xian setup node --mode join --network testnet --name validator-1 \
+xian setup node --mode join --name validator-1 \
+  --network private-net \
+  --network-manifest /path/to/accepted/manifest.json \
   --preset indexed --key-mode existing \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
-  --stack-dir ../xian-stack --start --yes
+  --stack-dir ../xian-stack --no-start --yes
 ```
 
-Mainnet preparation uses the draft `xian-mainnet-1` manifest in `xian-configs`,
-but operators should pass the accepted operator bundle manifest with
-`--network-manifest`; product defaults should stay local.
-
-When the joined network manifest pins published node images, `xian node start`
-pulls those immutable images by default through `xian-stack`. Use
-`--node-image-mode local_build` during setup when you need a dev override
-against the local workspace instead.
-
-The lower-level flow is available for scripted operators:
-
-1. Generate validator key material with `xian-cli`
-2. Create or join a network manifest/profile manually
-3. Materialize the local CometBFT home with `xian node init`
-4. Start and stop the runtime through `xian-stack`
-5. Use `xian node status`, `xian node endpoints`, `xian node health`, and the optional dashboard for inspection
+Verify genesis, chain ID, peers, snapshot trust, image digests, and release
+provenance before starting.
 
 ## Runtime Topologies
 
-`xian-stack` supports two runtime topologies:
+- `integrated`: CometBFT and `xian-abci` supervised in one node container
+- `fidelity`: separate CometBFT and application containers
 
-- `integrated`: one container per node, with `xian-abci` and `CometBFT`
-  supervised together by `s6-overlay`
-- `fidelity`: separate `xian-abci` and `CometBFT` containers, closer to an
-  orchestrated production layout
+Dashboard, BDS, GraphQL, monitoring, and other sidecars are optional and do not
+participate in consensus.
 
-The dashboard is optional in both cases and runs as its own service. BDS and
-GraphQL are optional indexed-read services on top of the node, not part of the
-deterministic validator path.
+## Documentation Map
 
-## What This Section Covers
-
-- [Architecture](/node/architecture): how the runtime pieces fit together
-- [System Requirements](/node/requirements): host, Docker, and workspace needs
-- [Installation & Setup](/node/installation): supported setup path
-- [Configuration](/node/configuration): manifests, profiles, homes, and ports
-- [Config Taxonomy](/node/config-taxonomy): templates, profiles, deploy
-  bindings, bundles, products, solutions, and when to use each one
-- [Runtime Features](/node/runtime-features): execution-engine policy, tracer
-  modes, readonly simulation, parallel execution, and runtime keys
-- [Pruning & Retention](/node/pruning): block-history pruning policy,
-  `blocks_to_keep` sizing, and recovery implications
-- [Local DEX Bootstrap](/node/local-dex-bootstrap): opt-in local deployment of
-  `con_pairs`, `con_dex`, and a demo liquid pair for DEX UI and event testing
-- [xian-dex-automation](/tools/xian-dex-automation): optional deterministic
-  DEX event automation sidecar for stack-managed nodes
-- [5-Validator Localnet E2E](/node/localnet-e2e): the canonical whole-stack local
-  validation run across validators, BDS, governance, DEX, logging,
-  shielded-note flows, VM-native validation, and `make release-safety`
-- [Protocol Governance & State Patches](/node/protocol-governance): the
-  first-class forward patching model, local bundle directory, and emergency
-  boundary
-- [Governance Web Console](/node/governance-web): validator-facing proposal,
-  voting, vote audit, and state-patch hash verification UI
-- [Recovery Plans](/node/recovery-plans): the guided operator rollback /
-  restore workflow when forward patching is not enough
-- [Node Profiles](/node/profiles): the JSON contract used by `xian-cli`
-- [Starting, Stopping & Monitoring](/node/managing): operational commands,
-  monitoring surfaces, and incident runbooks
-- [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,
-  BDS rebuilds, and snapshot import/export workflows
-- [Validators](/node/validators): validator-specific setup and expectations
-- [Validator Operations Runbook](/node/validator-operations-runbook): production-style rehearsal procedures for onboarding, exit/unbond, jail/unjail, evidence/slashing, governance changes, and incident recovery
+- [Architecture](/node/architecture)
+- [Requirements](/node/requirements)
+- [Installation and Setup](/node/installation)
+- [Config Taxonomy](/node/config-taxonomy)
+- [Configuration](/node/configuration)
+- [Node Profiles](/node/profiles)
+- [Runtime Features](/node/runtime-features)
+- [Starting, Stopping and Monitoring](/node/managing)
+- [Pruning and Retention](/node/pruning)
+- [Recovery Plans](/node/recovery-plans)
+- [Upgrading](/node/upgrading)
+- [Becoming a Validator](/node/validators)
+- [Validator Operations Runbook](/node/validator-operations-runbook)
+- [Validator Responsibilities](/node/validator-responsibilities)
+- [Staking Mechanics](/node/staking)
+- [Protocol Governance and State Patches](/node/protocol-governance)
+- [Governance Web Console](/node/governance-web)
+- [5-Validator Localnet E2E](/node/localnet-e2e)
+- [Local DEX Bootstrap](/node/local-dex-bootstrap)

@@ -22,7 +22,7 @@ flowchart TD
   RPC["CometBFT RPC :26657"]
   ABCI["ABCI query paths"]
   Node["xian-abci node process"]
-  Dashboard["Dashboard REST + WebSocket :18080"]
+  Dashboard["Dashboard REST + WebSocket :8080"]
   BDS["BDS Postgres index"]
   GraphQL["GraphQL / PostGraphile :5000"]
   Metrics["Prometheus metrics"]
@@ -104,14 +104,14 @@ Assuming a stack-managed local node with default template ports:
 GET http://localhost:26657/status
 GET http://localhost:26657/abci_query?path="/get/currency.balances:alice"
 GET http://localhost:26657/abci_query?path="/keys/currency.balances/limit=50"
-GET http://localhost:18080/api/status
-GET http://localhost:18080/api/abci_query/contract_info/currency
-GET http://localhost:18080/api/abci_query/blocks/limit=20/offset=0
-GET http://localhost:18080/api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0
+GET http://localhost:8080/api/status
+GET http://localhost:8080/api/abci_query/contract_info/currency
+GET http://localhost:8080/api/abci_query/blocks/limit=20/offset=0
+GET http://localhost:8080/api/abci_query/shielded_wallet_history/<tag>/limit=50/after_note_index=0
 GET http://localhost:9108/metrics
 GET http://localhost:26660/metrics
 GET http://localhost:5000/graphql
 ```
 
 When a local endpoint uses an IPv6 literal, bracket the host in the URL, for
-example `GET http://[::1]:26657/status` or `GET http://[::1]:18080/api/status`.
+example `GET http://[::1]:26657/status` or `GET http://[::1]:8080/api/status`.

@@ -1,144 +1,67 @@
 # State Model
 
-Xian stores all contract data in a key-value database. Every `Variable` and `Hash` in every contract maps to entries in this database. Understanding how state is organized, cached, and committed helps you write efficient contracts and debug unexpected behavior.
+Xian stores durable contract data in a key-value database. Contract state must
+use `Variable` or `Hash`; ordinary module globals are recreated for each
+execution and are not persistent.
 
-Ordinary Python module globals are not part of this durable state model.
-Contracts are reloaded fresh for each execution, so if you need persistence you
-must store it in `Variable` or `Hash`.
+## Keys
 
-## Key Format
+Storage keys use this shape:
 
-All state keys follow the pattern:
-
-```
-contract_name.variable_name:key1:key2:...
+```text
+contract.variable:key1:key2
 ```
 
 Examples:
 
-| Contract State | Storage Key |
-|---------------|-------------|
+| Contract access | Storage key |
+| --- | --- |
 | `currency.balances["alice"]` | `currency.balances:alice` |
-| `currency.approvals["alice", "bob"]` | `currency.approvals:alice:bob` |
-| `con_nft.owner` (Variable) | `con_nft.owner` |
-| `con_dex.pairs["XIAN", "ETH"]` | `con_dex.pairs:XIAN:ETH` |
-| `con_game.metadata["name"]` | `con_game.metadata:name` |
+| `currency.approvals["alice", "con_dex"]` | `currency.approvals:alice:con_dex` |
+| `con_app.owner` | `con_app.owner` |
 
-The `.` separates the contract name from the variable name. The `:` separates key dimensions. You never construct these keys manually in contract code -- the ORM (`Hash`, `Variable`) handles it. But knowing the format is useful when querying state via the API.
+The ORM constructs these keys. Applications use the same shape for direct
+state queries. Contract names and hash key parts cannot contain the reserved
+`.` or `:` separators.
 
-Because `.` and `:` are reserved separators in storage keys, deployed contract
-names are limited to lowercase ASCII letters, digits, and underscores.
+## Transaction Isolation
 
-## Storage Backend: LMDB
+Writes and events remain buffered while a transaction executes.
 
-Xian uses LMDB (Lightning Memory-Mapped Database) as the underlying storage engine. LMDB provides:
+- Successful execution contributes its effects to the block transition.
+- A failed assertion, runtime error, or out-of-chi condition discards the
+  transaction's application writes and events.
+- A failing nested contract call rolls back the entire transaction, including
+  earlier effects from its caller.
 
-- Memory-mapped I/O for fast reads
-- Single-writer, multiple-reader concurrency
-- ACID transactions with crash recovery
-- No garbage collection pauses
+Reads see writes already made by the same transaction. An internal bounded
+cache avoids repeated database reads without changing the committed state
+model.
 
-All state for all contracts lives in a single LMDB environment on each validator node.
+## Block Commit
 
-## Cache Layers
+At the end of a block, accepted state changes, nonce state, height, block time,
+and the state-root marker are committed atomically in LMDB. The LMDB marker is
+authoritative after restart; auxiliary metadata files are repairable copies.
 
-State access goes through multiple cache layers before hitting disk:
+The application computes a 32-byte Merkle root over canonical consensus state.
+CometBFT records that `app_hash` in the next block header. Validators that
+execute the same block differently produce a different root and cannot remain
+aligned with the network.
 
-```mermaid
-flowchart TD
-  Contract["Contract code"]
-  Pending["Pending writes for the current transaction"]
-  Cache["TTL cache for recent committed reads"]
-  LMDB["LMDB persistent state"]
-  Commit["Block-level atomic batch commit"]
-  Rollback["Discard pending writes on failure"]
+## Queries
 
-  Contract --> Pending
-  Pending -->|read-your-own-writes| Contract
-  Pending --> Cache
-  Cache --> LMDB
-  Pending -->|success| Commit
-  Pending -->|failure| Rollback
-  Commit --> LMDB
+Direct state queries read committed state, not an in-flight transaction:
+
+```text
+/get/currency.balances:alice
 ```
 
-### Pending Writes
+Use direct ABCI state queries for authoritative current values. BDS history
+and GraphQL are derived indexed views and may lag finalization briefly.
 
-During execution of a single transaction, all writes go into an in-memory buffer. If the transaction succeeds, these writes are promoted to the next layer. If it fails (assertion error, out of chi), they are discarded entirely.
+## Related Pages
 
-This is how Xian achieves atomic transactions -- either all state changes apply or none do.
-
-### TTL Cache
-
-Between transactions within the same block, a time-limited cache holds recently accessed values. This avoids redundant LMDB lookups when multiple transactions in the same block read the same keys.
-
-### LMDB Persistence
-
-At the end of each block, all committed state changes are written to LMDB in a single atomic batch. This ensures that:
-
-- A crash mid-block does not corrupt state
-- The state on disk is always a complete, consistent snapshot at a block boundary
-- The committed block height, block time, and `app_hash` marker advance in the
-  same LMDB transaction as contract state and nonce state
-
-On startup, the ABCI application reads that committed LMDB marker when it
-reports its last block to CometBFT. An auxiliary JSON mirror exists for offline
-tools, but it is repaired from LMDB and is never authoritative. A crash cannot
-therefore leave durable state at block N while the application reports a
-separately persisted height from block N-1 or N+1.
-
-## Atomic Batch Commits
-
-State changes from an entire block are committed in one LMDB write transaction:
-
-```
-Block N execution:
-  tx1: balances["alice"] -= 100, balances["bob"] += 100    (success)
-  tx2: balances["carol"] -= 50, balances["dave"] += 50     (success)
-  tx3: balances["eve"] -= 9999                              (fail - rolled back)
-
-Commit:
-  Only tx1 and tx2 state changes are written to LMDB.
-  tx3's changes were already discarded from pending_writes.
-```
-
-## Rollback on Failed Transactions
-
-When a transaction fails (assertion error, out of chi, runtime error), its state changes are rolled back:
-
-1. The pending writes buffer for that transaction is discarded
-2. No state from the failed transaction reaches LMDB
-3. The receipt records consumed chi; paid networks charge the matching execution fee
-4. Events emitted during the failed transaction are also discarded
-
-This rollback is immediate and requires no explicit undo logic -- the pending writes were never committed.
-
-The same rule applies to nested cross-contract execution. If contract `A`
-calls contract `B` and `B` fails after mutating state or emitting events, the
-entire transaction rolls back, including the earlier writes and events from
-`A`.
-
-## State and the App Hash
-
-After applying a block's state changes, each validator computes an `app_hash`.
-In Xian this is a 32-byte Merkle root over the canonical consensus key/value
-state: contract state plus committed nonce keys. Local runtime metadata that is
-not part of consensus is excluded. Validators maintain an in-memory root cache
-and update it from the keys touched by each block.
-
-This hash is included in the next block's header and is how CometBFT verifies
-that all validators agree on the state.
-
-If any validator has a different state (due to non-deterministic execution, a bug, or data corruption), its `app_hash` will differ, and the consensus protocol will flag the disagreement.
-
-## Querying State
-
-You can read any contract's state via the API without executing a transaction:
-
-```
-GET /api/abci_query/get/currency.balances:alice
-```
-
-This reads directly from the committed LMDB state (not from any in-flight transaction's pending writes).
-
-See [REST API](/api/rest) for all query endpoints.
+- [Storage Overview](/smart-contracts/storage)
+- [Transaction Lifecycle](/concepts/transaction-lifecycle)
+- [REST API](/api/rest)

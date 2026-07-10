@@ -31,7 +31,7 @@ flowchart LR
 
 | Contract | Role |
 |----------|------|
-| `con_xsc005` | XSC-0005 interface checker; collections are registered and verified through `is_XSC005` |
+| `con_xsc005` | XSC-0005 interface checker exposed through `is_XSC005` |
 | `con_xsc005_nft` | reference collection and marketplace contract: minting, listing, buying, royalties, approvals, likes, ownership proofs, chunked content, and PixelGrid support |
 
 The reference collection implements the full

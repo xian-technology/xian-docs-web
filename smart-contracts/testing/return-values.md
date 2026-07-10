@@ -19,7 +19,7 @@ def my_contract():
         return balances[address]
 
     @export
-    def transfer(to: str, amount: float):
+    def transfer(amount: float, to: str):
         balances[ctx.caller] -= amount
         balances[to] += amount
         return True
@@ -68,7 +68,7 @@ def token_with_events():
         balances[ctx.caller] = 1000
 
     @export
-    def transfer(to: str, amount: float):
+    def transfer(amount: float, to: str):
         assert balances[ctx.caller] >= amount, "Insufficient balance"
         balances[ctx.caller] -= amount
         balances[to] += amount
@@ -84,7 +84,7 @@ output = token.transfer(to="alice", amount=100, return_full_output=True)
 assert output["status_code"] == 0
 assert output["result"] is None
 assert output["events"][0]["event"] == "Transfer"
-assert output["events"][0]["data"]["to"] == "alice"
+assert output["events"][0]["data_indexed"]["to"] == "alice"
 ```
 
 When `return_full_output=True` is passed to a contract call, failed calls return
@@ -142,9 +142,8 @@ When an assertion fails inside a contract, the call raises an `AssertionError` i
 
 ```python
 def test_transfer_fails_on_insufficient_balance(self):
-    self.client.signer = "broke_user"
     with self.assertRaises(AssertionError) as cm:
-        self.contract.transfer(to="alice", amount=100)
+        self.contract.transfer(to="alice", amount=100, signer="broke_user")
     self.assertIn("Insufficient balance", str(cm.exception))
 ```
 

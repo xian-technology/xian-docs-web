@@ -136,9 +136,8 @@ class TestDex(unittest.TestCase):
         self.token.transfer(amount=500, to="alice")
 
         # Alice deposits
-        self.client.signer = "alice"
-        self.token.approve(amount=500, to="con_dex")
-        self.dex.deposit(amount=500)
+        self.token.approve(amount=500, to="con_dex", signer="alice")
+        self.dex.deposit(amount=500, signer="alice")
 
         self.assertEqual(self.dex.pool_balance(address="sys"), 1000)
         self.assertEqual(self.dex.pool_balance(address="alice"), 500)
@@ -153,8 +152,7 @@ if __name__ == "__main__":
 Understanding how `ctx` changes is critical when testing multi-contract interactions:
 
 ```
-self.client.signer = "alice"
-self.dex.deposit(amount=100)
+self.dex.deposit(amount=100, signer="alice")
 ```
 
 Inside `con_dex.deposit()`:

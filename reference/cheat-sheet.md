@@ -38,7 +38,7 @@ def seed():
     owner.set(ctx.caller)
 
 @export
-def transfer(to: str, amount: float):
+def transfer(amount: float, to: str):
     pass
 
 def helper():
@@ -93,7 +93,7 @@ For dynamic function dispatch, prefer the explicit helper:
 importlib.call(
     "con_token",
     "balance_of",
-    {"account": "alice"},
+    {"address": "alice"},
 )
 ```
 
@@ -138,7 +138,7 @@ import submission
 @export
 def deploy_child(
     name: str,
-    deployment_artifacts: dict,
+    source: str,
     owner: str = None,
     constructor_args: dict = None,
 ):
@@ -147,14 +147,14 @@ def deploy_child(
 
     submission.submit_contract(
         name=name,
-        deployment_artifacts=deployment_artifacts,
+        code=source,
         owner=owner,
         constructor_args=constructor_args,
     )
 ```
 
-Factories do not compile source on chain. The caller or factory author must
-provide artifacts built by the current Xian compiler for the child contract.
+Validators compile child source with the canonical compiler. Submitted
+deployment artifacts are rejected.
 
 Deployed contracts record immutable provenance in state:
 
@@ -188,7 +188,7 @@ bal = balances["alice"]
 allowance = approvals["alice", "con_dex"]
 ```
 
-Client-side direct inspection:
+Local `ContractingClient` inspection and test setup:
 
 ```python
 client.get_var("con_token", "balances", arguments=["alice"])

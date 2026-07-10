@@ -24,7 +24,7 @@ source = """
 balances = Hash(default_value=0)
 
 @export
-def transfer(to: str, amount: float):
+def transfer(amount: float, to: str):
     assert amount > 0, "Amount must be positive"
     balances[ctx.caller] -= amount
     balances[to] += amount

@@ -38,11 +38,14 @@ The streamed token contract must expose:
 4. call `balance_stream(...)` as time passes
 5. finalize, shorten, or forfeit the stream as needed
 
+Encode `begins`, `closes`, permit deadlines, and close-time updates as
+`YYYY-MM-DD HH:MM:SS`.
+
 ## Important Behavior
 
 - accrual is lazy; nothing runs between blocks
 - the contract uses block time (`now`) when computing accrued value
-- modern maintained event names are:
+- event names are:
   - `StreamCreated`
   - `StreamBalanced`
   - `StreamCloseChanged`
@@ -60,5 +63,5 @@ The streamed token contract must expose:
 
 ## Related Pages
 
-- [XSC-0003: Streaming Payments](/smart-contracts/standards/xsc-0003)
+- [XSC-0003: Streaming Token](/smart-contracts/standards/xsc-0003)
 - [Permit Standard](/smart-contracts/standards/xsc-0002)

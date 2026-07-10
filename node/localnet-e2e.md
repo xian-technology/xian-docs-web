@@ -1,71 +1,32 @@
 # 5-Validator Localnet E2E
 
-Use this workflow when you want to validate the live Xian stack on one machine
-with a real 5-validator network, not just repo-local unit tests.
+The `xian-stack` localnet harness validates the integrated runtime on one
+machine with five validators, the fixed Xian VM, and optional indexed services.
 
-The maintained entrypoint lives in `xian-stack` and is designed to exercise the
-real runtime path with:
+## Choose a Flow
 
-- 5 validators
-- the fixed `xian_vm_v1` runtime
-- one node with BDS enabled
-- real validator governance
-- governed forward state patches
-- `xian-py`
-- nested contract deployment and dynamic contract-call routing
-- DEX deployment and mixed trading flows
-- shielded-note-token proof-backed flows, including the promoted bundle
-  deployment handoff
-- indexed reads, websocket subscriptions, and event watching
-- logging, readonly simulation under load, intentional BDS catch-up, and
-  dedicated parallel-execution validation
+| Goal | Command |
+| --- | --- |
+| disposable five-node network | `LOCALNET_NODES=5 make localnet-init && make localnet-up` |
+| broad whole-stack E2E | `make localnet-e2e` |
+| E2E with parallel execution | `make localnet-parallel-e2e` |
+| validator/governance safety | `make localnet-protocol-safety` |
+| release-grade gate | `make release-safety` |
 
-## Which 5-Node Flow To Use
+Use the clean localnet for interactive debugging. Use the E2E or release gate
+when you need recorded cross-repo evidence.
 
-There are several 5-node paths, and they are intentionally not the same thing.
-
-| Flow | Command | Purpose |
-|------|---------|---------|
-| Clean 5-node localnet | `LOCALNET_NODES=5 make localnet-init && make localnet-up` | Starts a disposable 5-node network without running the full validation program. |
-| Layered 5-validator e2e | `make localnet-e2e` | Runs the broad whole-stack validation harness on the normal configured execution path. |
-| Parallel layered e2e | `make localnet-parallel-e2e` | Runs the same layered harness with lower parallel-execution batching. |
-| Protocol safety localnet | `make localnet-protocol-safety` | Runs the focused validator, delegation, governance, evidence, slashing, and leave/rebalance validation program. |
-| Release safety gate | `make release-safety` | Runs the release-grade stack gate: sibling repo validation, e2e, runtime report, and the protocol safety localnet. |
-
-```mermaid
-flowchart TD
-  Clean["Clean 5-node localnet"]
-  Layered["make localnet-e2e"]
-  Parallel["make localnet-parallel-e2e"]
-  Report["make localnet-node-report"]
-  Safety["make localnet-protocol-safety"]
-  Release["make release-safety"]
-
-  Clean --> Layered
-  Layered --> Parallel
-  Parallel --> Report
-  Report --> Safety
-  Parallel --> Release
-  Safety --> Release
-```
-
-Use the clean 5-node localnet when you only need a running network to inspect,
-debug, or attach tooling. Use the e2e and release-safety targets when you need
-evidence that the stack works across real validators and live services.
-
-## Layered E2E Command
-
-From `xian-stack`:
+## Run the Harness
 
 ```bash
+cd ../xian-stack
 make localnet-e2e
 ```
 
-Equivalent machine-facing backend command:
+Machine-facing equivalent:
 
 ```bash
 python3 ./scripts/backend.py localnet-e2e
-python3 ./scripts/backend.py localnet-e2e --start-phase 10-retrieval-surfaces --resume-dir .artifacts/localnet-e2e/<run-id>
 ```
 
 Artifacts are written under:
@@ -74,240 +35,66 @@ Artifacts are written under:
 .artifacts/localnet-e2e/<run-id>/
 ```
 
-The runner writes:
+The directory contains `summary.json`, per-phase JSON, and the generated
+network description. A failed run can resume from a supported phase with the
+backend's `--start-phase` and `--resume-dir` options.
 
-- `summary.json`
-- one JSON file per phase
-- a copy of the generated `network.json`
+## Coverage
 
-## Release Safety Command
+The layered harness covers:
 
-Use the release safety gate before tagging or when a change touches execution,
-networking, genesis, validator behavior, governance, or localnet plumbing:
+- five-node startup, health, peers, validator count, and app-hash agreement
+- `xian-py` reads, simulation, source deployment, and transactions
+- nested contract deployment/calls and rollback
+- periodic, burst, conflicting, and invalid transaction workloads
+- DEX bootstrap and mixed trading
+- BDS outage, catch-up, indexed reads, reindex, and watchers
+- validator governance and policy transitions
+- governed forward state patches
+- application logging modes
+- shielded-note and relayed proof flows with governed verifier registration
+- parallel execution acceptance and fallback behavior
+- restart/chaos convergence and soak checks
+
+## Release Safety
 
 ```bash
 make release-safety
 ```
 
-That target runs:
+This runs release validation for the contracting/runtime repos, stack
+validation, parallel E2E, a node capability report, and protocol-safety
+coverage. Use it before tagging changes to execution, genesis, networking,
+governance, validator behavior, or localnet plumbing.
 
-1. `xian-contracting` release validation
-2. `xian-abci` release validation
-3. `xian-stack` validation
-4. `make localnet-parallel-e2e`
-5. `make localnet-node-report`
-6. `make localnet-protocol-safety` after resetting the localnet
+## Topology Matrix
 
-Useful options:
-
-```bash
-./scripts/release-safety.sh --skip-repo-validation
-./scripts/release-safety.sh --skip-protocol-safety
-./scripts/release-safety.sh --skip-vm-report
-./scripts/release-safety.sh --keep-localnet
-```
-
-## What The Runner Does
-
-The phases intentionally build on each other:
-
-```mermaid
-flowchart TD
-  P00["00 Bootstrap 5 validators and one BDS node"]
-  P01["01 Health, peers, validator count, app hashes"]
-  P02["02 xian-py smoke"]
-  P03["03 Contract orchestration, atomic rollback, x402 canaries"]
-  P04["04 Periodic load"]
-  P05["05 Burst load"]
-  P06["06 Conflict and invalid transactions"]
-  P07["07 DEX mixed trading"]
-  P08["08 Throughput mix and readonly simulator load"]
-  P09["09 BDS catch-up after outage"]
-  P10["10 Retrieval and reindex surfaces"]
-  P11["11 Determinism checks"]
-  P12["12 Validator governance"]
-  P13["13 Governed state patch"]
-  P14["14 Logging posture"]
-  P15["15 Shielded note token"]
-  P16["16 Parallel execution"]
-  P17["17 Chaos convergence"]
-  P18["18 Soak and abuse coverage"]
-
-  P00 --> P01 --> P02 --> P03 --> P04 --> P05 --> P06 --> P07 --> P08 --> P09
-  P09 --> P10 --> P11 --> P12 --> P13 --> P14 --> P15 --> P16 --> P17 --> P18
-```
-
-Phase 03 covers contract orchestration plus dedicated atomic-rollback,
-x402-exact, and intentkit-x402 canaries. Phase 08 runs both a mixed
-throughput workload and readonly simulator load.
-
-1. bootstrap a fresh 5-validator network with the fixed Xian VM and one node
-   with BDS enabled
-2. verify health, peer connectivity, validator count, and recent app-hash
-   equality
-3. use `xian-py` to fund accounts, deploy helper contracts, simulate, and read
-   state
-4. deploy a contract factory that submits multiple child contracts, then test
-   dynamic contract/function dispatch and multi-hop `ctx.caller` /
-   `ctx.signer` behavior
-5. send periodic transfers from different nodes
-6. run a higher-rate burst workload and capture approximate TPS
-7. trigger conflicting and invalid transactions intentionally
-8. deploy and exercise the DEX product contracts
-9. hammer readonly simulation and capture approximate simulator QPS
-10. intentionally let the primary BDS service fall behind by stopping
-    Postgres, generate live chain traffic, then verify it catches back up
-11. validate retrieval through indexed BDS reads, `abci_query`, `xian-py`
-   watchers, raw websocket tx subscriptions, paginated `/keys/<prefix>`
-   retrieval, and a secondary BDS reindex/restart path fed from retained block
-   history
-12. run a dedicated determinism check by comparing recent app hashes, sampled
-    state, and simulation outputs across validators
-13. vote a validator power change, remove a validator, add it back, switch the
-    validator policy through `auto_top_n` and `hybrid`, and restore `manual`
-    through real on-chain governance
-14. approve and apply a governed forward state patch
-15. switch logging posture to `DEBUG` and `TRACE` and verify the expected log
-    output appears
-16. use the governed system `zk_registry`, deploy the shielded-note-token,
-    promote note and relay-command bundles through the
-    `xian-zk-shielded-bundle promote` handoff, register/bind the resulting
-    manifests through governance, then test deposit, shielded transfer, relayed
-    transfer, and withdraw flows
-17. run a dedicated parallel-execution probe that:
-    - verifies `/perf_status` reports the configured parallel on/off posture on
-      every validator
-    - forces a non-conflicting batch and checks for speculative acceptance
-    - forces same-sender reuse and checks for serial prefiltering
-    - forces read-after-write and prefix-scan tails and checks for multi-wave
-      speculative handling
-
-Phase 15 writes its promotion artifacts under the run directory:
-
-```text
-.artifacts/localnet-e2e/<run-id>/shielded-promotion/promoted/
-```
-
-That directory contains the promoted private prover bundles, registry
-manifests, `promotion-summary.json`, `catalog-artifacts-snippet.json`, and the
-generated `register_and_bind.py` helper. The e2e runner uses governance for
-on-chain `zk_registry.register_vk(...)` calls because the testnet-shaped
-localnet registry is governance-owned.
-
-## Recommended Matrix
-
-Run the same exercise in these modes over time:
-
-### Integrated Topology, Parallel Off
-
-```bash
-XIAN_LOCALNET_TOPOLOGY=integrated \
-XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED=0 \
-make localnet-e2e
-```
-
-### Integrated Topology, Parallel On
-
-```bash
-XIAN_LOCALNET_TOPOLOGY=integrated \
-XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED=1 \
-XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS=4 \
-XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS=4 \
-make localnet-e2e
-```
-
-### Fidelity Topology, Parallel Off
-
-```bash
-XIAN_LOCALNET_TOPOLOGY=fidelity \
-XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED=0 \
-make localnet-e2e
-```
-
-### Fidelity Topology, Parallel On
+Exercise both integrated and fidelity topology, with parallel execution off and
+on when the change can affect process boundaries or speculation:
 
 ```bash
 XIAN_LOCALNET_TOPOLOGY=fidelity \
 XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED=1 \
 XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS=4 \
-XIAN_LOCALNET_PARALLEL_EXECUTION_MIN_TRANSACTIONS=4 \
 make localnet-e2e
 ```
 
-## Useful Overrides
-
-```bash
-LOCALNET_E2E_BUILD=1 make localnet-e2e
-LOCALNET_E2E_BURST_COUNTER_OPS=500 make localnet-e2e
-LOCALNET_E2E_DEX_ROUNDS=12 make localnet-e2e
-LOCALNET_E2E_BOOTSTRAP=0 make localnet-e2e
-```
-
-`LOCALNET_E2E_BOOTSTRAP=0` is only for rerunning the phased checks against an
-already-running localnet.
+The default harness remains the baseline. Overrides should answer a specific
+validation question and be recorded with the run artifacts.
 
 ## Operational Notes
 
-- The runner creates disposable local validator keys and stores them in
-  `.localnet/network.json` so it can exercise real validator governance. Treat
-  those keys as local-only dev material.
-- The shielded-note-token is exercised as a privacy-asset flow, but it is not
-  listed on the DEX in the canonical run. The DEX fixture expects float-based
-  token semantics, while the shielded-note-token public interface uses integer
-  amounts.
-- The orchestration phase validates contract-submitted child deployments,
-  dynamic name-based and module-based dispatch, rollback on nested submission
-  failure, and preserved `ctx.caller` / `ctx.signer` across a multi-hop call
-  chain.
-- The parallel-execution phase uses a dedicated `parallel_probe` contract and
-  validates the runtime through recent `/perf_status` block metadata, not just
-  transaction success.
-- The BDS catch-up phase intentionally stops the local Postgres service. The
-  pass condition is that live block production continues, BDS reports backlog
-  or degraded indexing, and the indexed surface catches up again after
-  Postgres returns. On the BDS implementation, `queue_depth` can stay nonzero
-  in steady state, so the meaningful recovery signals are the
-  indexed height, spool state, and DB health.
-- The harness also validates a secondary BDS rebuild path outside the live node
-  process. That makes the retrieval phase cover both live catch-up
-  and explicit reindex/restart recovery from retained block history.
-- The secondary BDS path covers more than a one-shot sync. The run stops that
-  rebuilt instance, lets the chain advance, then restarts it again to verify
-  delayed catch-up from retained history.
-- The localnet validator image must include `xian-zk`, not just the Python-side
-  prover utilities. The shielded phase verifies proofs inside the validator
-  runtime.
-- The shielded phase uses explicit transaction chi ceilings. The default
-  readonly simulator cap is intentionally smaller than proof-backed shielded
-  execution, so simulator-based chi estimation is not the right path for
-  those transactions in the canonical run.
-- The shielded phase is normally the slowest phase in the whole run because it
-  includes real proving work. A clean success run can spend multiple minutes in
-  that phase alone.
-- Hex-looking public addresses are valid shielded withdraw recipients. The
-  toolkit and contract use matching recipient-digest hashing semantics for
-  those values.
-- Keep the logging phase short. `TRACE` is intentionally expensive and exists
-  for debugging, not for steady-state operation.
-- Localnet Compose waits for `service_healthy`, not just `service_started`.
-  Treat a running container as not ready until the health checks pass.
-- `make localnet-clean` requires `FORCE=1` because it deletes all localnet
-  keys, state, and generated Compose files.
+- Generated validator keys and proving material are disposable local test
+  assets.
+- The BDS phase intentionally causes an outage; block production must continue
+  and the indexed head must recover afterward.
+- Shielded phases perform real proving and can dominate runtime.
+- `TRACE` logging is temporary diagnostic posture.
+- A running container is not ready until health checks pass.
+- `make localnet-clean` is destructive and requires `FORCE=1`.
 
-## What To Review After A Run
+## Review Results
 
-Always inspect:
-
-- `summary.json`
-- the phase JSON files
-- BDS status and indexed-height progress on the BDS node
-- the logging phase output snippets
-
-If a phase fails:
-
-- inspect `.localnet/<node>/.cometbft/xian/logs/`
-- inspect Docker logs for the affected node
-- compare the last successful phase with the first failing phase
-
-For the deeper internal operator runbook and rationale behind the phase order,
-keep the matching note in `xian-meta` aligned with this page.
+Inspect `summary.json`, the first failing phase, BDS indexed-height progress,
+node application logs, Docker logs, and final app-hash agreement. Preserve the
+run directory with the exact sibling SHAs when using it as release evidence.

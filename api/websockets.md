@@ -1,371 +1,124 @@
 # WebSocket Subscriptions
 
-The dashboard exposes a WebSocket endpoint at `/ws` that supports real-time subscriptions to state changes and contract events. Clients connect once and receive only the updates they care about — no polling required.
+The optional dashboard exposes `/ws` for live blocks, node status, state
+changes, and contract events.
 
-## Connecting
-
-```javascript
-const ws = new WebSocket("ws://localhost:18080/ws");
+```js
+const ws = new WebSocket("ws://127.0.0.1:8080/ws");
 ```
 
-Replace `localhost:18080` with the dashboard address of the node you want to
-connect to. `18080` is the stack-managed template default host port; a direct
-dashboard process defaults to `8080`. For IPv6 literals, bracket the host, for
-example `ws://[::1]:18080/ws`.
-
-Once connected, you'll automatically receive `new_block` messages for every block the node commits. To receive state changes or contract events, you need to subscribe explicitly.
-
-The built-in dashboard UI uses that same socket for live node status and block
-updates. Service nodes with BDS enabled handle recent event browsing through the
-explorer.
+The stack and a directly started dashboard process use port `8080` by default.
 
 ## Message Types
 
-All messages are JSON. Every message has a `type` field.
+| Type | Meaning |
+| --- | --- |
+| `new_block` | a committed block; broadcast to every client |
+| `node_status` | dashboard connection status for the node |
+| `state_change` | a subscribed state key changed |
+| `contract_event` | a subscribed `LogEvent` was emitted |
 
-### Messages You Receive
-
-| Type | Description | When |
-|------|-------------|------|
-| `new_block` | Block summary with height, hash, proposer, and decoded transaction list | Every committed block |
-| `node_status` | CometBFT connection status (`"online"` or `"offline"`) | On connect/disconnect |
-| `state_change` | A state key you subscribed to was modified | On matching tx |
-| `contract_event` | A contract event you subscribed to was emitted | On matching tx |
-
-### Messages You Send
-
-| Field | Description |
-|-------|-------------|
-| `action` | One of: `subscribe`, `unsubscribe`, `unsubscribe_all`, `list` |
-| `type` | Subscription type: `"state"` or `"event"` |
-| Additional fields | Depend on the subscription type (see below) |
-
-Every action returns a JSON response with `"status": "ok"` or `"status": "error"`.
-
-`new_block` messages include a `txs` array with decoded payload summaries when
-the raw transaction could be decoded. Each tx summary includes:
-
-- `tx_hash`
-- `contract`
-- `function`
-- `sender`
-- `chi_supplied`
+Subscriptions are connection-local and must be recreated after reconnecting.
 
 ## State Subscriptions
 
-Watch specific state keys for changes. Supports glob patterns.
-
-### Subscribe to a Key
-
 ```json
-{"action": "subscribe", "type": "state", "key": "currency.balances:alice"}
+{"action":"subscribe","type":"state","key":"currency.balances:alice"}
 ```
 
-When a transaction modifies `currency.balances:alice`, you receive:
+Keys support `fnmatch` wildcards:
+
+```json
+{"action":"subscribe","type":"state","key":"currency.balances:*"}
+```
+
+Response message:
 
 ```json
 {
-    "type": "state_change",
-    "key": "currency.balances:alice",
-    "value": "999.5"
+  "type": "state_change",
+  "key": "currency.balances:alice",
+  "value": "999.5"
 }
 ```
 
-### Glob Patterns
-
-You can use `*` and `?` wildcards (standard `fnmatch` syntax):
-
-```json
-{"action": "subscribe", "type": "state", "key": "currency.balances:*"}
-```
-
-This matches all balance changes for any address on the `currency` contract.
-
-More pattern examples:
-
-| Pattern | Matches |
-|---------|---------|
-| `currency.balances:alice` | Exact key |
-| `currency.balances:*` | All balances on `currency` |
-| `con_mytoken.*` | All state keys on `con_mytoken` |
-| `*.balances:alice` | Alice's balance on any token contract |
-| `con_pairs.pairs:*:*` | All trading-pair fields on the canonical DEX pair registry |
-
-### Unsubscribe
-
-```json
-{"action": "unsubscribe", "type": "state", "key": "currency.balances:alice"}
-```
+State values are encoded as strings; parse numeric values with a
+precision-preserving client.
 
 ## Event Subscriptions
 
-Watch for contract events emitted by smart contracts (via `LogEvent`).
-
-### Subscribe to a Specific Event
-
 ```json
 {
-    "action": "subscribe",
-    "type": "event",
-    "contract": "currency",
-    "event": "Transfer"
+  "action": "subscribe",
+  "type": "event",
+  "contract": "currency",
+  "event": "Transfer"
 }
 ```
 
-When the `currency` contract emits a `Transfer` event, you receive:
+Omit `event` for every event from the matching contract. Both fields support
+wildcards.
 
 ```json
 {
-    "type": "contract_event",
-    "event": "Transfer",
-    "contract": "currency",
-    "signer": "alice",
-    "caller": "alice",
-    "data": {
-        "from": "alice",
-        "to": "bob",
-        "amount": "100"
-    }
+  "type": "contract_event",
+  "contract": "currency",
+  "event": "Transfer",
+  "signer": "alice",
+  "caller": "alice",
+  "data": {"from":"alice","to":"bob","amount":"100"}
 }
 ```
 
-### Subscribe to All Events from a Contract
+## Manage Subscriptions
 
-Omit the `event` field to receive all events:
-
-```json
-{"action": "subscribe", "type": "event", "contract": "currency"}
+```text
+{"action":"list"}
+{"action":"unsubscribe","type":"state","key":"currency.balances:alice"}
+{"action":"unsubscribe","type":"event","contract":"currency","event":"Transfer"}
+{"action":"unsubscribe_all"}
 ```
 
-### Subscribe to All Events on All Contracts
+Every command returns `{"status":"ok", ...}` or
+`{"status":"error", ...}`.
 
-```json
-{"action": "subscribe", "type": "event", "contract": "*"}
+## Minimal Client
+
+```js
+const ws = new WebSocket("ws://127.0.0.1:8080/ws");
+
+ws.addEventListener("open", () => {
+  ws.send(JSON.stringify({
+    action: "subscribe",
+    type: "event",
+    contract: "currency",
+    event: "Transfer",
+  }));
+});
+
+ws.addEventListener("message", ({ data }) => {
+  const message = JSON.parse(data);
+  if (message.type === "contract_event") {
+    console.log(message.data);
+  }
+});
 ```
 
-### Glob Patterns for Events
+## Limits and Delivery
 
-Both `contract` and `event` support glob patterns:
+The dashboard applies configurable limits for total clients, clients per
+address, state and event subscriptions, inbound message size, and queued
+outbound messages. A slow consumer can lose its connection; reconnect and
+resubscribe.
 
-| Pattern | Matches |
-|---------|---------|
-| `contract: "currency", event: "Transfer"` | Transfer events on `currency` |
-| `contract: "currency"` | All events on `currency` |
-| `contract: "con_*"` | All events on user-submitted contracts |
-| `contract: "*"` | All events on all contracts |
-| `contract: "*", event: "Transfer"` | Transfer events on any contract |
+This feed is live and non-durable. Use BDS event IDs and SDK watchers when an
+application must resume without missing events.
 
-### Unsubscribe
+The dashboard is outside consensus. Restarting it drops subscriptions but does
+not affect block production.
 
-```json
-{"action": "unsubscribe", "type": "event", "contract": "currency", "event": "Transfer"}
-```
+## Related Pages
 
-## Management Commands
-
-### List Active Subscriptions
-
-```json
-{"action": "list"}
-```
-
-Response:
-
-```json
-{
-    "status": "ok",
-    "action": "list",
-    "state": ["currency.balances:alice", "currency.balances:*"],
-    "events": [
-        {"contract": "currency", "event": "Transfer"},
-        {"contract": "*", "event": null}
-    ]
-}
-```
-
-### Clear All Subscriptions
-
-```json
-{"action": "unsubscribe_all"}
-```
-
-## Limits
-
-The dashboard applies explicit WebSocket limits so one browser cannot exhaust
-the service:
-
-| Limit | Default | CLI flag |
-|-------|---------|----------|
-| concurrent WebSocket clients | `100` | `--max-ws-clients` |
-| concurrent connections from one client address | `8` | `--max-ws-clients-per-client` |
-| state subscriptions per client | `64` | `--max-state-subs-per-client` |
-| event subscriptions per client | `32` | `--max-event-subs-per-client` |
-| inbound message size | `64 KiB` | `--max-ws-message-bytes` |
-| queued outbound messages per client | `128` | `--max-ws-outbound-queue` |
-
-## Full Example: Wallet Balance Watcher
-
-```javascript
-const ws = new WebSocket("ws://localhost:18080/ws");
-const MY_ADDRESS = "your_public_key_here";
-
-ws.onopen = () => {
-    // Watch my balance on the main currency
-    ws.send(JSON.stringify({
-        action: "subscribe",
-        type: "state",
-        key: `currency.balances:${MY_ADDRESS}`,
-    }));
-
-    // Watch incoming transfers to me
-    ws.send(JSON.stringify({
-        action: "subscribe",
-        type: "event",
-        contract: "currency",
-        event: "Transfer",
-    }));
-
-    console.log("Subscribed to balance and transfers");
-};
-
-ws.onmessage = (msg) => {
-    const data = JSON.parse(msg.data);
-
-    switch (data.type) {
-        case "state_change":
-            console.log(`Balance updated: ${data.value}`);
-            break;
-
-        case "contract_event":
-            if (data.data.to === MY_ADDRESS) {
-                console.log(`Received ${data.data.amount} from ${data.data.from}`);
-            }
-            break;
-
-        case "new_block":
-            // Update block height in UI
-            break;
-
-        case "node_status":
-            console.log(`Node is ${data.status}`);
-            break;
-    }
-};
-```
-
-## Full Example: DEX Price Monitor (Python)
-
-```python
-import asyncio
-import json
-import websockets
-
-async def monitor_dex():
-    async with websockets.connect("ws://localhost:18080/ws") as ws:
-        # Watch all state changes on the DEX contract
-        await ws.send(json.dumps({
-            "action": "subscribe",
-            "type": "state",
-            "key": "con_pairs.pairs:*:reserve*",
-        }))
-
-        # Watch pair reserve syncs and swaps
-        await ws.send(json.dumps({
-            "action": "subscribe",
-            "type": "event",
-            "contract": "con_pairs",
-            "event": "Sync",
-        }))
-        await ws.send(json.dumps({
-            "action": "subscribe",
-            "type": "event",
-            "contract": "con_pairs",
-            "event": "Swap",
-        }))
-
-        async for message in ws:
-            data = json.loads(message)
-
-            if data["type"] == "state_change":
-                print(f"Reserve update {data['key']}: {data['value']}")
-
-            elif data["type"] == "contract_event":
-                payload = data["data"]
-                if data["event"] == "Sync":
-                    print(
-                        f"Pair {payload['pair']} reserves: "
-                        f"{payload['reserve0']} / {payload['reserve1']}"
-                    )
-                elif data["event"] == "Swap":
-                    print(
-                        f"Swap on pair {payload['pair']}: "
-                        f"in {payload['amount0In']}/{payload['amount1In']} "
-                        f"out {payload['amount0Out']}/{payload['amount1Out']}"
-                    )
-
-asyncio.run(monitor_dex())
-```
-
-## Full Example: Multi-Token Portfolio Tracker
-
-```javascript
-const ws = new WebSocket("ws://localhost:18080/ws");
-const MY_ADDRESS = "your_public_key_here";
-const TOKENS = ["currency", "con_usdt", "con_eth", "con_btc"];
-
-ws.onopen = () => {
-    // Subscribe to balance on each token
-    for (const token of TOKENS) {
-        ws.send(JSON.stringify({
-            action: "subscribe",
-            type: "state",
-            key: `${token}.balances:${MY_ADDRESS}`,
-        }));
-    }
-};
-
-ws.onmessage = (msg) => {
-    const data = JSON.parse(msg.data);
-    if (data.type === "state_change") {
-        // Extract token name from key: "con_usdt.balances:addr" → "con_usdt"
-        const token = data.key.split(".")[0];
-        console.log(`${token}: ${data.value}`);
-    }
-};
-```
-
-## Architecture
-
-```
-Your App / Wallet / Explorer
-  │
-  │  WebSocket connection to /ws
-  │  Sends: subscribe/unsubscribe messages
-  │  Receives: state_change, contract_event, new_block
-  │
-  ▼
-Dashboard (aiohttp)
-  │  SubscriptionManager tracks per-client filters
-  │  Routes matching events to the right clients
-  │
-  │  Persistent WS connection
-  ▼
-CometBFT (/websocket)
-  │  Subscribes to NewBlock + Tx events
-  │  Receives all committed transactions
-  ▼
-ABCI App (finalize_block)
-  │  StateChange events: all state mutations
-  │  Contract events: LogEvent emissions from contracts
-  ▼
-Smart Contract Execution
-```
-
-## Notes
-
-- **No polling needed.** The server pushes updates only when matching changes occur.
-- **Block messages always broadcast** to all connected clients regardless of subscriptions.
-- **State change values are strings.** Parse them in your client if you need numeric types.
-- **Subscriptions are per-connection.** If you disconnect and reconnect, you need to re-subscribe.
-- **The dashboard must be enabled** on the node (`services.dashboard.enabled = true` in a node profile, or the equivalent stack flag). Not all nodes run the dashboard.
-- **This is a read-only observer.** The subscription system does not affect consensus or block production. If the dashboard restarts, subscriptions are lost but the chain continues normally.
+- [BDS Indexed Queries](/api/bds)
+- [xian-py](/tools/xian-py)
+- [xian-js](/tools/xian-js)

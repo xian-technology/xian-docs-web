@@ -1,255 +1,55 @@
 # Common Pitfalls
 
-This page covers the most frequent mistakes that lead to bugs or vulnerabilities in Xian smart contracts.
+## Authorization Context
 
-## 1. Forgetting to Check ctx.caller
+`ctx.caller` is the immediate caller. `ctx.signer` is the original transaction
+signer and remains unchanged across contract calls.
 
-The most dangerous mistake. Without an access control check, anyone can call your admin functions:
-
-```python
-# BAD -- anyone can call this
-@export
-def mint(amount: float):
-    balances[ctx.caller] += amount
-
-# GOOD -- only the owner can mint
-@export
-def mint(amount: float):
-    assert ctx.caller == owner.get(), "Only owner"
-    balances[ctx.caller] += amount
-```
-
-## 2. Confusing ctx.caller and ctx.signer
-
-These are different when contracts call other contracts:
-
-```
-User "alice" -> contract_a.action() -> contract_b.do_work()
-
-Inside contract_b:
-  ctx.signer = "alice"       # the original transaction signer
-  ctx.caller = "contract_a"  # the immediate caller
-```
-
-**When to use which:**
-
-| Check | Use Case |
-|-------|----------|
-| `ctx.caller` | Allowance/approval checks (who is calling me right now?) |
-| `ctx.signer` | Identifying the end user (who initiated this transaction?) |
-| `ctx.caller == ctx.signer` | Ensuring a direct call (no intermediary contract) |
-
-A common mistake is using `ctx.signer` for access control in a function that should restrict who can call it directly:
+Use `ctx.caller` for direct authorization and allowance checks. Use
+`ctx.caller == ctx.signer` when a function must reject contract-mediated calls.
 
 ```python
-# BAD -- a malicious contract could trick alice into calling it,
-# then call your contract; ctx.signer remains "alice"
-@export
-def admin_action():
-    assert ctx.signer == owner.get(), "Only owner"
-
-# GOOD -- checks the immediate caller
 @export
 def admin_action():
     assert ctx.caller == owner.get(), "Only owner"
 ```
 
-## 3. Not Validating Amounts
+Using `ctx.signer` here could let an intermediate contract act while preserving
+the owner's signer identity.
 
-Always check that numeric inputs are positive. Negative amounts can reverse the intended direction of a transfer:
+## Amount and Balance Checks
+
+Negative or unchecked amounts can reverse a transfer or create negative
+balances.
 
 ```python
-# BAD -- negative amount would ADD to sender and SUBTRACT from receiver
 @export
-def transfer(to: str, amount: float):
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-
-# GOOD -- validate first
-@export
-def transfer(to: str, amount: float):
+def transfer(amount: float, to: str):
+    assert to != "", "Recipient is required"
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount
     balances[to] += amount
 ```
 
-## 4. Mutable Default Values in Hash
+Validate bounds, identifiers, deadlines, and collection sizes before changing
+state.
 
-When you read a `list` or `dict` from a `Hash`, including through `Hash.all()`,
-you get a **copy**. Modifying the copy does not update storage. You must write
-it back explicitly:
+## Mutable Stored Values
 
-```python
-# BAD -- the append modifies a copy, not the stored value
-@export
-def add_item(item: str):
-    items = data["list"]
-    items.append(item)
-    # data["list"] is unchanged!
-
-# GOOD -- write back after modification
-@export
-def add_item(item: str):
-    items = data["list"]
-    items.append(item)
-    data["list"] = items
-```
-
-This applies to:
-
-- any mutable value stored in a `Hash`
-- nested mutable values inside a `Variable`
-- values returned by `Variable.get()`, because `.get()` returns a defensive copy
-
-For top-level mutable `Variable` values, you can use helpers like
-`settings["mode"] = "strict"` or `queue.append(item)` instead of the full
-read-modify-write cycle.
-
-## 5. Numeric Semantics
-
-Xian contract code uses `float` syntax, but it does not execute those values as
-ordinary Python binary floats. The compiler preserves float literals from the
-source code, and the runtime executes them as `ContractingDecimal`.
-
-That means this is fine and deterministic in Xian:
+Values read from `Hash` or `Variable` are defensive copies. Write a modified
+list or dictionary back to storage:
 
 ```python
-@export
-def calculate(amount: float):
-    return amount * 0.1 + amount * 0.2
+items = data["items"]
+items.append(value)
+data["items"] = items
 ```
 
-The real pitfalls are different:
+## Persistent State
 
-- do not assume unlimited decimal range
-- do not assume more than the supported fractional precision
-- do not compare against values that rely on extra digits beyond the supported
-  scale
-
-Policy:
-
-- `61` whole digits
-- `30` fractional digits
-- extra fractional digits are truncated toward zero
-- values outside the supported range raise an overflow error
-
-Use `float` for normal user-facing decimal amounts. Use `int` when the value is
-conceptually integral.
-
-## 6. Random is Not Truly Random
-
-The `random` module in Xian contracts is **deterministic**. It is seeded from
-public execution context so that all validators produce the same result. This
-means:
-
-- The outcome is reproducible if you know the block metadata and transaction-specific input hash
-- Do not use `random` for high-stakes outcomes where prediction matters
-- Miners/validators can potentially influence the seed
-
-```python
-@export
-def roll_dice():
-    # This is deterministic -- all validators get the same result
-    # But a sophisticated attacker could predict or influence the outcome
-    random.seed()
-    return random.randint(1, 6)
-```
-
-For applications where unpredictability is critical, consider commit-reveal schemes or external randomness oracles.
-
-## 7. Missing Balance Checks Before Subtraction
-
-Always verify the sender has enough balance before subtracting. With `default_value=0`, a subtraction on a zero balance creates a negative balance:
-
-```python
-# BAD -- creates negative balance if sender has 0
-@export
-def transfer(to: str, amount: float):
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-
-# GOOD
-@export
-def transfer(to: str, amount: float):
-    assert amount > 0, "Amount must be positive"
-    assert balances[ctx.caller] >= amount, "Insufficient balance"
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-```
-
-## 8. Not Handling the Zero Address
-
-Sending tokens to an empty string or to a nonexistent address is valid -- the tokens are effectively burned. If this is unintended, validate the recipient:
-
-```python
-@export
-def transfer(to: str, amount: float):
-    assert len(to) > 0, "Recipient cannot be empty"
-    assert amount > 0, "Amount must be positive"
-    assert balances[ctx.caller] >= amount, "Insufficient balance"
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-```
-
-## 9. Re-Entrancy via Cross-Contract Calls
-
-While Xian does not have the same re-entrancy risk as Ethereum (no raw `call` opcode), a similar pattern can occur when your contract calls an external contract that calls back into yours:
-
-```python
-# RISKY -- external contract could call back before state is updated
-@export
-def withdraw(amount: float):
-    external_token.transfer(amount=amount, to=ctx.caller)
-    balances[ctx.caller] -= amount  # state updated after external call
-
-# SAFER -- update state before making external calls
-@export
-def withdraw(amount: float):
-    assert balances[ctx.caller] >= amount, "Insufficient balance"
-    balances[ctx.caller] -= amount  # state updated first
-    external_token.transfer(amount=amount, to=ctx.caller)
-```
-
-The general rule: **update your own state before calling external contracts**.
-
-If the nested call fails, Xian rolls back the whole transaction, including
-earlier writes and events from the parent contract. That protects atomicity,
-but it does not remove the need for correct checks-effects-interactions order
-in successful call paths.
-
-## 10. Storing Sensitive Data On-Chain
-
-All state is publicly readable. Do not store secrets, private keys, or passwords in contract state:
-
-```python
-# BAD -- anyone can read this via the API
-secret = Variable()
-
-@construct
-def seed():
-    secret.set("my_secret_password")
-
-# Use commit-reveal patterns or off-chain secret management instead
-```
-
-## 11. Using Python Globals as State
-
-Module-level Python globals are not durable contract state. Xian reloads
-contract modules fresh for each execution, including dynamic imports:
-
-```python
-counter = 0
-
-@export
-def bump():
-    global counter
-    counter += 1
-    return counter
-```
-
-Do not use this pattern for balances, counters, guards, or configuration.
-Persistent state belongs in `Variable` and `Hash`:
+Ordinary Python globals are recreated for each execution. Persistent data must
+use `Variable` or `Hash`.
 
 ```python
 counter = Variable(default_value=0)
@@ -257,17 +57,52 @@ counter = Variable(default_value=0)
 @export
 def bump():
     counter.set(counter.get() + 1)
-    return counter.get()
 ```
 
-## Security Checklist
+## External Calls
 
-Before deploying a contract, verify:
+Update and validate your own state before calling another contract. Xian rolls
+back the full transaction when a nested call fails, but successful callbacks
+can still observe incorrectly ordered state.
 
-- [ ] Every admin function checks `ctx.caller` against an authorized address
-- [ ] All numeric inputs are validated (`amount > 0`, balance checks)
-- [ ] State is updated before external contract calls
-- [ ] `ctx.caller` vs `ctx.signer` is used correctly for each function
-- [ ] Mutable values (lists, dicts) are written back after modification
-- [ ] No sensitive data is stored in contract state
-- [ ] Edge cases are tested (zero amounts, empty strings, unauthorized callers)
+Apply checks-effects-interactions and guard any workflow that must not be
+re-entered.
+
+## Numeric Semantics
+
+Contract `float` values are deterministic decimal-backed numbers, not binary
+Python floats. They support 61 whole digits and 30 fractional digits; extra
+fractional digits truncate toward zero and out-of-range values fail.
+
+Use `int` for integral quantities and test rounding/boundary behavior for
+amounts and rates.
+
+## Randomness
+
+Contract `random` is deterministic and derived from public execution context.
+It is suitable for reproducible sampling, not adversarially unpredictable
+lotteries. Use a reviewed commit-reveal or oracle design when manipulation or
+prediction matters.
+
+## Secrets
+
+Contract source, state, events, transaction inputs, and public outputs are
+observable. Never store passwords, private keys, seed phrases, or unencrypted
+secrets on-chain.
+
+## Deployment Checklist
+
+- every privileged export authorizes the correct caller
+- direct-call requirements distinguish caller from signer
+- amounts, balances, identifiers, deadlines, and collection sizes are bounded
+- state is updated before external calls
+- mutable values are written back
+- no durable data relies on Python globals
+- numeric precision and truncation are tested
+- emitted events contain no secrets
+- failure tests assert complete rollback
+- deployment uses reviewed source, constructor arguments, owner, and developer
+  metadata
+
+See [Audit Checklist](/smart-contracts/security/audit-checklist) for the
+short review form.

@@ -133,11 +133,11 @@ const pair = await client.contract("con_pairs").call("pairFor", {
 });
 ```
 
-## Status
+## Deployment Readiness
 
-`candidate`. Contracts are usable and covered by package-local tests, but
-deeper hardening is required before treating the package as a polished
-production drop-in.
+The package is a candidate deployment: its contracts and bootstrap are tested,
+but operators should complete independent review, workload testing, monitoring,
+and incident planning before using it with material value.
 
 ## Related Pages
 

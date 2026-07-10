@@ -1,187 +1,70 @@
 # Chi Cost Table
 
-This page provides a detailed reference for chi costs across all operation types.
+These are stable runtime constants. Use readonly simulation against the target
+node for a complete operation estimate.
 
-## Storage Costs
+## Accounting
 
-| Operation | Cost | Unit |
-|-----------|------|------|
-| Storage read | 1 | meter unit per byte (key + value) |
-| Storage write | 25 | meter units per byte (key + value) |
-| Submitted transaction bytes | 1 | meter unit per byte |
-| Returned value bytes | 1 | meter unit per byte |
-| Cross-contract dispatch | 10,000 | raw meter units per call |
-
-Byte count includes both the encoded key (e.g., `currency.balances:alice`) and the encoded value (e.g., `1000000`).
-
-`xian_vm_v1` uses the VM host-operation schedule. VM storage writes are
-charged at `25` units per byte, while VM storage reads are charged by the VM
-schedule. Cross-contract dispatch is charged as a fixed per-call cost; repeated
-contract calls do not add a progressive surcharge.
-
-## Base Costs
-
-| Item | Value |
-|------|-------|
-| Base transaction cost | 5 chi |
-| Chi-to-XIAN conversion in `paid_metered` mode | 20 chi = 1 XIAN |
-
-## Limits
-
-| Limit | Value |
-|-------|-------|
-| Runtime raw safety ceiling | 50,000,000,000 raw units |
-| Maximum write data per transaction | 128 KiB |
-| Maximum return value size | 128 KiB |
-| Maximum submitted contract source | 128 KiB |
-| Maximum sequence or binary allocation | 128 KiB |
-| Default chi allocation | 1,000,000 |
-
-## Chi Formula
-
-```
+```text
 chi_used = (raw_meter_cost // 1000) + 5
 ```
 
-Where:
-- `raw_meter_cost` = compute, storage, transaction-byte, return-value, and
-  runtime-bridge costs charged by the fixed Xian VM backend
-- `5` = base transaction cost
-- the final value is capped by the transaction's submitted chi budget
+The result is capped by the transaction's submitted chi limit.
 
-## Opcode Costs
+| Item | Raw cost |
+| --- | ---: |
+| storage read | 1 per encoded key/value byte |
+| storage write | 25 per encoded key/value byte |
+| submitted transaction | 1 per byte |
+| returned value | 1 per byte |
+| cross-contract dispatch | 10,000 per call, plus called work |
 
-`xian_vm_v1` meters execution through the VM gas schedule plus storage and
-payload-size costs. The exact compute breakdown is implementation-defined by
-the VM runtime, so use simulation for final receipt values.
+VM computation and host operations use the fixed `xian_vm_v1` gas schedule.
 
-## Example Meter Contributions
+## Fee Conversion
 
-The rows below show raw meter contributions before the final `// 1000`
-conversion. Do not read a storage row such as `600` as `600` billed chi; it is
-one part of the raw aggregate that becomes final `chi_used`.
+| Setting | Value |
+| --- | ---: |
+| base transaction cost | 5 chi |
+| paid-mode conversion | 20 chi per XIAN |
 
-### Simple Variable Read
+In `free_metered` mode the runtime reports the same chi usage but creates no
+execution-fee debit or fee-derived reward.
 
-```python
-counter.get()
-```
+## Resource Limits
 
-- Compute cost: VM gas schedule dependent
-- Storage read: key `con_x.counter` (12 bytes) + value `42` (2 bytes) = 14 raw meter units
-- Final chi: `5 + (raw_meter_cost // 1000)`, so use simulation for the exact receipt value
+| Limit | Value |
+| --- | ---: |
+| raw runtime safety ceiling | 50,000,000,000 units |
+| writes per transaction | 128 KiB |
+| returned value | 128 KiB |
+| submitted contract source | 128 KiB |
+| sequence or binary allocation | 128 KiB |
+| default local chi budget | 1,000,000 |
 
-### Simple Hash Write
+## ZK Verification
 
-```python
-balances["alice"] = 1000
-```
-
-- Compute cost: VM gas schedule dependent
-- Storage write: key `con_x.balances:alice` (20 bytes) + value `1000` (4 bytes) = 24 bytes * 25 = 600 raw meter units
-- Final chi: `5 + (raw_meter_cost // 1000)`, capped by the submitted budget
-
-### Token Transfer (Two Reads + Two Writes)
-
-```python
-@export
-def transfer(to: str, amount: float):
-    assert balances[ctx.caller] >= amount, "Insufficient balance"
-    balances[ctx.caller] -= amount
-    balances[to] += amount
-```
-
-- 2 storage reads: roughly 30-60 raw meter units, depending on encoded key/value sizes
-- 2 storage writes: roughly 1,200-1,400 raw meter units, depending on encoded key/value sizes
-- compute, transaction bytes, return values, and runtime bridge work add to the same raw meter total
-- final chi is the converted receipt value, so simulate the transaction against the target execution policy for a real estimate
-
-## Cost Optimization Tips
-
-| Strategy | Savings |
-|----------|---------|
-| Use shorter contract and variable names | Reduces key byte count for every read/write |
-| Cache repeated reads in local variables | Avoids paying read cost multiple times |
-| Use `default_value` in Hash declarations | Avoids unnecessary reads that return None |
-| Minimize writes in loops | Each write is 25x more expensive than a read |
-| Keep cross-contract boundaries intentional | Each hop pays a fixed dispatch cost plus the called work |
-| Avoid storing large strings or lists | Every byte increases the raw write-meter cost |
-
-## Measured Local Reference Transactions
-
-These examples were measured on a rebuilt local BDS node in June 2026 with
-`paid_metered` fees, `chi_cost = 20`, and `xian_vm_v1` cross-contract dispatch
-charged as a fixed per-call cost. They are useful for comparing relative
-transaction shapes, but exact values can move with contract source, arguments,
-network config, and VM metering policy.
-
-| Action | Main call | Chi used | XIAN fee |
-|--------|-----------|----------|----------|
-| Contract read call | probe `read_value` | `19` | `0.95` |
-| Contract storage write | probe `set_value` | `30` | `1.50` |
-| Contract loop + write | probe `bump_many` | `31` | `1.55` |
-| Contract event + write | probe `emit_probe` | `40` | `2.00` |
-| Approve demo token | token `approve` | `42` | `2.10` |
-| Approve allowance | `currency.approve` | `60` | `3.00` |
-| Native XIAN transfer | `currency.transfer` | `69` | `3.45` |
-| Spend via `transfer_from` | `currency.transfer_from` | `83` | `4.15` |
-| Deploy small contract | `submission.submit_contract` | `927` | `46.35` |
-| Direct DEX core swap | `con_dex.swapExactTokenForToken` | `1,775` | `88.75` |
-| Direct DEX supporting swap | `con_dex.swapExactTokenForTokenSupportingFeeOnTransferTokens` | `1,923` | `96.15` |
-| DEX sell demo token | `con_dex_helper.sell` | `2,126` | `106.30` |
-| DEX buy demo token | `con_dex_helper.buy` | `2,214` | `110.70` |
-| Shielded command execution | shielded command `execute_command` | `6,715` | `335.75` |
-| Shielded DEX swap path | shielded command plus DEX adapter | `9,898` | `494.90` |
-
-The shielded rows include proof verification, hidden-note spend accounting, and
-hidden change-note output handling. The DEX shielded row also includes the
-canonical shielded DEX adapter and the real `con_dex` router swap. Setup
-transactions such as verifier-key registration, contract deployment, approvals,
-deposits, and liquidity seeding are excluded from these per-action rows.
-
-## ZK Bridge Metering
-
-The runtime `zk` bridge has explicit meter constants before native verification
-or shielded helper work runs:
-
-| Operation | Cost |
-|-----------|------|
-| raw Groth16 verify base | 750,000 |
-| raw Groth16 public input | 50,000 each |
-| raw Groth16 payload byte | 50 each |
-| registry-backed Groth16 verify base | 500,000 |
+| Operation | Raw cost |
+| --- | ---: |
+| raw Groth16 verification base | 750,000 |
+| raw public input | 50,000 each |
+| raw payload byte | 50 each |
+| registry-backed verification base | 500,000 |
 | registry prepared-key setup | 250,000 |
 | registry-backed public input | 50,000 each |
 | registry-backed payload byte | 25 each |
-| shielded tree append base | 250,000 |
-| shielded tree append commitment | 500,000 each |
-| shielded command nullifier digest base | 100,000 |
-| shielded command nullifier digest input | 50,000 each |
-| shielded command binding | 100,000 |
-| shielded command execution tag | 50,000 |
 
-ZK inputs are bounded before verification: verifying-key hex payloads are
-limited to `8,192` characters, proof hex payloads to `4,096` characters,
-public inputs to `32`, and registry verifying-key ids to `128` characters.
+Shielded protocol helpers also have fixed host-operation costs. Proofs are
+limited to 4,096 hex characters, raw verifying keys to 8,192 hex characters,
+public inputs to 32, and verifying-key IDs to 128 characters.
 
-## XIAN Cost Conversion
+## Optimization
 
-In the default `paid_metered` mode, the chain converts used chi to XIAN at 20
-chi per XIAN:
+- cache repeated state reads in local variables
+- keep keys and stored values compact
+- avoid unnecessary writes and cross-contract calls
+- paginate scans and bound returned collections
+- simulate the exact transaction before choosing a chi limit
 
-| Billed chi | XIAN cost |
-|------------|-----------|
-| 5 | 0.25 |
-| 20 | 1 |
-| 100 | 5 |
-| 1,000 | 50 |
-| 10,000 | 500 |
-
-In `free_metered` mode, the same chi accounting and receipt values apply, but
-the execution fee charged to the sender is `0`. Use the submitted chi caps in
-the node config to bound per-transaction and per-block work on 0-fee networks.
-
-Use dry-run simulation for operation-level estimates. Deployment includes more
-than final writes: it also pays for contract-analysis work and canonical source
-storage. Large comments are not preserved in stored `__source__`, but raw
-submitted source remains size-limited.
+See [Chi and Metering](/concepts/chi) for the fee modes and
+[Estimating Chi](/api/dry-runs) for simulation.

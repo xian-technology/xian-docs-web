@@ -69,7 +69,7 @@ features:
     <a href="/products/dex">Xian DEX</a>
     <a href="/products/nft">Xian NFT</a>
     <a href="/products/stable-protocol">Stable Protocol</a>
-    <a href="/tools/xian-py#service-integration-examples">xian-py Service Examples</a>
+    <a href="/tools/xian-py">xian-py SDK</a>
     <a href="/node/local-dex-bootstrap">Local DEX Bootstrap</a>
   </div>
 </div>

@@ -1,183 +1,62 @@
-# Chi & Metering
+# Chi and Metering
 
-Chi is Xian's execution-energy unit. It is the budget that limits computation,
-storage work, and other metered runtime behavior during a transaction.
+Chi is Xian's deterministic execution budget and fee unit. It is not a separate
+token.
 
-It is not a separate token. It is the unit Xian uses to price execution.
+Every transaction supplies a chi limit. The runtime meters VM work, host calls,
+storage, transaction bytes, return data, and native bridges against that limit.
+If execution runs out of chi, its state and events roll back.
 
-## How Chi Works
-
-When a transaction is submitted, it carries a chi limit.
-
-- if execution finishes within that limit, the transaction succeeds and the
-  receipt records the chi actually used
-- if execution exceeds the limit, execution aborts, state changes roll back,
-  and the submitted limit is what matters for failure accounting
-
-On normal paid networks, used chi is converted into a native-token fee. On
-0-fee networks, chi remains the deterministic execution budget and receipt
-unit, but the runtime does not debit the sender's native-token balance for
-execution.
-
-```mermaid
-flowchart TD
-  Estimate["Optional: estimate chi via readonly simulation"]
-  Submit["Submit transaction with chi limit"]
-  Admit["CHECK_TX: sender can cover the submitted limit (paid mode)"]
-  Execute["Metered execution in xian_vm_v1"]
-  Within{"Finished within limit?"}
-  Success["Success: receipt records chi_used"]
-  Fail["Out of chi: state rolls back, submitted limit is charged"]
-  Fee["Paid mode: chi converts to native-token fee and reward split"]
-  Free["0-fee mode: no balance debit, chi metered and reported"]
-
-  Estimate --> Submit
-  Submit --> Admit
-  Admit --> Execute
-  Execute --> Within
-  Within -->|yes| Success
-  Within -->|no| Fail
-  Success --> Fee
-  Success --> Free
-  Fail --> Fee
-```
-
-## Core Constants
-
-| Constant | Value | Meaning |
-|----------|-------|---------|
-| `READ_COST_PER_BYTE` | `1` | raw meter unit per stored byte read |
-| `WRITE_COST_PER_BYTE` | `25` | raw meter units per stored byte written |
-| `TRANSACTION_BYTES_COST_PER_BYTE` | `1` | raw meter unit per submitted transaction byte |
-| `RETURN_VALUE_COST_PER_BYTE` | `1` | raw meter unit per returned byte |
-| `CHI_PER_T` | `20` | chi purchased by one unit of the native token |
-| base transaction cost | `5` | flat chi charged on every transaction |
-
-## Base Formula
-
-The runtime uses this raw-meter-to-chi conversion:
+## Accounting
 
 ```text
 chi_used = (raw_meter_cost // 1000) + 5
 ```
 
-`raw_meter_cost` includes compute, storage, submitted transaction bytes,
-returned value bytes, and metered runtime bridge work. The final receipt value
-is capped by the chi budget supplied on the transaction.
+The result is capped by the submitted chi limit. In `paid_metered` mode, the
+sender must be able to cover that limit during admission and is charged for
+`chi_used`. In `free_metered` mode, the transaction remains metered but the
+runtime creates no execution-fee debit or fee-derived rewards.
 
-VM work, host operations, storage, transaction bytes, and return payload size
-are all metered explicitly against the transaction's chi budget. Compute and
-host operations use the fixed native VM gas schedule.
+## Stable Constants
 
-## What Gets Metered
+| Constant | Value |
+| --- | ---: |
+| storage read | 1 raw unit per encoded byte |
+| storage write | 25 raw units per encoded byte |
+| submitted transaction bytes | 1 raw unit per byte |
+| returned value bytes | 1 raw unit per byte |
+| base transaction cost | 5 chi |
+| paid-mode conversion | 20 chi per native-token unit |
 
-### Computation
+The VM has a fixed compute and host-operation gas schedule. Cross-contract calls
+pay a fixed dispatch cost plus the complete work of the called contract.
+Hashing, signature verification, ZK verification, and other native bridges have
+explicit costs.
 
-Xian meters execution through `xian_vm_v1`, using the VM-native gas
-schedule over VM operations and host calls.
-
-The supported runtime and metering policy are fixed by the node software.
-Applications and validators do not get to improvise their own cost model.
-
-### Storage Reads
-
-VM-native execution charges reads through the VM host-operation schedule,
-including the encoded storage data handled by the host boundary.
-
-### Storage Writes
-
-Writing state costs `25` meter units per byte of encoded key plus encoded
-value under the VM host-operation schedule.
-
-Writes are intentionally much more expensive than reads because they expand the
-durable chain state.
-
-### Cross-Contract Calls
-
-Cross-contract calls meter the called work too. In practice that means a single
-transaction can accumulate chi across multiple contracts if it touches multiple
-execution paths. The VM also charges a fixed dispatch cost for each
-cross-contract call so composable transactions pay for each hop without a
-progressive repeated-call surcharge.
-
-### Proof Verification and Other Runtime Bridges
-
-Metered runtime bridges such as hashing, signature checks, and zk verification
-also contribute to total chi usage. In the VM-native path, these appear as
-explicit host operations instead of implicit Python work.
-
-## Limits
+## Resource Limits
 
 | Limit | Value |
-|------|-------|
-| runtime raw safety ceiling | `50,000,000,000` raw units |
-| maximum write per transaction | `128 KiB` |
-| maximum returned value size | `128 KiB` |
-| maximum submitted contract source | `128 KiB` |
-| maximum sequence or binary allocation | `128 KiB` |
-| default chi allocation | `1,000,000` |
+| --- | ---: |
+| raw runtime safety ceiling | 50,000,000,000 units |
+| writes per transaction | 128 KiB |
+| returned value | 128 KiB |
+| submitted contract source | 128 KiB |
+| sequence or binary allocation | 128 KiB |
+| default local chi budget | 1,000,000 |
 
-Those line/instruction ceilings are tracer-backend safety limits. VM-native
-execution uses its own gas schedule rather than those tracer-event counters.
-The raw safety ceiling is a runtime overflow guard; ordinary transaction
-success is bounded by the `chi` supplied by the sender.
+The submitted transaction limit, not the raw safety ceiling, is the normal
+execution boundary.
 
-## Converting Chi To Native Token Cost
+## Paid and Free-Metered Modes
 
-In the default `paid_metered` fee mode, chi is priced through the chain's
-native token:
+Paid mode converts execution to native-token cost:
 
 ```text
 token_cost = chi_used / 20
 ```
 
-Examples:
-
-| Chi used | Token cost |
-|----------|------------|
-| `100` | `5.0` |
-| `1,000` | `50.0` |
-| `10,000` | `500.0` |
-| `100,000` | `5,000.0` |
-| `1,000,000` | `50,000.0` |
-
-## Local Reference Measurements
-
-The following values were measured on the rebuilt local BDS node in June 2026
-with `paid_metered` fees, `chi_cost = 20`, and fixed-cost cross-contract
-dispatch. They are reference points, not protocol guarantees; simulate against
-the target network before submitting production transactions.
-
-| Action | Chi used | XIAN fee |
-|--------|----------|----------|
-| Contract read call | `19` | `0.95` |
-| Contract storage write | `30` | `1.50` |
-| Native XIAN transfer | `69` | `3.45` |
-| `transfer_from` spend | `83` | `4.15` |
-| Deploy small contract | `927` | `46.35` |
-| Direct DEX core swap | `1,775` | `88.75` |
-| DEX helper buy | `2,214` | `110.70` |
-| Shielded command execution | `6,715` | `335.75` |
-| Shielded DEX swap path | `9,898` | `494.90` |
-
-## 0-Fee Metered Networks
-
-Operators can run a network with `tx_fee_mode = "free_metered"` in the rendered
-Xian node config. In this mode:
-
-- transaction execution is metered
-- each transaction supplies a chi budget
-- receipts report `chi_used`
-- the runtime does not debit native-token fees for execution
-- fee-derived validator, foundation, and developer rewards are not generated
-- admission does not require a native-token balance just to cover chi
-
-This is different from disabling metering. Contracts run under a fixed
-chi budget and can fail with out-of-chi. Contract-level balances,
-allowances, and assertions are unchanged; a token transfer can fail for
-insufficient token balance.
-
-0-fee networks should set explicit resource caps:
+Free-metered networks should set explicit caps:
 
 ```toml
 tx_fee_mode = "free_metered"
@@ -185,31 +64,31 @@ free_tx_max_chi = 1000000
 free_block_max_chi = 20000000
 ```
 
-`free_tx_max_chi` caps the submitted chi budget for one transaction.
-`free_block_max_chi` caps the total submitted chi budget admitted into one
-proposed block. These caps are the main spam and capacity controls when fees
-are not used as an economic throttle.
+The transaction cap limits one submitted budget. The block cap limits the sum
+of submitted budgets accepted into a proposal. Contract balances and
+application-level payment rules remain unchanged.
 
-## Why Chi Matters For Design
+## Estimate Before Submission
 
-Chi is not only a billing detail. It shapes how you design contracts:
+Readonly simulation returns the measured `chi_used` without committing state.
+SDK estimate helpers add configurable headroom. Estimates can fail when a node
+disables simulation, caps it below the target transaction, or has different
+state from the eventual execution block.
 
-- long or repeated storage writes are expensive
-- repeated reads add up
-- deep multi-contract flows cost more than simple direct calls
-- proof-backed and privacy-preserving flows are expected to cost more than
-  trivial public transfers
+Use simulation as an estimate, then provide a bounded margin. Do not copy
+historical benchmark values into a transaction policy.
 
-## Practical Optimization Rules
+## Contract Design
 
-- minimize storage writes
+- minimize durable writes
 - cache repeated reads in local variables
 - keep stored keys and values compact
 - avoid unnecessary cross-contract hops
-- simulate before submitting when the SDK supports it
+- paginate broad storage scans
+- expect proof-backed flows to cost more than simple public transfers
 
-## See Also
+## Related Pages
 
 - [Estimating Chi](/api/dry-runs)
 - [Chi Cost Table](/reference/chi-costs)
-- [The Xian VM](/concepts/xian-vm)
+- [Measuring Chi Costs](/smart-contracts/testing/chi-costs)

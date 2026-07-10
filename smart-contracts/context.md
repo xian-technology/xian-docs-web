@@ -1,79 +1,68 @@
 # Context Variables
 
-The `ctx` object is available in every exported function. It tells you who called the function, who signed the transaction, and which contract is executing.
+The runtime injects `ctx` and block metadata into contract execution.
 
-## Properties
+## `ctx` Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `ctx.caller` | `str` | The immediate caller — either a user address or a contract name |
-| `ctx.signer` | `str` | The original transaction signer (never changes in a call chain) |
-| `ctx.this` | `str` | The name of the executing contract |
-| `ctx.owner` | `str` or `None` | The runtime owner stored for the contract |
-| `ctx.entry` | `tuple` | `(contract_name, function_name)` of the transaction entry point |
-| `ctx.submission_name` | `str` or `None` | The name of the contract being deployed during module-body execution and `@construct` |
+| Property | Meaning |
+| --- | --- |
+| `ctx.caller` | immediate caller: an account or another contract |
+| `ctx.signer` | original transaction signer; unchanged across a call chain |
+| `ctx.this` | contract currently executing |
+| `ctx.owner` | runtime `__owner__` metadata, or `None` |
+| `ctx.entry` | `(contract, function)` at the transaction entry point |
+| `ctx.submission_name` | contract being deployed during module and constructor execution |
 
-## How Context Changes in Call Chains
+If account `alice` calls `contract_a`, which then calls `contract_b`, the
+second call sees `ctx.signer == "alice"`, `ctx.caller == "contract_a"`, and
+`ctx.this == "contract_b"`.
 
-When contract A calls contract B, the context updates:
+Use `ctx.caller` for immediate authorization. Use `ctx.signer` only when the
+original external signer is intentionally the authority.
 
-```
-User "alice" calls contract_a.do_something()
-  → ctx.signer = "alice"
-  → ctx.caller = "alice"
-  → ctx.this   = "contract_a"
+## Factory Deployment
 
-  contract_a calls contract_b.helper()
-    → ctx.signer = "alice"      (unchanged — always the original signer)
-    → ctx.caller = "contract_a" (the immediate caller changed)
-    → ctx.this   = "contract_b" (execution is inside B)
-```
-
-This distinction is critical for security. A token contract should check `ctx.caller` for allowance-based transfers, but `ctx.signer` for direct transfers.
-
-## Factory Deployment Context
-
-Contracts can deploy child contracts by calling the built-in `submission`
-contract.
-
-Factories do not compile child source on-chain. Build the child's
-`deployment_artifacts` off-chain with `xian-py`, `xian-js` plus the WASM
-compiler package, or `ContractingClient.build_deployment_artifacts(...)`, then
-pass those artifacts into the factory call.
-
-During child module-body execution and the child `@construct`, the child sees
-its own deployment context:
+Factories pass child source to the built-in `submission` contract. Validators
+compile the source and persist canonical IR; factories do not submit executable
+artifacts.
 
 ```python
 import submission
 
+CHILD_SOURCE = """
+value = Variable()
+
+@construct
+def seed(label: str):
+    value.set(label)
+
 @export
-def deploy(name: str, deployment_artifacts: dict):
+def read() -> str:
+    return value.get()
+"""
+
+@export
+def deploy_child(name: str, label: str):
     submission.submit_contract(
         name=name,
-        deployment_artifacts=deployment_artifacts,
+        code=CHILD_SOURCE,
+        owner=ctx.caller,
+        constructor_args={"label": label},
     )
 ```
 
-If `con_factory.deploy("con_child")` is called by signer `alice`, then inside
-the child module body and constructor:
+During the child's module and constructor execution:
 
-- `ctx.this == "con_child"`
-- `ctx.caller == "con_factory"`
-- `ctx.signer == "alice"`
-- `ctx.entry == ("con_factory", "deploy")`
-- `ctx.submission_name == "con_child"`
+- `ctx.this` and `ctx.submission_name` are the child name
+- `ctx.caller` is the factory contract
+- `ctx.signer` is the original transaction signer
+- `ctx.entry` remains the outer transaction entry point
 
-This means factories can create child contracts without losing the original
-transaction signer or the transaction entry point.
+## Runtime Ownership
 
-## Runtime Owner Metadata
-
-`ctx.owner` comes from the contract's runtime `__owner__` metadata, not from an
-application variable such as `owner = Variable()` or `metadata["owner"]`.
-
-That runtime owner can be reassigned through the built-in `submission`
-contract:
+`ctx.owner` is separate from an application variable such as
+`owner = Variable()`. Transfer runtime ownership through the authorized
+submission surface:
 
 ```python
 import submission
@@ -83,63 +72,13 @@ def handoff(contract: str, new_owner: str):
     submission.change_owner(contract=contract, new_owner=new_owner)
 ```
 
-Changing the runtime owner affects runtime access control for owner-gated
-contracts. It does not rewrite a contract's own state variables.
+## Block Metadata
 
-That metadata mutation surface is intentionally narrow: ordinary contracts do
-not get a generic ability to rewrite another contract's runtime owner or
-developer fields directly. Use the built-in `submission` path.
+| Value | Meaning |
+| --- | --- |
+| `now` | finalized block timestamp |
+| `block_num` | executing block height |
+| `block_hash` | executing block hash |
+| `chain_id` | network chain identifier |
 
-## Common Patterns
-
-### Owner-only functions
-
-```python
-owner = Variable()
-
-@construct
-def seed():
-    owner.set(ctx.caller)
-
-@export
-def admin_action():
-    assert ctx.caller == owner.get(), "Only the owner can do this"
-    # ... privileged logic
-```
-
-### Preventing cross-contract calls
-
-```python
-@export
-def sensitive_action():
-    assert ctx.caller == ctx.signer, "Must be called directly, not from another contract"
-```
-
-### Identifying the entry point
-
-```python
-@export
-def process():
-    entry_contract, entry_function = ctx.entry
-    # Useful for logging or conditional logic based on how we were reached
-```
-
-## Environment Variables
-
-In addition to `ctx`, exported functions have access to block-level environment variables injected by the runtime:
-
-| Variable | Type | Description |
-|----------|------|-------------|
-| `now` | `Datetime` | Block timestamp (deterministic, agreed by validators) |
-| `block_num` | `int` | Block height for the executing transaction |
-| `block_hash` | `str` | Block hash for the executing transaction |
-| `chain_id` | `str` | Network chain identifier |
-
-```python
-@export
-def time_locked_withdraw(amount: float):
-    assert now > unlock_time.get(), "Too early"
-    balances[ctx.caller] -= amount
-```
-
-These values are the same for every transaction in the same block, ensuring deterministic execution.
+These values come from consensus context, not the validator's local clock.

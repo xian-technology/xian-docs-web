@@ -1,372 +1,130 @@
-# Protocol Governance & State Patches
+# Protocol Governance and State Patches
 
-Xian treats forward state patching as the primary remediation path for protocol
-mistakes that do not require rewriting finalized history.
+The canonical `governance` contract supports two proposal kinds:
 
-The model has two parts:
+- `contract_call`: execute an approved contract call immediately
+- `state_patch`: schedule a deterministic forward state patch
 
-- on-chain approval through the canonical `governance` contract
-- local validator possession of the exact approved patch bundle
+Governance decides what may happen. Every validator must also possess the exact
+approved patch bundle before its activation height.
 
-That split is deliberate. Governance decides what should happen and when it
-should activate. Validators need the exact bundle locally so every node
-applies the same deterministic state change at the same block.
+## Membership and Thresholds
 
-## Canonical Contract
+Governance imports the configured membership contract, normally `validators`,
+and snapshots members and voting weights when a proposal is created. Later
+membership or power changes do not alter that proposal.
 
-The maintained contract source is `xian-configs/contracts/governance.s.py`.
+Checked-in local/dev/test bundles use:
 
-It supports two proposal kinds:
+| Setting | Value |
+| --- | ---: |
+| approval threshold | 4/5 weighted power |
+| proposal expiry | 7 days |
+| normal patch delay | 20 blocks |
+| emergency threshold | unanimous weighted power |
+| emergency patch delay | 5 blocks |
 
-- `state_patch`
-- `contract_call`
-
-The contract is parameterized by:
-
-| Key | Default / bundled value |
-| --- | --- |
-| `approval_threshold_numerator` | `4` |
-| `approval_threshold_denominator` | `5` |
-| `proposal_expiry_days` | `7` |
-| `min_patch_delay_blocks` | `20` |
-| `emergency_threshold_numerator` | `1` |
-| `emergency_threshold_denominator` | `1` |
-| `emergency_patch_delay_blocks` | `5` |
-
-`contracts_testnet.json` pins those values explicitly. The maintained local and
-devnet bundles use the same contract defaults. The draft `xian-mainnet-1`
-rehearsal bundle uses a one-validator bootstrap threshold (`1/1`) until launch
-inputs are finalized.
-
-## Membership and Voting Weight
-
-The governance contract does not own its own member list. It imports a
-membership contract through `membership_contract_name`.
-
-On canonical Xian networks, that contract is `validators`.
-
-Governance uses:
-
-- `get_members()` for the member snapshot
-- `is_member(account)` to authorize proposals
-- `member_weight(account)` and `total_member_weight()` when the membership
-  contract exports weighted voting helpers
-
-Protocol governance is therefore validator governance, and active validator
-power can become protocol-governance weight.
+The draft mainnet rehearsal bundle begins with a one-validator bootstrap
+threshold. Accepted launch configuration is authoritative.
 
 ## Proposal Lifecycle
 
-All proposals follow this flow:
+1. An active governance member proposes a contract call or state patch.
+2. Governance snapshots voters, weights, expiry, and required yes weight.
+3. The proposer casts the first yes vote.
+4. Other snapshotted members vote.
+5. The proposal is approved when yes weight reaches the threshold, rejected
+   when remaining weight cannot reach it, or expired after its deadline.
 
-1. A governance member submits either `propose_contract_call(...)` or
-   `propose_state_patch(...)`.
-2. Governance snapshots the current member list and per-member weight.
-3. Governance stores:
-   - proposer
-   - kind
-   - summary
-   - creation time
-   - expiry time
-   - required yes count
-   - required yes weight
-4. The proposer automatically casts the first `yes` vote.
-5. Each later `vote(proposal_id, support)` updates the proposal and may
-   finalize it immediately.
+Contract-call proposals execute synchronously on approval through
+`importlib.call(target_contract, target_function, kwargs)`.
 
-```mermaid
-flowchart TD
-  Member["Governance member"]
-  Propose["Submit contract-call or state-patch proposal"]
-  Snapshot["Snapshot members, weights, expiry, and threshold"]
-  Vote["Vote yes or no"]
-  Decision{"Approved, rejected, or expired?"}
-  Call["Contract-call proposal executes immediately"]
-  Schedule["State patch is approved and scheduled"]
-  Bundle{"Each validator has the matching local bundle?"}
-  Apply["Apply bundle during finalize_block at activation height"]
-  Halt["Node fails at activation until the approved bundle is supplied"]
-  Terminal["Rejected or expired terminal state"]
-  Waiting["Proposal remains pending"]
+## State Patch Proposal
 
-  Member --> Propose
-  Propose --> Snapshot
-  Snapshot --> Vote
-  Vote --> Decision
-  Decision -->|pending| Waiting
-  Waiting --> Vote
-  Decision -->|rejected or expired| Terminal
-  Decision -->|approved contract_call| Call
-  Decision -->|approved state_patch| Schedule
-  Schedule --> Bundle
-  Bundle -->|yes| Apply
-  Bundle -->|no| Halt
-```
+A patch proposal identifies:
 
-A missing local bundle does not cancel an approved patch. The node refuses to
-finalize past the activation height without the exact approved bundle, so
-operators must distribute the bundle to every validator before activation.
+- unique `patch_id`
+- exact `bundle_hash`
+- future `activation_height`
+- summary and optional URI
+- whether emergency threshold/delay applies
 
-Important behavior:
+Approval schedules the patch; it does not apply it immediately.
 
-- thresholds are snapshotted when the proposal is created
-- voting weights are snapshotted when the proposal is created
-- a member added later cannot vote on an already-open proposal
-- a weight change after proposal creation does not change the open proposal's
-  required threshold
+## Local Bundle
 
-## Approval and Rejection Rules
-
-Approval is weight-driven first.
-
-A proposal is approved as soon as:
-
-- `yes_weight >= required_yes_weight`
-
-Early rejection can also happen before expiry:
-
-- if the remaining uncast weight cannot reach the required yes weight
-
-If neither side finalizes early, the proposal stays pending until:
-
-- it reaches the approval threshold, or
-- `expire_proposal(proposal_id)` is called after `expires_at`
-
-Proposal statuses are:
-
-- `pending`
-- `approved`
-- `executed`
-- `rejected`
-- `expired`
-
-## Contract Call Proposals
-
-`propose_contract_call(...)` stores:
-
-- `target_contract`
-- `target_function`
-- `kwargs`
-- optional `summary`
-
-On approval, governance immediately executes:
-
-```python
-importlib.call(target_contract, target_function, kwargs)
-```
-
-So contract-call governance is synchronous at approval time. There is no later
-activation height or delayed execution stage.
-
-Practical consequence:
-
-- `contract_call` proposals move from `pending` straight to `executed` once the
-  threshold is met
-
-## State Patch Proposals
-
-`propose_state_patch(...)` stores:
-
-- `patch_id`
-- `bundle_hash`
-- `activation_height`
-- optional `summary`
-- optional `uri`
-- `emergency` flag
-
-Additional rules:
-
-- `patch_id` must be unique
-- `bundle_hash` is required
-- `activation_height` must be in the future
-- `activation_height` must satisfy the minimum block delay
-
-Delay rules:
-
-- normal patches use `min_patch_delay_blocks`
-- emergency patches use `emergency_patch_delay_blocks`
-
-On approval, governance does not execute the patch immediately. Instead it:
-
-- marks the patch `approved`
-- records `approved_at`
-- schedules the patch by `(activation_height, patch_id)`
-
-Patch statuses are:
-
-- `proposed`
-- `approved`
-- `applied`
-
-## Emergency Patches
-
-Emergency patches are forward patches. They are not historical rewrites.
-
-The emergency flag changes two things:
-
-- the required approval threshold switches to the emergency ratio
-- the minimum activation delay switches to the emergency patch delay
-
-In the local, devnet, and testnet bundled configuration, that means:
-
-- emergency approval requires 100% yes weight
-- emergency patches may activate after 5 blocks instead of 20
-
-Use the emergency path only when the chain is live and validators already
-have the exact approved bundle locally.
-
-## Local Bundle Directory
-
-Validators load local patch bundles from:
+Place bundles in:
 
 ```text
-<cometbft-home>/config/state-patches
+<cometbft-home>/config/state-patches/
 ```
 
-In the maintained stack this is typically:
-
-```text
-../xian-stack/.cometbft/config/state-patches
-```
-
-The runtime loads this inventory at startup. If a bundle file is malformed, the
-node fails fast instead of silently skipping patch execution later.
-
-## Bundle Format
-
-Bundle shape:
+Minimal shape:
 
 ```json
 {
   "version": 1,
-  "patch_id": "metering-fix-20260327",
+  "patch_id": "metering_fix_1",
   "activation_height": 123456,
   "chain_id": "xian-local-1",
-  "summary": "Correct meter output for edge-case branch",
-  "uri": "ipfs://...",
+  "summary": "Correct deterministic state",
   "changes": [
-    {
-      "key": "con_example.value",
-      "value": "patched",
-      "comment": "correct stored value"
-    }
+    {"key": "con_example.value", "value": "patched"}
   ]
 }
 ```
 
-Runtime rules:
+Bundle validation rejects unsafe IDs, non-positive heights, empty changes,
+duplicate keys, and direct writes to derived VM artifacts. To replace contract
+code, patch `contract_name.__source__`; the runtime derives canonical
+`__xian_ir_v1__`.
 
-- `patch_id` must be a safe lowercase identifier
-- `activation_height` must be positive
-- `changes` must be non-empty
-- duplicate keys are rejected
-- derived VM artifact writes are rejected
-- contract source changes must be supplied as `contract_name.__source__`
+## Activation
 
-When a bundle patches `.__source__`, the runtime derives and applies the
-matching canonical `.__xian_ir_v1__` artifact automatically.
+During `finalize_block` at the activation height, the runtime applies a patch
+only when:
 
-## Activation Path
-
-At the activation height, the runtime applies every approved scheduled patch
-for that block during `finalize_block`.
-
-Validators only apply a patch when:
-
-- the patch is approved on-chain for that height
+- governance approved it for that height
 - the local bundle exists
-- the local bundle hash matches the approved `bundle_hash`
+- the local bundle hash matches the approved hash
 
-Applied patch metadata is written back into governance-managed patch state,
-including:
+A validator missing the exact bundle fails closed at activation. Distribute and
+verify bundles on every validator before the vote reaches approval.
 
-- `applied_at_nanos`
-- `applied_block_height`
-- `applied_block_hash`
-- `execution_hash`
+After application, governance records the block, time, block hash, and
+execution hash. BDS can index the applied changes for historical inspection.
 
-## Query Surfaces
+## Operator Procedure
 
-These ABCI query paths expose the patch pipeline without requiring BDS:
+1. Build and independently review the patch.
+2. Verify its chain ID, activation height, changes, and hash.
+3. Distribute the same file to every validator.
+4. Confirm local inventories report the same hash.
+5. Submit and vote on the proposal.
+6. Monitor the activation block and compare app hashes across validators.
+7. Archive the proposal, bundle, hash, transaction, and application evidence.
+
+Use emergency mode only when the chain is progressing and validators already
+have the bundle. It shortens the delay but remains a forward patch; it does not
+rewrite finalized history.
+
+## When Governance Is Not Enough
+
+If the chain cannot finalize or validators disagree on app hash, an on-chain
+proposal may be unable to complete. Stop divergent execution, agree on trusted
+state and runtime off-chain, and use a reviewed [Recovery Plan](/node/recovery-plans).
+Apply a governed forward patch after recovery if state correction is still
+needed.
+
+## Query Paths
 
 ```text
-GET /api/abci_query/state_patch_bundles
-GET /api/abci_query/scheduled_state_patches/<height>
+/state_patch_bundles
+/scheduled_state_patches/<height>
+/state_patches/limit=50/offset=0
+/state_patch/<execution_hash>
+/state_changes_for_patch/<execution_hash>
 ```
 
-They reflect:
-
-- the node's local bundle inventory
-- the node's on-chain view of approved scheduled patches
-
-When BDS is enabled, historical applied patch data is also indexed through:
-
-```text
-GET /api/abci_query/state_patches
-GET /api/abci_query/state_patches_for_block/123
-GET /api/abci_query/state_patch/<execution_hash>
-GET /api/abci_query/state_changes_for_patch/<execution_hash>
-```
-
-## Emitted Events
-
-The governance contract emits:
-
-- `ProposalSubmitted`
-- `ProposalVoted`
-- `ProposalApproved`
-- `ProposalExecuted`
-- `StatePatchScheduled`
-
-Those are the canonical event names for proposal lifecycle indexing.
-
-## Normal Operator Flow
-
-Use this path when the chain is progressing and the problem can be fixed
-forward.
-
-1. Build the patch bundle and distribute the exact file to validators.
-2. Verify that validators report the same local `bundle_hash`.
-3. Submit `propose_state_patch(...)` with:
-   - `patch_id`
-   - `bundle_hash`
-   - `activation_height`
-   - optional `summary`
-   - optional `uri`
-   - optional `emergency`
-4. Reach the required threshold.
-5. Wait for the activation block.
-6. Let every validator apply the approved local bundle at that height.
-
-This is the preferred remediation path for:
-
-- correcting bad protocol state
-- deterministic storage migrations
-- replacing deployed contract source deterministically
-- fixing logic mistakes after an upgrade while consensus is live
-
-## What Forward Patching Does Not Solve
-
-Forward patching reduces the need for rollbacks, but it does not solve every
-recovery scenario.
-
-If the bug itself breaks consensus progression, on-chain governance may not be
-enough because the chain may not advance far enough to approve or activate the
-fix.
-
-Typical boundary case:
-
-- a bug introduces nondeterministic execution
-- validators diverge during block processing
-- the chain stalls or splits before governance can finalize a remedy
-
-In that case, the operator response is:
-
-1. stop validators from continuing divergent execution
-2. agree on the fixed runtime and recovery plan off-chain
-3. restart validators on the same deterministic runtime
-4. use governed forward patching afterward if the recovered chain state needs
-   correction
-
-For the operator-side JSON recovery plan flow, see
-[Recovery Plans](/node/recovery-plans).
+The first two are direct node queries. Historical applied-patch paths require
+BDS.

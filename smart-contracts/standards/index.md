@@ -7,12 +7,12 @@ payment primitives that other tools expect.
 
 - [XSC-0001](/smart-contracts/standards/xsc-0001): fungible token core
 - [XSC-0002](/smart-contracts/standards/xsc-0002): permit-authorizer approvals
-- [XSC-0003](/smart-contracts/standards/xsc-0003): streaming payments
+- [XSC-0003](/smart-contracts/standards/xsc-0003): streaming fungible token
 - [XSC-0004](/smart-contracts/standards/xsc-0004): wrapped token
 - [XSC-0005](/smart-contracts/standards/xsc-0005): non-fungible token core
 
-These standards are reflected in the canonical contracts shipped in
-`xian-configs/contracts` and the maintained packages in `xian-contracts`.
+Reference standards live in `xian-xips`. Canonical system contracts and
+product repositories implement the relevant interfaces where needed.
 
 ## How To Use Them
 

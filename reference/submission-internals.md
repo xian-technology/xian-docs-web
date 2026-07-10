@@ -24,7 +24,7 @@ the stored VM IR with the canonical Rust compiler and reject submitted
 
 ## Important Constraints
 
-- user contracts should keep the `con_` prefix
+- user contracts must use the `con_` prefix
 - contract names must use lowercase ASCII letters, digits, and underscores
 - imports resolve to deployed contracts, not Python packages
 - constructor args are supplied as a dictionary
