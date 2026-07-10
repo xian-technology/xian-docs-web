@@ -20,6 +20,9 @@ second call sees `ctx.signer == "alice"`, `ctx.caller == "contract_a"`, and
 Use `ctx.caller` for immediate authorization. Use `ctx.signer` only when the
 original external signer is intentionally the authority.
 
+For example, token allowance checks generally use `ctx.caller`, while direct
+user authorization may intentionally use `ctx.signer`.
+
 ## Factory Deployment
 
 Factories pass child source to the built-in `submission` contract. Validators
