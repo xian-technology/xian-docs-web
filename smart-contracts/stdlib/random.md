@@ -12,6 +12,7 @@ observers can reproduce it.
 ```python
 random.seed()
 random.seed("round-2")
+random.random()
 random.getrandbits(k)
 random.shuffle(items)
 random.randrange(k)
