@@ -320,6 +320,13 @@ print(result.tx_hash)
 print(result.receipt)
 ```
 
+`tx_hash` is derived from the exact bytes submitted to CometBFT. The SDK freezes
+the JSON bytes once, converts them to the ASCII hexadecimal RPC payload, and
+computes the uppercase SHA-256 digest of those submitted ASCII bytes. It reuses
+that immutable prepared transaction for broadcast and ambiguous-result lookup,
+so a timeout cannot cause recovery to search for a hash of differently
+serialized JSON.
+
 If `chi` is omitted, the SDK simulates the transaction first and adds a
 small configurable headroom to the estimated chi usage before submission.
 

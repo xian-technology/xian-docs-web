@@ -49,6 +49,7 @@ The main exported staking and validator-lifecycle functions are:
 Read surfaces relevant to staking include:
 
 - `get_validator(account)`
+- `get_validators()` (complete validator registry, including terminal states)
 - `get_active_validators()`
 - `get_pending_candidates()`
 - `get_delegation(delegator, validator)`
@@ -57,6 +58,10 @@ Read surfaces relevant to staking include:
 - `get_pending_unbond_ids(owner)`
 - `get_reward_distribution_info(validator)`
 - `get_policy_config()`
+
+Validator records include aggregate pending-unbond state and last
+jail/unjail, slash, and evidence details so operator consoles can flag work
+without reconstructing contract storage.
 
 ## Registration Bond vs Bonded Stake
 
@@ -90,7 +95,6 @@ stateDiagram-v2
     leaving --> approved: leave cancelled
     leaving --> left: leave() after leave delay
     active --> removed: remove_member vote
-    approved --> removed: remove_member vote
     left --> [*]
     removed --> [*]
     withdrawn --> [*]
@@ -284,6 +288,11 @@ runtime.
 - `update_policy`
 - `topic_vote`
 
+`change_types` preserves an immutable recovery set: membership add/remove,
+jail/unjail/slash, member power, registration fee, chi cost, `change_types`
+itself, and `update_policy`. Reward, DAO payout, and topic types remain
+configurable.
+
 Vote semantics:
 
 - only active validators can propose
@@ -305,6 +314,11 @@ In non-manual selection modes:
 - `remove_member`, `set_member_power`, `jail_member`, and `unjail_member`
   require `manual_override_enabled = true`
 - `slash_member` remains available regardless of manual override policy
+
+`remove_member` targets an active validator. A pending or approved inactive
+candidate withdraws its own registration with `unregister()`; extending
+governed removal to inactive candidates would be a separate governance-policy
+change.
 
 ## Bundled Reality
 

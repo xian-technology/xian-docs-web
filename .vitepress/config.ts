@@ -135,6 +135,12 @@ export default defineConfig({
           ]
         },
         {
+          text: 'Maintained Packages',
+          items: [
+            { text: 'Multi-Token Staking', link: '/smart-contracts/staking' }
+          ]
+        },
+        {
           text: 'Testing',
           items: [
             { text: 'Overview', link: '/smart-contracts/testing/' },
@@ -204,6 +210,7 @@ export default defineConfig({
           text: 'Validators',
           items: [
             { text: 'Becoming a Validator', link: '/node/validators' },
+            { text: 'Validator Operations Runbook', link: '/node/validator-operations-runbook' },
             { text: 'Validator Responsibilities', link: '/node/validator-responsibilities' },
             { text: 'Staking Mechanics', link: '/node/staking' }
           ]

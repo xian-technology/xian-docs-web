@@ -138,6 +138,7 @@ import {
   XianShieldedRelayerClient,
   XianShieldedRelayerPoolClient,
   canonicalizeRuntime,
+  createXianMessageSigningPayload,
   decodeRuntime,
   encodeRuntime,
   generatePrivateKey,
@@ -149,9 +150,11 @@ import {
   shieldedSyncHintFromViewingPrivateKey,
   shieldedSyncHintFromViewingPublicKey,
   signMessage,
+  signXianMessage,
   sortShieldedRelayerCatalog,
   sortKeysDeep,
   verifyMessage,
+  verifyXianMessage,
 } from "@xian-tech/client";
 ```
 
@@ -246,6 +249,36 @@ The signer exposes:
 - `getAddress()`
 - `signMessage(message)`
 - `verifyMessage(message, signature)`
+
+Those two methods are raw Ed25519 primitives because transaction signing uses
+their exact bytes. For an external user-facing message, use the versioned Xian
+helpers instead:
+
+```ts
+import { signXianMessage, verifyXianMessage } from "@xian-tech/client";
+
+const input = {
+  account: signer.address,
+  chainId: "xian-local-1",
+  message: "Authorize this login",
+};
+const signature = signXianMessage(signer.privateKey, input);
+console.log(verifyXianMessage(signer.address, input, signature));
+```
+
+The version-1 envelope length-prefixes its fields and binds the signature to
+the Xian account and chain. Raw verification, a different chain, or a different
+account does not validate the signature.
+
+The exact UTF-8 payload is:
+
+```text
+\x19Xian Signed Message:\n1\nchain-id:<UTF-8 byte length>:<chain id>\naccount:<UTF-8 byte length>:<64-hex account>\nmessage:<UTF-8 byte length>:<message>
+```
+
+Lengths are UTF-8 byte lengths, not JavaScript character counts. Prefer
+`createXianMessageSigningPayload(...)`, `signXianMessage(...)`, and
+`verifyXianMessage(...)` instead of assembling this envelope manually.
 
 For production browser wallet flows, prefer provider-backed signing rather than
 raw private-key handling in the app itself.
@@ -745,6 +778,10 @@ const quickSubmission = await wallet?.sendCall(
 );
 ```
 
+Wallet `signMessage(...)` requests use the same version-1 chain/account-bound
+envelope and return a 128-character hex signature. Verify with
+`verifyXianMessage(account, { account, chainId, message }, signature)`.
+
 It also forwards provider events:
 
 ```ts
@@ -755,17 +792,16 @@ wallet?.on("accountsChanged", (accounts) => {
 
 ### Provider-Backed Signer Adapter
 
-When another helper only needs `getAddress()` and `signMessage()`, wrap the
-wallet as a signer:
+For a transaction helper that accepts a signer, wrap the wallet as a signer:
 
 ```ts
 const signer = wallet?.asSigner();
 const address = await signer?.getAddress();
-const signature = await signer?.signMessage("hello");
 ```
 
-That lets dapp code keep provider-backed signing without storing raw private
-keys in the app.
+The adapter accepts canonical transaction payloads and delegates them through
+`xian_signTransaction`; it does not expose raw message signing. This lets dapp
+code keep provider-backed transaction signing without storing private keys.
 
 ### Recommended Transaction Model
 
@@ -775,6 +811,10 @@ payload in the dapp:
 - `prepareTransaction(...)` lets the wallet fill sender, active chain, nonce,
   and default chi
 - `sendCall(...)` lets the wallet do prepare + sign + broadcast in one request
+
+Automatic `sendCall(...)` requests are nonce-ordered per wallet, chain, and
+account. Prepared transactions are explicit-nonce snapshots; applications
+should not concurrently broadcast two prepared payloads with the same nonce.
 
 That avoids stale nonces and wrong-account or wrong-chain mismatches better
 than forcing every dapp to build the full unsigned tx upfront.
@@ -853,6 +893,9 @@ await provider.request({
   params: [{ message: "hello from xian-js" }],
 });
 ```
+
+The wallet signs the version-1 Xian envelope for its active chain and account,
+not the raw UTF-8 message.
 
 Sign a transaction:
 

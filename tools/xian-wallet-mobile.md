@@ -358,13 +358,16 @@ platform.
 | Data | Backend | Purpose |
 |------|---------|---------|
 | Wallet state | `AsyncStorage` | Encrypted keys, accounts, presets, assets |
-| Unlocked session | `expo-secure-store` | Active private key, mnemonic when available, and a derived session key while unlocked |
+| Unlocked session | `expo-secure-store` | Expiring v2 record containing only the public key and device-wrapped session key; raw private key/mnemonic exist only in process memory |
 | Contacts | `AsyncStorage` | Saved recipient addresses |
 | Preferences | `AsyncStorage` | Layout, label visibility |
 | Biometric session key | `expo-secure-store` | Optional device-auth protected unlock material |
 
 Android automatic app-data backup is disabled for wallet data. Use the wallet's
 manual encrypted backup export when you need a portable recovery file.
+Legacy or malformed unlocked-session records are deleted and the app starts
+locked. A valid session decrypts the active account from encrypted wallet state
+after restart and is constrained to `WHEN_UNLOCKED_THIS_DEVICE_ONLY`.
 
 ### RPC Client
 
@@ -443,6 +446,13 @@ The Apps tab manages WalletConnect dApp sessions:
 - review and approve session proposals
 - approve or reject per-request signing and transaction prompts
 - list and disconnect active sessions
+
+The wallet approves only required Xian methods/events for the active chain.
+Optional namespace permissions are not granted, and proposals requiring an
+unsupported namespace, method, event, or inactive chain are rejected. Every
+incoming request is checked again against the live session method, chain, and
+account before approval or auto-approval. Message-signing requests use the
+version-1 chain/account-bound Xian envelope rather than raw UTF-8 signing.
 
 Transaction prompts can also create temporary auto-approval rules. Exact rules
 repeat the same request arguments for the same dApp session, account, network,

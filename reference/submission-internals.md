@@ -5,27 +5,22 @@ built-in `submission` contract.
 
 ## High-Level Flow
 
-1. a client builds deployment artifacts from contract source
+1. a client prepares contract source and constructor args
 2. the transaction calls `submission.submit_contract(...)`
-3. the runtime validates the artifact format, hashes, source, and VM IR
-4. legacy `runtime_code` and `runtime_code_sha256` payloads are rejected
+3. the runtime rejects client-supplied IR artifacts
+4. the runtime normalizes, lints, and compiles source to canonical VM IR
 5. the child module body and constructor run under deployment context
 6. canonical source, execution artifacts, and metadata are written to chain
    state
 7. `ContractDeployed` is emitted
 
-## Source-Authored, Artifact-Backed Submission
+## Source Submission
 
-Xian deployments are source-authored and artifact-backed.
+Xian deployments are source-backed.
 
-SDK deploy helpers compile source into deployment artifacts before submitting
-the transaction. SDK submit helpers expect those deployment artifacts to
-already exist.
-
-`xian_vm_v1` requires valid `deployment_artifacts` for deployment. Those
-artifacts include canonical source plus the VM IR used by the native runtime.
-The current format is `xian_contract_artifact_v1`, and the supported VM profile
-is `xian_vm_v1`.
+`xian_vm_v1` requires submitted source for native deployment. Validators derive
+the stored VM IR with the canonical Rust compiler and reject submitted
+`deployment_artifacts`.
 
 ## Important Constraints
 
@@ -33,9 +28,11 @@ is `xian_vm_v1`.
 - contract names must use lowercase ASCII letters, digits, and underscores
 - imports resolve to deployed contracts, not Python packages
 - constructor args are supplied as a dictionary
-- source must pass the linter before artifacts are built
+- source must pass the linter
+- source is compiled by the authoritative Rust compiler on every validator
+- compiler admission allows at most 128 KiB source, 50,000 syntax nodes,
+  nesting depth 64, 100,000 tokens total, and 4,096 tokens per logical line
 - child deployments use the same submission surface
-- artifact hashes must match the canonical compiler output
 
 ## What Gets Stored
 
@@ -75,7 +72,7 @@ Deployment is metered too. The cost is not only the final state writes.
 Deployment accounting includes:
 
 - submission analysis, source normalization, and VM compilation work
-- stored artifact size
+- stored source and VM IR size
 - metadata writes
 - constructor execution
 
@@ -89,7 +86,7 @@ Submission defines the long-lived executable identity behind a contract name.
 That is why the submission path participates in:
 
 - lint enforcement
-- canonical artifact generation and validation
+- canonical source and VM IR generation and validation
 - contract metadata ownership and developer attribution
 
 The same contract also owns the narrow metadata mutation surface for:

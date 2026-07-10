@@ -25,7 +25,7 @@ fixed to the VM artifact path.
 
 ## What `xian_vm_v1` Actually Uses
 
-Under `xian_vm_v1`, deployment is source-authored and artifact-backed.
+Under `xian_vm_v1`, deployment is source-driven.
 
 The important stored artifacts are:
 
@@ -33,16 +33,16 @@ The important stored artifacts are:
   and inspection tooling
 - `__xian_ir_v1__`: the persisted Xian VM IR used by the native runtime
 
-Client tooling builds `deployment_artifacts` before submission. Those artifacts
-include canonical source, VM IR, and hashes that the runtime validates before
-persisting source and IR. Legacy `runtime_code` and `runtime_code_sha256`
-deployment fields are rejected.
+Clients submit cleartext source. Validators normalize, lint, and compile that
+source with the canonical Rust compiler, then persist the resulting source and
+IR.
+Submitted `deployment_artifacts` are rejected so clients cannot choose the
+executable IR.
 
 ```mermaid
 flowchart TD
   Source["Restricted Python contract source"]
   Compiler["Canonical Xian compiler"]
-  Artifacts["deployment_artifacts"]
   SourceArtifact["Stored __source__"]
   IR["Stored __xian_ir_v1__"]
   Admission["Validator deployment admission"]
@@ -51,10 +51,10 @@ flowchart TD
   State["Xian state, events, and imports"]
 
   Source --> Compiler
-  Compiler --> Artifacts
-  Artifacts --> Admission
-  Admission --> SourceArtifact
-  Admission --> IR
+  Compiler --> SourceArtifact
+  Compiler --> IR
+  SourceArtifact --> Admission
+  IR --> Admission
   Admission --> VM
   VM --> Host
   Host --> State
@@ -68,7 +68,7 @@ On the supported branch:
 
 - `xian_vm_v1` is the only supported node runtime
 - bytecode, gas schedule, and authority are internal VM constants
-- submitted contracts must provide validated deployment artifacts
+- submitted contracts must provide source code
 
 This keeps the execution contract explicit without exposing alternate engines
 or an operator-selectable execution policy section.
@@ -90,6 +90,13 @@ That host boundary includes things such as:
 
 Those operations are deterministic runtime calls, not arbitrary operating-system
 syscalls.
+
+Assignment targets are metered through that same active host boundary. For a
+write such as `matrix[indexes["row"]][column] = value`, the native VM charges
+the container path, storage-backed index reads, and index expressions exactly
+once before rebuilding the immutable container path. Augmented assignment and
+mutating methods on nested receivers follow the same rule. If target evaluation
+runs out of chi, the container is not mutated.
 
 ## What Stays The Same For Contract Authors
 
@@ -121,8 +128,8 @@ including storage flows, decimals, datetime helpers, hashing, Ed25519
 verification, imports, events, and the shielded contract helpers needed by the
 existing shielded stack.
 
-That means the Xian VM is not just a design note. It is the supported
-execution path for current node deployments.
+That means the Xian VM is not just a design note. It is the supported execution
+path for current node deployments.
 
 ## Related Pages
 

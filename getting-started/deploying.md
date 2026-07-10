@@ -33,10 +33,12 @@ result = client.deploy_contract(
 )
 ```
 
-`deploy_contract` builds the current Xian VM deployment artifacts locally, then
-submits them through `submission.submit_contract`. Use
-`submit_contract(name, deployment_artifacts, ...)` only when you already have
-prebuilt artifacts.
+`deploy_contract` submits cleartext source. Validators lint and compile that
+source, then store the canonical source and VM IR. Prebuilt artifacts are useful
+for offline inspection, but they are not accepted as deployment payloads.
+Submitted source is limited to 128 KiB and must also stay within the compiler's
+deterministic syntax-node, nesting, and token bounds described in the
+[linter reference](/tools/linter#response-shape).
 
 Contract names must start with a lowercase ASCII letter and then use only
 lowercase ASCII letters, digits, and underscores. User-submitted contracts

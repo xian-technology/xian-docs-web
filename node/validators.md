@@ -126,6 +126,9 @@ The canonical validator record tracks:
 - commission rate in basis points
 - delegator count
 - timestamps for registration, join, leave, and pending leave
+- last jail/unjail, slash, and evidence identifiers/timestamps
+- pending-unbond count, total, and next unlock time
+- last-rebalance and eligible selection epochs
 
 The lifecycle is:
 
@@ -139,6 +142,9 @@ The lifecycle is:
 6. Become `active` according to the configured selection mode.
 7. Optionally announce exit with `announce_leave()`, then finish with
    `leave()`.
+
+Use the [Validator Operations Runbook](/node/validator-operations-runbook) for
+the reviewed production-style procedure and rehearsal evidence checklist.
 
 Status values used by the contract today include:
 
@@ -225,6 +231,12 @@ Supported vote types are:
 - `update_policy`
 - `topic_vote`
 
+The recovery subset is immutable: `add_member`, `remove_member`,
+`jail_member`, `unjail_member`, `slash_member`, `set_member_power`,
+`change_registration_fee`, `chi_cost_change`, `change_types`, and
+`update_policy`. A `change_types` proposal may add or remove optional types such
+as rewards, DAO payouts, or topics, but cannot disable those recovery controls.
+
 Vote behavior:
 
 - only active validators can open proposals
@@ -238,6 +250,8 @@ Vote behavior:
 - each validator's recorded `yes` / `no` choice is stored per proposal for
   audit views and governance dashboards
 - proposals expire after 7 days if pending
+- `remove_member` targets an active validator; pending/approved inactive
+  candidates self-withdraw with `unregister()`
 
 Validator voting weight comes from active `powers`, not just
 one-validator-one-vote.

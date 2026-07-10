@@ -5,9 +5,9 @@ Xian has two related linting surfaces:
 - the core contract linter in `xian-contracting`
 - the optional standalone `xian-linter` HTTP service
 
-Both ultimately enforce the same contract-language rules. The standalone
-package can also run an optional `xian_vm_v1` validation mode for tooling that
-wants to check that a contract lowers to Xian VM IR before deployment.
+Both use the Rust `xian-compiler-core` as the authoritative contract-language
+and diagnostic surface. The standalone package also runs PyFlakes and can run
+optional native IR validation in `xian_vm_v1` mode.
 
 The published PyPI package name for the standalone service is
 `xian-tech-linter`. The import package and console command remain
@@ -15,10 +15,10 @@ The published PyPI package name for the standalone service is
 
 ## Using The Core Linter
 
-Use `contracting.compilation.linter.Linter` when you are already inside Python:
+Use `diagnose_contract_source` when you are already inside Python:
 
 ```python
-from contracting.compilation.linter import Linter
+from contracting.artifacts import diagnose_contract_source
 
 source = """
 balances = Hash(default_value=0)
@@ -30,21 +30,21 @@ def transfer(to: str, amount: float):
     balances[to] += amount
 """
 
-linter = Linter()
-errors = linter.check(source) or []
+errors = diagnose_contract_source(
+    module_name="con_example",
+    source=source,
+)
 
 for error in errors:
-    print(error.code.value, error.line, error.col, error.message)
+    print(error["code"], error.get("range"), error["message"])
 ```
 
-The core linter returns structured `LintError` objects with:
+The compiler returns structured diagnostics with:
 
 - `code`
 - `message`
-- `line`
-- `col`
-- `end_line`
-- `end_col`
+- `severity`
+- an optional `range` containing start/end line and column values
 
 ## Using The Standalone HTTP Service
 
@@ -101,7 +101,8 @@ The service accepts raw, base64, or gzip request bodies:
 
 Request bodies are capped at `1,000,000` bytes before decoding. `/lint_gzip`
 also enforces the same cap after decompression and rejects extreme gzip
-compression ratios. All endpoints also accept an optional comma-separated
+compression ratios. Compiler admission is stricter: contract source may not
+exceed `131,072` UTF-8 bytes. All endpoints also accept an optional comma-separated
 `whitelist_patterns` query parameter when a controlled integration needs to
 allow additional PyFlakes names:
 
@@ -124,8 +125,8 @@ The standalone package supports two modes:
 
 | Mode | What it checks |
 |------|----------------|
-| `python` | default source linting with the shared `xian-contracting` rules plus PyFlakes warnings |
-| `xian_vm_v1` | source linting, VM-profile compatibility, Xian VM IR lowering, and native IR validation when `xian_vm_core` is installed |
+| `python` | authoritative Rust compiler diagnostics plus PyFlakes warnings; the name is retained for API compatibility |
+| `xian_vm_v1` | the same Rust compiler diagnostics and PyFlakes warnings, plus native IR validation when `xian_vm_core` is installed |
 
 The VM mode is linting only. It does not execute the contract or simulate
 storage, imports, environment values, or host syscalls. Use runtime tests or
@@ -172,7 +173,7 @@ The HTTP service returns:
   "success": false,
   "errors": [
     {
-      "code": "E005",
+      "code": "xian.lint.E005",
       "message": "Cannot import stdlib module 'os'",
       "severity": "error",
       "position": {
@@ -187,40 +188,31 @@ The HTTP service returns:
 ```
 
 `xian-linter` may also include PyFlakes warnings with code `W001`. Processing
-errors from the wrapper itself are returned as `E000`. In `xian_vm_v1` mode,
-IR lowering failures are returned as `XVM001`; native VM IR validation failures
-are returned as `XVM002`.
+errors from the wrapper itself are returned as `E000`; native VM IR validation
+failures are returned as `XVM002`. Compiler diagnostics use stable `xian.*`
+codes in both modes.
+
+Compiler admission is deterministic and rejects inputs that exceed any of
+these bounds:
+
+| Bound | Maximum | Diagnostic |
+|------|---------|------------|
+| UTF-8 source bytes | `131,072` | `xian.limit.source_bytes` |
+| syntax nodes | `50,000` | `xian.limit.syntax_nodes` |
+| syntax nesting depth | `64` | `xian.limit.syntax_depth` |
+| lexical tokens | `100,000` | `xian.limit.tokens` |
+| tokens on one logical line | `4,096` | `xian.limit.logical_line_tokens` |
 
 ## Error Codes
 
 | Code | Meaning |
 |------|---------|
 | `E000` | standalone wrapper processing error |
-| `E001` | illegal syntax form |
-| `E002` | name starts or ends with underscore |
-| `E003` | import inside a function |
-| `E004` | `from x import y` used |
-| `E005` | stdlib import attempted |
-| `E006` | class definition |
-| `E007` | async function |
-| `E008` | invalid decorator |
-| `E009` | multiple constructors |
-| `E010` | multiple decorators on one function |
-| `E011` | forbidden ORM kwarg |
-| `E012` | tuple unpacking for ORM declarations |
-| `E013` | no exported function |
-| `E014` | forbidden builtin or reserved name |
-| `E015` | exported arg shadows ORM name |
-| `E016` | invalid exported argument annotation |
-| `E017` | missing exported argument annotation |
-| `E018` | invalid exported return annotation |
-| `E019` | nested function |
-| `E020` | syntax error |
-| `E021` | invalid decorator arguments |
-| `E022` | syntax not supported by the active validation profile |
-| `E023` | builtin not supported by the active validation profile |
+| `xian.lint.E001` through `xian.lint.E023` | contract-language semantic rules such as imports, decorators, annotations, exports, and reserved names |
+| `xian.syntax.*` | parser or unsupported syntax-tree diagnostics |
+| `xian.ir.*` | canonical IR lowering diagnostics |
+| `xian.limit.*` | deterministic compiler admission bounds |
 | `W001` | PyFlakes warning from the standalone service |
-| `XVM001` | Xian VM IR lowering failed |
 | `XVM002` | native Xian VM IR validation failed |
 
 See [Valid Code & Restrictions](/smart-contracts/valid-code) for the supported

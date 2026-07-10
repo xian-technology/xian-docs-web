@@ -78,6 +78,14 @@ At the end of each block, all committed state changes are written to LMDB in a s
 
 - A crash mid-block does not corrupt state
 - The state on disk is always a complete, consistent snapshot at a block boundary
+- The committed block height, block time, and `app_hash` marker advance in the
+  same LMDB transaction as contract state and nonce state
+
+On startup, the ABCI application reads that committed LMDB marker when it
+reports its last block to CometBFT. An auxiliary JSON mirror exists for offline
+tools, but it is repaired from LMDB and is never authoritative. A crash cannot
+therefore leave durable state at block N while the application reports a
+separately persisted height from block N-1 or N+1.
 
 ## Atomic Batch Commits
 

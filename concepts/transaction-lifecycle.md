@@ -135,7 +135,10 @@ After all transactions in the block are executed:
 1. All successful state changes are assembled in pending state
 2. The `app_hash` cache is updated as a Merkle root over consensus state
 3. The app_hash is returned to CometBFT for inclusion in the next block header
-4. Commit persists the pending state to LMDB in a single atomic batch
+4. Commit persists the pending state and its block-height/time/app-hash marker
+   to LMDB in one atomic batch
+5. An auxiliary latest-block JSON file is updated on a best-effort basis; node
+   startup and ABCI `Info` always reconcile it from the authoritative LMDB marker
 
 ### 18-20. Post-Finalization
 

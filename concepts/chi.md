@@ -46,16 +46,16 @@ flowchart TD
 
 | Constant | Value | Meaning |
 |----------|-------|---------|
-| `READ_COST_PER_BYTE` | `1` | tracer meter unit per stored byte read |
-| `WRITE_COST_PER_BYTE` | `25` | tracer meter units per stored byte written |
-| `TRANSACTION_BYTES_COST_PER_BYTE` | `1` | tracer meter unit per submitted transaction byte |
-| `RETURN_VALUE_COST_PER_BYTE` | `1` | tracer meter unit per returned byte |
+| `READ_COST_PER_BYTE` | `1` | raw meter unit per stored byte read |
+| `WRITE_COST_PER_BYTE` | `25` | raw meter units per stored byte written |
+| `TRANSACTION_BYTES_COST_PER_BYTE` | `1` | raw meter unit per submitted transaction byte |
+| `RETURN_VALUE_COST_PER_BYTE` | `1` | raw meter unit per returned byte |
 | `CHI_PER_T` | `20` | chi purchased by one unit of the native token |
 | base transaction cost | `5` | flat chi charged on every transaction |
 
 ## Base Formula
 
-Tracer-backed execution uses the familiar compute-to-chi conversion:
+The runtime uses this raw-meter-to-chi conversion:
 
 ```text
 chi_used = (raw_meter_cost // 1000) + 5
@@ -65,11 +65,9 @@ chi_used = (raw_meter_cost // 1000) + 5
 returned value bytes, and metered runtime bridge work. The final receipt value
 is capped by the chi budget supplied on the transaction.
 
-For `xian_vm_v1`, the execution machine changes, but the same high-level idea
-does not: VM work, host operations, storage, transaction bytes, and return
-payload size are all metered explicitly against the transaction's chi budget.
-The VM has its own host-operation gas schedule instead of reusing every tracer
-constant one-for-one.
+VM work, host operations, storage, transaction bytes, and return payload size
+are all metered explicitly against the transaction's chi budget. Compute and
+host operations use the fixed native VM gas schedule.
 
 ## What Gets Metered
 
@@ -78,14 +76,13 @@ constant one-for-one.
 Xian meters execution through `xian_vm_v1`, using the VM-native gas
 schedule over VM operations and host calls.
 
-The network chooses the execution engine and metering policy. Applications and
-validators do not get to improvise their own cost model.
+The supported runtime and metering policy are fixed by the node software.
+Applications and validators do not get to improvise their own cost model.
 
 ### Storage Reads
 
-Tracer-backed execution charges `1` meter unit per byte of encoded key plus
-encoded value. VM-native execution charges reads through the VM host-operation
-schedule.
+VM-native execution charges reads through the VM host-operation schedule,
+including the encoded storage data handled by the host boundary.
 
 ### Storage Writes
 

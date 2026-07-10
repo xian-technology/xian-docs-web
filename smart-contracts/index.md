@@ -62,5 +62,6 @@ def transfer(to: str, amount: float):
 - [Standard Library](/smart-contracts/stdlib/)
 - [Imports & Interfaces](/smart-contracts/imports/)
 - [Contract Standards](/smart-contracts/standards/)
+- [Curated Multi-Token Staking](/smart-contracts/staking)
 - [Testing](/smart-contracts/testing/)
 - [Security](/smart-contracts/security/)

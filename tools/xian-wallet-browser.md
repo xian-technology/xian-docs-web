@@ -106,6 +106,22 @@ allow the same site to change transaction arguments without another prompt for
 the rule lifetime. The wallet shows a second in-app confirmation before saving
 that broader rule, and users can revoke rules from the connected-apps view.
 
+### Approval and network context
+
+Every approval is tied to the account and network details shown during review,
+including the active preset, RPC URL, and chain ID. If the account or network
+changes before approval, the wallet rejects the request instead of signing or
+sending it under the new context. This binding is stored with pending approvals,
+so the same rule applies after the extension service worker or browser restarts.
+Pending approvals created by wallet versions that did not store this binding
+must be requested again.
+
+A dApp can request `xian_switchChain` only after it is connected. Switching to a
+different configured chain opens a dedicated approval that shows the current and
+requested networks. Rejecting it leaves the active network unchanged. Approving
+it changes the wallet-wide active network and emits `chainChanged` to connected
+pages.
+
 ## Initial Wallet Setup
 
 On first launch the extension shows three setup modes:
@@ -169,14 +185,19 @@ extension bundle.
 For maintainers, release automation is tag-based:
 
 1. update repo and package versions to `X.Y.Z`
-2. run `npm install`
-3. run `npm run validate`
-4. run the Playwright browser and visual test suites
-5. create and push the tag `vX.Y.Z`
+2. update `release-manifest.json` with the exact `xian-js` and
+   `xian-contracting` commit SHAs and matching package versions
+3. refresh and commit the lockfile, then validate the release manifest
+4. run locked install, audit, workspace validation, and the Playwright browser
+   and visual suites
+5. create and push the matching tag `vX.Y.Z` from a clean tree
 
-On tag builds, CI validates the repo, builds the extension bundle, publishes
-`@xian-tech/wallet-core`, and attaches the browser-wallet zip artifact to the
-GitHub release.
+On tag builds, CI resolves one immutable wallet source SHA, checks out sibling
+sources at the manifest's exact SHAs, and verifies source, package, lockfile,
+and extension-manifest versions before building. Publishing consumes only the
+validated uploaded artifacts: `@xian-tech/wallet-core` goes to npm and the
+browser-wallet zip is attached to the GitHub release. An existing npm version
+is accepted only when its registry integrity matches the validated tarball.
 
 ## Architecture
 
@@ -338,10 +359,12 @@ The extension registers a default provider at `window.xian.provider` and in the
 - `xian_accounts` - list connected accounts
 - `xian_getWalletInfo` - wallet capabilities and state
 - `xian_watchAsset` - add a token to the wallet's tracked asset list
-- `xian_prepareTransaction` - let the wallet fill sender, chain, nonce, and default chi
-- `xian_sendCall` - intent-first prepare + sign + broadcast in one request
-- `xian_sendTransaction` / `xian_signTransaction` - transaction flows
-- `xian_signMessage` - message signing
+- `xian_prepareTransaction` - create an explicit-nonce transaction snapshot
+- `xian_sendCall` - intent-first ordered prepare + sign + broadcast; concurrent
+  calls use distinct sequential nonces
+- `xian_sendTransaction` / `xian_signTransaction` - prepared transaction flows;
+  concurrent same-chain/account/nonce broadcasts are rejected
+- `xian_signMessage` - version-1, chain/account-bound Xian message signing
 
 Approval requests are shown inline in the wallet (side panel mode) or in a
 dedicated popup window.

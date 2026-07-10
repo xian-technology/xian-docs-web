@@ -24,9 +24,11 @@ Use the console to:
 - connect the Xian browser wallet
 - submit validator votes through wallet signing
 - create guided protocol and validator-governance proposals through typed
-  forms
-- inspect active validators and candidates, including a validator detail
-  panel
+  forms; the vote-type editor identifies and preserves the immutable validator
+  recovery set before simulation or signing
+- inspect active validators, candidates, and exited/removed validators, with
+  lifecycle, eligibility epoch, bond/delegation, pending-unbond, jail/unjail,
+  slash, and last-evidence state plus operator next-step cues
 - review network settings (governance parameters and membership policy)
 - verify state-patch bundle hashes before activation, with a state-patch
   detail panel
@@ -179,3 +181,7 @@ The console can compute and compare the canonical bundle hash, but operators
 must distribute the bundle to validators and confirm node readiness.
 See [Protocol Governance & State Patches](/node/protocol-governance) for the
 full patch process.
+
+For operational sequencing around onboarding, exit, jail/unjail, evidence,
+slashing, and configuration changes, use the
+[Validator Operations Runbook](/node/validator-operations-runbook).

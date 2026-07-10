@@ -24,19 +24,14 @@ Typical sources of nondeterminism in ordinary software include:
 
 Xian removes or controls those sources explicitly.
 
-## Runtime Must Agree
+## Runtime Versions Must Agree
 
 Xian separates contract authorship from contract execution.
 
-On the current supported branch, validators execute the fixed Xian VM artifact
-path. The alignment rule is:
-
-| Engine family | Validators must align on |
-|--------------|---------------------------|
-| `xian_vm_v1` | `xian-abci`, `xian-contracting`, native VM support, and canonical source-to-IR compilation |
-
-The principle is always the same: validators must execute the same machine
-contract for the same source and state.
+The supported machine contract is `xian_vm_v1`. Validators must align on
+`xian-abci`, `xian-contracting`, the native VM runtime, its fixed gas schedule,
+and canonical Rust source-to-IR compilation. There is no operator-selectable
+fallback execution engine.
 
 ## Sandboxed Contract Language
 
@@ -163,5 +158,5 @@ the need to restore deterministic execution first.
 | file/network I/O | forbidden by the sandbox |
 | floating-point drift | decimal-backed contract values |
 | hidden mutable process state | durable state lives in contract storage, not module globals |
-| runtime-version drift | validators must align on the supported `xian_vm_v1` runtime and artifact format |
+| runtime-version drift | validators must align on `xian_vm_v1`, its native runtime, and canonical compiler |
 | encoding differences | deterministic compact encoding rules |

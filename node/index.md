@@ -132,3 +132,4 @@ deterministic validator path.
 - [Snapshots & Reindex](/node/managing): application snapshots, BDS replay,
   BDS rebuilds, and snapshot import/export workflows
 - [Validators](/node/validators): validator-specific setup and expectations
+- [Validator Operations Runbook](/node/validator-operations-runbook): production-style rehearsal procedures for onboarding, exit/unbond, jail/unjail, evidence/slashing, governance changes, and incident recovery
