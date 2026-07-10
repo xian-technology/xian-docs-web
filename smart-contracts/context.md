@@ -23,10 +23,10 @@ User "alice" calls contract_a.do_something()
   → ctx.caller = "alice"
   → ctx.this   = "contract_a"
 
-  contract_a calls contract_b.helper()
-    → ctx.signer = "alice"      (unchanged — always the original signer)
-    → ctx.caller = "contract_a" (the immediate caller changed)
-    → ctx.this   = "contract_b" (execution is inside B)
+contract_a calls contract_b.helper()
+  → ctx.signer = "alice"      (unchanged — always the original signer)
+  → ctx.caller = "contract_a" (the immediate caller changed)
+  → ctx.this   = "contract_b" (execution is inside B)
 ```
 
 This distinction is critical for security. A token contract should check `ctx.caller` for allowance-based transfers, but `ctx.signer` for direct transfers.
