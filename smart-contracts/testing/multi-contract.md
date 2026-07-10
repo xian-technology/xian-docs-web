@@ -151,19 +151,17 @@ if __name__ == "__main__":
 
 Understanding how `ctx` changes is critical when testing multi-contract interactions:
 
-```
-self.dex.deposit(amount=100, signer="alice")
-```
+```mermaid
+sequenceDiagram
+  participant User as alice
+  participant DEX as con_dex
+  participant Token as con_token
 
-Inside `con_dex.deposit()`:
-- `ctx.caller` = `"alice"` (the user called the DEX)
-- `ctx.signer` = `"alice"`
-- `ctx.this` = `"con_dex"`
-
-When `con_dex` calls `con_token.transfer_from()`:
-- `ctx.caller` = `"con_dex"` (the DEX is calling the token)
-- `ctx.signer` = `"alice"` (unchanged)
-- `ctx.this` = `"con_token"`
+  User->>DEX: deposit(amount=100)
+  Note over DEX: caller = alice<br/>signer = alice<br/>this = con_dex
+  DEX->>Token: transfer_from(...)
+  Note over Token: caller = con_dex<br/>signer = alice<br/>this = con_token
+```
 
 This is why the DEX uses `transfer_from` with `main_account=ctx.caller` -- inside the token contract, `ctx.caller` is `"con_dex"`, which must have an allowance from `"alice"`.
 

@@ -29,14 +29,29 @@ threshold. Accepted launch configuration is authoritative.
 
 ## Proposal Lifecycle
 
-1. An active governance member proposes a contract call or state patch.
-2. Governance snapshots voters, weights, expiry, and required yes weight.
-3. The proposer casts the first yes vote.
-4. Other snapshotted members vote.
-5. The proposal is approved when yes weight reaches the threshold, rejected
-   when remaining weight cannot reach it, or expired after its deadline.
+```mermaid
+flowchart TD
+  Propose["Active member proposes a contract call or state patch"]
+  Snapshot["Snapshot voters, weights, expiry, and threshold"]
+  FirstVote["Proposer casts the first yes vote"]
+  Voting["Snapshotted members vote"]
+  Outcome{"Outcome"}
+  Approved["Approved"]
+  Rejected["Rejected"]
+  Expired["Expired"]
+  Kind{"Proposal kind"}
+  Execute["Execute contract call immediately"]
+  Schedule["Schedule state patch activation"]
 
-Contract-call proposals execute synchronously on approval through
+  Propose --> Snapshot --> FirstVote --> Voting --> Outcome
+  Outcome -->|"yes threshold reached"| Approved --> Kind
+  Outcome -->|"threshold is unreachable"| Rejected
+  Outcome -->|"deadline passes"| Expired
+  Kind -->|"contract_call"| Execute
+  Kind -->|"state_patch"| Schedule
+```
+
+Contract calls execute through
 `importlib.call(target_contract, target_function, kwargs)`.
 
 ## State Patch Proposal

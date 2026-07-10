@@ -5,14 +5,21 @@ built-in `submission` contract.
 
 ## High-Level Flow
 
-1. a client prepares contract source and constructor args
-2. the transaction calls `submission.submit_contract(...)`
-3. the runtime rejects client-supplied IR artifacts
-4. the runtime normalizes, lints, and compiles source to canonical VM IR
-5. the child module body and constructor run under deployment context
-6. canonical source, execution artifacts, and metadata are written to chain
-   state
-7. `ContractDeployed` is emitted
+```mermaid
+flowchart TD
+  Client["Client prepares source and constructor arguments"]
+  Submit["submission.submit_contract(...)"]
+  Artifact{"Client supplied IR artifacts?"}
+  Reject["Reject submission"]
+  Compile["Normalize, lint, and compile canonical VM IR"]
+  Execute["Run module body and constructor"]
+  Store["Persist canonical source, VM IR, and metadata"]
+  Event["Emit ContractDeployed"]
+
+  Client --> Submit --> Artifact
+  Artifact -->|"yes"| Reject
+  Artifact -->|"no"| Compile --> Execute --> Store --> Event
+```
 
 ## Source Submission
 

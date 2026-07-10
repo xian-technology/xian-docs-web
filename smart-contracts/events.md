@@ -38,6 +38,28 @@ to fields applications actually query.
 - failed transactions discard their events with their writes
 - event emission consumes chi
 
+## How Events Flow Through the System
+
+```mermaid
+flowchart TD
+  Contract["Contract emits a LogEvent"]
+  Buffer["Validate schema, charge chi, and buffer the event"]
+  Outcome{"Execution succeeds?"}
+  Discard["Discard buffered event"]
+  ABCI["FinalizeBlock encodes an ABCI event"]
+  Comet["CometBFT indexes the event"]
+  Search["CometBFT event search"]
+  Dashboard["Dashboard WebSocket subscribers"]
+  BDS["BDS durable event history"]
+
+  Contract --> Buffer --> Outcome
+  Outcome -->|"no"| Discard
+  Outcome -->|"yes"| ABCI --> Comet
+  ABCI --> BDS
+  Comet --> Search
+  Comet --> Dashboard
+```
+
 ## Read Events
 
 CometBFT search can filter indexed attributes:

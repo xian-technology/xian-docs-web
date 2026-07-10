@@ -9,6 +9,23 @@ const ws = new WebSocket("ws://127.0.0.1:8080/ws");
 
 The stack and a directly started dashboard process use port `8080` by default.
 
+## Architecture
+
+```mermaid
+flowchart TD
+  App["App, wallet, or explorer"]
+  Dashboard["Dashboard /ws<br/>subscription filters and routing"]
+  Comet["CometBFT /websocket<br/>NewBlock and Tx subscriptions"]
+  ABCI["xian-abci FinalizeBlock<br/>state changes and contract events"]
+  Runtime["xian_vm_v1 contract execution"]
+
+  App -->|"subscribe and unsubscribe"| Dashboard
+  Dashboard -->|"persistent subscriptions"| Comet
+  Runtime --> ABCI -->|"committed ABCI events"| Comet
+  Comet -->|"block and transaction events"| Dashboard
+  Dashboard -->|"matching live messages"| App
+```
+
 ## Message Types
 
 | Type | Meaning |
