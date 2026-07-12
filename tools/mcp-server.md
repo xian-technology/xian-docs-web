@@ -1,6 +1,7 @@
 # MCP Server
 
-The maintained Xian MCP server is `xian-mcp-server`.
+The maintained Xian MCP server is `xian-mcp-server`. The plan-first DEX tool
+surface documented here requires version `0.1.0` or newer.
 
 It exposes Xian wallet, query, transaction, indexed-read, crypto, and DEX
 operations to AI assistants and other tool-calling systems.
@@ -49,6 +50,8 @@ Configure the target network explicitly. Local development defaults are:
 | `HTTP_PORT` | HTTP bind port | `8100` |
 | `XIAN_MCP_HTTP_TOKEN` | Bearer token for HTTP tools; required for unsafe tools or non-loopback binds | unset |
 | `XIAN_MCP_HTTP_CORS_ORIGINS` | Comma-separated browser origins allowed to call HTTP mode | unset |
+| `XIAN_MCP_DEX_PLAN_TTL_SECONDS` | Process-local DEX plan lifetime, bounded to 30-900 seconds | `300` |
+| `XIAN_MCP_DEX_PLAN_MAX_ENTRIES` | Maximum stored DEX plans before oldest-first eviction, bounded to 1-1000 | `256` |
 
 When in doubt, read `result.node_info.network` from the node's `/status`
 response and use that value for `XIAN_CHAIN_ID`.
@@ -136,8 +139,38 @@ The DEX tools use the canonical DEX contract names:
 - `con_dex` for router-level liquidity and swap behavior
 - `con_dex_helper` for single-pair `buy` and `sell` helper flows
 
-`get_dex_price` is read-only. `buy_on_dex` and `sell_on_dex` submit
-transactions and therefore require `XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1`.
+`get_dex_price`, `dex_list_pairs`, `dex_get_pair`, the `dex_quote_*` tools, and
+the `dex_plan_*` tools are read-only. `buy_on_dex`, `sell_on_dex`, and the
+`dex_submit_*` tools submit transactions and therefore require
+`XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1`.
+
+For the agent-oriented flow, call a `dex_plan_*` tool and show its complete
+audit JSON before asking for authorization. It includes the exact calls,
+amounts, recipient, deadline, warnings, an opaque `plan_id`, canonical SHA-256
+digest, and issue/expiry timestamps. After approval, call the matching
+`dex_submit_*` tool with only `private_key`, `plan_id`, and the optional
+`simulate` flag. The server retrieves its immutable canonical copy; callers
+cannot replace the calls, amounts, or recipient between planning and execution.
+
+Plans are short-lived, single-use, bounded in memory, and local to one server
+process. A submission attempt consumes the plan before wallet checks,
+simulation, or transaction submission, including when an approval succeeds but
+a later router call fails. Concurrent submission and replay therefore fail.
+Plans also become invalid after expiry, oldest-first capacity eviction, or a
+server restart; create and confirm a fresh plan rather than retrying an old ID.
+Simulation is enabled by default.
+
+For event-driven agents, choose the delivery guarantee explicitly:
+
+- `dex_wait_live_event` performs a bounded wait on the node's CometBFT
+  WebSocket. It is low latency and does not require BDS, but it has no replay
+  cursor and can miss events across disconnects or restarts. Start the wait
+  before the activity being observed.
+- `dex_list_events` reads BDS-indexed DEX history with an `after_id` cursor.
+  Use it for restart-safe recovery, reconciliation, and historical queries.
+
+Services that must not miss events should combine the live wait for
+responsiveness with indexed cursor reads for recovery.
 
 The buy/sell helpers send exact decimal amount and slippage values and convert
 `deadline_min` into the Xian VM datetime payload expected by the canonical DEX

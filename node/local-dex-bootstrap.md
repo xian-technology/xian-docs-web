@@ -48,6 +48,9 @@ flowchart TD
 
 From `xian-stack`:
 
+The resilient bootstrap and automatic simulation-based chi budgeting described
+here require `xian-stack` version `0.3.0` or newer.
+
 ```bash
 make localnet-init
 make localnet-up
@@ -110,6 +113,23 @@ make localnet-dex-bootstrap
 
 The bootstrap parses these numeric values as exact decimal contract values. Use
 plain decimal strings such as `0.1` or `2500.75` when overriding them.
+
+Bootstrap deployments and calls use xian-py's simulation-based automatic chi
+estimation by default. This submits a ceiling sized for the simulated work
+instead of requiring the deployer to cover every bundle maximum. To exercise
+the manifest and bootstrap ceilings directly in a diagnostic or release check,
+opt into fixed budgets:
+
+```bash
+XIAN_DEX_CHI_BUDGET_MODE=fixed make localnet-dex-bootstrap
+
+# Equivalent product-repo installer option:
+uv run python scripts/bootstrap_dex.py --recipe local-demo \
+  --chi-budget-mode fixed
+```
+
+The JSON summary reports `chi_budget_mode` and, for submitted transactions,
+both `chi_estimated` and `chi_supplied`.
 
 Use a different hash-pinned DEX bundle:
 

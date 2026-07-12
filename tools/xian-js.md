@@ -8,15 +8,62 @@ Node.js applications.
 | Package | Purpose |
 | --- | --- |
 | `@xian-tech/client` | typed RPC client, transaction builder, signer, watchers, indexed reads |
+| `@xian-tech/dex` | protocol-neutral routing, constant-product math, and named DEX execution adapters |
 | `@xian-tech/provider` | wallet provider contract, injected-wallet discovery, WalletConnect adapter |
 | `@xian-tech/types` | shared public types |
 | `@xian-tech/web-kit` | wallet, RPC, formatting, toast, and React helpers |
 
 Install only the packages your application uses:
 
+The generic DEX planner and Xian v1 adapter are available in
+`@xian-tech/dex` version `0.3.0` or newer.
+
 ```bash
 npm install @xian-tech/client @xian-tech/provider
 ```
+
+## DEX Planning
+
+Use `@xian-tech/dex` when an app or agent needs the same exact-input route and
+transaction planning as SnakX without coupling that logic to a wallet or RPC
+transport:
+
+```ts
+import {
+  deadlineFromNow,
+  planXianDexV1ExactInExecution,
+  selectBestXianDexV1ExactInRoute,
+} from "@xian-tech/dex";
+
+const quote = selectBestXianDexV1ExactInRoute({
+  pairs,
+  fromToken: "currency",
+  toToken: "con_usdc",
+  amountIn: 10,
+  feeBps: 30,
+});
+if (!quote) throw new Error("No route");
+
+const plan = planXianDexV1ExactInExecution({
+  quote,
+  recipient: agentAddress,
+  allowance,
+  slippageBps: 50,
+  deadline: deadlineFromNow(15),
+  feeOnTransferTokens,
+});
+```
+
+Supply current typed pair reserves from your own reader, then submit
+`plan.calls` in order through your own signer or injected-wallet adapter. The
+planner deterministically enumerates routes, calculates price impact and the
+minimum output, adds an approval only when allowance is insufficient, selects
+the supporting fee-on-transfer entrypoint for flagged source/destination
+tokens, and rejects flagged intermediate tokens.
+
+The canonical contract ABI is isolated in the Xian DEX v1 adapter. Other DEXes
+can use `selectBestExactInRoute` with their own pool/quote adapter and the
+generic execution planner with their own approval and swap-call builders.
 
 ## Direct Client Use
 
