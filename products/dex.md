@@ -75,8 +75,9 @@ Behavior worth knowing before integrating:
 ## SnakX Web Frontend
 
 The SnakX frontend (`web/`, Vite + React + TypeScript) talks to the canonical
-contract names through `@xian-tech/client` for reads and the injected browser
-wallet provider for writes:
+contract names through `@xian-tech/client` for reads, consumes
+`@xian-tech/dex` for deterministic route and transaction planning, and uses the
+injected browser wallet provider for writes:
 
 | Route | Purpose |
 |-------|---------|
@@ -109,7 +110,18 @@ The `core` recipe deploys only the DEX contracts; `local-demo` also seeds a
 demo token and liquidity for local testing. For a stack-managed localnet, see
 [Local DEX Bootstrap](/node/local-dex-bootstrap).
 
+Both recipes use automatic simulation-based chi estimation by default. Use
+`--chi-budget-mode fixed` only when deliberately exercising the bundle's fixed
+deployment ceilings.
+
 ## Reading DEX State From SDKs
+
+For reusable TypeScript route enumeration, quotes, price impact, slippage,
+deadlines, and ordered approval/swap call plans, use the canonical Xian DEX v1
+adapter from `@xian-tech/dex`. The package keeps protocol-neutral routing and
+constant-product math separate from this contract ABI. Callers supply current
+pair reserves and own RPC reads, simulation, signing, and submission. See
+[xian-js](/tools/xian-js#dex-planning) for an example.
 
 ```python
 from xian_py import Xian
@@ -132,6 +144,22 @@ const pair = await client.contract("con_pairs").call("pairFor", {
   tokenB: "demo_token",
 });
 ```
+
+## Agent Event Delivery
+
+`xian-mcp-server` exposes two complementary DEX event tools:
+
+- `dex_wait_live_event` opens a bounded CometBFT WebSocket wait. It sees
+  finalized events with low latency and does not require BDS. Start it before
+  the activity being observed.
+- `dex_list_events` reads BDS-indexed history with an `after_id` cursor. Use it
+  for replay, restart recovery, and reconciliation after a disconnect.
+
+Live delivery is non-durable: an event finalized before subscription, during a
+disconnect, or while the MCP server is restarting can be missed. Agent services
+that must not miss events should use the live wait for responsiveness and the
+indexed cursor for recovery rather than treating either one as a replacement
+for the other.
 
 ## Deployment Readiness
 
