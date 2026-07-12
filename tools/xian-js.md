@@ -15,6 +15,9 @@ Node.js applications.
 
 Install only the packages your application uses:
 
+The generic DEX planner and Xian v1 adapter are available in
+`@xian-tech/dex` version `0.3.0` or newer.
+
 ```bash
 npm install @xian-tech/client @xian-tech/provider
 ```

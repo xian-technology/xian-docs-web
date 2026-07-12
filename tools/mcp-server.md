@@ -1,6 +1,7 @@
 # MCP Server
 
-The maintained Xian MCP server is `xian-mcp-server`.
+The maintained Xian MCP server is `xian-mcp-server`. The plan-first DEX tool
+surface documented here requires version `0.1.0` or newer.
 
 It exposes Xian wallet, query, transaction, indexed-read, crypto, and DEX
 operations to AI assistants and other tool-calling systems.

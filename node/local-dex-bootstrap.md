@@ -48,6 +48,9 @@ flowchart TD
 
 From `xian-stack`:
 
+The resilient bootstrap and automatic simulation-based chi budgeting described
+here require `xian-stack` version `0.3.0` or newer.
+
 ```bash
 make localnet-init
 make localnet-up
