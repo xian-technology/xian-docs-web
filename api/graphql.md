@@ -17,6 +17,35 @@ That means GraphQL is:
 
 The maintained stack publishes it on port `5000` when enabled.
 
+## Endpoint And Browser UI
+
+With the local GraphQL sidecar running, use:
+
+```text
+GraphQL endpoint: http://127.0.0.1:5000/graphql
+Browser UI:       http://127.0.0.1:5000/graphiql
+```
+
+The browser UI may be branded Ruru. It is the interactive GraphiQL-compatible
+client for the same `/graphql` endpoint.
+
+To run a parameterized example in the browser UI:
+
+1. Paste the `graphql` block into the Operation Editor.
+2. Open the **Variables** panel below the editor.
+3. Paste the matching `json` block into that panel.
+4. Replace example values with hashes or heights returned by the same node.
+5. Execute the operation.
+
+Do not paste the variables JSON into the Operation Editor. An error such as
+`Variable "$hash" of required type "String!" was not provided` means the
+Variables panel is empty or does not contain the declared variable.
+
+A successful lookup can return `null` when that hash or height is not present
+in this node's BDS database. That is different from a GraphQL validation error.
+Use the collection queries below to discover values indexed by the node before
+running the corresponding lookup query.
+
 ## Deployment Posture
 
 In the maintained `xian-stack` runtime:
@@ -81,6 +110,24 @@ block during catch-up or recovery.
 Transaction rows use the generated PostGraphile field name `hash`. The direct
 ABCI BDS and SDK surfaces expose the same value as `tx_hash` or `txHash`.
 
+Start by listing recent transactions. This query does not require variables:
+
+```graphql
+query RecentTransactions {
+  allTransactions(first: 20, orderBy: BLOCK_HEIGHT_DESC) {
+    nodes {
+      hash
+      blockHeight
+      contract
+      function
+      success
+    }
+  }
+}
+```
+
+Copy a returned `hash` into the Variables panel for the lookup query:
+
 ```graphql
 query TransactionByHash($hash: String!) {
   transactionByHash(hash: $hash) {
@@ -95,23 +142,31 @@ query TransactionByHash($hash: String!) {
 }
 ```
 
-Recent transactions:
+Variables:
+
+```json
+{
+  "hash": "<hash-from-all-transactions>"
+}
+```
+
+List recent blocks before looking up one height. This query does not require
+variables:
 
 ```graphql
-{
-  allTransactions(first: 20, orderBy: BLOCK_HEIGHT_DESC) {
+query RecentBlocks {
+  allBlocks(first: 10, orderBy: HEIGHT_DESC) {
     nodes {
-      hash
-      blockHeight
-      contract
-      function
-      success
+      height
+      blockHash
+      txCount
     }
   }
 }
 ```
 
-Block heights are generated as `BigInt`, so pass height variables as strings:
+Block heights are generated as `BigInt`. Pass height variables as strings so
+clients do not lose precision for heights above their safe integer range:
 
 ```graphql
 query BlockByHeight($height: BigInt!) {
@@ -126,7 +181,9 @@ query BlockByHeight($height: BigInt!) {
 Variables:
 
 ```json
-{ "height": "123" }
+{
+  "height": "<height-from-all-blocks>"
+}
 ```
 
 ## Related Pages
