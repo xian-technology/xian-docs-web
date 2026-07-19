@@ -17,6 +17,9 @@ That means GraphQL is:
 
 The maintained stack publishes it on port `5000` when enabled.
 
+The canonical `single-node-dev` template enables BDS and this GraphQL sidecar,
+so a default local development setup includes both endpoints below.
+
 ## Endpoint And Browser UI
 
 With the local GraphQL sidecar running, use:

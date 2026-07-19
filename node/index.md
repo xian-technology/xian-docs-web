@@ -17,13 +17,18 @@ network or an explicitly accepted operator manifest.
 
 ```bash
 xian setup node --mode local --network local-dev --name validator-1 \
-  --preset basic --key-mode generate --start --yes
+  --key-mode generate --start --yes
 
 xian node status validator-1
 xian node endpoints validator-1
 xian node health validator-1
 xian node stop validator-1
 ```
+
+The default local template starts BDS/Postgres, GraphQL and its GraphiQL browser
+UI, the dashboard, Prometheus, and Grafana. These host-facing services bind to
+loopback by default, and five-second periodic blocks keep contract time moving
+while idle. Credential- and product-dependent sidecars remain opt-in.
 
 For a shared operator-managed network, pass its reviewed manifest explicitly:
 
@@ -44,8 +49,9 @@ provenance before starting.
 - `integrated`: CometBFT and `xian-abci` supervised in one node container
 - `fidelity`: separate CometBFT and application containers
 
-Dashboard, BDS, GraphQL, monitoring, and other sidecars are optional and do not
-participate in consensus.
+Dashboard, BDS, GraphQL, monitoring, and other sidecars do not participate in
+consensus. The local development template enables the self-contained core set;
+operator and public-network profiles may choose a narrower service posture.
 
 ## Documentation Map
 

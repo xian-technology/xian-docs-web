@@ -45,6 +45,11 @@ xian node health local-dev
 xian node endpoints local-dev
 ```
 
+The canonical `single-node-dev` template enables BDS/Postgres, GraphQL and the
+GraphiQL browser UI, the dashboard, Prometheus, and Grafana. The generated
+profile keeps host-facing endpoints on loopback unless public exposure is
+explicitly requested.
+
 Use `xian setup node` for an interactive flow. Add `--plan` or `--dry-run` to
 review supported setup and recovery operations before writing files.
 

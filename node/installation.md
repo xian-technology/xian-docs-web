@@ -66,6 +66,18 @@ xian node endpoints local-dev
 xian node health local-dev
 ```
 
+`single-node-dev` enables the self-contained development surface by default:
+BDS/Postgres indexing, the read-only GraphQL endpoint and GraphiQL browser UI,
+the dashboard, Prometheus, and Grafana. Run `xian node endpoints local-dev` for
+the effective loopback URLs and `xian node health local-dev` to verify every
+enabled service. Five-second periodic blocks keep contract time moving while an
+interactive development node is idle.
+
+IntentKit, DEX automation, the shielded relayer, product contract deployment,
+state sync, and speculative parallel execution remain explicit choices because
+they require extra repositories, credentials, product bootstrap, a peer
+network, or a dedicated test scenario.
+
 Use `--plan` or `--dry-run` where supported to inspect paths and actions before
 writing files.
 

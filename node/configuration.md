@@ -115,11 +115,12 @@ monitoring.
 | CometBFT RPC | `http://127.0.0.1:26657` |
 | CometBFT metrics | `http://127.0.0.1:26660/metrics` |
 | Xian metrics | `http://127.0.0.1:9108/metrics` |
-| dashboard | `http://127.0.0.1:8080` |
+| dashboard | `http://127.0.0.1:18080` (`single-node-dev`; backend default `8080`) |
 | GraphQL | `http://127.0.0.1:5000/graphql` |
+| GraphiQL browser UI | `http://127.0.0.1:5000/graphiql` |
 | Prometheus | `http://127.0.0.1:9090` |
 | Grafana | `http://127.0.0.1:3000` |
 
-Not every profile enables every service. Run `xian node endpoints <name>` for
-the effective catalog. Bracket IPv6 literals in URLs, for example
-`http://[::1]:26657`.
+The local development template enables all services in this endpoint table.
+Other profiles may not. Run `xian node endpoints <name>` for the effective
+catalog. Bracket IPv6 literals in URLs, for example `http://[::1]:26657`.

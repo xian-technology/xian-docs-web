@@ -17,15 +17,15 @@ the network manifest or the generated CometBFT home.
   "validator_key_ref": "./keys/local-dev/validator_key_info.json",
   "stack_dir": "../xian-stack",
   "node_image_mode": "local_build",
-  "block_policy_mode": "on_demand",
-  "block_policy_interval": "0s",
+  "block_policy_mode": "periodic",
+  "block_policy_interval": "5s",
   "pruning_enabled": false,
   "tx_fee_mode": "paid_metered",
   "parallel_execution_enabled": false,
   "services": {
-    "bds": { "enabled": false },
-    "dashboard": { "enabled": true, "host": "127.0.0.1", "port": 8080 },
-    "monitoring": { "enabled": false },
+    "bds": { "enabled": true },
+    "dashboard": { "enabled": true, "host": "127.0.0.1", "port": 18080 },
+    "monitoring": { "enabled": true },
     "intentkit": { "enabled": false },
     "dex_automation": { "enabled": false },
     "shielded_relayer": { "enabled": false }
@@ -69,6 +69,11 @@ xian network create local-dev \
 
 xian node status local-dev
 ```
+
+The canonical `single-node-dev` template uses this full local service posture,
+including GraphQL/GraphiQL through BDS and Prometheus/Grafana through the
+monitoring service. It deliberately leaves product- and credential-dependent
+sidecars disabled.
 
 Use `xian network join` with an explicit accepted manifest for an
 operator-managed shared network. The checked-in mainnet manifest is a rehearsal
