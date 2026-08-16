@@ -58,6 +58,20 @@ The vote matrix requires these node query routes:
 /validators_vote_records/<proposal-id>
 ```
 
+### Reward Split Votes
+
+A `reward_change` payload uses this order:
+
+```text
+[validators, burn, foundation, developers]
+```
+
+All four ratios must be numeric and non-negative, and their sum must equal one.
+Zero-valued buckets are valid. The checked-in genesis default is
+`[0.70, 0, 0, 0.30]`; a later vote can enable burn or foundation funding.
+After approval, verify the `rewards` value on multiple nodes and inspect a
+fee-paying transaction's actual reward recipients and amounts.
+
 ## Operator Safety
 
 - Confirm the wallet, RPC response, manifest, and console all show the same

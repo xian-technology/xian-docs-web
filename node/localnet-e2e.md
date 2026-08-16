@@ -49,12 +49,20 @@ The layered harness covers:
 - periodic, burst, conflicting, and invalid transaction workloads
 - DEX bootstrap and mixed trading
 - BDS outage, catch-up, indexed reads, reindex, and watchers
-- validator governance and policy transitions
+- validator governance, policy transitions, and governed fee-distribution changes
 - governed forward state patches
 - application logging modes
 - shielded-note and relayed proof flows with governed verifier registration
 - parallel execution acceptance and fallback behavior
 - restart/chaos convergence and soak checks
+
+The validator-governance phase proposes and approves a non-default transaction
+fee split of 60% validators, 10% burn, 10% foundation, and 20% contract
+developers. It waits for the `rewards` state to converge on all five nodes,
+executes a fee-paying contract transaction, and verifies the resulting
+validator/delegator, implicit burn, foundation, and developer totals against
+the approved ratios. The test-specific split is deliberately different from
+the canonical 70/0/0/30 genesis default.
 
 ## Release Safety
 

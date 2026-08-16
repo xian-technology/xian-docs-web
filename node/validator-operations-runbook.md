@@ -87,6 +87,9 @@ For membership, fee, reward, power, vote-type, or policy changes:
 
 Rehearse registration-fee and selection-policy changes by onboarding a fresh
 candidate and checking active-set behavior.
+For a reward-split change, verify `[validators, burn, foundation, developers]`
+on multiple nodes, then inspect a fee-paying transaction and reconcile all four
+buckets against its charged fee.
 
 ## Incident Boundary
 
@@ -101,9 +104,9 @@ the incident is reconciled.
 ## Rehearsal
 
 Exercise onboarding, bond/delegation, unbond/claim, leave, jail/unjail,
-evidence idempotency, slashing, policy change, state patching, and snapshot
-recovery on the pinned [5-Validator Localnet E2E](/node/localnet-e2e) release
-state.
+evidence idempotency, slashing, policy and reward-split changes, state patching,
+and snapshot recovery on the pinned
+[5-Validator Localnet E2E](/node/localnet-e2e) release state.
 
 Do not treat a single-node green test as a public-network rehearsal.
 

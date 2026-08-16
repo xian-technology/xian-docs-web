@@ -36,6 +36,25 @@ through `delegate()` is rejected; validators use `bond_self()`.
 
 ## Rewards and Commission
 
+The checked-in genesis bundles configure the transaction-fee split as:
+
+| Recipient bucket | Default share |
+| --- | ---: |
+| validators | 70% |
+| burn | 0% |
+| foundation | 0% |
+| contract developers | 30% |
+
+The on-chain value is ordered as `[validators, burn, foundation, developers]`.
+Each ratio must be non-negative and the four ratios must sum to one. Active
+validators can change the split through a `reward_change` governance vote, so a
+network may later enable burn or foundation funding without a runtime upgrade.
+
+Developer rewards are attributed across the contracts used by a transaction,
+weighted by their execution cost. If a contract has no claimable developer or
+uses the system developer identity, that contract's developer amount returns to
+the validator reward bucket rather than going to the foundation.
+
 The runtime first divides the validator reward bucket by active voting power.
 For each validator:
 
