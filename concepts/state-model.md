@@ -60,6 +60,11 @@ Direct state queries read committed state, not an in-flight transaction:
 Use direct ABCI state queries for authoritative current values. BDS history
 and GraphQL are derived indexed views and may lag finalization briefly.
 
+The direct query API serves current state. Supplying a historical `height` to
+CometBFT's `abci_query` does not select an earlier Xian state version, and these
+queries do not return Merkle proofs. For historical changes, use the BDS
+state-history routes; those are indexed records, not historical VM execution.
+
 ## Related Pages
 
 - [Storage Overview](/smart-contracts/storage)

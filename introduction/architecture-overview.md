@@ -13,7 +13,7 @@ flowchart TD
   RPC["CometBFT RPC and optional dashboard APIs"]
   Comet["CometBFT consensus and block ordering"]
   ABCI["xian-abci application"]
-  Runtime["xian-contracting compiler and runtime"]
+  Runtime["Native xian_vm_v1 and deterministic host operations"]
   State["LMDB application state"]
 
   Apps --> SDKs
@@ -45,6 +45,11 @@ language, compiler, storage model, metering, and standard-library bridges.
 `mainnet` manifests. These are configuration assets, not evidence that a public
 network is running. The current codebase has no active public testnet or
 mainnet.
+
+An existing network running an earlier codebase has its own runtime and
+operating instructions. Moving it to this runtime requires a coordinated
+[upgrade and migration](/node/upgrading), including contract and state
+compatibility checks.
 
 ## Contract Execution
 

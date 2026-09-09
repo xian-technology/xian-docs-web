@@ -1,7 +1,8 @@
 # Chi Cost Table
 
-These are stable runtime constants. Use readonly simulation against the target
-node for a complete operation estimate.
+These costs describe the native `xian_vm_v1` runtime. Use readonly simulation
+against the target node for a complete operation estimate; the local Python
+harness has a separate metering implementation.
 
 ## Accounting
 
@@ -13,7 +14,7 @@ The result is capped by the transaction's submitted chi limit.
 
 | Item | Raw cost |
 | --- | ---: |
-| storage read | 1 per encoded key/value byte |
+| storage read | 2 per encoded key/value byte |
 | storage write | 25 per encoded key/value byte |
 | submitted transaction | 1 per byte |
 | returned value | 1 per byte |
@@ -26,7 +27,10 @@ VM computation and host operations use the fixed `xian_vm_v1` gas schedule.
 | Setting | Value |
 | --- | ---: |
 | base transaction cost | 5 chi |
-| paid-mode conversion | 20 chi per XIAN |
+| initial paid-mode conversion in canonical bundles | 20 chi per XIAN |
+
+The effective conversion rate is on-chain at `chi_cost.S:value` and can be
+changed by validator governance. Paid fees use `chi_used / chi_rate`.
 
 In `free_metered` mode the runtime reports the same chi usage but creates no
 execution-fee debit or fee-derived reward.
@@ -35,12 +39,16 @@ execution-fee debit or fee-derived reward.
 
 | Limit | Value |
 | --- | ---: |
-| raw runtime safety ceiling | 50,000,000,000 units |
-| writes per transaction | 128 KiB |
-| returned value | 128 KiB |
+| metered storage-write byte budget | less than 128 KiB, including encoded keys and values |
 | submitted contract source | 128 KiB |
-| sequence or binary allocation | 128 KiB |
-| default local chi budget | 1,000,000 |
+| `range(...)` and bounded sequence repetition | 131,072 entries |
+| bounded binary allocation and string repetition | 128 KiB |
+| default node simulation chi budget | 1,000,000 |
+
+Sequence entry counts and encoded byte counts are different units. A list of
+large values can cost much more than a list of the same length containing
+small integers. Return bytes are metered; the Python harness's separate
+128 KiB return-value limit is not a general native-VM return-size guarantee.
 
 ## ZK Verification
 

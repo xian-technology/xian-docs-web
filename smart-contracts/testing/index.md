@@ -5,6 +5,11 @@
 It lets you submit contracts, call exported functions, inspect state, and
 exercise contract interactions without running a full node.
 
+The local harness executes through Python. Validators execute canonical IR
+through the native Xian VM. Use the harness for fast logic tests, then exercise
+deployment and representative calls on a local node before release. Local
+metering results are regression signals, not exact network fee quotes.
+
 ## What It Gives You
 
 `ContractingClient` includes:

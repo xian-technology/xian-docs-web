@@ -18,43 +18,43 @@ sender must be able to cover that limit during admission and is charged for
 `chi_used`. In `free_metered` mode, the transaction remains metered but the
 runtime creates no execution-fee debit or fee-derived rewards.
 
-## Stable Constants
+## VM Costs
 
 | Constant | Value |
 | --- | ---: |
-| storage read | 1 raw unit per encoded byte |
+| storage read | 2 raw units per encoded byte |
 | storage write | 25 raw units per encoded byte |
 | submitted transaction bytes | 1 raw unit per byte |
 | returned value bytes | 1 raw unit per byte |
 | base transaction cost | 5 chi |
-| paid-mode conversion | 20 chi per native-token unit |
+| initial paid-mode conversion in the canonical bundles | 20 chi per native-token unit |
 
 The VM has a fixed compute and host-operation gas schedule. Cross-contract calls
 pay a fixed dispatch cost plus the complete work of the called contract.
 Hashing, signature verification, ZK verification, and other native bridges have
 explicit costs.
 
-## Resource Limits
+## Sizing Transactions
 
-| Limit | Value |
-| --- | ---: |
-| raw runtime safety ceiling | 50,000,000,000 units |
-| writes per transaction | 128 KiB |
-| returned value | 128 KiB |
-| submitted contract source | 128 KiB |
-| sequence or binary allocation | 128 KiB |
-| default local chi budget | 1,000,000 |
+Keep writes and returned collections small, and supply an explicit positive
+chi budget. The VM charges encoded storage and return bytes as well as
+computation. The [Chi Cost Table](/reference/chi-costs) lists the VM's byte costs
+and operation-specific limits.
 
-The submitted transaction limit, not the raw safety ceiling, is the normal
-execution boundary.
+Local Python harness limits and metering are separate from the network VM.
+Use a node simulation to estimate the intended transaction.
 
 ## Paid and Free-Metered Modes
 
 Paid mode converts execution to native-token cost:
 
 ```text
-token_cost = chi_used / 20
+token_cost = chi_used / chi_rate
 ```
+
+Read `chi_rate` from `chi_cost.S:value`. The canonical bundles initialize it
+to `20`, but validator governance can change it. Applications should query the
+target network instead of hard-coding that initial rate.
 
 Free-metered networks should set explicit caps:
 

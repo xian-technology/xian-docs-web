@@ -32,7 +32,10 @@ For numeric values, this means:
 
 ## Read/Write Cost Reminder
 
-- reads: `1` meter unit per byte
+- reads: `2` raw meter units per byte in the native VM
 - writes: `25` meter units per byte
 
 That byte count includes both key and value.
+
+See [Chi Cost Table](/reference/chi-costs). Local Python harness measurements
+use a separate meter and should not be used as exact node fee quotes.

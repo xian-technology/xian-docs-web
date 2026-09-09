@@ -11,7 +11,8 @@ deterministic core, operator UX, and runtime backend stay cleanly separated.
 | `xian-stack` | Docker images, Compose topology, backend control surface |
 | `xian-abci` | deterministic node process, query handling, config rendering |
 | `xian-configs` | canonical network bundles and contract bundles |
-| `xian-contracting` | contract runtime, metering, storage, linting |
+| `xian-contracting` | canonical Rust compiler, native VM packages, deterministic storage/host helpers, local test harness |
+| `xian-deploy` | remote Linux deployment of prepared homes and released images |
 | `xian-py` | external SDK for apps, wallets, and transaction helpers |
 
 ## Runtime Shapes
@@ -21,7 +22,7 @@ deterministic core, operator UX, and runtime backend stay cleanly separated.
 The default runtime is a single node container:
 
 ```mermaid
-flowchart LR
+flowchart TD
   Operator["Operator"]
   CLI["xian-cli"]
   Stack["xian-stack backend"]
@@ -46,14 +47,15 @@ supervision.
 The optional fidelity profile splits the node:
 
 ```mermaid
-flowchart LR
+flowchart TD
   Operator["Operator"]
+  CLI["xian-cli"]
   Stack["xian-stack backend"]
   ABCIContainer["abci-app container"]
   CometContainer["cometbft container"]
   Dashboard["Optional dashboard container"]
 
-  Operator --> Stack
+  Operator --> CLI --> Stack
   Stack --> ABCIContainer
   Stack --> CometContainer
   Stack --> Dashboard

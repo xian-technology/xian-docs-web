@@ -27,7 +27,8 @@ The immediate caller of a contract function, available as `ctx.caller`. When a u
 Xian's name for transaction execution energy and the unit of computation cost
 on the network, analogous to gas on Ethereum. Chi is not a separate token or an
 acronym. Every operation costs chi. In the default paid fee mode, chi are
-purchased with XIAN at a rate of 20 chi per XIAN. In `free_metered` mode, chi
+purchased with XIAN at the on-chain `chi_cost.S:value` rate, initially 20 chi
+per XIAN in the canonical bundles. In `free_metered` mode, chi
 meter execution without charging a native-token execution fee.
 
 ### CometBFT

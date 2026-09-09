@@ -38,36 +38,37 @@ It also wires the fixed `xian_vm_v1` execution runtime.
 
 At a high level, one transaction moves through these stages:
 
-1. CometBFT receives and gossips the signed payload.
-2. `xian-abci` performs mempool validation such as payload shape, nonce rules,
-   and basic execution prechecks.
-3. CometBFT includes the transaction in an ordered block.
-4. `xian-abci` executes the block deterministically and produces state changes,
-   events, receipts, and the new app hash.
-5. CometBFT commits the block and finalizes the height.
+1. CometBFT receives the signed payload and calls `CheckTx`. Accepted
+   transactions enter the local mempool and can be gossiped to peers.
+2. `PrepareProposal` selects transactions; `ProcessProposal` checks the
+   proposed transaction sequence before validators vote.
+3. CometBFT reaches a consensus decision on the ordered block.
+4. `FinalizeBlock` executes that decided block and returns transaction results,
+   validator updates, and `app_hash`. Application writes remain buffered.
+5. `Commit` persists the application transition. CometBFT can then advance to
+   the next height, whose header carries the preceding block's `app_hash`.
 
 ```mermaid
 flowchart TD
   Payload["Signed transaction payload"]
-  Gossip["CometBFT mempool gossip"]
-  Check["xian-abci CHECK_TX validation"]
-  Block["CometBFT ordered block"]
-  Execute["xian-abci FINALIZE_BLOCK execution"]
-  Runtime["xian_vm_v1 runtime"]
-  Commit["State commit and app_hash"]
-  Finality["CometBFT finalizes height"]
+  Check["CheckTx admission"]
+  Mempool["Mempool and gossip"]
+  Proposal["PrepareProposal and ProcessProposal"]
+  Decision["CometBFT decides the ordered block"]
+  Execute["FinalizeBlock executes xian_vm_v1"]
+  Result["Return results and app_hash; buffer writes"]
+  Commit["Commit persists application state"]
+  Next["Next consensus height"]
 
-  Payload --> Gossip
-  Gossip --> Check
-  Check --> Block
-  Block --> Execute
-  Execute --> Runtime
-  Runtime --> Commit
-  Commit --> Finality
+  Payload --> Check --> Mempool --> Proposal --> Decision
+  Decision --> Execute --> Result --> Commit --> Next
 ```
 
 That separation is why Xian can evolve contract execution without replacing the
 consensus engine itself.
+
+See the [CometBFT ABCI lifecycle](https://github.com/cometbft/cometbft/blob/v0.39.3/spec/abci/abci%2B%2B_methods.md#finalizeblock)
+for the consensus/application handoff.
 
 ## Query Surfaces
 

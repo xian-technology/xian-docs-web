@@ -81,6 +81,10 @@ are derived asynchronously from finalized blocks and may lag during catch-up.
 Check `/api/abci_query/bds_status` when an indexed read must include a recent
 transaction.
 
+Direct Xian queries do not implement historical-height selection or Merkle
+proof responses. Use BDS state-history routes for historical changes. See
+[State Model](/concepts/state-model) for the boundary between the two views.
+
 ## Security
 
 The dashboard does not provide wallet authentication or TLS termination. Bind

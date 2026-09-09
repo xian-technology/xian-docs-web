@@ -15,9 +15,10 @@ flowchart TD
   Workers --> Check["Validate reads and writes against accepted prefix"]
   Check -->|compatible| Accept["Accept result in block order"]
   Check -->|conflict or worker failure| Serial["Re-execute serially"]
-  Accept --> Next["Plan remaining transactions"]
+  Accept --> Next{"Transactions remain?"}
   Serial --> Next
-  Next --> Commit["Commit one serial-equivalent result"]
+  Next -->|yes| Plan
+  Next -->|no| Commit["Commit one serial-equivalent result"]
 ```
 
 Each worker records the state it read, wrote, and scanned. The controller

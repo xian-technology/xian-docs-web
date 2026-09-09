@@ -124,6 +124,43 @@ const events = await client.listEvents("currency", "Transfer", { afterId: 0 });
   has been pruned
 - avoid running a live writer and a reset/reindex against the same database
 
+## Recovery and Backfill
+
+Choose a source that retains the missing block range before starting a
+rebuild. Pruned local history cannot reconstruct older indexed rows.
+
+Run maintenance commands in the matching node runtime, with the intended
+node home mounted at `~/.cometbft` and its BDS connection settings available.
+Stop the normal BDS writer while performing a manual reindex or import; keep
+Postgres and the selected RPC source available.
+
+To continue from the database's indexed height:
+
+```bash
+xian-bds-reindex --rpc-url http://127.0.0.1:26657
+```
+
+The default range starts after the indexed height and ends at the RPC source's
+latest height. `--start-height` and `--end-height` select an explicit range.
+`--reset` deletes the BDS schema and local spool before rebuilding; reserve it
+for a deliberate full rebuild with the required history available.
+
+A BDS snapshot provides another starting point:
+
+```bash
+xian-bds-snapshot export --output-path ./xian-bds-snapshot.tar.gz
+```
+
+Use `xian-bds-snapshot import --input-path <archive>` in the prepared maintenance
+runtime to restore it. The import checks the snapshot against the configured
+RPC source. Resume the writer afterward and verify that indexed height advances
+and the spool drains.
+
+A BDS snapshot contains indexed history. It does not replace the Xian
+application-state snapshot, CometBFT data, or validator configuration needed
+for node recovery. Set a retention policy for each storage layer and periodically
+restore a backup into an isolated environment to confirm it is usable.
+
 ## Related Pages
 
 - [GraphQL](/api/graphql)

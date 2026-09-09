@@ -27,7 +27,7 @@ The linter enforces that restricted subset before code is accepted.
 
 | Feature | Error Code | Why |
 |---------|------------|-----|
-| `try/except`, `with`, `lambda`, `yield`, `yield from`, `nonlocal`, `@`, set literals, set comprehensions, semicolons, one-line compound statements | `E001` | blocked syntax in the sandbox or rejected to keep line-bucket metering predictable |
+| `try/except`, `with`, `lambda`, `yield`, `yield from`, `nonlocal`, `@`, set literals, set comprehensions, semicolons, one-line compound statements | `E001` | outside the supported contract language |
 | names starting or ending with `_` | `E002` | blocks Python internals / escape paths |
 | import inside a function | `E003` | imports must be explicit and module-level |
 | `from x import y` | `E004` | use `import x` then `x.y` |
@@ -73,7 +73,8 @@ Allowed builtins are bounded by deterministic runtime limits:
 - integer multiplication, exponentiation, and left shifts may not create integers larger than `1,048,576` bits.
 - `int(...)` string and bytes inputs may be at most `8,192` characters or bytes.
 - three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus and rejects exponent values with more than `8,192` bits.
-- returned contract values may not exceed `131,072` bytes when serialized.
+- returned contract values are charged by encoded size; keep responses small
+  and paginate collections.
 - submitted contract source may not exceed `131,072` bytes.
 
 These guards prevent contracts from allocating large in-memory objects or huge

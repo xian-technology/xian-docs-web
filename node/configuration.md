@@ -9,7 +9,9 @@ Xian node configuration has three layers:
 ```mermaid
 flowchart TD
   Template["Reusable template"] --> Manifest["Network manifest"]
+  Template --> Profile
   Manifest --> Profile["Node profile"]
+  Manifest --> Home
   Profile --> Home["Rendered CometBFT home"]
   Home --> Runtime["Running node"]
 ```
@@ -79,6 +81,12 @@ Top-level Xian settings cover:
 
 The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
 and spool behavior. See [Runtime Features](/node/runtime-features).
+
+Not every setting stored in a node profile is a local optimization. Fee mode
+and free-metered chi caps affect transaction acceptance or state transitions
+and must agree across the network. Coordinate changes to those values with
+the validator set. Logging, query limits, and serial-equivalent parallel
+execution can vary by node.
 
 ## Snapshot and State Sync
 

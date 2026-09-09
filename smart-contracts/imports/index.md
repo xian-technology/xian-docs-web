@@ -18,7 +18,7 @@ When contract A calls into contract B, the runtime keeps the original signer
 stable while moving the immediate caller along the call chain:
 
 ```mermaid
-flowchart LR
+flowchart TD
   User["User signs tx (alice)"]
   A["con_app"]
   B["con_token"]

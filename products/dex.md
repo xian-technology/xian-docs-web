@@ -22,7 +22,7 @@ Operator automation that watches DEX events and reacts to them lives in
 - Installer: `xian-dex/scripts/bootstrap_dex.py`
 
 ```mermaid
-flowchart LR
+flowchart TD
   Source["Contract sources"] --> Bundle["contract-bundle.json"]
   Bundle --> Bootstrap["scripts/bootstrap_dex.py"]
   Bundle --> CLI["xian-cli bundle validation"]
@@ -30,6 +30,7 @@ flowchart LR
   Web["SnakX web frontend"] -->|reads through SDK| Chain
   Web -->|writes through wallet provider| Wallet["Browser wallet"]
   Wallet --> Chain
+  Chain --> Events
   Events["DEX events"] --> Automation["xian-dex-automation"]
 ```
 

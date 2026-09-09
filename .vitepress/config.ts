@@ -195,6 +195,7 @@ export default defineConfig({
             { text: 'Configuration', link: '/node/configuration' },
             { text: 'Config Taxonomy', link: '/node/config-taxonomy' },
             { text: 'Runtime Features', link: '/node/runtime-features' },
+            { text: 'Performance & Capacity', link: '/node/performance' },
             { text: 'Pruning & Retention', link: '/node/pruning' },
             { text: 'Local DEX Bootstrap', link: '/node/local-dex-bootstrap' },
             { text: '5-Validator Localnet E2E', link: '/node/localnet-e2e' },

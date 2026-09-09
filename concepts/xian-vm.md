@@ -41,20 +41,19 @@ executable IR.
 ```mermaid
 flowchart TD
   Source["Restricted Python contract source"]
-  Compiler["Canonical Xian compiler"]
-  SourceArtifact["Stored __source__"]
-  IR["Stored __xian_ir_v1__"]
-  Admission["Validator deployment admission"]
+  Admission["Validator receives source deployment"]
+  Compiler["Canonical Rust compiler"]
+  Constructor["Execute module and constructor"]
+  Stored["Commit source, IR, metadata, and initial state"]
+  Call["Later contract call"]
   VM["Native xian_vm_v1 execution"]
   Host["Deterministic host operations"]
   State["Xian state, events, and imports"]
 
-  Source --> Compiler
-  Compiler --> SourceArtifact
-  Compiler --> IR
-  SourceArtifact --> Admission
-  IR --> Admission
-  Admission --> VM
+  Source --> Admission --> Compiler --> Constructor
+  Constructor -->|successful deployment| Stored
+  Stored -->|load executable IR| VM
+  Call --> VM
   VM --> Host
   Host --> State
 ```

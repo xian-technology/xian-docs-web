@@ -17,7 +17,7 @@ tooling for installing the product after a Xian chain exists.
 - Installer: `xian-nft/scripts/bootstrap_nft.py`
 
 ```mermaid
-flowchart LR
+flowchart TD
   Source["Contract sources"] --> Bundle["contract-bundle.json"]
   Bundle --> Bootstrap["scripts/bootstrap_nft.py"]
   Bundle --> CLI["xian-cli bundle validation"]

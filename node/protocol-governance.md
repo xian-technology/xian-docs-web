@@ -46,7 +46,7 @@ flowchart TD
   Propose --> Snapshot --> FirstVote --> Voting --> Outcome
   Outcome -->|"yes threshold reached"| Approved --> Kind
   Outcome -->|"threshold is unreachable"| Rejected
-  Outcome -->|"deadline passes"| Expired
+  Outcome -->|"expiry handled by a later call"| Expired
   Kind -->|"contract_call"| Execute
   Kind -->|"state_patch"| Schedule
 ```

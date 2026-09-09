@@ -1,7 +1,7 @@
 # Estimating Chi
 
 Xian supports dry runs through the `simulate_tx` ABCI query path. This executes
-contract logic against the node's current effective state view and then drops
+contract logic against the node's committed application state and then drops
 the simulated writes.
 
 Operationally, the node handles dry runs through a bounded subprocess worker so
@@ -30,7 +30,7 @@ flowchart TD
   Encode["Hex-encode simulate_tx payload"]
   Query["CometBFT abci_query"]
   Worker["Bounded simulation subprocess"]
-  Runtime["Contract runtime against current effective state"]
+  Runtime["xian_vm_v1 against committed application state"]
   Drop["Drop simulated writes"]
   Result["Return status, chi_used, result, and write preview"]
 
@@ -126,8 +126,10 @@ print(result["state"])
   later state
 - nonce/signature admission rules are not the focus of the simulator itself
 - state can change between simulation and real submission
-- the simulator uses the node's current runtime view, including live in-memory
-  overlays that have not been flushed to disk
+- the node serializes queries with state transitions and keeps finalized,
+  uncommitted block writes separate from the query view
+- block metadata is supplied by the simulator; values derived from time,
+  height, or randomness are not a prediction of the eventual transaction block
 - `simulate_tx` is free compute, so operators should not expose it as an
   unrestricted public validator RPC endpoint
 - if you expose dry runs to users, front them with gateway-level protections

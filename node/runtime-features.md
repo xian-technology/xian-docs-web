@@ -113,5 +113,6 @@ Contract `now` always comes from finalized block time. See
 ## Related Pages
 
 - [Configuration](/node/configuration)
+- [Performance and Capacity](/node/performance)
 - [Pruning and Retention](/node/pruning)
 - [BDS Indexed Queries](/api/bds)

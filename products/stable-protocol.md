@@ -19,7 +19,7 @@ together.
 ## Protocol Shape
 
 ```mermaid
-flowchart LR
+flowchart TD
   Collateral["Collateral token"] --> Vaults["con_vaults"]
   Vaults --> Stable["con_stable_token"]
   Oracle["con_oracle"] --> Vaults

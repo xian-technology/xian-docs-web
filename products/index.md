@@ -41,7 +41,7 @@ hash-pinned on-chain payload for that product: it pins source hashes, contract
 roles, deployment order, and default chi budgets.
 
 ```mermaid
-flowchart LR
+flowchart TD
   Repo["Owning product repo"]
   Bundle["Contract bundle"]
   Bootstrap["Bootstrap script"]

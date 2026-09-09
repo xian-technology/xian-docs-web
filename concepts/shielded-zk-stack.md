@@ -12,7 +12,7 @@ application logic across explicit layers.
 | optional relayer | submit a proof-bound public transaction for the hidden user |
 
 ```mermaid
-flowchart LR
+flowchart TD
   Wallet["Wallet or application"] --> Toolkit["xian-zk prover and sync"]
   Toolkit --> Proof["Proof and encrypted outputs"]
   Proof --> Relayer["Optional relayer"]

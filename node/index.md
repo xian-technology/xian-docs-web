@@ -57,6 +57,7 @@ operator and public-network profiles may choose a narrower service posture.
 
 - [Architecture](/node/architecture)
 - [Requirements](/node/requirements)
+- [Performance and Capacity](/node/performance)
 - [Installation and Setup](/node/installation)
 - [Config Taxonomy](/node/config-taxonomy)
 - [Configuration](/node/configuration)

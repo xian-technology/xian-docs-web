@@ -10,13 +10,15 @@ flowchart TD
   Broadcast["Broadcast through CometBFT RPC"]
   Check["CheckTx admission"]
   Mempool["Mempool"]
-  Consensus["CometBFT orders and finalizes block"]
-  Execute["FinalizeBlock executes xian_vm_v1"]
-  Commit["Atomic LMDB commit and app hash"]
-  Read["RPC, WebSocket, and BDS reads"]
+  Consensus["Proposal checks and CometBFT block decision"]
+  Execute["FinalizeBlock executes and returns app_hash"]
+  Commit["Commit persists the LMDB transition"]
+  Read["Committed state and transaction results"]
+  BDS["Asynchronous BDS history"]
 
   Build --> Sign --> Broadcast --> Check
   Check -->|accepted| Mempool --> Consensus --> Execute --> Commit --> Read
+  Read -.-> BDS
 ```
 
 ## Payload and Signature
@@ -65,8 +67,9 @@ results must remain equivalent to serial block order. Conflicts run serially.
 
 Successful transaction effects and required fee accounting are assembled into
 one block transition. Xian commits state, nonce data, height, block time, and
-the state-root marker atomically in LMDB. The resulting `app_hash` is returned
-to CometBFT for the next block header.
+the state-root marker atomically in LMDB. `FinalizeBlock` returns the computed
+`app_hash` before this persistence step; `Commit` makes the corresponding
+transition durable. CometBFT includes the hash in the next block header.
 
 The LMDB marker is authoritative on restart; auxiliary JSON metadata is only a
 repairable convenience copy.
@@ -77,7 +80,7 @@ The decoded execution payload includes:
 
 | Field | Meaning |
 | --- | --- |
-| `hash` | transaction hash |
+| `hash` | Xian execution-result hash; distinct from the CometBFT RPC transaction hash |
 | `status` | `0` success, `1` failure |
 | `chi_used` | metered chi charged/reported |
 | `result` | encoded function result or error |
@@ -86,6 +89,10 @@ The decoded execution payload includes:
 
 SDK receipts wrap this together with the original transaction, RPC metadata,
 and success/error helpers.
+
+Use the CometBFT transaction hash returned by broadcast for RPC receipt lookup
+and BDS queries. The embedded execution-result hash uses a separate Xian hash
+calculation and is not interchangeable with that lookup identifier.
 
 ## Failure Boundaries
 
