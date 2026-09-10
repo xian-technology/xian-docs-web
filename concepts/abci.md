@@ -40,8 +40,11 @@ At a high level, one transaction moves through these stages:
 
 1. CometBFT receives the signed payload and calls `CheckTx`. Accepted
    transactions enter the local mempool and can be gossiped to peers.
-2. `PrepareProposal` selects transactions; `ProcessProposal` checks the
-   proposed transaction sequence before validators vote.
+2. `PrepareProposal` selects transactions within CometBFT's total transaction
+   byte budget and the configured chi policy. A transaction that does not fit
+   is skipped without consuming its sender's proposal nonce; smaller valid
+   transactions can still be selected. `ProcessProposal` checks the proposed
+   transaction sequence before validators vote.
 3. CometBFT reaches a consensus decision on the ordered block.
 4. `FinalizeBlock` executes that decided block and returns transaction results,
    validator updates, and `app_hash`. Application writes remain buffered.
@@ -71,6 +74,11 @@ See the [CometBFT ABCI lifecycle](https://github.com/cometbft/cometbft/blob/v0.3
 for the consensus/application handoff.
 
 ## Query Surfaces
+
+CometBFT's `/abci_info` reports the `xian-abci` software release in
+`response.version`. The numeric `response.app_version` identifies the
+application protocol version and is a separate value. CometBFT's own software
+version is available through `/status`.
 
 The ABCI side is also where Xian exposes application queries.
 

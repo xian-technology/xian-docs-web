@@ -36,7 +36,8 @@ through `delegate()` is rejected; validators use `bond_self()`.
 
 ## Rewards and Commission
 
-The checked-in genesis bundles configure the transaction-fee split as:
+The checked-in genesis bundles configure the fee split for successful paid
+transactions as:
 
 | Recipient bucket | Default share |
 | --- | ---: |

@@ -81,8 +81,12 @@ are derived asynchronously from finalized blocks and may lag during catch-up.
 Check `/api/abci_query/bds_status` when an indexed read must include a recent
 transaction.
 
-Direct Xian queries do not implement historical-height selection or Merkle
-proof responses. Use BDS state-history routes for historical changes. See
+Direct CometBFT `abci_query` requests accept `height=0` or the exact latest
+committed Xian height. Other heights and `prove=true` return a nonzero ABCI
+response code with an explanation. The response envelope reports the committed
+application height; indexed rows may refer to earlier blocks.
+
+Use BDS state-history routes for historical changes. See
 [State Model](/concepts/state-model) for the boundary between the two views.
 
 ## Security

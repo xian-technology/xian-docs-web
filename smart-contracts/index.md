@@ -38,6 +38,14 @@ def transfer(amount: float, to: str):
     balances[to] += amount
 ```
 
+## Deployment Names
+
+Publicly submitted contract names must start with `con_`, contain only
+lowercase ASCII letters, digits, and underscores, and be at most 64 characters
+including the prefix. For example, `con_token` and `con_token_v2` are valid;
+`con_Token` is not. Built-in contracts such as `currency` use reserved names
+outside public submission.
+
 ## Rules To Remember
 
 - module-level state declarations and imports are allowed
@@ -47,7 +55,7 @@ def transfer(amount: float, to: str):
   whitelisted types accepted for arguments
 - exported functions may opt into runtime argument / return checks with
   `@export(typecheck=True)`
-- names starting or ending with `_` are rejected
+- identifiers inside contract source starting or ending with `_` are rejected
 - classes, nested functions, `try/except`, `lambda`, `async`, `yield`, and
   `from x import y` are rejected
 

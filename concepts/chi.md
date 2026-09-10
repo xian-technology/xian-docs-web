@@ -18,6 +18,11 @@ sender must be able to cover that limit during admission and is charged for
 `chi_used`. In `free_metered` mode, the transaction remains metered but the
 runtime creates no execution-fee debit or fee-derived rewards.
 
+A failed execution in paid mode still debits its consumed chi, but produces no
+fee-reward payouts. That debit reduces the total native-token balance. The
+[governed reward split](/node/staking#rewards-and-commission) applies to
+successful paid executions.
+
 ## VM Costs
 
 | Constant | Value |

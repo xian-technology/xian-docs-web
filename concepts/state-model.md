@@ -60,10 +60,24 @@ Direct state queries read committed state, not an in-flight transaction:
 Use direct ABCI state queries for authoritative current values. BDS history
 and GraphQL are derived indexed views and may lag finalization briefly.
 
-The direct query API serves current state. Supplying a historical `height` to
-CometBFT's `abci_query` does not select an earlier Xian state version, and these
-queries do not return Merkle proofs. For historical changes, use the BDS
-state-history routes; those are indexed records, not historical VM execution.
+The direct query API serves current state. For CometBFT's `abci_query`:
+
+- omit `height` or use `height=0` to select the latest committed state
+- an explicit height must equal the node's latest committed height; earlier,
+  future, and negative heights return a nonzero response code with an explanation
+- keep `prove=false`; Merkle proof requests return an unsupported-query error
+
+The ABCI response's `height` identifies Xian's committed application height
+`H`, including when the query returns an error. It is `0` before the first
+block is committed. The corresponding `app_hash` appears in CometBFT block
+`H + 1`; response height does not refer to that later header.
+
+An explicit latest height can become unavailable if another block commits
+before the request is handled. Use `height=0` for current reads and inspect the
+returned height. For historical changes, use BDS state-history routes; those
+are indexed records, not historical VM execution. BDS rows carry their own
+block heights, and the response envelope's height does not mean the indexer
+has caught up to that height.
 
 ## Related Pages
 
