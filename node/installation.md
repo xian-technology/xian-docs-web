@@ -120,6 +120,13 @@ These guides do not identify an already-live public network.
 Release deployments should use digest-pinned images and retain the embedded
 release provenance.
 
+Pin the controller's CLI commit and resolved dependencies alongside the node
+release. A CLI package version can remain unchanged while its dependency lock
+is refreshed; an older tag's frozen lock may not match the selected runtime.
+Verify native VM/compiler builds and the controller's SDK separately from the
+server image. Execution-changing runtime fixes require coordinated upgrade
+and replay validation for an existing network, without regenerating genesis.
+
 ## Remote Hosts
 
 Use `xian-deploy` for supported Ansible-based Linux deployment:
