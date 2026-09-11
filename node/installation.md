@@ -143,6 +143,10 @@ ansible-playbook playbooks/deploy.yml
 ansible-playbook playbooks/health.yml
 ```
 
+Remote configuration runs with a Python entrypoint override so the integrated
+image's supervisor and validator services start only with the Compose runtime.
+Use a deployment revision that includes this override.
+
 Store inventory secrets in Ansible Vault, SOPS, CI secrets, or another secret
 manager. Do not commit validator keys, database passwords, or rendered secret
 files.
