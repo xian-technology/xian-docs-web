@@ -71,6 +71,14 @@ initial price feed, sets fee-routing addresses, seeds a default vault type
 when none exists, and starts governance handoff by default. The operator
 wallet must match the configured initial governor during bootstrap.
 
+The bootstrap validates the complete bundle before connecting and retains the
+verified sources for deployment. `--bundle` selects its source paths, deployment
+order, and per-contract chi budgets. Product configuration supplies constructor
+arguments and target names. `XIAN_STABLE_DEPLOY_CHI` explicitly overrides the
+bundle budgets; when unset, each entry's `default_chi` applies. Sample collateral
+and reserve tokens reuse the validated stable-token source. The deploy dependency
+group includes the shared CLI validator and Python SDK.
+
 ### Required Wiring
 
 The protocol is not correctly wired unless fee destinations are configured:

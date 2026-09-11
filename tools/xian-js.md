@@ -145,6 +145,18 @@ The client provides:
 - CometBFT and dashboard WebSocket subscriptions
 - shielded relayer clients
 
+Indexed event `dataIndexed` and `data` are separate records: identifiers such as
+NFT token IDs can be in `dataIndexed`, while values such as prices can be in
+`data`. Both fields, and indexed transaction `payload`, accept the node's JSON
+text or object representation and preserve large integers. Malformed or
+non-object columns become `null`; `raw` retains the original row.
+`getRecentEvents()` distinguishes an unavailable index (`available: false`)
+from an available index with no events (`available: true`, empty `items`).
+
+For chain dates, `maybeDate` from `@xian-tech/web-kit` treats offset-free
+contract timestamps as UTC, honors explicit offsets, and truncates microsecond
+fractions to milliseconds.
+
 Automatic send helpers reserve nonces per client, chain, and sender. An
 ambiguous broadcast can quarantine that sender until the caller reconciles the
 network state; handle `NonceReservationError` rather than forcing nonce reuse.
@@ -156,6 +168,14 @@ network state; handle `NonceReservationError` rather than forcing nonce reuse.
 - `commit`: wait through the RPC commit response
 
 Use `waitForTx: true` when the application needs a finalized receipt.
+
+## Transaction encoding
+
+Use the SDK's transaction builder and signer together so signing and broadcast
+use identical canonical bytes. Nested object keys are serialized in Unicode
+code-point order, including numeric-looking keys. Own keys are preserved as data.
+Use `bigint` for integers outside JavaScript's safe integer range; the SDK encodes
+runtime wrappers recursively through nested arrays and objects.
 
 ## Related Pages
 

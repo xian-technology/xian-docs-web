@@ -183,6 +183,13 @@ liquidity for the requested pair.
 - agent workflows that need structured Xian tools
 - prototyping higher-level automation before building a dedicated app backend
 
+## Exact message signatures
+
+The local `sign_message` and `verify_signature` tools use the exact supplied
+message text, including leading/trailing spaces, newlines, and Unicode. Keep that
+text unchanged when verifying. These tools expose raw Ed25519 signing; injected
+wallet message signatures use the separate versioned Xian message envelope.
+
 ## Related Tools
 
 - [xian-py](/tools/xian-py)

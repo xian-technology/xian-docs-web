@@ -65,7 +65,14 @@ npm run dev   # http://localhost:5180
 The app reads through `@xian-tech/client` plus the node's indexer endpoints
 and writes through the injected browser wallet provider. When the configured
 node does not expose the indexer surface, the app shows an indexer-down
-banner and degrades gracefully.
+banner and degrades gracefully. Collection discovery, token grids, profiles,
+and activity need indexed events; direct token reads use contract state. The
+marketplace combines indexed event identifiers with the remaining event data
+and displays contract timestamps consistently across browser timezones.
+
+Collection verification uses the native VM's read-only dynamic `ForeignHash`
+support. Deploy the standard `con_xsc005` checker as well as a collection, and
+use an indexed node for automatic discovery, profiles, and activity.
 
 ## Installing The NFT Product
 
@@ -76,6 +83,14 @@ the repo-owned bootstrap against a healthy node:
 uv run --project ../xian-cli xian contract bundle validate contract-bundle.json
 uv run --group deploy python scripts/bootstrap_nft.py
 ```
+
+The bootstrap validates the entire bundle before connecting to the node and
+uses the verified source snapshot for deployment. `--bundle` selects a bundle;
+its entries determine source paths, deployment order, names, and default chi
+budgets. `--checker-contract`, `--collection-contract`, `--checker-chi`, and
+`--collection-chi` are explicit overrides. `--dry-run` validates and prints the
+plan without broadcasting. The deploy dependency group includes the shared CLI
+validator and Python SDK.
 
 ## Related Pages
 

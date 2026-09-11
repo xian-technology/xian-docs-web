@@ -111,6 +111,17 @@ Catch the SDK's structured exceptions when behavior depends on failure type:
 - `AbciError` and `SimulationError`
 - `TransactionError` and `TxTimeoutError`
 
+## Runtime values in transactions
+
+Transaction preparation recursively normalizes runtime values through nested
+lists and dictionaries. Large Python integers use the `__big_int__` wire wrapper;
+booleans remain JSON booleans. Pass native Python values to SDK helpers rather
+than converting large integers to floating point.
+
+Source deployment targets `xian-tech-py>=0.5.0,<0.6`. Keep application dependency
+constraints aligned with this API even when local development uses sibling
+source overrides.
+
 ## Related Pages
 
 - [BDS Indexed Queries](/api/bds)
