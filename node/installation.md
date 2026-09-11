@@ -105,6 +105,14 @@ asset.
 
 ## Image Mode
 
+For agent-assisted setup, the
+[first-node guide](https://github.com/xian-technology/xian-ai-guides/blob/main/testnet-first-node-agent.md)
+covers a fresh operator-managed testnet, a separate treasury funded through the
+standard genesis bundle, and a verified public handoff. Share the
+[participant guide](https://github.com/xian-technology/xian-ai-guides/blob/main/testnet-join-agent.md)
+with that handoff to join a full node and optionally request validator admission.
+These guides do not identify an already-live public network.
+
 - `registry` uses immutable image references supplied by a manifest/profile.
 - `local_build` builds from sibling source checkouts and is intended for local
   development or unreleased testing.

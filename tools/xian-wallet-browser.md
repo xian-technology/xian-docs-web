@@ -95,3 +95,17 @@ Load `apps/wallet-extension/dist/` as an unpacked extension.
 - [xian-js](/tools/xian-js)
 - [Mobile Wallet](/tools/xian-wallet-mobile)
 - [Source repository](https://github.com/xian-technology/xian-wallet-browser)
+
+## Interrupted approvals
+
+An approval can execute once. Overlapping approve, reject, and dismiss requests
+share an execution claim. The extension stores that claim before execution and
+stores the signed transaction identity before broadcast.
+
+After an interrupted execution, the same request is not signed again. A
+`SubmissionInterruptedError` reports the known `txHash`, when available, and
+`submissionMayHaveOccurred` in its error data. Check that transaction before
+starting a replacement request. An interruption is not evidence that a transfer
+failed. Wallet integrations using a custom persistent store should implement
+`claimApprovalExecution` atomically and use one controller authority for that
+store.

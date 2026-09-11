@@ -183,3 +183,15 @@ runtime wrappers recursively through nested arrays and objects.
 - [WebSocket Subscriptions](/api/websockets)
 - [BDS Indexed Queries](/api/bds)
 - [Source repository](https://github.com/xian-technology/xian-js)
+
+## Persisting transaction identity before submission
+
+`prepareTransaction(signedTransaction)` returns immutable `json`, `rpcHex`, and
+`txHash` strings. The hash identifies the exact ASCII hex bytes submitted to
+CometBFT, which are also the base64-decoded bytes returned in a block.
+
+Pass an asynchronous `onPreparedTransaction` callback to `client.sendTx()` to
+persist these values before broadcast. The client awaits the callback. If
+persistence fails, it does not broadcast and releases an automatic nonce
+reservation. Store signed bytes in application-controlled storage and reconcile
+by hash after a restart before creating another transaction.

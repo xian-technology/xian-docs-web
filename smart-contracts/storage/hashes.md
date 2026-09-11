@@ -70,3 +70,17 @@ updated independently.
 ## When to Use
 
 Use `Hash` for mappings, registries, ledgers, and sparse structured state.
+
+## Scan order and limits
+
+`all()` returns values in lexicographic order of their full stored keys (UTF-8
+byte order). Numeric-looking key parts sort as strings: `"10"` precedes `"2"`.
+Pending writes override committed values; deleted entries are omitted. Cache
+warming and the order in which entries were written do not affect the result.
+Static and function-local `ForeignHash` scans use the same ordering.
+
+Native scans charge storage reads as entries are consumed. Scanning stops on
+chi exhaustion and enforces a 128 KiB cumulative encoded key/value budget.
+An oversized scan fails the transaction instead of returning a partial list.
+Keep large collections partitioned by key prefix and avoid scanning an
+unbounded collection within a transaction.

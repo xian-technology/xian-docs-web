@@ -128,3 +128,25 @@ source overrides.
 - [Estimating Chi](/api/dry-runs)
 - [xian-zk](/tools/xian-zk)
 - [Source repository](https://github.com/xian-technology/xian-py)
+
+## Recovering uncertain submissions
+
+Automatic sends are coordinated per client, chain, and sender. Local validation
+or signing failures release their nonce reservation. Concurrent sends wait for
+the preceding submission to finish its admission/finality path.
+
+A lost broadcast response or finality timeout leaves the nonce unresolved.
+Structured errors include `details["tx_hash"]` and `details["nonce"]` when the
+transaction was prepared. Query that hash before creating another transfer.
+The SDK raises `NonceReservationError` if a subsequent automatic send sees the
+same network nonce. It resumes once the network nonce advances;
+`refresh_nonce()` does not clear unresolved reservations by itself.
+
+An explicit `nonce=` bypasses automatic coordination and is the caller's
+responsibility. Client instances do not share reservations. Persist signed
+transactions and their hashes if recovery must survive application restarts.
+
+Receipt recovery can scan recent blocks when transaction indexing is
+unavailable. It hashes the exact submitted bytes and requires an actual
+execution result; missing or pruned block results are reported as unknown/error,
+never as successful execution.
