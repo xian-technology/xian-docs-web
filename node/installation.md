@@ -112,6 +112,11 @@ standard genesis bundle, and a verified public handoff. Share the
 [participant guide](https://github.com/xian-technology/xian-ai-guides/blob/main/testnet-join-agent.md)
 with that handoff to join a full node and optionally request validator admission.
 These guides do not identify an already-live public network.
+Both guides default to BDS/PostgreSQL, read-only GraphQL/GraphiQL, and the node
+dashboard, with private host bindings and serial transaction execution.
+The pinned Ansible runtime deploys BDS and the dashboard; the guides include
+an explicit PostGraphile companion because enabling BDS there does not itself
+deploy a GraphQL server. Prometheus/Grafana remain optional.
 
 - `registry` uses immutable image references supplied by a manifest/profile.
 - `local_build` builds from sibling source checkouts and is intended for local
