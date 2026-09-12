@@ -72,3 +72,8 @@ uv add xian-tech-zk
   an AI model deciding the action
 - use the hub, playground, or MCP server when you want a higher-level developer
   surface instead of starting from raw SDK calls
+
+## Browser IDE
+
+The [Browser IDE](/tools/ide) provides contract editing, compiler checks,
+simulation, and wallet-based deployment.
