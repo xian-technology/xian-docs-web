@@ -94,6 +94,19 @@ npm install
 npm run dev
 ```
 
+For a hosted frontend, set `VITE_XIAN_RPC_URL` to the operator's HTTPS RPC
+endpoint at build time (`npm run build`). The default remains localhost for
+development. `VITE_XIAN_NETWORK_LABEL` optionally labels the deployed network
+in the footer; label disposable testnets clearly. Set `VITE_XIAN_TOKEN_CONTRACTS`
+to a comma-separated list of deployed token contracts to show them in the token
+picker alongside XIAN. Existing browser settings
+override the build's RPC default. These variables are public frontend data,
+so never include signing keys or other secrets.
+
+Serve the generated `dist/` directory with an `index.html` fallback for client
+routes. The browser wallet must also use the same chain and a reachable RPC;
+changing the frontend RPC does not reconfigure the wallet.
+
 ## Installing The DEX
 
 Products are installed from their owning repo after a chain exists. Validate
