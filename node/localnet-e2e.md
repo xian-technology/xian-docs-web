@@ -35,8 +35,15 @@ Artifacts are written under:
 .artifacts/localnet-e2e/<run-id>/
 ```
 
-The directory contains `summary.json`, per-phase JSON, and the generated
-network description. A failed run can resume from a supported phase with the
+Successful runs contain `summary.json`, per-phase JSON, and the generated
+network description. A failed phase writes its error to its phase JSON and
+captures bounded RPC, peer, container-state, and container-log diagnostics in
+`<phase>-failure/nodes.json` before release-gate cleanup removes the containers.
+Unavailable probes are recorded as errors without replacing the original
+failure. The protocol safety harness captures the same diagnostics in its
+own artifact directory.
+
+A failed run can resume from a supported phase with the
 backend's `--start-phase` and `--resume-dir` options. Resume at a phase that
 has not begun. Use a fresh run when repeating a partially executed recovery,
 nonce, accounting, or replay scenario: those checks retain stateful fixtures
@@ -100,6 +107,8 @@ they are not included in the node image.
 The partition test checks voting power before splitting the network. Four
 validators must keep producing blocks when one is isolated. With neither side
 holding more than two thirds of the voting power, the 3/2 split must halt.
+E2E bootstrap assigns fixed container addresses within a Docker-selected local
+subnet so partition reconnects and process restarts preserve peer addresses.
 After reconnecting, all five nodes must agree on application hashes and block
 results. Fresh observers have newly generated keys and no validator voting
 power. They must catch up to the running network, including after an
