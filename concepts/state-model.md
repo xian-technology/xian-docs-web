@@ -84,3 +84,12 @@ has caught up to that height.
 - [Storage Overview](/smart-contracts/storage)
 - [Transaction Lifecycle](/concepts/transaction-lifecycle)
 - [REST API](/api/rest)
+
+## Account registry
+
+The node reserves `_accounts.policy` and `_accounts.records:<address>` for
+account authorization. Registry transitions preserve the address used by
+currency balances and contract roles. They execute through the node's native
+account handler rather than ordinary contract code. Query committed records to
+select signing credentials; an unavailable or malformed response is not an
+absent record. See [Account Backups and Recovery](/concepts/hybrid-account-recovery).

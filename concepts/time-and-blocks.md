@@ -78,7 +78,7 @@ not as a background scheduler.
 Good patterns:
 
 ```python
-assert now < deadline, "Permit expired"
+assert now < deadline, "Request expired"
 assert now >= unlock_time.get(), "Too early"
 ```
 
@@ -95,13 +95,12 @@ Bad assumptions:
 
 ## Practical Examples
 
-### Permit Deadlines
+### Transaction Deadlines
 
-In the XSC-0002 permit authorizer, a permit is valid only if the inclusion
-block satisfies:
+An application can require that a call's inclusion block satisfies:
 
 ```python
-assert now < deadline, "Permit has expired."
+assert now < deadline, "Request has expired."
 ```
 
 That means:

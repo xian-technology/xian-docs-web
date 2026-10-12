@@ -95,3 +95,16 @@ keys, which can leak through shell history and process listings.
 - [Configuration](/node/configuration)
 - [Node Profiles](/node/profiles)
 - [Source repository](https://github.com/xian-technology/xian-cli)
+
+## Hybrid signing and balance import
+
+Transaction commands accept `--active-backup-file /secure/active.json` and
+`--backup-password-env XIAN_BACKUP_PASSWORD` in place of private-key inputs.
+Set `--chain-id` to the intended chain. The encrypted file must contain current
+active credentials for the original address; recovery credentials and mixed
+key modes are rejected. Derive this service credential from the verified
+master backup and retain the master offline.
+
+`xian network convert-legacy-balances` converts exported balance rows, and
+`xian network migrate-balances` reconciles them into a separate genesis bundle.
+See [Balance Import](/node/balance-migration) for input formats and validation.

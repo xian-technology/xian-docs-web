@@ -6,6 +6,8 @@ Use this list before shipping a contract to a real network.
 
 - every privileged function checks `ctx.caller`
 - any use of `ctx.signer` is intentional and justified
+- no raw original-key signature bypasses current account-registry authority
+- retained allowances and delegated roles are reviewed separately from key rotation
 - no privileged path can be reached through an unexpected contract-to-contract
   call
 

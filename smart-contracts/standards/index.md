@@ -6,7 +6,6 @@ payment primitives that other tools expect.
 ## Standards
 
 - [XSC-0001](/smart-contracts/standards/xsc-0001): fungible token core
-- [XSC-0002](/smart-contracts/standards/xsc-0002): permit-authorizer approvals
 - [XSC-0003](/smart-contracts/standards/xsc-0003): streaming fungible token
 - [XSC-0004](/smart-contracts/standards/xsc-0004): wrapped token
 - [XSC-0005](/smart-contracts/standards/xsc-0005): non-fungible token core

@@ -97,7 +97,7 @@ the service host while preserving the vault's strict on-chain cap.
 
 The first contract version supports one pair, one direction, and plain
 single-pair exact-input swaps. It does not support multi-hop or fee-on-transfer
-routes, owner rotation, or cumulative-budget increases.
+routes, owner-address transfers, or cumulative-budget increases.
 
 ## Stack-Managed Setup
 
@@ -172,3 +172,16 @@ custody mode and strategy limits. The API does not return private key material.
 - [Xian DEX](/products/dex)
 - [Local DEX Bootstrap](/node/local-dex-bootstrap)
 - [xian-py](/tools/xian-py)
+
+## Enrolled service accounts
+
+Configure `wallet.active_backup_file` and `wallet.backup_password_env` for an
+encrypted active-only hybrid credential; remove the ordinary private-key
+configuration. The default password variable is
+`XIAN_DEX_AUTOMATION_BACKUP_PASSWORD`. The credential is bound to the configured
+chain and original address. Keep its verified master backup offline.
+
+Pause execution while rotating or recovering, reconcile committed state and
+pending transactions, then install the confirmed credential and reload the
+service. Registry key rotation preserves a strategy vault owner's address;
+the vault itself has no owner-address transfer operation.

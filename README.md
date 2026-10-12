@@ -56,11 +56,11 @@ The site is statically generated; the build output goes to
     walk-through.
   - `concepts/` — ABCI, consensus, chi, deterministic execution, state
     model, time / blocks, transaction lifecycle, parallel block
-    execution, the Xian VM, and the shielded zk stack.
+    execution, the Xian VM, account backups/recovery, and the shielded zk stack.
   - `smart-contracts/` — contract authoring guidance.
   - `api/` — REST, GraphQL, websockets, dry-runs.
   - `tools/` — operator and developer tools.
-  - `node/` — node operator documentation.
+  - `node/` — node operation, governance, recovery and snapshot balance import.
   - `tutorials/` — long-form, end-to-end walk-throughs (token, dice
     game, multi-contract dapp, streaming payments, shielded commands,
     shielded privacy token).
@@ -82,8 +82,8 @@ npm audit --audit-level=high --omit=dev
 npm run build
 ```
 
-`npm run build` is the docs-site smoke gate — broken links, missing
-sidebar entries, and VitePress build errors all surface here.
+`npm run build` checks VitePress rendering and internal page links. Review
+sidebar coverage separately when adding or moving pages.
 
 ## Related Docs
 

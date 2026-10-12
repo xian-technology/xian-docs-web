@@ -4,7 +4,7 @@ These costs describe the native `xian_vm_v1` runtime. Use readonly simulation
 against the target node for a complete operation estimate; the local Python
 harness has a separate metering implementation.
 
-## Accounting
+## Contract execution accounting
 
 ```text
 chi_used = (raw_meter_cost // 1000) + 5
@@ -76,3 +76,13 @@ public inputs to 32, and verifying-key IDs to 128 characters.
 
 See [Chi and Metering](/concepts/chi) for the fee modes and
 [Estimating Chi](/api/dry-runs) for simulation.
+
+## Account registry transitions
+
+Enrollment, rotation and recovery execute in the node's native account handler.
+They use `_accounts.policy.transition_chi` instead of the VM formula above;
+the checked-in bundles set it to `100000`. The submitted budget must cover the
+policy cost. Paid mode charges the transition fee; free-metered mode retains
+the budget checks without a native-token debit. Read the target chain's policy
+when preparing a transition; contract simulation is not a registry-transition
+fee estimate.

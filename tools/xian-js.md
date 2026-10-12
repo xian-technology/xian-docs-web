@@ -93,6 +93,11 @@ console.log(submission.txHash, submission.finalized);
 Do not put private keys in browser application code. Browser dapps should use
 an injected wallet provider.
 
+The Ed25519 key examples apply to unenrolled accounts. For an enrolled
+account, use the SDK's hybrid signer with current active credentials or an
+injected wallet. The account address and contract call stay the same. See
+[Account Backups and Recovery](/concepts/hybrid-account-recovery).
+
 ## Deploy Source
 
 ```ts
@@ -195,3 +200,26 @@ persist these values before broadcast. The client awaits the callback. If
 persistence fails, it does not broadcast and releases an automatic nonce
 reservation. Store signed bytes in application-controlled storage and reconcile
 by hash after a restart before creating another transaction.
+
+## Hybrid account integration
+
+`HybridAccountSigner` signs the production `xian_account_v1` envelope while
+preserving the sender stored in the active backup. `MasterAccountTransitionDraft`
+derives active/recovery pairs from one fresh master. Save `exportMasterBackup()`
+and reopen it with `verifyMasterBackup()` before signing. A password is optional;
+the unencrypted file is the secret. `AccountVault.begin()` uses this flow. The
+older `AccountTransitionDraft` remains a compatibility primitive.
+
+Wallet integrations should use `AccountVault` with an encrypted, atomic
+`AccountVaultStore`. It saves candidate spending keys and the signed transaction
+before broadcast, reconciles against the committed registry, and refuses legacy
+fallback on missing keys or failed reads. Serialize vault operations and protect
+its writes from stale settings saves. Use `canonicalAccountJson` for protocol
+JSON: epochs are uint64 integer tokens, including values beyond JS safe integers.
+
+`exportAccountMaster` / `importAccountMaster` share a portable format with
+Python and both official wallets. `accountBackupFromMaster` extracts active or
+recovery credentials; retain only active credentials in an everyday wallet.
+`readAccountCredential` also accepts older encrypted role backups. See the [recovery guide](../concepts/hybrid-account-recovery.md).
+The master is independent of the original mnemonic and bound to one account
+and chain. Enrollment is disabled in checked-in network policies.

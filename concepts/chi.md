@@ -7,7 +7,7 @@ Every transaction supplies a chi limit. The runtime meters VM work, host calls,
 storage, transaction bytes, return data, and native bridges against that limit.
 If execution runs out of chi, its state and events roll back.
 
-## Accounting
+## Contract execution accounting
 
 ```text
 chi_used = (raw_meter_cost // 1000) + 5
@@ -97,3 +97,13 @@ historical benchmark values into a transaction policy.
 - [Estimating Chi](/api/dry-runs)
 - [Chi Cost Table](/reference/chi-costs)
 - [Measuring Chi Costs](/smart-contracts/testing/chi-costs)
+
+## Account registry transitions
+
+Enrollment, rotation and recovery execute in the node's native account handler.
+They use `_accounts.policy.transition_chi` instead of the VM formula above;
+the checked-in bundles set it to `100000`. The submitted budget must cover the
+policy cost. Paid mode charges the transition fee; free-metered mode retains
+the budget checks without a native-token debit. Read the target chain's policy
+when preparing a transition; contract simulation is not a registry-transition
+fee estimate.

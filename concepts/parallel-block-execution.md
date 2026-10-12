@@ -93,3 +93,10 @@ counters dominate.
 - [Transaction Lifecycle](/concepts/transaction-lifecycle)
 - [Deterministic Execution](/concepts/deterministic-execution)
 - [Runtime Features](/node/runtime-features)
+
+## Account registry transitions
+
+A block containing enrollment, rotation or recovery executes serially. The node
+keeps authority changes in deterministic block order. Later transactions from
+the same sender wait for the next committed block. Ordinary hybrid calls can use the normal parallel
+path when no registry transition is present.

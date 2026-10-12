@@ -16,7 +16,7 @@ Each stream:
 - lets the sender or receiver claim the accrued portion
 - lets the sender shorten the stream and recover the unvested refund
 - lets the receiver forfeit the unvested part of the stream
-- supports permit-style creation flows
+- authenticates stream creation through the transaction caller
 - exposes `claimable_amount(...)` and `stream_info(...)` read helpers for
   clients
 
@@ -38,7 +38,7 @@ The streamed token contract must expose:
 4. call `balance_stream(...)` as time passes
 5. finalize, shorten, or forfeit the stream as needed
 
-Encode `begins`, `closes`, permit deadlines, and close-time updates as
+Encode `begins`, `closes`, and close-time updates as
 `YYYY-MM-DD HH:MM:SS`.
 
 ## Important Behavior
@@ -58,10 +58,8 @@ Encode `begins`, `closes`, permit deadlines, and close-time updates as
 
 - `change_close_time(...)` supports shortening or immediate close, not arbitrary
   extension in place
-- `create_stream_from_permit(...)` authorizes the stream parameters, but the
-  token-side approval needed for escrow funding has to exist
+- Submit `create_stream` directly from the sender account.
 
 ## Related Pages
 
 - [XSC-0003: Streaming Token](/smart-contracts/standards/xsc-0003)
-- [Permit Standard](/smart-contracts/standards/xsc-0002)

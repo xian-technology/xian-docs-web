@@ -11,7 +11,7 @@ existing network running an earlier runtime is not automatically compatible.
 | --- | --- |
 | Compatible image or operational update | Validate first, then restart nodes in the agreed maintenance order |
 | Compiler, execution, metering, state format, or consensus-rule change | Coordinated network upgrade with an agreed activation boundary |
-| Move an earlier network to `xian_vm_v1` | Rehearse contract and state migration before scheduling the cutover |
+| Start a distinct chain with existing native balances | Reconcile a snapshot through the [balance importer](/node/balance-migration) and build its target genesis |
 
 The `xian-deploy` upgrade playbook rolls hosts one at a time. Use that flow only
 when the old and target versions can participate in the same network during
@@ -75,36 +75,19 @@ xian node status validator-1
 xian node health validator-1
 ```
 
-## Migrating an Earlier Network
+## Starting a chain from existing balances
 
-`xian_vm_v1` executes persisted canonical IR in `__xian_ir_v1__`. Stored source
-alone is not an executable contract on this runtime, and startup does not
-compile an earlier network's source-only contracts automatically.
+The [balance importer](/node/balance-migration) prepares a fresh genesis from
+an explicitly selected source snapshot and a reviewed disposition for each
+contract-held balance. It preserves user account identifiers and exact native
+balances, installs current contracts, and starts with enrollment disabled.
+It does not import old contract code, allowances, streams, nonces or registry
+records. Redeploy applications through their owning contract bundles.
 
-Before scheduling a migration:
-
-1. Inventory deployed contracts and their dependencies from a representative
-   export of the existing network.
-2. Compile every contract with the target compiler. Resolve unsupported syntax
-   and check expected contract behavior on the target VM.
-3. Prepare a deterministic state conversion that preserves the agreed balances,
-   nonces, ownership, contract storage, validator state, and pending governance
-   actions. Populate the target contract artifacts as part of that conversion.
-4. Compare independent migration outputs and record the expected application
-   hash. Re-run the conversion from the same input to verify repeatability.
-5. Start a multi-validator rehearsal from the converted state. Exercise actual
-   application flows, restart, snapshot restore, and indexed-history recovery.
-6. Agree the stop boundary, which state is authoritative, and the conditions for
-   restarting or aborting before executing the production procedure.
-
-Do not redeploy all contracts through ordinary submission as a substitute for
-state migration: submission runs constructors and initializes contract state.
-The generic snapshot/import helpers restore their supported data formats;
-they do not decide how an earlier runtime's contract state should be converted.
-
-The draft mainnet manifest is a launch/rehearsal asset. It is not a migration
-plan for an existing network. The network's accepted plan must explicitly
-resolve chain identity, retained history, and the transition height.
+This creates a distinct chain. It is separate from restoring a node on an
+existing chain, and does not stop or change the source network. Use the same
+snapshot, plan, target bundle, chain ID and genesis time on every validator,
+and compare the generated hashes before starting them.
 
 ## Backups and Recovery
 

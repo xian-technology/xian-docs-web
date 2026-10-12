@@ -80,3 +80,11 @@ deploy and seed the DEX product first; base local networks do not include it.
 - [xian-py](/tools/xian-py)
 - [xian-dex-automation](/tools/xian-dex-automation)
 - [Local DEX Bootstrap](/node/local-dex-bootstrap)
+
+## Wallet authorization scope
+
+The fork's Xian wallet provider uses `xian_py.Wallet` with Ed25519 private keys.
+Use it with unenrolled accounts. It cannot sign transactions for an enrolled
+hybrid account; use a service with explicit hybrid credential support for that
+account. See [DEX Automation](/tools/xian-dex-automation) and
+[Account Backups and Recovery](/concepts/hybrid-account-recovery).

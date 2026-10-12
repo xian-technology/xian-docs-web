@@ -96,3 +96,11 @@ validator and Python SDK.
 
 - [Products overview](/products/)
 - [XSC-0005: Non-Fungible Token](/smart-contracts/standards/xsc-0005)
+
+## Hybrid deployment credentials
+
+An enrolled deployer can set `XIAN_ACTIVE_BACKUP_FILE`,
+`XIAN_BACKUP_PASSWORD` and `XIAN_CHAIN_ID` instead of
+`XIAN_WALLET_PRIVATE_KEY`. Supply an encrypted active-only credential derived
+from the verified master backup and keep the master offline. The bootstrap
+preserves the original authority address and does not enroll accounts.

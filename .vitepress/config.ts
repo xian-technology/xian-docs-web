@@ -128,7 +128,6 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/smart-contracts/standards/' },
             { text: 'XSC-0001: Fungible Token', link: '/smart-contracts/standards/xsc-0001' },
-            { text: 'XSC-0002: Permit Authorizer', link: '/smart-contracts/standards/xsc-0002' },
             { text: 'XSC-0003: Streaming Token', link: '/smart-contracts/standards/xsc-0003' },
             { text: 'XSC-0004: Wrapped Token', link: '/smart-contracts/standards/xsc-0004' },
             { text: 'XSC-0005: Non-Fungible Token', link: '/smart-contracts/standards/xsc-0005' }
@@ -167,6 +166,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/concepts/' },
             { text: 'Transaction Lifecycle', link: '/concepts/transaction-lifecycle' },
+            { text: 'Account Backups & Recovery', link: '/concepts/hybrid-account-recovery' },
             { text: 'Parallel Block Execution', link: '/concepts/parallel-block-execution' },
             { text: 'Consensus & Finality', link: '/concepts/consensus' },
             { text: 'Time & Block Policy', link: '/concepts/time-and-blocks' },
@@ -202,6 +202,7 @@ export default defineConfig({
             { text: 'Protocol Governance & State Patches', link: '/node/protocol-governance' },
             { text: 'Governance Web Console', link: '/node/governance-web' },
             { text: 'Recovery Plans', link: '/node/recovery-plans' },
+            { text: 'Balance Import', link: '/node/balance-migration' },
             { text: 'Node Profiles', link: '/node/profiles' },
             { text: 'Starting, Stopping & Monitoring', link: '/node/managing' },
             { text: 'Upgrading', link: '/node/upgrading' }

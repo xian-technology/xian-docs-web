@@ -97,6 +97,11 @@ assert token.balance_of(address="sys") == 999_900
 Add failure tests for negative amounts, insufficient balances, allowance
 limits, unauthorized metadata changes, and empty recipients.
 
+The Ed25519 key examples apply to unenrolled accounts. For an enrolled
+account, use the SDK's hybrid signer with current active credentials or an
+injected wallet. The account address and contract call stay the same. See
+[Account Backups and Recovery](/concepts/hybrid-account-recovery).
+
 ## Deploy Source
 
 ```python

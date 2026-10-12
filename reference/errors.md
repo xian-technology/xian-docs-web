@@ -24,7 +24,8 @@ See:
 
 These happen before execution, during mempool admission:
 
-- invalid signature
+- invalid signature or obsolete account keys
+- closed enrollment, mismatched account epoch, or invalid transition proofs
 - wrong `chain_id`
 - nonce mismatch
 - insufficient balance for the supplied chi limit on paid-fee networks

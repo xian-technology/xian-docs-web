@@ -116,3 +116,10 @@ Contract `now` always comes from finalized block time. See
 - [Performance and Capacity](/node/performance)
 - [Pruning and Retention](/node/pruning)
 - [BDS Indexed Queries](/api/bds)
+
+## Account enrollment policy
+
+Hybrid enrollment is controlled by committed `_accounts.policy`, not a
+node-local `xian.toml` switch. Checked-in bundles set `enrollment_open` to
+`false` and `transition_chi` to `100000`. Existing enrolled accounts still use
+their current registry keys. See [Account Backups and Recovery](/concepts/hybrid-account-recovery).

@@ -15,7 +15,7 @@ hashlib.sha3_hex(value)
 All helpers accept a string.
 
 Use the `_text` helpers when the value is an ordinary contract message,
-identifier, JSON string, canonical payload, permit message, or other
+identifier, JSON string, canonical payload, or other
 human-readable value. The runtime hashes the exact UTF-8 bytes of the string.
 
 Use the `_hex` helpers only when the value is already encoded as raw bytes in
@@ -37,7 +37,7 @@ All functions return lowercase hex strings.
 ## Common Uses
 
 - deterministic identifiers
-- permit or authorization-message hashing
+- canonical message hashing
 - compact code or config fingerprints
 - note, payload, or commitment helper flows in privacy-oriented contracts
 

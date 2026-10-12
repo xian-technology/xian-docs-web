@@ -66,6 +66,7 @@ operator and public-network profiles may choose a narrower service posture.
 - [Starting, Stopping and Monitoring](/node/managing)
 - [Pruning and Retention](/node/pruning)
 - [Recovery Plans](/node/recovery-plans)
+- [Balance Import](/node/balance-migration)
 - [Upgrading](/node/upgrading)
 - [Becoming a Validator](/node/validators)
 - [Validator Operations Runbook](/node/validator-operations-runbook)

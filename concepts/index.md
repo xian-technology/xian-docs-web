@@ -7,6 +7,8 @@ not just how to call one contract function at a time.
 
 - [Transaction Lifecycle](/concepts/transaction-lifecycle) for the path from
   signed payload to finalized block
+- [Account Backups and Recovery](/concepts/hybrid-account-recovery) for mnemonic
+  accounts, hybrid authorization, encrypted signing keys and master backups
 - [Consensus & Finality](/concepts/consensus) for the CometBFT boundary and
   validator agreement
 - [The ABCI Layer](/concepts/abci) for what `xian-abci` actually owns

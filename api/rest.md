@@ -110,3 +110,12 @@ compute even though it does not commit state.
 - [BDS Indexed Queries](/api/bds)
 - [WebSocket Subscriptions](/api/websockets)
 - [GraphQL](/api/graphql)
+
+## Account authorization state
+
+Read committed account state with `/get/_accounts.records:<address>` and policy
+with `/get/_accounts.policy`. The SDK account helpers validate these records.
+For an absent registry value, a successful ABCI response carries a single NUL
+byte (`AA==` in CometBFT's base64 JSON), which is distinct from a missing or
+malformed wire value. Query errors must stop signing rather than trigger a
+fallback to an original key. See [Account Backups and Recovery](/concepts/hybrid-account-recovery).

@@ -42,3 +42,9 @@ validators must stay aligned on:
 - `xian-abci` and `xian-contracting` versions
 - the fixed `xian_vm_v1` runtime and gas policy
 - the canonical Rust compiler and validator-derived VM IR
+
+## Account authorization and consensus keys
+
+Hybrid account signatures protect enrolled transaction accounts. CometBFT
+validator votes use separate Ed25519 consensus keys; enrolling a wallet does
+not change validator signing or make consensus quantum-resistant.

@@ -23,11 +23,13 @@ returns `False`. Malformed hex inputs or an invalid Ed25519 public-key shape
 can raise before signature verification runs, so validate untrusted public keys
 with `crypto.key_is_valid(...)` before calling `crypto.verify(...)`.
 
-Typical uses include:
-
-- permit-style approvals
-- signed off-chain authorizations
-- relayed action authorization patterns
+This is a raw Ed25519 primitive. It does not look up the account registry or
+follow key rotation and recovery. Do not use an account's original public key
+here to authorize spending or approvals: that would retain old-key authority
+after enrollment. Fresh-chain currency and stream contracts use authenticated
+transaction callers. Protocols
+using off-chain messages need a separately designed and reviewed authorization
+scheme.
 
 ## `crypto.key_is_valid(...)`
 
@@ -48,3 +50,14 @@ specific account role.
 - use `crypto.key_is_valid(...)` for input validation, not for authorization
 - remember that signature verification is public and deterministic; there is no
   private key handling inside the contract runtime
+
+## Signature Acceptance
+
+Verification rejects small-order public keys and signature points, malformed
+point encodings, and noncanonical signature scalars. Use signatures produced
+from randomly generated Ed25519 seeds. A syntactically valid key is not proof
+that a signature is valid.
+
+The node admission fast path and VM use strict Ed25519 verification. Deploy
+validator runtime changes from the same pinned release across the network;
+changing signature acceptance is consensus-sensitive.

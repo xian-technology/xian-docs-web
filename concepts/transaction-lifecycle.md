@@ -6,7 +6,7 @@ deterministic execution, atomic commit, and optional indexing.
 ```mermaid
 flowchart TD
   Build["Build payload with chain ID, nonce, call, and chi limit"]
-  Sign["Sign with Ed25519"]
+  Sign["Sign with the account’s current authorization keys"]
   Broadcast["Broadcast through CometBFT RPC"]
   Check["CheckTx admission"]
   Mempool["Mempool"]
@@ -37,6 +37,43 @@ SDKs support `async`, `checktx`, and `commit` broadcast modes. `checktx`
 returns mempool admission; it does not prove final execution success. Use a
 receipt wait when the application needs finality.
 
+## Hybrid Account Enrollment
+
+The node supports a consensus-controlled account registry for Ed25519 plus
+ML-DSA-65 authorization. Enrollment is disabled in the default network bundles.
+The registry policy controls whether an unenrolled address can enroll.
+
+Enrollment preserves the existing sender string exactly. Native/token balances,
+allowances, contract ownership, `ctx.signer`, and the nonce sequence keep the
+same identity. An unenrolled account continues using its existing Ed25519 key.
+Enrollment requires the existing key's authorization and possession proofs for
+both a new active pair and a separate recovery pair. Both signatures are required
+for each hybrid pair.
+
+After successful enrollment commits, the old key alone cannot spend or recover
+that account. The SDKs and wallets derive active and recovery credentials from
+one fresh master and require a verified master backup per account and chain.
+These credentials cannot be reconstructed from the original mnemonic or private
+key. Recovery uses the
+separate pair to install fresh active and recovery keys, and retains the account's
+balances and permissions. Recovery is immediate; it does not veto an attacker
+who already controls both active secrets.
+
+Registry transactions use explicit `xian_account_v1` metadata and the native
+`_accounts` operations `enroll`, `rotate`, and `recover`. They do not call a
+user-deployed contract. The chain policy sets a fixed chi cost for these
+operations; paid networks charge the corresponding fee. Failed transitions do
+not change authorization. The transaction nonce can still be consumed when an
+otherwise valid transaction fails during execution, as with ordinary calls.
+
+After a registry operation is included, later transactions from the same sender
+must wait until the next committed block. CheckTx acceptance alone does not
+activate keys. Registry records and policy are included in the app hash,
+atomic commit, snapshots, and state exports.
+
+See [hybrid backups and recovery](hybrid-account-recovery.md) for the SDK and
+wallet migration workflow.
+
 ## CheckTx
 
 Before mempool admission, the application checks payload shape, signature,
@@ -49,8 +86,8 @@ A CheckTx rejection does not enter the mempool or change chain state.
 ## Consensus and Execution
 
 CometBFT fixes transaction order and the block timestamp. During
-`FinalizeBlock`, every validator executes the same ordered calls through
-`xian_vm_v1`.
+`FinalizeBlock`, every validator executes the same ordered contract calls through
+`xian_vm_v1`; native account-registry operations use the node registry handler.
 
 For each transaction, the runtime:
 

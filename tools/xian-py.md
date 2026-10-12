@@ -37,6 +37,11 @@ with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
 Use `XianAsync` in asynchronous applications. The sync and async clients expose
 the same core concepts.
 
+The Ed25519 key examples apply to unenrolled accounts. For an enrolled
+account, use the SDK's hybrid signer with current active credentials or an
+injected wallet. The account address and contract call stay the same. See
+[Account Backups and Recovery](/concepts/hybrid-account-recovery).
+
 ## Deploy Source
 
 ```python
@@ -150,3 +155,49 @@ Receipt recovery can scan recent blocks when transaction indexing is
 unavailable. It hashes the exact submitted bytes and requires an actual
 execution result; missing or pruned block results are reported as unknown/error,
 never as successful execution.
+
+## Hybrid accounts
+
+The optional `hybrid` extra supplies ML-DSA-65 and portable master backups.
+Import `HybridWallet` from `xian_py.hybrid`, and `MasterAccountTransitionDraft`,
+`import_account_master`, `account_backup_from_master` from `xian_py.account_master`.
+A `HybridWallet` can be passed to `Xian` or `XianAsync`; transactions retain the
+original `public_key` identity. Recovery credentials cannot spend.
+
+`MasterAccountTransitionDraft.export_master_backup()` exports one master file
+(optional password argument). Reopen it with `verify_master_backup()` before
+`sign()` can produce an enrollment, rotation or recovery transaction. The master
+recreates either role through `account_backup_from_master(master, role)`.
+`AccountTransitionDraft` and version-1 role backup imports remain compatibility
+APIs for older independently generated keys. Python
+helpers are offline primitives: the application must query current registry and
+policy, obtain the nonce, durably encrypt the candidate active backup and exact
+signed transaction **before** broadcasting, and wait for committed state before
+changing its active wallet. Never replace custody state on CheckTx acceptance.
+The official browser/mobile wallets implement this lifecycle through the JS vault.
+
+See [hybrid account backups and recovery](../concepts/hybrid-account-recovery.md).
+Install with `uv add "xian-tech-py[hybrid]"`. Local development resolves the
+sibling account package. Enrollment is disabled in checked-in network policies.
+
+## HD and mnemonic accounts
+
+Install `xian-tech-py[hd]` for mnemonic support:
+
+```python
+import os
+from xian_py import Wallet
+
+phrase = os.environ["XIAN_RECOVERY_PHRASE"]
+first = Wallet.from_mnemonic(phrase, account_index=0)
+second = Wallet.from_mnemonic(phrase, account_index=1)
+```
+
+This uses the same indexed derivation as the browser and mobile wallets.
+`xian_py.wallet.HDWallet.get_wallet(path)` instead uses hardened SLIP-0010
+Ed25519 derivation; it produces different accounts from the same phrase.
+Always restore with the original scheme and index/path.
+
+Hybrid enrollment preserves the original address but uses a fresh master per
+account and chain. The original mnemonic does not replace that verified master
+backup. See [Account Backups and Recovery](/concepts/hybrid-account-recovery).

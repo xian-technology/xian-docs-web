@@ -6,6 +6,11 @@ The simplest path is:
 2. deploy reviewed source with an SDK
 3. inspect state and transaction results through the node APIs
 
+The Ed25519 key examples apply to unenrolled accounts. For an enrolled
+account, use the SDK's hybrid signer with current active credentials or an
+injected wallet. The account address and contract call stay the same. See
+[Account Backups and Recovery](/concepts/hybrid-account-recovery).
+
 ## Deploy A Contract
 
 ```python

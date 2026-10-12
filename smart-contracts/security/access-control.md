@@ -85,3 +85,15 @@ votes, bind approvals to an exact action, and make execution one-time.
 - distinguish application ownership from runtime ownership
 - bind approvals to an exact owner, spender, action, and scope
 - test direct calls, contract calls, duplicate approvals, and role changes
+
+## Account keys and contract authority
+
+`ctx.caller` and `ctx.signer` contain stable account identities. Hybrid
+enrollment, rotation and recovery change the keys accepted by the node without
+changing those identities, so balances and address-based roles continue to work.
+The contract does not need to parse hybrid signatures.
+
+Do not authorize an account by checking a raw signature against its original
+address with `crypto.verify`: that primitive does not consult the account
+registry. Recovery also leaves existing allowances, delegates and contract
+roles intact; revoke unwanted permissions separately.

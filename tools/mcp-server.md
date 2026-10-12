@@ -195,3 +195,25 @@ wallet message signatures use the separate versioned Xian message envelope.
 - [xian-py](/tools/xian-py)
 - [xian-js](/tools/xian-js)
 - [xian-intentkit](/tools/xian-intentkit)
+
+## Configured hybrid signer
+
+Set `XIAN_ACTIVE_BACKUP_FILE`, `XIAN_BACKUP_PASSWORD`, `XIAN_CHAIN_ID` and,
+optionally, `XIAN_SIGNER_ADDRESS` for a local enrolled service account. Pass an
+empty `private_key` to transaction and DEX submit tools in this mode. Supplying
+both credential modes is rejected. The unsafe-tool and HTTP-authentication
+requirements still apply.
+
+Use an encrypted active-only credential derived from the verified master;
+keep the master offline. The server does not enroll or recover accounts, and
+its raw Ed25519 message tools do not prove hybrid account authority.
+
+## HD derivation
+
+`create_hd_wallet` and `create_hd_wallet_from_mnemonic` use Python's hardened
+SLIP-0010 path `[44, 0, 0, 0, 0]` for the Xian account. This differs from the
+indexed mnemonic scheme used by the browser/mobile wallets and
+`Wallet.from_mnemonic`. Preserve the returned derivation path when restoring.
+These tools return key material under the unsafe-wallet opt-in; their results
+must be treated as secrets. A mnemonic does not restore an enrolled account's
+independently generated hybrid master.
