@@ -103,6 +103,8 @@ Password unlock reads 250,000-iteration vaults and re-encrypts all stored
 account keys, the mnemonic, and shielded snapshots at the current work factor
 before saving one replacement state record. A wrong password or unreadable
 stored secret aborts migration without replacing the record.
+If the stored wallet changes during unlock, the wallet refuses to overwrite it
+and asks you to retry.
 
 Biometric unlock cannot perform password-based re-encryption. After a password
 unlock migrates the vault, re-enable biometric unlock in Settings. Use a strong,

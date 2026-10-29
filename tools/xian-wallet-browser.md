@@ -104,6 +104,8 @@ explicit work-factor field, and re-encrypts all stored secrets at the current
 work factor. The wallet prepares every encrypted account key, mnemonic, and
 shielded snapshot before saving one replacement state record. A wrong password
 or unreadable stored secret aborts migration without replacing the record.
+If the stored wallet changes during unlock, the wallet refuses to overwrite it
+and asks you to retry.
 
 Use a strong, unique wallet password. Exported backup files retain their
 original parameters until another backup is exported; encrypted backups remain
@@ -133,3 +135,9 @@ starting a replacement request. An interruption is not evidence that a transfer
 failed. Wallet integrations using a custom persistent store should implement
 `claimApprovalExecution` atomically and use one controller authority for that
 store.
+
+Custom `WalletController` stores must also implement optional
+`replaceState(expected, next)` as an atomic comparison and replacement to enable
+password-work-factor migration. Stores without that capability can unlock
+existing wallets, but leave their encryption parameters unchanged. The official
+extension store implements this operation.
