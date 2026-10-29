@@ -193,8 +193,8 @@ wallet message signatures use the separate versioned Xian message envelope.
 ## HD Derivation
 
 `create_hd_wallet` and `create_hd_wallet_from_mnemonic` accept an optional
-`account_index`, an integer from `0` through `4294967295`, defaulting to `0`.
-They return the numeric `account_index` alongside the wallet material.
+`account_index` for Xian, an integer from `0` through `4294967295`, defaulting to
+`0`. They return the numeric `account_index` alongside the wallet material.
 
 Xian accounts use the shared indexed mnemonic scheme: the same phrase and index
 `n` produce the same account as `Wallet.from_mnemonic(phrase, account_index=n)`,
@@ -202,8 +202,9 @@ Xian accounts use the shared indexed mnemonic scheme: the same phrase and index
 mobile wallet. Restore with the same phrase and account index;
 see [Python mnemonic accounts](/tools/xian-py#mnemonic-accounts-and-recovery).
 
-The Ethereum account in the result uses that index with the Ethereum helper's
-own derivation.
+The Ethereum account in the result always uses the Ethereum helper's first
+account, index `0`, independently of the selected Xian index. The result records
+this as `ethereum_account_index: 0`.
 
 These tools return secret key material under the unsafe-wallet opt-in. Preserve
 the phrase and account index securely with your recovery material.
