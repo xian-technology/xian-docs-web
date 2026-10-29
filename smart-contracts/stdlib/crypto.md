@@ -48,3 +48,15 @@ specific account role.
 - use `crypto.key_is_valid(...)` for input validation, not for authorization
 - remember that signature verification is public and deterministic; there is no
   private key handling inside the contract runtime
+
+## Signature Acceptance
+
+The VM and node admission reject small-order public keys and signature points,
+invalid point encodings, and noncanonical signature scalars. A syntactically
+valid key is not proof that a signature is valid. Use signatures produced from
+randomly generated Ed25519 seeds.
+
+Signature acceptance affects transaction admission and contract execution.
+Changes to these rules require a coordinated validator release; follow the
+[upgrade procedure](/node/upgrading) rather than mixing verification policies
+across validators.

@@ -124,7 +124,8 @@ print(result["state"])
 - dry runs do not commit writes
 - dry runs are estimates against the node's current state view, not a predicted
   later state
-- nonce/signature admission rules are not the focus of the simulator itself
+- simulation does not authenticate the supplied sender or prove that a nonce
+  or signature will pass transaction admission
 - state can change between simulation and real submission
 - the node serializes queries with state transitions and keeps finalized,
   uncommitted block writes separate from the query view

@@ -73,6 +73,8 @@ only on a trusted local/private network; prefer HTTPS elsewhere.
 - unlocked secret material exists only in process memory
 - the secure-store session record contains wrapped session data, not raw keys
 - invalid session records fail closed to the locked state
+- locking invalidates pending session operations; a delayed session read or
+  save cannot restore the unlocked state
 - WalletConnect approves required Xian scopes only and rechecks chain, method,
   and account on every request
 - external message signatures use a chain- and account-bound envelope
@@ -89,6 +91,28 @@ npm run test
 
 Exercise security-sensitive flows on a device or emulator before shipping a
 build.
+
+## Password Protection and Recovery
+
+Local vaults and encrypted backup exports use AES-256-GCM with salted
+PBKDF2-HMAC-SHA256 at 600,000 iterations. Imports accept work factors from
+250,000 through 2,000,000 and validate the 16-byte salt, 12-byte nonce, and
+minimum authenticated ciphertext size before deriving a key.
+
+Password unlock reads 250,000-iteration vaults and re-encrypts all stored
+account keys, the mnemonic, and shielded snapshots at the current work factor
+before saving one replacement state record. A wrong password or unreadable
+stored secret aborts migration without replacing the record.
+
+Biometric unlock cannot perform password-based re-encryption. After a password
+unlock migrates the vault, re-enable biometric unlock in Settings. Use a strong,
+unique wallet password. Exported backups retain their original parameters until
+another backup is exported; encrypted backups remain version 2.
+
+Mnemonic accounts use the same indexed derivation as the browser wallet and
+Python's `Wallet.from_mnemonic(phrase, account_index=n)`. Record the account index
+with your recovery material. Python's `HDWallet.get_wallet(path)` uses a
+different scheme; see [mnemonic accounts and recovery](/tools/xian-py#mnemonic-accounts-and-recovery).
 
 ## Related Pages
 

@@ -93,6 +93,11 @@ console.log(submission.txHash, submission.finalized);
 Do not put private keys in browser application code. Browser dapps should use
 an injected wallet provider.
 
+`verifyMessage` and `verifyXianMessage` reject small-order keys and signature
+points, invalid point encodings, and noncanonical signature scalars. Verification
+uses the exact message bytes; do not trim or otherwise rewrite signed text.
+Key and signature length checks alone do not establish a valid signature.
+
 ## Deploy Source
 
 ```ts

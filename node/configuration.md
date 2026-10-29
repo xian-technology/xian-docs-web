@@ -88,6 +88,24 @@ and must agree across the network. Coordinate changes to those values with
 the validator set. Logging, query limits, and serial-equivalent parallel
 execution can vary by node.
 
+## Reproducible Genesis Builds
+
+The Python genesis helpers in `xian.genesis_builder` accept an optional
+`genesis_time` argument. For a reproducible build, supply a timezone-aware ISO
+timestamp such as `2026-01-01T00:00:00.000000Z` and pin the other inputs,
+including contract sources, compiler/runtime versions, validator keys, and
+constructor arguments.
+
+Combined network builders normalize the timestamp to UTC and use the same
+instant for the CometBFT genesis header, submission and deployed-contract
+timestamps, and constructor `now`. Microsecond precision is preserved. A timestamp
+without a timezone is rejected. When omitted, the timestamp is sampled once in
+UTC for that build, so separate builds can produce different genesis state.
+
+Compare the complete generated genesis and application hashes before distributing
+the accepted file to validators. This controls genesis construction only; do not
+regenerate genesis for a running network as an operational update.
+
 ## Snapshot and State Sync
 
 These are separate mechanisms:

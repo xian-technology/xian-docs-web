@@ -56,6 +56,9 @@ The layered harness covers:
 - five-node startup, health, peers, validator count, and app-hash agreement
 - application version, submission-name admission, and query-height/error
   semantics through each running node's CometBFT RPC
+- rejection of forged and noncanonical Ed25519 transactions at each node,
+  plus committed contract verification of valid and adversarial signatures
+- genesis contract timestamps matching the genesis header across all five nodes
 - proposal byte-budget and nonce-selection checks in isolated processes using
   each node image's installed runtime and fee configuration
 - real deployment at the 64-character contract-name limit, with constructor

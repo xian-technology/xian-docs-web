@@ -37,6 +37,28 @@ with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
 Use `XianAsync` in asynchronous applications. The sync and async clients expose
 the same core concepts.
 
+## Mnemonic Accounts and Recovery
+
+Install `xian-tech-py[hd]` for mnemonic support:
+
+```python
+import os
+from xian_py import Wallet
+
+phrase = os.environ["XIAN_RECOVERY_PHRASE"]
+first = Wallet.from_mnemonic(phrase, account_index=0)
+second = Wallet.from_mnemonic(phrase, account_index=1)
+```
+
+`Wallet.from_mnemonic` uses the same indexed derivation as the browser and mobile
+wallets: SHA-256 of the BIP39 seed, `xian-wallet-seed-v2`, and the four-byte
+big-endian account index.
+
+`xian_py.wallet.HDWallet.get_wallet(path)` uses hardened SLIP-0010 Ed25519
+derivation. It produces different accounts from the same phrase. These are
+distinct supported schemes; always restore with the original scheme and
+index/path. Choosing another scheme does not move funds to the resulting address.
+
 ## Deploy Source
 
 ```python

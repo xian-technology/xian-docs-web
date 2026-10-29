@@ -114,10 +114,18 @@ python3 ./scripts/backend.py start --no-bds-enabled --dex-automation
 python3 ./scripts/backend.py endpoints --no-bds-enabled --dex-automation
 ```
 
-The stack-managed admin UI/API defaults to `http://127.0.0.1:38280`. The stack
-creates service configuration and a local key file under
+The stack-managed admin UI/API defaults to `http://127.0.0.1:38280`. When creating
+service configuration, the stack creates a local key file under
 `.artifacts/dex-automation/`; execution remains disabled until the operator
-enables it.
+enables it. An existing configuration keeps its selected credential source.
+The stack does not create an unused default key or inject a default key-file
+environment override into that configuration. Explicit environment overrides
+remain operator-controlled.
+
+When creating service configuration, the stack rejects an existing empty keeper
+key file. The strategy-vault bootstrap rejects empty files in both preview and
+execute mode. Restore the intended key from backup before continuing. An empty
+file is not treated as permission to generate a replacement identity.
 
 ### Local Strategy-Vault Exercise
 

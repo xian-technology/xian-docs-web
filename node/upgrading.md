@@ -29,6 +29,10 @@ Use one accepted release bundle for the fleet. Record:
 The `xian_vm_v1` name alone is not a compatibility guarantee: two releases can
 use that name while differing in compiler output, VM behavior, or metering.
 Fee mode and free-metered transaction/block caps must also agree across nodes.
+Ed25519 signature acceptance is also consensus-sensitive: stricter rejection
+rules in transaction admission or contract `crypto.verify` require coordinated
+deployment, even though the signature algorithm and ordinary signing API stay
+the same.
 
 Validate the exact release before the maintenance window:
 

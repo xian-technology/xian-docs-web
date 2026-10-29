@@ -190,6 +190,17 @@ message text, including leading/trailing spaces, newlines, and Unicode. Keep tha
 text unchanged when verifying. These tools expose raw Ed25519 signing; injected
 wallet message signatures use the separate versioned Xian message envelope.
 
+## HD Derivation
+
+`create_hd_wallet` and `create_hd_wallet_from_mnemonic` derive the Xian account
+with Python's hardened SLIP-0010 path `[44, 0, 0, 0, 0]`. This differs from the
+indexed mnemonic scheme used by the browser/mobile wallets and
+`Wallet.from_mnemonic`. Restore with the same scheme and path used for creation;
+see [Python mnemonic accounts](/tools/xian-py#mnemonic-accounts-and-recovery).
+
+These tools return secret key material under the unsafe-wallet opt-in. Preserve
+recovery material securely, including its derivation scheme and path.
+
 ## Related Tools
 
 - [xian-py](/tools/xian-py)

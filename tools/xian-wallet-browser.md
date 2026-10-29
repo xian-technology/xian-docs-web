@@ -88,7 +88,31 @@ Load `apps/wallet-extension/dist/` as an unpacked extension.
 - seed phrases and private keys should never leave the wallet approval flow
 - dapps receive accounts and approved signatures, not raw secrets
 - network and account changes invalidate mismatched pending approvals
+- locking invalidates pending session operations; a delayed session read or
+  save cannot restore the unlocked state
 - use a separate low-value account when testing untrusted dapps
+
+## Password Protection and Recovery
+
+Local vaults and encrypted backup exports use AES-256-GCM with salted
+PBKDF2-HMAC-SHA256 at 600,000 iterations. Imports accept work factors from
+250,000 through 2,000,000 and validate the 16-byte salt, 12-byte nonce, and
+minimum authenticated ciphertext size before deriving a key.
+
+Password unlock reads 250,000-iteration vaults, including vaults without an
+explicit work-factor field, and re-encrypts all stored secrets at the current
+work factor. The wallet prepares every encrypted account key, mnemonic, and
+shielded snapshot before saving one replacement state record. A wrong password
+or unreadable stored secret aborts migration without replacing the record.
+
+Use a strong, unique wallet password. Exported backup files retain their
+original parameters until another backup is exported; encrypted backups remain
+version 2.
+
+Mnemonic accounts use the same indexed derivation as the mobile wallet and
+Python's `Wallet.from_mnemonic(phrase, account_index=n)`. Record the account index
+with your recovery material. Python's `HDWallet.get_wallet(path)` uses a
+different scheme; see [mnemonic accounts and recovery](/tools/xian-py#mnemonic-accounts-and-recovery).
 
 ## Related Pages
 
