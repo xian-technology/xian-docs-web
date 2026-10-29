@@ -111,10 +111,11 @@ unlock migrates the vault, re-enable biometric unlock in Settings. Use a strong,
 unique wallet password. Exported backups retain their original parameters until
 another backup is exported; encrypted backups remain version 2.
 
-Mnemonic accounts use the same indexed derivation as the browser wallet and
-Python's `Wallet.from_mnemonic(phrase, account_index=n)`. Record the account index
-with your recovery material. Python's `HDWallet.get_wallet(path)` uses a
-different scheme; see [mnemonic accounts and recovery](/tools/xian-py#mnemonic-accounts-and-recovery).
+Mnemonic accounts use the same indexed derivation as the browser wallet,
+Python's `Wallet.from_mnemonic(phrase, account_index=n)`, and
+`HDWallet(phrase).get_wallet(account_index=n)`. The same phrase and index restore
+the same address. Record the account index with your recovery material; see
+[mnemonic accounts and recovery](/tools/xian-py#mnemonic-accounts-and-recovery).
 
 ## Related Pages
 

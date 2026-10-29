@@ -192,14 +192,21 @@ wallet message signatures use the separate versioned Xian message envelope.
 
 ## HD Derivation
 
-`create_hd_wallet` and `create_hd_wallet_from_mnemonic` derive the Xian account
-with Python's hardened SLIP-0010 path `[44, 0, 0, 0, 0]`. This differs from the
-indexed mnemonic scheme used by the browser/mobile wallets and
-`Wallet.from_mnemonic`. Restore with the same scheme and path used for creation;
+`create_hd_wallet` and `create_hd_wallet_from_mnemonic` accept an optional
+`account_index`, an integer from `0` through `4294967295`, defaulting to `0`.
+They return the numeric `account_index` alongside the wallet material.
+
+Xian accounts use the shared indexed mnemonic scheme: the same phrase and index
+`n` produce the same account as `Wallet.from_mnemonic(phrase, account_index=n)`,
+`HDWallet(phrase).get_wallet(account_index=n)`, and account `n` in the browser or
+mobile wallet. Restore with the same phrase and account index;
 see [Python mnemonic accounts](/tools/xian-py#mnemonic-accounts-and-recovery).
 
+The Ethereum account in the result uses that index with the Ethereum helper's
+own derivation.
+
 These tools return secret key material under the unsafe-wallet opt-in. Preserve
-recovery material securely, including its derivation scheme and path.
+the phrase and account index securely with your recovery material.
 
 ## Related Tools
 

@@ -111,10 +111,11 @@ Use a strong, unique wallet password. Exported backup files retain their
 original parameters until another backup is exported; encrypted backups remain
 version 2.
 
-Mnemonic accounts use the same indexed derivation as the mobile wallet and
-Python's `Wallet.from_mnemonic(phrase, account_index=n)`. Record the account index
-with your recovery material. Python's `HDWallet.get_wallet(path)` uses a
-different scheme; see [mnemonic accounts and recovery](/tools/xian-py#mnemonic-accounts-and-recovery).
+Mnemonic accounts use the same indexed derivation as the mobile wallet,
+Python's `Wallet.from_mnemonic(phrase, account_index=n)`, and
+`HDWallet(phrase).get_wallet(account_index=n)`. The same phrase and index restore
+the same address. Record the account index with your recovery material; see
+[mnemonic accounts and recovery](/tools/xian-py#mnemonic-accounts-and-recovery).
 
 ## Related Pages
 
