@@ -80,6 +80,12 @@ failure or a definitive first-attempt rejection does not advance rule state.
 Timeouts, missing receipts, and rejections after an earlier uncertain broadcast
 remain pending and block new trades.
 
+This pause is local to the automation database and its dedicated signer. It does
+not lock the DEX or other wallets. A confirmed rejection or reverted transaction
+releases the queue for follow-up evaluations. If no node can establish an outcome,
+automation can remain paused indefinitely; a timeout cannot safely turn an
+unknown execution into a failed one.
+
 Restore the original RPC and its transaction history when recovery is blocked.
 Do not delete pending records or start with a fresh database to resume trading:
 the original swap may already have executed. Expiry alone does not prove failure;
@@ -89,14 +95,45 @@ execution journal existed cannot be recovered automatically.
 Use one database path on a local filesystem on Linux or macOS, and a dedicated
 signer. Different database copies, remote filesystems, and transactions submitted
 outside this service do not share its coordination. Do not remove the adjacent
-`.execution.lock` file while any process is running. Back up the database as one
+`.execution.lock` or `.configuration.lock` file while any process is running. Back up the database as one
 consistent SQLite snapshot, including its pending execution journal.
 
 The API rejects database path changes with HTTP 409. Stop all workers and API
-processes before migrating the existing database. Restart workers after network,
-custody, or signing configuration changes: live updates do not recreate an
-existing RPC client or signer. Event delivery can replay after a crash; choose
-baseline-reset and cooldown settings for the strategy's intended behavior.
+processes before migrating the existing database. Event delivery can replay
+after a crash; configure cooldowns for the strategy's intended behavior.
+
+## Live Configuration Changes
+
+API configuration and key changes automatically drain and restart workers. A
+shared gate stops new evaluations while existing work finishes and pending
+transactions are reconciled. The service publishes a new configuration revision
+in SQLite; every worker sharing that database recreates its watcher, RPC client,
+and signer, even without new events. Replacing a key at the same file path also
+forces a reload, with execution disabled before replacement.
+
+`GET /health` exposes `configuration_status`: `draining`, `restarting`, or
+`active` for the embedded worker, and `worker_error` if startup/runtime fails.
+Workers retry after failure. A configuration request waits while an outcome is
+unknown; competing writes return HTTP 409. After a client timeout, check
+`/config.yaml` and `/health` to determine whether the change completed.
+
+If the original RPC is unavailable, submit a configuration using a healthy RPC
+on the same chain. Drain recovery can query or rebroadcast the saved transaction
+there, validating the original chain and hash, and falls back to the original
+endpoint if needed. It never re-signs the unresolved transaction. Requests to
+disable execution perform receipt reads only during drain. An explicit chain
+change finishes the old transaction on its original chain before applying.
+
+RPC, chain, or DEX-contract changes clear event cursors and price baselines.
+Changing a rule's pair clears that rule's baseline. Cooldown timestamps are
+preserved. Local file/environment edits require restarting affected processes;
+API writes propagate through the shared database.
+
+The five-node E2E suite includes a mandatory recovery phase using the canonical
+DEX contracts: concurrent evaluations, process death after broadcast, live RPC
+reload, a reverted swap followed by a successful swap, and an unrelated wallet
+transacting while automation remains pending. All five validators must agree on
+receipts and balances, with one nonce and one input debit per successful swap.
 
 ## Strategy-Vault Custody
 

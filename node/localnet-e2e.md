@@ -72,6 +72,11 @@ The layered harness covers:
   while retaining return-only value rendering
 - periodic, burst, conflicting, and invalid transaction workloads
 - DEX bootstrap and mixed trading
+- canonical DEX automation recovery (`07-dex-automation-recovery`): concurrent
+  evaluation, a process killed after broadcast, recovery through another validator
+  during a configuration change, reverted-swap follow-up, and an unrelated wallet
+  transfer while automation is pending; receipts and balances agree across all
+  five validators, with no duplicate nonce consumption or input-token debit
 - BDS outage, catch-up, indexed reads, reindex, and watchers
 - validator governance, policy transitions, governed fee-distribution changes,
   and rejection of contract-mediated validator registration
