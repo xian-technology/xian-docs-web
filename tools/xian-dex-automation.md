@@ -77,14 +77,27 @@ Inspect `GET /runs` for `pending` status, the transaction hash, and
 `details.recovery_error`. Confirmed success updates the run, baseline, and
 cooldown atomically; cooldown starts when success is reconciled. Confirmed
 failure or a definitive first-attempt rejection does not advance rule state.
-Timeouts, missing receipts, and rejections after an earlier uncertain broadcast
-remain pending and block new trades.
+When the receipt is missing, recovery checks the saved signer's committed nonce
+on the original chain. Mempool next-nonce reservations do not count. If the nonce
+is consumed, the run becomes `outcome_unknown` with reason
+`nonce_consumed_receipt_missing`. The signed transaction is retained without
+rebroadcasting, and the shared queue is released. Independent rules can trade
+from fresh state using the same wallet; only the affected rule returns
+`rule_outcome_unknown`.
+
+That hold survives restarts and configuration changes. Evaluations check for the
+original receipt with a bounded lookup. When it becomes available, the existing
+run records success or failure and the rule resumes with a fresh baseline and
+cooldown. This also prevents replay when the recovered transaction reverted.
+Until receipt recovery, that rule remains held; do not rename or recreate it to
+bypass the hold. If nonce consumption cannot be verified, the shared queue stays
+pending and recovery may rebroadcast only the original signed transaction.
 
 This pause is local to the automation database and its dedicated signer. It does
 not lock the DEX or other wallets. A confirmed rejection or reverted transaction
-releases the queue for follow-up evaluations. If no node can establish an outcome,
-automation can remain paused indefinitely; a timeout cannot safely turn an
-unknown execution into a failed one.
+releases the queue for follow-up evaluations. The shared queue can remain paused
+if neither a receipt nor nonce consumption can be verified; a timeout cannot turn
+an unknown execution into a failed one.
 
 Restore the original RPC and its transaction history when recovery is blocked.
 Do not delete pending records or start with a fresh database to resume trading:
@@ -121,7 +134,7 @@ If the original RPC is unavailable, submit a configuration using a healthy RPC
 on the same chain. Drain recovery can query or rebroadcast the saved transaction
 there, validating the original chain and hash, and falls back to the original
 endpoint if needed. It never re-signs the unresolved transaction. Requests to
-disable execution perform receipt reads only during drain. An explicit chain
+disable execution read receipts and committed nonce state only during drain. An explicit chain
 change finishes the old transaction on its original chain before applying.
 
 RPC, chain, or DEX-contract changes clear event cursors and price baselines.
@@ -134,6 +147,10 @@ DEX contracts: concurrent evaluations, process death after broadcast, live RPC
 reload, a reverted swap followed by a successful swap, and an unrelated wallet
 transacting while automation remains pending. All five validators must agree on
 receipts and balances, with one nonce and one input debit per successful swap.
+It also hides receipts for successful and reverted swaps while retaining real
+committed-state reads: independent same-wallet trades must continue, original
+decisions must not repeat across worker recreation or RPC reload, and restoring
+receipts must safely release the affected rules.
 
 ## Strategy-Vault Custody
 

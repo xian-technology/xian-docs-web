@@ -76,7 +76,10 @@ The layered harness covers:
   evaluation, a process killed after broadcast, recovery through another validator
   during a configuration change, reverted-swap follow-up, and an unrelated wallet
   transfer while automation is pending; receipts and balances agree across all
-  five validators, with no duplicate nonce consumption or input-token debit
+  five validators, with no duplicate nonce consumption or input-token debit;
+  hidden receipts for successful and reverted swaps must allow independent
+  same-wallet trades without repeating the original decision, including across
+  worker recreation, RPC reload, and eventual receipt restoration
 - BDS outage, catch-up, indexed reads, reindex, and watchers
 - validator governance, policy transitions, governed fee-distribution changes,
   and rejection of contract-mediated validator registration
