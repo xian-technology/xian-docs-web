@@ -32,6 +32,20 @@ mutation through aliases or function arguments, iterator consumption, or
 optional builtin arguments. Compare results, storage writes, events and failed
 transactions, rather than checking only that source compiles.
 
+The runtime's compatibility suite includes a pinned pre-VM Python baseline.
+It checks source admission independently and preserves value types and dictionary
+key order when comparing returns, writes, events, and failure outcomes. Its
+coverage is bounded; it does not establish full language or metering parity.
+
+Dictionary operations reject unhashable keys, including lists, dictionaries,
+bytearrays, mutable sets, decimal/time objects, and tuples containing unhashable
+members. Equal numeric keys such as `True`, `1`, and `float("1")` address one
+entry; replacement preserves the first key and its position. Large integers
+remain distinct from nearby rounded floats. These in-memory rules do not relax
+the string-key requirement for dictionaries persisted in contract storage.
+Deterministic sets have their own member eligibility rules, including support
+for decimal/time values.
+
 Runtime fixes can change contract results. Validators participating in one
 network must use a consistent compiler and VM version when replaying blocks.
 

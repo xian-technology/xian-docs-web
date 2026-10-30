@@ -70,6 +70,10 @@ The layered harness covers:
   consumed-chi accounting after failed execution
 - rejection of unencodable writes with rollback and continued block production,
   while retaining return-only value rendering
+- dictionary duplicate replacement, numeric-key equality, exact large-integer
+  comparisons, and nested list removal; unhashable-key failures roll back writes
+  and events, with matching receipts on all five validators and a successful
+  follow-up transaction
 - periodic, burst, conflicting, and invalid transaction workloads
 - DEX bootstrap and mixed trading
 - canonical DEX automation recovery (`07-dex-automation-recovery`): concurrent
