@@ -122,6 +122,13 @@ The stack does not create an unused default key or inject a default key-file
 environment override into that configuration. Explicit environment overrides
 remain operator-controlled.
 
+Stack status and setup results report the effective source in
+`dex_automation_credential_source`: a file path or an environment-variable name,
+never the private key. `dex_automation_wallet_key_path` contains the resolved
+file path when a file supplies the key, and is `null` for an environment key.
+If the configuration cannot be inspected, the source is unavailable and
+`dex_automation_credential_source_error` reports that condition.
+
 When creating service configuration, the stack rejects an existing empty keeper
 key file. The strategy-vault bootstrap rejects empty files in both preview and
 execute mode. Restore the intended key from backup before continuing. An empty

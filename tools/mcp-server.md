@@ -6,6 +6,28 @@ surface documented here requires version `0.1.0` or newer.
 It exposes Xian wallet, query, transaction, indexed-read, crypto, and DEX
 operations to AI assistants and other tool-calling systems.
 
+## Installation
+
+From a standalone `xian-mcp-server` checkout:
+
+```bash
+uv sync --frozen
+uv run --frozen xian-mcp-server
+```
+
+These commands use the locked published dependencies, including
+`xian-tech-py` version `0.5.2` or newer within the supported `0.5` series.
+Sibling repositories are not required. The Dockerfile's `pypi` target also
+uses published dependencies:
+
+```bash
+docker build --target pypi -t xian-mcp-server:latest .
+```
+
+Docker Compose uses the separate `local` target to test sibling SDK sources.
+That development workflow requires `xian-py` and `xian-contracting` beside the
+MCP checkout.
+
 ## Important Safety Rule
 
 This server can hold private keys and submit transactions.
