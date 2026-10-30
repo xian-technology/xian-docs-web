@@ -64,16 +64,37 @@ During the child's module and constructor execution:
 ## Runtime Ownership
 
 `ctx.owner` is separate from an application variable such as
-`owner = Variable()`. Transfer runtime ownership through the authorized
-submission surface:
+`owner = Variable()`. A configured runtime owner restricts calls to the immediate
+caller, at both transaction entry and nested contract calls. An owner of `None`
+allows public calls; application-level checks still apply.
+
+Deployment and protected contract-metadata changes require the built-in
+`submission` contract to be executing. Calling an ordinary contract from a
+transaction that originally entered `submission` does not grant that contract
+metadata privileges.
+
+Transfer runtime ownership through the authorized submission surface. For
+example, an owner contract can expose an authorized handoff:
 
 ```python
 import submission
 
+administrator = Variable()
+
+@construct
+def seed():
+    administrator.set(ctx.caller)
+
 @export
 def handoff(contract: str, new_owner: str):
+    assert ctx.caller == administrator.get(), "Only administrator"
     submission.change_owner(contract=contract, new_owner=new_owner)
 ```
+
+The handoff succeeds only if the delegating contract is the target's current
+runtime owner. `submission.change_developer(...)` similarly retains its
+developer authorization checks. Routing a call through another contract does
+not bypass either authorization rule.
 
 ## Block Metadata
 

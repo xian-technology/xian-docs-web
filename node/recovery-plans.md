@@ -80,6 +80,36 @@ Recovery plans use the explicit archive-hash model in the plan itself.
 Signed snapshot manifests are supported in the normal node bootstrap path, but
 they are not the recovery-plan artifact format.
 
+## Snapshot Restore Boundaries
+
+Stop the node before restoring a snapshot. Restore replaces only the `data/`
+and `xian/` roots. A full node-home archive may contain `config/` or other
+entries, but those entries are not restored.
+
+The restore helper preserves local validator signing state, validator keys, and
+node keys at both their default and configured paths. Protected files inside a
+replaced root retain their bytes and file modes; files outside those roots are
+left in place. A missing local protected file is not imported from the archive.
+Restoring older chain data therefore does not rewind the local signing record
+or import another node's identity. Provision any missing keys through the normal
+node setup workflow.
+
+The archive is inspected before extraction into private staging. Only regular
+files and directories are accepted. Absolute or traversing paths, backslash
+paths, links, and special files are rejected even when the entry would otherwise
+be ignored. Duplicate application-file entries and conflicting application paths
+fail before replacing local data. Restore also refuses symlinked application
+roots or protected paths within those roots.
+
+Publication rolls back filesystem failures where possible. If rollback itself
+fails, retained backups remain under `.snapshot-restore-*/backup` in the node
+home and further restores are blocked until an operator recovers that state.
+Keep those backups and inspect the reported paths before restarting. Replacement
+of both application roots is not a crash-atomic operation; an interrupted host
+still requires recovery review. These protections supplement archive hashes and
+the agreed recovery plan; they do not establish that a snapshot is the correct
+chain state.
+
 ## Example Workflow
 
 1. Agree off-chain on the recovery plan and artifact.

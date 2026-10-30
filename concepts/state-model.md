@@ -24,6 +24,23 @@ The ORM constructs these keys. Applications use the same shape for direct
 state queries. Contract names and hash key parts cannot contain the reserved
 `.` or `:` separators.
 
+## Stored and Event Values
+
+Stored values and event fields must be representable by the node's consensus
+encoder. This includes ordinary scalar values, supported decimal and datetime
+values, bytes, and nested lists, tuples, and dictionaries with string keys.
+Sets, frozen sets, byte arrays, durations, and dictionaries with non-string
+keys cannot be persisted or emitted. Storage keys must also be valid UTF-8.
+
+An unencodable write or event fails the transaction and discards all of its
+application writes and events. Consumed chi is retained and the normal failure
+fee policy applies. The node does not silently stringify an unsupported stored
+value or event field.
+
+Return values have a different boundary: the node can render an unsupported
+return-only value as text. A successful return therefore does not demonstrate
+that the same value is suitable for storage or events.
+
 ## Transaction Isolation
 
 Writes and events remain buffered while a transaction executes.

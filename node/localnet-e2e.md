@@ -64,11 +64,17 @@ The layered harness covers:
 - real deployment at the 64-character contract-name limit, with constructor
   state checked through RPC on all five validators
 - `xian-py` reads, simulation, source deployment, and transactions
-- nested contract deployment/calls and rollback
+- nested contract deployment/calls and rollback, immediate-caller ownership,
+  authorized ownership transfer, and rejection of unauthorized metadata changes
+- shared execution budgets across serial and nested constructors, including
+  consumed-chi accounting after failed execution
+- rejection of unencodable writes with rollback and continued block production,
+  while retaining return-only value rendering
 - periodic, burst, conflicting, and invalid transaction workloads
 - DEX bootstrap and mixed trading
 - BDS outage, catch-up, indexed reads, reindex, and watchers
-- validator governance, policy transitions, and governed fee-distribution changes
+- validator governance, policy transitions, governed fee-distribution changes,
+  and rejection of contract-mediated validator registration
 - governed forward state patches
 - application logging modes
 - shielded-note and relayed proof flows with governed verifier registration
@@ -84,6 +90,7 @@ The layered harness covers:
   application hashes, transaction results, events, and consensus updates
 - nonce gaps, conflicting pending nonces, submission-node restart, replay
   rejection, and a queued transaction whose balance becomes insufficient
+- zero-chi admission rejection at every node without consuming the sender's nonce
 - a seeded accounting model covering transfers, minting, burning, staking,
   unstaking, failed-call rollback, native fees, rewards, and a network restart
 - exact transaction-size boundaries, pending transaction bytes exceeding one

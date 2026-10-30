@@ -38,6 +38,11 @@ to fields applications actually query.
 - failed transactions discard their events with their writes
 - event emission consumes chi
 
+Every field must also be encodable by the node, including nested contents.
+Unsupported values fail the transaction and discard all application writes and
+events; they are not converted to strings. See the
+[State Model](/concepts/state-model#stored-and-event-values) for the value boundary.
+
 ## How Events Flow Through the System
 
 ```mermaid

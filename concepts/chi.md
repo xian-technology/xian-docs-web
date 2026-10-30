@@ -3,7 +3,9 @@
 Chi is Xian's deterministic execution budget and fee unit. It is not a separate
 token.
 
-Every transaction supplies a chi limit. The runtime meters VM work, host calls,
+Every metered transaction must supply a strictly positive chi limit, in both
+`paid_metered` and `free_metered` mode. A zero limit is rejected rather than
+selecting unmetered execution. The runtime meters VM work, host calls,
 storage, transaction bytes, return data, and native bridges against that limit.
 If execution runs out of chi, its state and events roll back.
 
@@ -38,6 +40,13 @@ The VM has a fixed compute and host-operation gas schedule. Cross-contract calls
 pay a fixed dispatch cost plus the complete work of the called contract.
 Hashing, signature verification, ZK verification, and other native bridges have
 explicit costs.
+
+One budget covers the entire execution: the entry function, nested calls, host
+operations, and every deployed contract's module and constructor work. A factory
+that deploys several children cannot obtain a fresh budget for each child.
+Failed calls retain their measured cost even though their writes and events
+roll back. Execution also has a hard runtime ceiling; increasing the submitted
+limit cannot remove that ceiling.
 
 ## Sizing Transactions
 

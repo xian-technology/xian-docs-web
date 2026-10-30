@@ -29,7 +29,8 @@ mainnet; do not treat checked-in rehearsal manifests as onboarding endpoints.
 
 ## On-Chain Lifecycle
 
-1. Call `validators.register(...)` with the consensus key and operator profile.
+1. Sign a direct `validators.register(...)` call with the validator account and
+   supply the operator profile.
 2. Escrow the registration bond.
 3. Add self-bond or accept delegations when required by policy.
 4. Enter `pending` status.
@@ -42,6 +43,24 @@ Common statuses are `pending`, `approved`, `active`, `leaving`, `left`,
 Validator records include the consensus key, reward key, requested/active
 power, commission, profile metadata, registration bond, self-bond, delegation,
 pending unbonds, and jail/slash/evidence information.
+
+The registering account becomes the consensus key. Registration requires
+`ctx.caller == ctx.signer`, so a wrapper contract cannot register on behalf of
+an account. Use the account corresponding to the node's validator key, and keep
+any separate reward key in the registration's `reward_key` field.
+
+Consensus identities must be 32-byte Ed25519 public keys encoded as 64 hex
+characters. The node compares these keys case-insensitively and emits a single
+consensus identity for equivalent spellings; this does not rename contract
+accounts or state keys. Use one consistent spelling in contract calls.
+
+Malformed identities are excluded from consensus updates. An empty or entirely
+invalid desired set does not erase the last effective nonempty validator set.
+Equivalent key spellings with conflicting voting powers also reject the desired
+update. Operators must correct the on-chain membership rather than treating
+these cases as successful removals. The effective consensus baseline is
+persisted in application state so later updates remain consistent after restart
+or snapshot restore.
 
 ## Selection Modes
 

@@ -115,6 +115,12 @@ These are separate mechanisms:
 - CometBFT state sync uses trusted RPC servers, height, hash, and trust period
   to join through the consensus protocol.
 
+Snapshot restore replaces only the `data/` and `xian/` application roots.
+Configuration and node identity are retained locally, including configured
+validator signing state and key paths. Stop the node before restoring; see
+[Snapshot Restore Boundaries](/node/recovery-plans#snapshot-restore-boundaries)
+for archive validation and recovery requirements.
+
 Use [Recovery Plans](/node/recovery-plans) for supported recovery paths.
 
 ## Public Exposure

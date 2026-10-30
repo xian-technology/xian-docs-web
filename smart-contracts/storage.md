@@ -45,6 +45,12 @@ shape you use when reading state through `/get/<state-key>`.
 
 Use the pages in this section for the exact behavior of each primitive.
 
+The node validates writes and events against its consensus encoding before
+applying them. Unsupported nested values fail the whole transaction rather
+than being stored as text. See the
+[State Model](/concepts/state-model#stored-and-event-values) for supported value
+boundaries and rollback behavior.
+
 ## Dynamic foreign reads
 
 Create a foreign reference inside a function when its target is known only at

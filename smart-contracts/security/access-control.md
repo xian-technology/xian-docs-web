@@ -27,9 +27,16 @@ def set_config(key: str, value: str):
 
 This application-owned variable is separate from runtime `ctx.owner` metadata.
 An application owner affects only functions that check it; a configured
-runtime owner is enforced by the execution layer for calls to that contract.
+runtime owner is enforced by the execution layer for both transaction entry
+calls and cross-contract calls. The runtime compares the owner to the immediate
+caller: the sending account at entry, or the calling contract in a nested call.
+The original signer does not bypass that check. An owner of `None` leaves the
+contract publicly callable, subject to its own application checks.
+
 Runtime ownership changes go through the authorized
-`submission.change_owner(...)` surface.
+`submission.change_owner(...)` surface. An owner contract can delegate a change
+through that surface, provided its own exported function authorizes the caller.
+See [Runtime Ownership](/smart-contracts/context#runtime-ownership).
 
 ## Direct Calls Only
 

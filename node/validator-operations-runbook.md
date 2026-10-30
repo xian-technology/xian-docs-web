@@ -21,8 +21,10 @@ xian node health validator-1
 ```
 
 The signing wallet, governance console, node status, and reviewed manifest must
-show the same chain ID. Never load validator consensus keys into a wallet or
-governance UI.
+show the same chain ID. Keep validator consensus keys out of general-purpose
+wallets and governance UIs. Registration requires a controlled signing workflow
+for the validator account itself; a separate reward account or wrapper contract
+cannot register that consensus identity.
 
 ## Onboard
 
@@ -30,7 +32,7 @@ governance UI.
 2. Join an accepted manifest, initialize the home, and start the node.
 3. Confirm sync, peers, height, and app hash.
 4. Review the registration fee, approve the exact amount, and call
-   `validators.register(...)`.
+   `validators.register(...)` directly from the validator account.
 5. Confirm `pending` status, reward key, commission, registration bond, and
    profile metadata.
 6. Add self-bond/delegation required by policy.
