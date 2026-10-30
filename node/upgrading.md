@@ -85,6 +85,20 @@ xian node health validator-1
 alone is not an executable contract on this runtime, and startup does not
 compile an earlier network's source-only contracts automatically.
 
+Offline migration analysis and rehearsal tooling lives in the optional
+[xian-migration repository](https://github.com/xian-technology/xian-migration).
+It consumes node/runtime tooling; migration implementation is not part of the
+`xian-abci` node package or normal node startup. Follow that repo's instructions
+for pinned dependencies and explicit network and contract-source inputs.
+
+Active legacy streams and their backing balances need an explicit migration
+decision because the target currency contract lacks the legacy stream
+operations. Contracts that read allowances through `currency.balances` also
+need review: migrated allowances live in `currency.approvals`. Generated reports
+or candidate state do not settle these compatibility decisions or authorize a
+network cutover. Resolve them in the accepted migration plan and validate the
+resulting application behavior before scheduling a transition.
+
 Before scheduling a migration:
 
 1. Inventory deployed contracts and their dependencies from a representative
