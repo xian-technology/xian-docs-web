@@ -59,6 +59,45 @@ Rejected transactions and receipts reporting failed execution are recorded as
 failed runs, with the transaction hash retained when available. These failures
 do not advance the rule's price baseline or start its action cooldown.
 
+## Interruption and Concurrency Recovery
+
+Before broadcasting a swap, the service saves its exact signed bytes, hash,
+original RPC and chain, and intended baseline update in SQLite. Workers and API
+evaluations sharing that database on one host serialize execution. A busy manual
+evaluation returns `execution_busy`; event processing waits before advancing its
+cursor. Only one transaction can remain unresolved across all rules.
+
+Recovery runs on startup and at each polling interval, even without DEX events
+or the original rule/signing key. It checks the saved hash and, when execution
+is enabled, can rebroadcast only the same signed bytes, nonce, and deadline.
+With `wallet.execute: false`, it checks receipts without broadcasting. It never
+signs a replacement while the original transaction's outcome is unknown.
+
+Inspect `GET /runs` for `pending` status, the transaction hash, and
+`details.recovery_error`. Confirmed success updates the run, baseline, and
+cooldown atomically; cooldown starts when success is reconciled. Confirmed
+failure or a definitive first-attempt rejection does not advance rule state.
+Timeouts, missing receipts, and rejections after an earlier uncertain broadcast
+remain pending and block new trades.
+
+Restore the original RPC and its transaction history when recovery is blocked.
+Do not delete pending records or start with a fresh database to resume trading:
+the original swap may already have executed. Expiry alone does not prove failure;
+pruned receipts can require operator investigation. Submissions made before the
+execution journal existed cannot be recovered automatically.
+
+Use one database path on a local filesystem on Linux or macOS, and a dedicated
+signer. Different database copies, remote filesystems, and transactions submitted
+outside this service do not share its coordination. Do not remove the adjacent
+`.execution.lock` file while any process is running. Back up the database as one
+consistent SQLite snapshot, including its pending execution journal.
+
+The API rejects database path changes with HTTP 409. Stop all workers and API
+processes before migrating the existing database. Restart workers after network,
+custody, or signing configuration changes: live updates do not recreate an
+existing RPC client or signer. Event delivery can replay after a crash; choose
+baseline-reset and cooldown settings for the strategy's intended behavior.
+
 ## Strategy-Vault Custody
 
 Each `con_dex_strategy_vault.py` deployment represents one owner-funded pair
