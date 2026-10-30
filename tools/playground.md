@@ -29,6 +29,10 @@ It lets users:
 
 This is the maintained browser-first contract experimentation surface.
 
+Each session executes native VM calls in a worker process. Shutdown handles
+workers that have already exited and terminates workers that do not acknowledge
+the shutdown request, so cleanup does not wait indefinitely for a reply.
+
 ## Which One To Use
 
 - use the `xian-js` browser dapp example when you are testing app and wallet

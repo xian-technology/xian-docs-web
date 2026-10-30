@@ -19,8 +19,21 @@ Developers write a restricted Python subset. Nodes execute it through the fixed
 |------|----------------|
 | `xian_vm_v1` | validator-derived canonical IR under a native runtime |
 
-The contract language stays the same. The supported node runtime is fixed to
-the VM artifact path.
+The source language remains a restricted Python subset. The supported node
+runtime is fixed to the VM artifact path; acceptance by the compiler does not
+guarantee identical behavior to every Python operation.
+
+## Testing Python Compatibility
+
+The local Python harness is useful for contract tests, but complete semantic
+parity with the native VM has not been established. Test deployment and calls
+through `xian_vm_v1` before relying on Python-specific container identity,
+mutation through aliases or function arguments, iterator consumption, or
+optional builtin arguments. Compare results, storage writes, events and failed
+transactions, rather than checking only that source compiles.
+
+Runtime fixes can change contract results. Validators participating in one
+network must use a consistent compiler and VM version when replaying blocks.
 
 ## What `xian_vm_v1` Actually Uses
 

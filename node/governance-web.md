@@ -74,6 +74,12 @@ fee-paying transaction's actual reward recipients and amounts.
 
 ## Operator Safety
 
+The browser bundle verifier orders change keys by Unicode code point and
+serializes strings with the node's ASCII escaping rules. Numeric-looking object
+keys retain lexicographic ordering. For bundles containing large integers or
+floating-point JSON values, verify the original file with the node-side tooling:
+JavaScript JSON parsing cannot preserve every Python numeric representation.
+
 - Confirm the wallet, RPC response, manifest, and console all show the same
   chain ID.
 - Review the exact proposal target, function, payload, voter snapshot, and
