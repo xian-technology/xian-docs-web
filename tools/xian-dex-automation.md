@@ -55,10 +55,14 @@ rules:
 The service persists event cursors and run records. Dry-run evaluations record
 the planned action without broadcasting it.
 
+Rejected transactions and receipts reporting failed execution are recorded as
+failed runs, with the transaction hash retained when available. These failures
+do not advance the rule's price baseline or start its action cooldown.
+
 ## Strategy-Vault Custody
 
 Each `con_dex_strategy_vault.py` deployment represents one owner-funded pair
-and trade direction. The keeper can only call `swap_exact_in`; output remains
+and trade direction. The keeper can only call `execute_swap`; output remains
 in the vault, only the owner can withdraw or unpause, and either owner or keeper
 can emergency-pause. Limit changes can only tighten and automatically pause the
 vault.

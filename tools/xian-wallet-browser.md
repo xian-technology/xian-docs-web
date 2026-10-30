@@ -45,6 +45,10 @@ Approval requests are bound to the displayed account, chain ID, network
 preset, and RPC endpoint. If that context changes before approval, the wallet
 rejects the request.
 
+Transaction approval previews preserve large integers and byte values using
+the SDK's `__big_int__` and `__bytes__` JSON wrappers. These let you inspect the
+exact values in nested arguments without rounding large integers.
+
 Temporary auto-approval rules can be scoped to a site, account, network,
 method, contract, function, and exact arguments. Broad function rules allow
 arguments to change and therefore require separate confirmation. Review and
