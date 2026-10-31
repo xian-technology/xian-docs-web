@@ -27,8 +27,7 @@ guarantee identical behavior to every Python operation.
 
 The local Python harness is useful for contract tests, but complete semantic
 parity with the native VM has not been established. Test deployment and calls
-through `xian_vm_v1`, particularly when using iterator consumption or
-optional builtin arguments. Compare results, storage writes, events and failed
+through `xian_vm_v1`, particularly when using optional builtin arguments. Compare results, storage writes, events and failed
 transactions, rather than checking only that source compiles.
 
 The runtime's compatibility suite includes a pinned pre-VM Python baseline.
@@ -49,6 +48,18 @@ Within one execution, aliases, function arguments and imported-contract calls
 share mutable objects. Collection copies are shallow; nested objects keep their
 identity. `is` compares object identity. Do not rely on CPython's optional integer
 or string interning. Native methods evaluate their receiver before arguments.
+
+`map`, `filter`, `zip` and `reversed` produce consumable iterators. Callbacks
+run when a value is requested; `all` and `any` stop as soon as their answer is
+known. List iteration observes appends, dictionary views reflect the underlying
+dictionary, and changing dictionary size during iteration fails. Materialize an
+iterator or view with `list` or `tuple` before returning or storing it. Native
+ranges are lazy; materialized collections remain subject to allocation limits.
+The local Python harness retains a stricter large-range construction guard.
+
+Function defaults are evaluated in module definition order and retain their
+identity across calls within an execution. A fresh execution initializes them
+again. Keyword argument dictionaries preserve call-site order.
 
 Storage writes snapshot values, and reads return detached copies. Mutating a
 read value changes storage only after an explicit write. Cycles may exist in

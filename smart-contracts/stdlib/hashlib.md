@@ -30,6 +30,17 @@ byte_hash = hashlib.sha3_hex("68656c6c6f")
 `hashlib.sha3_text("68656c6c6f")` hashes those ten text characters.
 `hashlib.sha3_hex("68656c6c6f")` decodes the hex first and hashes `hello`.
 
+## Historical Aliases
+
+`hashlib.sha256(hex_str)` and `hashlib.sha3(hex_str)` preserve the historical
+hexadecimal-first behavior. Valid hex is decoded before hashing; ASCII whitespace
+is allowed between complete bytes. Input that cannot be decoded is hashed as
+UTF-8 text. Both accept `hex_str` as a keyword argument.
+
+For example, `hashlib.sha256("68")` hashes the byte for `h`, while
+`hashlib.sha256("hello")` hashes UTF-8 text. Use the explicit `_text` or `_hex`
+helpers for new message formats so the interpretation is evident at the call site.
+
 ## Output
 
 All functions return lowercase hex strings.
