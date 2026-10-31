@@ -16,7 +16,7 @@ The linter enforces that restricted subset before code is accepted.
 | functions | `def f():` | top-level only |
 | `return` | `return value` | |
 | `assert` | `assert ok, "message"` | main validation pattern |
-| f-strings | `f"Hello {name}"` | basic interpolation and allowed expressions only; conversions (`!r`, `!s`, `!a`), debug syntax (`{name=}`), and format specifications (`:04d`) are unsupported |
+| f-strings | `f"{amount:04d}"` | allowed expressions, `!s`/`!r`/`!a` conversions and bounded format specifications, including dynamic widths |
 | collections | `list`, `dict`, `tuple`, `set()`, `frozenset()` | set literals and set comprehensions are blocked |
 | list and dict comprehensions | `[x for x in items]`, `{k: v for k, v in items}` | generator expressions are not allowed |
 | ternary expressions | `"yes" if ok else "no"` | lowered into Xian VM IR and metered like other expressions |
@@ -74,12 +74,16 @@ members separately from tested behavior. Nominal, boundary and invalid-input
 cases cover every callable builtin; this does not establish correctness for
 every input or complete Python compatibility.
 
-String predicates, whitespace handling and upper/lower mappings use pinned
+See [Value Methods](/smart-contracts/value-methods) for callable method values,
+keyword signatures, collection views, text/binary operations and their limits.
+
+String predicates, whitespace handling and case mappings use pinned
 Unicode 15.0 semantics from the historical Python 3.12 runtime, including
 contextual Greek final sigma. A newer host Python's Unicode database is not the
 consensus definition. `isdigit()` includes Unicode digits, not every numeric
 character; `isalpha()` tests letters, and `islower()` ignores uncased characters
-while requiring at least one cased character.
+while requiring at least one cased character. Native strings contain Unicode
+scalar values; isolated surrogate code points are unsupported.
 
 `isinstance` and `issubclass` reject non-class descriptors and inspect class
 tuples in order, stopping after a match. `Any` is an annotation marker and is

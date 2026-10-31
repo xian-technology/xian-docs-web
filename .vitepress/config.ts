@@ -90,7 +90,8 @@ export default defineConfig({
             { text: 'Functions', link: '/smart-contracts/functions' },
             { text: 'Context Variables', link: '/smart-contracts/context' },
             { text: 'Events', link: '/smart-contracts/events' },
-            { text: 'Valid Code & Restrictions', link: '/smart-contracts/valid-code' }
+            { text: 'Valid Code & Restrictions', link: '/smart-contracts/valid-code' },
+            { text: 'Value Methods', link: '/smart-contracts/value-methods' }
           ]
         },
         {
