@@ -119,6 +119,14 @@ insertion order for ties. Repeated references to one NaN deduplicate; distinct
 NaN objects remain separate members. Signaling NaNs cannot be dictionary keys
 or set members.
 
+Within the float category, deterministic sets and frozen sets use numeric order:
+negative infinity, finite numbers, positive infinity, then NaNs. Equal positive
+and negative zeros retain the first inserted representation. All float NaNs have
+the same sort key, preserving their insertion order regardless of sign or
+payload. A repeated reference to one NaN deduplicates; distinct NaN objects stay
+distinct. These sort keys also apply inside tuple and frozen-set members.
+Set ordering does not change ordinary comparisons: `nan == nan` remains false.
+
 Decimal operations are bounded: input text is limited to 128 KiB, coefficient
 digits and raw exponent magnitude to 131072, and transcendental/power inputs to
 4096 coefficient digits and a coefficient-digit count plus exponent of at most
