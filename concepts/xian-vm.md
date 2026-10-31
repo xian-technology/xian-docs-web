@@ -27,8 +27,7 @@ guarantee identical behavior to every Python operation.
 
 The local Python harness is useful for contract tests, but complete semantic
 parity with the native VM has not been established. Test deployment and calls
-through `xian_vm_v1` before relying on Python-specific container identity,
-mutation through aliases or function arguments, iterator consumption, or
+through `xian_vm_v1`, particularly when using iterator consumption or
 optional builtin arguments. Compare results, storage writes, events and failed
 transactions, rather than checking only that source compiles.
 
@@ -45,6 +44,18 @@ remain distinct from nearby rounded floats. These in-memory rules do not relax
 the string-key requirement for dictionaries persisted in contract storage.
 Deterministic sets have their own member eligibility rules, including support
 for decimal/time values.
+
+Within one execution, aliases, function arguments and imported-contract calls
+share mutable objects. Collection copies are shallow; nested objects keep their
+identity. `is` compares object identity. Do not rely on CPython's optional integer
+or string interning. Native methods evaluate their receiver before arguments.
+
+Storage writes snapshot values, and reads return detached copies. Mutating a
+read value changes storage only after an explicit write. Cycles may exist in
+memory but cannot cross storage or public result boundaries. The native heap
+limits live object accounting to 128 MiB and 1,048,576 objects; mutable objects
+remain retained until execution ends. Boundary traversal and rendering are
+bounded, and a limit failure rolls back transaction effects.
 
 Runtime fixes can change contract results. Validators participating in one
 network must use a consistent compiler and VM version when replaying blocks.
