@@ -61,6 +61,13 @@ Function defaults are evaluated in module definition order and retain their
 identity across calls within an execution. A fresh execution initializes them
 again. Keyword argument dictionaries preserve call-site order.
 
+`sorted` and `list.sort` support stable `key`/`reverse` ordering; keys run once
+per item. `min`/`max` support `key` and an empty-iterable `default`, and `sum`
+supports `start` while rejecting text and bytes. Integer text conversion accepts
+base zero, matching prefixes and valid digit separators. Boolean arithmetic uses
+integer values; boolean bitwise operations retain boolean results. Sequence
+slices clip large bounds, and string searches preserve out-of-range semantics.
+
 Storage writes snapshot values, and reads return detached copies. Mutating a
 read value changes storage only after an explicit write. Cycles may exist in
 memory but cannot cross storage or public result boundaries. The native heap

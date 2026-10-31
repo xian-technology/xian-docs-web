@@ -67,7 +67,7 @@ Everything else is treated as forbidden.
 
 Allowed builtins are bounded by deterministic runtime limits:
 
-- `range(...)` may create at most `131,072` entries.
+- the Python harness limits `range(...)` to `131,072` entries; native ranges are lazy, with materialized collections limited to `131,072` entries.
 - `bytes(n)` and `bytearray(n)` may allocate at most `131,072` bytes.
 - string, bytes, bytearray, list, and tuple repetition with `*` may not exceed the same sequence or byte limits.
 - integer multiplication, exponentiation, and left shifts may not create integers larger than `1,048,576` bits.
