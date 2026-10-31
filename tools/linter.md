@@ -99,7 +99,9 @@ The service accepts raw, base64, or gzip request bodies:
 - `POST /lint_base64`
 - `POST /lint_gzip`
 
-Request bodies are capped at `1,000,000` bytes before decoding. `/lint_gzip`
+Request bodies are streamed with a `1,000,000` byte cap before decoding; raw
+and base64 endpoints stop reading once the cap is exceeded, regardless of
+Content-Length. `/lint_gzip`
 also enforces the same cap after decompression and rejects extreme gzip
 compression ratios. Compiler admission is stricter: contract source may not
 exceed `131,072` UTF-8 bytes. All endpoints also accept an optional comma-separated

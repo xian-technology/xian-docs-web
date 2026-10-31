@@ -64,7 +64,7 @@ python3 ./scripts/backend.py start --no-bds-enabled --dashboard
 python3 ./scripts/backend.py endpoints --no-bds-enabled --dashboard
 ```
 
-Plain HTTP to a non-loopback host requires an explicit preset opt-in. Use it
+RPC endpoints must use HTTP or HTTPS. Plain HTTP to a non-loopback host requires an explicit preset opt-in. Use it
 only on a trusted local/private network; prefer HTTPS elsewhere.
 
 ## Security Model

@@ -146,3 +146,7 @@ Custom `WalletController` stores must also implement optional
 password-work-factor migration. Stores without that capability can unlock
 existing wallets, but leave their encryption parameters unchanged. The official
 extension store implements this operation.
+
+Provider requests and result polling are bound to the browser-reported page
+origin. Wallet management and approval controls are accepted only from the
+extension’s packaged popup and approval pages.

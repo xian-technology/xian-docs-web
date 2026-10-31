@@ -76,9 +76,12 @@ fee-paying transaction's actual reward recipients and amounts.
 
 The browser bundle verifier orders change keys by Unicode code point and
 serializes strings with the node's ASCII escaping rules. Numeric-looking object
-keys retain lexicographic ordering. For bundles containing large integers or
-floating-point JSON values, verify the original file with the node-side tooling:
-JavaScript JSON parsing cannot preserve every Python numeric representation.
+keys retain lexicographic ordering. Both bundle paste flows preserve original
+numeric tokens: large integers stay exact and floats retain the node’s numeric
+format, including `1.0` and negative zero. Explicit null fields are preserved.
+The verifier rejects duplicate change keys and direct generated-artifact patches.
+It accepts standard JSON with finite numbers, up to 1 MiB of text and128 nesting
+levels; use the original bundle file when verifying numeric values.
 
 - Confirm the wallet, RPC response, manifest, and console all show the same
   chain ID.
