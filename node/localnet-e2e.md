@@ -110,10 +110,11 @@ The layered harness covers:
 - offline replay from public block data, rebuilding application state and
   comparing every block's application root, transaction outcomes, chi usage, and events
 
-The `03-contract-functionality` phase deploys eight authored contracts, from a
-counter to a decimal ledger, escrow and atomic batch-payment router. Its 40
+The `03-contract-functionality` phase deploys nine authored contracts, from a
+counter to a decimal ledger, escrow and atomic batch-payment router. Its 55
 interactions exercise language builtins, collection operations, text/bytes,
-foreign storage, signatures, time/random bridges, authorization and recovery
+foreign/bulk storage, starred syntax, module rebinding, Unicode numbers, Decimal
+quantum/type boundaries, signatures, time/random bridges, authorization and recovery
 after failures. Each call checks explicit results, ordered events and tracked
 application state on all five validators; the full run also replays these blocks.
 The [source and coverage matrix](https://github.com/xian-technology/xian-stack/tree/main/workloads/e2e/contract_suite)

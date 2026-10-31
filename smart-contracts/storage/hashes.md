@@ -54,8 +54,8 @@ def seed():
     balances.clone_from(legacy_balances)
 ```
 
-`clone_from(...)` clears the target hash first, then copies the stored entries
-from the source. After the clone, the new hash is local state and can be
+`clone_from(...)` snapshots the source (including pending writes), clears the
+target, then copies the snapshot. Self-cloning preserves the entries. After the clone, the new hash is local state and can be
 updated independently.
 
 ## Key Rules
@@ -84,3 +84,9 @@ chi exhaustion and enforces a 128 KiB cumulative encoded key/value budget.
 An oversized scan fails the transaction instead of returning a partial list.
 Keep large collections partitioned by key prefix and avoid scanning an
 unbounded collection within a transaction.
+
+Bulk clear/clone operations use the same bounded scans, charge each deletion or
+write, and roll back completely on failure. `clear("alice")` deletes descendants
+such as `balances["alice", "token"]`; it leaves the exact scalar key
+`balances["alice"]` intact. Set that scalar key to `None` to delete it too.
+Foreign hashes can be clone sources, but cannot be bulk-write destinations.

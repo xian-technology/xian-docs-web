@@ -71,13 +71,32 @@ slices clip large bounds, and string searches preserve out-of-range semantics.
 is `2.67`). Decimal rounding with explicit digits preserves Contracting's
 `ROUND_DOWN` policy. Extreme digit counts are bounded before allocating powers.
 
-Some historical differences remain: repeated module-level bindings are rejected;
-numeric text parsing accepts ASCII digits rather than all Unicode decimal digits;
-and native decimal values normalize trailing zeros rather than retaining Python
-Decimal's quantum/type distinction after rounding. Avoid deleting and inserting
-dictionary keys during iteration, even if the final size is unchanged: that case
-does not yet match Python's cursor/error behavior. Migration tests should check
-these operations explicitly where existing contracts use them.
+Ordinary module variables may be reassigned in source order; function defaults
+capture the value present at their definition. Storage declarations, imports and
+function names remain unique. Calls and list/tuple literals support starred
+iterable expansion, and nested assignments, loops and comprehensions support one
+starred target per target sequence. Expansion is metered and limited to 128 Ki
+items. Duplicate keyword arguments fail during argument merging.
+
+`dict.update` consumes iterable pairs incrementally, `setdefault` preserves the
+supplied object's identity, and `list.reverse` mutates the existing list.
+`bytes.fromhex` accepts a string with ASCII whitespace between complete byte
+pairs and limits decoded output to 128 KiB. Numeric string parsing accepts the
+frozen Unicode 15.0 decimal digits, including mixed scripts; byte inputs remain
+ASCII-only. Same-size dictionary key replacement follows historical insertion
+slots and cursor behavior; replacing a visited key can still raise a mutation
+error. Prefer completing an iteration before changing its keys.
+
+Rounding a contract decimal with explicit digits produces a distinct raw Decimal
+value: `str(round(decimal('2'), 2))` is `'2.00'`, and that result is not an instance
+of the contract `decimal` wrapper. Finite raw values preserve quantum and signed
+zero through arithmetic, formatting, return values and nested calls. Writing a
+raw Decimal directly to Variable/Hash converts it to the storage decimal format;
+`Variable(t=decimal)` checks the original type and requires an explicit
+`decimal(value)` conversion. Storage encoding does not preserve raw quantum.
+General fractional raw Decimal powers, non-finite results and additional Python
+Decimal methods are outside the supported native surface; migration tests must
+check actual application use rather than assume full Python Decimal parity.
 
 Storage writes snapshot values, and reads return detached copies. Mutating a
 read value changes storage only after an explicit write. Cycles may exist in
