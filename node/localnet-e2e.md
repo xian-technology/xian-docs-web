@@ -110,6 +110,16 @@ The layered harness covers:
 - offline replay from public block data, rebuilding application state and
   comparing every block's application root, transaction outcomes, chi usage, and events
 
+The `03-contract-functionality` phase deploys eight authored contracts, from a
+counter to a decimal ledger, escrow and atomic batch-payment router. Its 40
+interactions exercise language builtins, collection operations, text/bytes,
+foreign storage, signatures, time/random bridges, authorization and recovery
+after failures. Each call checks explicit results, ordered events and tracked
+application state on all five validators; the full run also replays these blocks.
+The [source and coverage matrix](https://github.com/xian-technology/xian-stack/tree/main/workloads/e2e/contract_suite)
+describes the scenarios and exclusions. Nominal builtin coverage does not prove
+full Python compatibility or coverage of every input combination.
+
 The validator-governance phase proposes and approves a non-default transaction
 fee split of 60% validators, 10% burn, 10% foundation, and 20% contract
 developers. It waits for the `rewards` state to converge on all five nodes,
