@@ -90,6 +90,12 @@ Offline migration analysis and rehearsal tooling lives in the optional
 It consumes node/runtime tooling; migration implementation is not part of the
 `xian-abci` node package or normal node startup. Follow that repo's instructions
 for pinned dependencies and explicit network and contract-source inputs.
+Its historical execution corpus checks recovered source through migrated native
+artifacts, including state preservation without rerunning constructors, returns,
+writes, events, failed-call rollback and subsequent calls. Successful compilation
+alone does not establish execution equivalence. For actual applications, compare
+representative calls against the old runtime and review every mismatch, source
+override or exclusion together with affected callers.
 
 Active legacy streams and their backing balances need an explicit migration
 decision because the target currency contract lacks the legacy stream

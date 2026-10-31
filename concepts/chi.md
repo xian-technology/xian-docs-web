@@ -85,6 +85,9 @@ application-level payment rules remain unchanged.
 ## Estimate Before Submission
 
 Readonly simulation returns the measured `chi_used` without committing state.
+It includes source/argument bytes and a standard signed transaction envelope.
+Because simulation happens before signing and nonce reservation, the final
+envelope size can differ slightly.
 SDK estimate helpers add configurable headroom. Estimates can fail when a node
 disables simulation, caps it below the target transaction, or has different
 state from the eventual execution block.

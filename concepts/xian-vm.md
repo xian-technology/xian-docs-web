@@ -67,6 +67,17 @@ supports `start` while rejecting text and bytes. Integer text conversion accepts
 base zero, matching prefixes and valid digit separators. Boolean arithmetic uses
 integer values; boolean bitwise operations retain boolean results. Sequence
 slices clip large bounds, and string searches preserve out-of-range semantics.
+`round` uses ties-to-even for integers and binary floats (so `round(2.675, 2)`
+is `2.67`). Decimal rounding with explicit digits preserves Contracting's
+`ROUND_DOWN` policy. Extreme digit counts are bounded before allocating powers.
+
+Some historical differences remain: repeated module-level bindings are rejected;
+numeric text parsing accepts ASCII digits rather than all Unicode decimal digits;
+and native decimal values normalize trailing zeros rather than retaining Python
+Decimal's quantum/type distinction after rounding. Avoid deleting and inserting
+dictionary keys during iteration, even if the final size is unchanged: that case
+does not yet match Python's cursor/error behavior. Migration tests should check
+these operations explicitly where existing contracts use them.
 
 Storage writes snapshot values, and reads return detached copies. Mutating a
 read value changes storage only after an explicit write. Cycles may exist in
