@@ -81,7 +81,7 @@ The simulator returns:
     }
   ],
   "chi_used": 342,
-  "result": "None"
+  "result": null
 }
 ```
 
@@ -90,7 +90,12 @@ Key fields:
 - `status`: `0` for success, `1` for failure
 - `chi_used`: estimated chi consumed
 - `state`: preview of writes that would occur
-- `result`: safe string representation of the function result or failure
+- `result`: JSON-compatible result or failure description. Dictionaries with
+  string keys remain objects, tuples become arrays, and decimals become strings.
+  Successful values that cannot be represented this way, such as sets or
+  dictionaries with numeric keys, use a safe string representation limited to
+  1,024 characters. This fallback preserves the execution status, chi and
+  simulated writes.
 
 When the node refuses or aborts a dry run, you get the same envelope with
 `status = 1`. Typical operator-controlled failure cases are:

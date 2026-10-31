@@ -94,9 +94,41 @@ zero through arithmetic, formatting, return values and nested calls. Writing a
 raw Decimal directly to Variable/Hash converts it to the storage decimal format;
 `Variable(t=decimal)` checks the original type and requires an explicit
 `decimal(value)` conversion. Storage encoding does not preserve raw quantum.
-General fractional raw Decimal powers, non-finite results and additional Python
-Decimal methods are outside the supported native surface; migration tests must
-check actual application use rather than assume full Python Decimal parity.
+Raw Decimal values support general fractional powers and the 53 public methods
+reachable through historical contract results, including `normalize`, `quantize`,
+`sqrt`, `exp`, `ln`, `log10`, `as_integer_ratio` and `as_tuple`. Arithmetic uses a
+91-digit, ROUND_DOWN context with Emin=-100 and Emax=100. Methods with a rounding
+argument accept the Python rounding-mode strings. Custom context objects are
+not supported; context arguments accept `None`.
+
+Exact construction is separate from arithmetic rounding. For example,
+`round(decimal('0'), 2).from_float(float('0.1'))` preserves the exact binary64
+input, including its additional decimal digits. A decimal literal such as `0.1`
+is the contract decimal wrapper and is not a valid `from_float` argument.
+`as_tuple()` returns a `DecimalTuple` with `sign`, `digits` and `exponent` fields;
+it supports tuple indexing, iteration and equality. Stored tuples serialize as
+JSON arrays, so named fields are not a persisted-state format.
+
+Infinity and quiet NaN can appear in memory and return values. Arithmetic and
+comparisons follow Decimal rules: NaN is unequal to itself, ordering with NaN
+fails, and invalid operations fail the transaction. Direct and nested storage
+writes of non-finite decimals fail. Convert or reject them explicitly before
+persisting a result. Deterministic sets order raw Decimals as negative Infinity,
+finite values, positive Infinity, then quiet NaNs by sign and payload, preserving
+insertion order for ties. Repeated references to one NaN deduplicate; distinct
+NaN objects remain separate members. Signaling NaNs cannot be dictionary keys
+or set members.
+
+Decimal operations are bounded: input text is limited to 128 KiB, coefficient
+digits and raw exponent magnitude to 131072, and transcendental/power inputs to
+4096 coefficient digits and a coefficient-digit count plus exponent of at most
+4096. Ordinary power additionally limits both operand coefficients to 1024
+digits. Integer power and modular-power exponents additionally have a
+coefficient-digit count plus exponent limit of 512. Rendering and expanded
+ratios also have allocation limits. A limit
+failure rolls back the transaction. This supported surface does not imply
+unrestricted Python Decimal compatibility; migration tests must check actual
+application inputs and boundary behavior.
 
 Storage writes snapshot values, and reads return detached copies. Mutating a
 read value changes storage only after an explicit write. Cycles may exist in

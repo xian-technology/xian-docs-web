@@ -111,11 +111,12 @@ The layered harness covers:
   comparing every block's application root, transaction outcomes, chi usage, and events
 
 The `03-contract-functionality` phase deploys nine authored contracts, from a
-counter to a decimal ledger, escrow and atomic batch-payment router. Its 55
-interactions exercise language builtins, collection operations, text/bytes,
+counter to a decimal ledger, escrow and atomic batch-payment router. Its 73
+interactions (44 successful calls and 29 expected failures) exercise language builtins, collection operations, text/bytes,
 foreign/bulk storage, starred syntax, module rebinding, Unicode numbers, Decimal
-quantum/type boundaries, signatures, time/random bridges, authorization and recovery
-after failures. Each call checks explicit results, ordered events and tracked
+quantum/type boundaries, all 53 historically reachable public Decimal methods,
+general powers and non-finite boundaries, signatures, time/random bridges,
+authorization and recovery after failures. Each call checks explicit results, ordered events and tracked
 application state on all five validators; the full run also replays these blocks.
 The [source and coverage matrix](https://github.com/xian-technology/xian-stack/tree/main/workloads/e2e/contract_suite)
 describes the scenarios and exclusions. Nominal builtin coverage does not prove
