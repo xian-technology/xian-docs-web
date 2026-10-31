@@ -63,6 +63,29 @@ list map max min oct ord pow range reversed round set sorted str sum tuple zip
 
 Everything else is treated as forbidden.
 
+Public attribute syntax is broader than the implemented method surface. An
+expression such as `value.method()` passing compilation does not guarantee that
+the method exists for that value in the native runtime. Check the supported
+runtime behavior and execute contract tests against the native VM.
+
+The runtime repository's [surface inventory and behavioral matrix](https://github.com/xian-technology/xian-contracting/tree/main/tests/surface)
+tracks callable builtins, host APIs and public value members. It records missing
+members separately from tested behavior. Nominal, boundary and invalid-input
+cases cover every callable builtin; this does not establish correctness for
+every input or complete Python compatibility.
+
+String predicates, whitespace handling and upper/lower mappings use pinned
+Unicode 15.0 semantics from the historical Python 3.12 runtime, including
+contextual Greek final sigma. A newer host Python's Unicode database is not the
+consensus definition. `isdigit()` includes Unicode digits, not every numeric
+character; `isalpha()` tests letters, and `islower()` ignores uncased characters
+while requiring at least one cased character.
+
+`isinstance` and `issubclass` reject non-class descriptors and inspect class
+tuples in order, stopping after a match. `Any` is an annotation marker and is
+invalid for `isinstance`. The guarded `range` callable is a function, not a
+class descriptor. Immutable `frozenset.copy()` preserves object identity.
+
 ## Allocation Guards
 
 Allowed builtins are bounded by deterministic runtime limits:
@@ -72,7 +95,7 @@ Allowed builtins are bounded by deterministic runtime limits:
 - string, bytes, bytearray, list, and tuple repetition with `*` may not exceed the same sequence or byte limits.
 - integer multiplication, exponentiation, and left shifts may not create integers larger than `1,048,576` bits.
 - `int(...)` string and bytes inputs may be at most `8,192` characters or bytes.
-- three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus and rejects exponent values with more than `8,192` bits.
+- three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus, requires a nonnegative exponent, and rejects exponent values with more than `8,192` bits.
 - returned contract values are charged by encoded size; keep responses small
   and paginate collections.
 - submitted contract source may not exceed `131,072` bytes.
