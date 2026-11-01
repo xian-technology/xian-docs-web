@@ -79,7 +79,10 @@ retain shared identity across contract calls, but cannot be persisted or returne
 as public transaction results. Function interfaces compare positional parameter
 names and order; keyword-only and variadic parameters are excluded. See
 [Interface Patterns](/smart-contracts/imports/interface-patterns) for exact
-matching rules, callable metadata and descriptor boundary restrictions.
+matching rules, callable metadata and descriptor boundary restrictions. Custom
+interface predicates receive an immutable metadata subject, not a live foreign
+function or storage object. The subject has its own execution-local boundary;
+copy its ordinary field values to store or return inspection results.
 
 ## Attribute Mutation
 

@@ -92,14 +92,72 @@ Descriptors compare by identity. Two independently created descriptors with
 the same fields are unequal; they can be separate dictionary keys. They are
 not supported as deterministic-set elements.
 
-The `is_of` method can be saved and called later. Interface enforcement uses
-the descriptor's current fields and its standard match behavior. For members
-that require function or storage matching, replacing `is_of`
-with a custom callable is not supported by `enforce_interface` and raises an
-error. Calling a stored callable attribute directly is a separate operation.
-Missing or `None` members fail the interface check without invoking a callback;
-other existing non-function, non-storage values satisfy the name check without
-invoking one.
+The standard `is_of` method can be saved and called later. Interface enforcement
+uses the descriptor's current fields. You can replace an instance's `is_of`
+attribute with a local predicate that checks the metadata described below.
+
+## Custom Metadata Predicates
+
+A custom predicate receives one immutable `InterfaceSubject` describing the
+member being checked. It receives no live foreign function or storage object.
+For example, the inspecting contract can require a particular transfer shape:
+
+```python
+def check_transfer(subject):
+    return (
+        subject.kind == "function"
+        and subject.name == "transfer"
+        and subject.args == ("amount", "to")
+    )
+
+@export
+def check_token(contract: str):
+    token = importlib.import_module(contract)
+    interface = importlib.Func("transfer")
+    interface.is_of = check_transfer
+    return importlib.enforce_interface(token, [interface])
+```
+
+The subject exposes only these fields:
+
+| Field | Function subject | Storage subject |
+|-------|------------------|-----------------|
+| `kind` | `"function"` | `"storage"` |
+| `name` | Canonical function code name, including a private `__` prefix when present | Inspected storage binding name; for example, `Var("balance", Variable)` inspects `"__balance"` |
+| `args` | Tuple of positional parameter names | `None` |
+| `storage_type` | `None` | One of `"Variable"`, `"Hash"`, `"ForeignVariable"`, `"ForeignHash"`, `"LogEvent"` |
+
+`args` follows the standard function matcher: defaults and annotations do not
+change it, and keyword-only and variadic parameters are excluded. A predicate
+can delegate to the standard matcher, for example
+`importlib.Func("transfer", ("amount", "to")).is_of(subject)` or
+`importlib.Var("balance", Variable).is_of(subject)`. Applying the wrong matcher
+family returns `False`.
+
+The predicate uses ordinary callable dispatch with one subject argument. Local
+functions, bound methods and admitted builtins can be used when they accept
+that argument. The result's truthiness determines the match; it need not be a
+boolean. Wrong signatures, non-callable overrides and exceptions propagate as
+normal execution errors and roll back the transaction. A falsey result simply
+fails the interface check; use `assert` if that should abort the transaction.
+
+A local predicate runs in the inspecting contract's frame, with its normal
+caller, owner, storage authority and chi budget. It may perform the inspecting
+contract's permitted operations. The subject cannot invoke the inspected
+function or access its storage. Any explicit contract calls made by the
+predicate follow the usual caller and owner checks. An imported exported
+function cannot serve as a remote predicate: transferring the subject to
+another contract is rejected before that function runs.
+
+There is no contract-visible subject constructor. Its fields cannot be assigned
+or deleted, and it has no call, storage or class capability. Subjects cannot be
+stored, returned as public transaction results or transferred between contracts,
+including through nested or shared containers. Copy ordinary field values when
+you need to store or return metadata.
+
+Callbacks run only for members that require function or storage matching.
+Missing or `None` members return `False` without invoking a callback; other
+existing non-function, non-storage values satisfy the name check without one.
 
 ## Host callable metadata and exclusions
 
@@ -139,7 +197,6 @@ The native contract API excludes these helper surfaces:
   aliases. [Public callable aliases](/smart-contracts/imports/importing-contracts#public-callable-aliases)
   have their own receiver and context checks; interface metadata does not export
   an arbitrary global value.
-- Custom `is_of` callbacks during interface enforcement, as described above.
 
 These boundaries prevent helper methods and callable values from acquiring
 another contract's storage authority or caller context. Supported descriptor
