@@ -46,10 +46,31 @@ Native string representations of bound methods are deterministic, such as
 `<bound method list.append>`. They omit host object addresses and therefore do
 not reproduce CPython's address-bearing representation.
 
-Method aliases do not imply support for every module function or constructor
-alias. Call `hashlib.sha3`, `decimal`, `datetime.datetime` and
-`datetime.timedelta` directly; retrieving those callables and invoking the
-retrieved value is not supported by the native VM.
+Allowed module functions and constructors can also be retrieved, assigned to
+local variables, kept in local containers and used as callbacks. Direct and
+aliased calls share the same signatures, validation, deterministic behavior and
+chi accounting. Alias lookup adds the usual expression costs. Numeric and time
+constructors retain their supported class-check behavior.
+
+```python
+hash_module = hashlib
+digest = hash_module.sha3
+hashes = list(map(digest, ["abc", ""]))
+
+number = decimal
+assert isinstance(number("1.25"), number)
+date = datetime.datetime
+duration = datetime.timedelta
+assert str(date(2026, 1, 2) + duration(days=2)) == "2026-01-04 00:00:00"
+```
+
+These callable values are execution-local too. They cannot be persisted,
+returned as transaction results or transferred between contracts, including
+inside a container. Construct the data first, then store or pass the data.
+
+`importlib.Func` and `importlib.Var` aliases can build interface descriptors.
+Native descriptors use a data representation for interface enforcement; Python
+descriptor instance attributes and class checks are not supported.
 
 ## Collections and Numeric Values
 
@@ -67,12 +88,34 @@ Mapping proxies retain their source dictionary and reflect subsequent changes.
 They cannot be persisted or returned across a VM boundary. Use `proxy.copy()`
 to obtain an ordinary dictionary snapshot when a serializable value is needed.
 
-View set operations use deterministic set ordering. One compatibility limitation
-remains: Python distinguishes a built-in set produced by view algebra from the
-deterministic wrapper returned by the contract's `set()` constructor. The native
-VM currently represents both with the same set type. Comparisons between these
-results, views and constructor-created sets are therefore not fully equivalent;
-do not rely on that type distinction in a contract.
+View set operations produce built-in sets, distinct from the deterministic
+wrappers created by the contract's `set()` and `frozenset()` constructors. Both
+kinds use deterministic ordering. A built-in set compares equal to a matching
+dictionary keys/items view, but not to a wrapper with the same elements;
+`isinstance(view_result, set)` is false. Mixed built-in/wrapper set operators and
+ordering comparisons fail. Methods such as `union` and `intersection` accept
+iterables and retain the receiver's kind.
+
+Built-in sets retain their kind and shared identity across contract calls. They
+cannot be persisted or returned as transaction results, including inside another
+container. Convert explicitly with `set(view_result)` before storing or returning
+one. Augmented assignment between built-in sets mutates the original receiver;
+when the right operand is a dictionary view, it produces a new set and leaves
+aliases of the original unchanged.
+
+Set members must belong to the deterministic scalar/structural key domain.
+Callable objects, including functions, constructors and bound methods, are not
+supported set members, even when the same object is an allowed dictionary key.
+This also applies to sets produced by dictionary-view operations.
+
+```python
+keys = {"a": 1, "b": 2}.keys()
+view_result = keys | []
+assert view_result == keys
+assert not isinstance(view_result, set)
+assert view_result != set(["a", "b"])
+serializable = set(view_result)
+```
 
 ```python
 entries = {"a": 1, "b": 2}
