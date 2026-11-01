@@ -162,6 +162,30 @@ def approve(amount: float, to: str):
 
 They are not callable through transactions or by other contracts.
 
+## Local Names and Comprehensions
+
+Parameters and names assigned anywhere in a function are local to that function.
+Reading a local name before it has been assigned fails, even when a module-level
+variable, runtime module or builtin has the same name. Assignments in an untaken
+branch or an empty loop still make the name local.
+
+```python
+@export
+def choose(flag: bool):
+    if flag:
+        result = 7
+    return result  # Fails when flag is False: result has not been assigned.
+```
+
+Initialize a local value before a conditional when every path needs it. Rebinding
+a name such as `len` or `datetime` also shadows the builtin or runtime module
+throughout that function; use a different local name when both are needed.
+
+List and dictionary comprehensions have their own local target names. Their first
+iterable is evaluated in the enclosing scope, and their targets do not overwrite
+names in that scope. Later generators and filters use the comprehension scope,
+so reading a later generator's target before its first assignment also fails.
+
 ## Assertions
 
 `assert` is the normal validation mechanism:
