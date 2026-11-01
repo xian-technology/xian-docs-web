@@ -130,7 +130,7 @@ Choose a source that retains the missing block range before starting a
 rebuild. Pruned local history cannot reconstruct older indexed rows.
 
 The database, recovery spool, snapshot, and RPC source must use the same execution
-policy as the node: execution revision `xvm-execution-2`, gas schedule
+policy as the node: execution revision `xvm-execution-3`, gas schedule
 `xvm-gas-2`, bytecode `xvm-1`, and set codec `xian-set-1`. BDS records this policy
 in database metadata and checks the RPC source's protected committed
 `__execution_policy` value before backfill or a reset. The RPC `/genesis` response

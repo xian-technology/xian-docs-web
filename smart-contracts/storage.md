@@ -116,6 +116,37 @@ The direct `ForeignVariable(...)` and `ForeignHash(...)` forms below are the
 read-only exception for function-local references. Use those constructor
 names directly; aliases and descriptor type values do not create references.
 
+## Methods through storage types
+
+Public storage methods can be retrieved from a storage type and called with an
+existing storage object as the explicit receiver. The descriptor's `type`
+field provides the class without constructing another storage object:
+
+```python
+balance = Variable(default_value=0)
+
+@export
+def increment():
+    variable_type = importlib.Var("balance", Variable).type
+    read = variable_type.get
+    variable_type.set(self=balance, value=read(balance) + 1)
+    return balance.get()
+```
+
+Unbound methods use the same signatures and storage paths as the corresponding
+bound methods. The receiver must belong to the actual storage family:
+`Variable` methods accept variable receivers, `Hash` methods accept hash
+receivers, and event emission requires a declared `LogEvent`. Passing a hash to
+`Variable.get`, for example, fails instead of selecting a different operation
+by method name.
+
+The class's public method surface and the receiver's authority are both checked.
+A local class's write method cannot write through a foreign receiver. A foreign
+class exposes only its permitted read methods, even if a local receiver is
+passed to it. Retrieved methods remain execution-local and do not grant another
+contract's writable storage authority. See
+[Foreign Variables & Hashes](/smart-contracts/storage/foreign).
+
 ## Dynamic foreign reads
 
 Create a foreign reference inside a function when its target is known only at

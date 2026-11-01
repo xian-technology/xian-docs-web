@@ -20,7 +20,8 @@ token_owner = ForeignVariable(
 ## Behavior
 
 - reads behave like the underlying local primitive
-- writes are rejected
+- writes are rejected, including through unbound methods obtained from local
+  `Variable` or `Hash` type metadata
 - this is for composition, not shared mutable state
 - if you need a local snapshot, create a normal `Hash` and call
   `local_hash.clone_from(foreign_hash)`

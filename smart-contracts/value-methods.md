@@ -4,6 +4,8 @@ Contract values expose a bounded, deterministic selection of Python-style
 methods. The [runtime surface inventory](https://github.com/xian-technology/xian-contracting/tree/main/tests/surface)
 records the exact reviewed names, examples and remaining exclusions. Source
 acceptance alone does not establish that every host Python API is available.
+A public name on a Python class does not make its method available to contracts;
+class-method aliases must belong to the reviewed callable catalog.
 
 ## Bound Methods and Arguments
 
@@ -67,6 +69,9 @@ assert str(date(2026, 1, 2) + duration(days=2)) == "2026-01-04 00:00:00"
 These callable values are execution-local too. They cannot be persisted,
 returned as transaction results or transferred between contracts, including
 inside a container. Construct the data first, then store or pass the data.
+Retrieving a permitted [public callable alias](/smart-contracts/imports/importing-contracts#public-callable-aliases)
+from an imported module is supported, but the retrieved value has the same
+argument, result and storage boundary restrictions.
 
 `importlib.Func` and `importlib.Var` aliases create mutable descriptor objects
 with supported fields, class checks and identity-based equality. Descriptors can
@@ -75,6 +80,14 @@ as public transaction results. Function interfaces compare positional parameter
 names and order; keyword-only and variadic parameters are excluded. See
 [Interface Patterns](/smart-contracts/imports/interface-patterns) for exact
 matching rules, callable metadata and descriptor boundary restrictions.
+
+## Attribute Mutation
+
+Authored attribute assignments and deletions cannot modify shared helpers,
+classes, modules or functions. This includes aliases to those objects. Mutable
+public attributes are supported on `importlib.Func` and `importlib.Var`
+descriptor instances; their classes remain protected. Use ordinary item
+assignment and supported mutator methods to update collection contents.
 
 ## Collections and Numeric Values
 

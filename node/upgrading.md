@@ -8,11 +8,12 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-2`, gas schedule `xvm-gas-2`, bytecode `xvm-1` and set codec
+`xvm-execution-3`, gas schedule `xvm-gas-2`, bytecode `xvm-1` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
-change this protected record.
+change this protected record. The comparison covers all four fields; matching
+gas and codec versions do not make a different execution revision compatible.
 
 This revision starts a fresh local chain; it does not migrate an earlier
 database or activate a second VM at a block height. Preserve earlier state and

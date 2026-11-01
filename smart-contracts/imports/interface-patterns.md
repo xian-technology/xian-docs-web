@@ -72,7 +72,9 @@ can be used. Defaults and annotations do not affect the match; keyword-only
 parameters, `*args`, and `**kwargs` are excluded. A list is preserved as a
 list and does not match the tuple of parameter names.
 
-Fields and additional public attributes are mutable. Constructor arguments
+Fields and additional public attributes on descriptor instances are mutable.
+This does not permit assigning or deleting attributes on the shared `Func` or
+`Var` classes, modules, functions or other runtime helpers. Constructor arguments
 retain their normal identity and aliases observe mutations:
 
 ```python
@@ -91,10 +93,13 @@ the same fields are unequal; they can be separate dictionary keys. They are
 not supported as deterministic-set elements.
 
 The `is_of` method can be saved and called later. Interface enforcement uses
-the descriptor's current fields and its standard match behavior. Replacing
-`is_of` with a custom callable is not supported by `enforce_interface` and
-raises an error; calling a stored callable attribute directly is a separate
-operation.
+the descriptor's current fields and its standard match behavior. For members
+that require function or storage matching, replacing `is_of`
+with a custom callable is not supported by `enforce_interface` and raises an
+error. Calling a stored callable attribute directly is a separate operation.
+Missing or `None` members fail the interface check without invoking a callback;
+other existing non-function, non-storage values satisfy the name check without
+invoking one.
 
 ## Host callable metadata and exclusions
 
@@ -120,15 +125,20 @@ function values, while a bound method can satisfy the existing-attribute check
 without matching its function signature. Use the exported-function checks below
 before calling another contract.
 
-The native contract API deliberately excludes these Python helper surfaces:
+Public [event methods](/smart-contracts/events#call-signatures) and
+[unbound storage methods](/smart-contracts/storage#methods-through-storage-types)
+retain their declared receiver and storage authority. Retrieving a method from
+`Var.type` does not permit constructing writable storage.
 
-- `Contract.submit`; use the controlled `Contract.deploy` API.
-- `LogEvent.write_event`; invoke the declared event object instead.
-- Unbound storage methods obtained from ORM classes or `Var.type`; use permitted
-  methods on a declared storage object or read-only foreign reference.
-- Imported-module global aliases such as `module.alias` where the other contract
-  assigned `alias = Contract.get_info`. Imported attribute access exposes exported
-  functions; an interface metadata check does not export a global value.
+The native contract API excludes these helper surfaces:
+
+- Direct low-level deployment from ordinary contracts; call
+  `submission.submit_contract(...)`. The [deployment helpers](/reference/submission-internals#low-level-deployment-helpers)
+  are restricted to the active `submission` contract.
+- Imported-module data globals, raw storage/event handles and private-function
+  aliases. [Public callable aliases](/smart-contracts/imports/importing-contracts#public-callable-aliases)
+  have their own receiver and context checks; interface metadata does not export
+  an arbitrary global value.
 - Custom `is_of` callbacks during interface enforcement, as described above.
 
 These boundaries prevent helper methods and callable values from acquiring

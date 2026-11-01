@@ -41,6 +41,51 @@ the stored VM IR with the canonical Rust compiler and reject submitted
   nesting depth 64, 100,000 tokens total, and 4,096 tokens per logical line
 - child deployments use the same submission surface
 
+## Low-level Deployment Helpers
+
+The active `submission` contract can use `Contract.deploy(...)` or the
+instance-style submit helper:
+
+```python
+helper = Contract()
+helper.submit(
+    name,
+    code,
+    owner=None,
+    constructor_args=None,
+    developer=None,
+    deployer=None,
+    initiator=None,
+)
+```
+
+`submit` accepts these arguments positionally or by keyword and returns `None`.
+It can be retrieved as `send = helper.submit`; the unbound form is
+`Contract.submit(helper, ...)`, with `self=helper` also accepted. Both forms use
+the same source-backed deployment, constructor, metadata and metering path.
+Missing, duplicate and unknown arguments are rejected.
+
+These helpers require the currently executing contract to be `submission`.
+Ordinary contracts, including child constructors, do not acquire that authority
+by constructing a handle, retrieving an alias or supplying deployment metadata.
+Factories should call `submission.submit_contract(...)` through an imported
+contract. Child deployment and its constructor roll back with a failing parent
+transaction.
+
+`Contract()` creates an opaque execution-local handle. `Contract(None)` and
+`Contract(driver=None)` are equivalent; other driver arguments are rejected
+inside a contract. It does not expose the
+storage driver or allow selecting another writable storage namespace. Handles
+cannot be persisted, returned as public transaction results or transferred
+across contract boundaries, including inside containers. The existing
+`get_info`, `set_owner`, `set_developer` and `deploy` class methods can also be
+retrieved from the handle; their authority checks remain unchanged.
+
+For low-level metadata arguments, `None` selects the contextual default for
+`developer`, `deployer` and `initiator`. An explicit value, including an empty
+string, is preserved. The public submission contract supplies and validates
+metadata on the normal application deployment path.
+
 ## What Gets Stored
 
 Every deployed contract stores metadata such as:

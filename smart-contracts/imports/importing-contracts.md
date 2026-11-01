@@ -19,6 +19,46 @@ In Xian, a static import resolves to another deployed contract in chain state.
 Calling an exported function on that imported module creates a contract-to-
 contract call inside the same transaction.
 
+## Public Callable Aliases
+
+An imported contract can expose a public alias to an exported function or an
+admitted builtin or host callable. For example, `con_tools` can define:
+
+```python
+size = len
+
+@export
+def identify():
+    return ctx.this
+
+identify_alias = identify
+```
+
+A caller can retrieve or invoke those aliases:
+
+```python
+import con_tools
+
+@export
+def inspect():
+    count = con_tools.size
+    return [count([1, 2, 3]), con_tools.identify_alias()]
+```
+
+The result is `[3, "con_tools"]`. An exported-function alias retains its
+original contract and canonical exported function name, including that
+contract's owner and normal caller context. An admitted builtin, host function
+or class-method alias executes in the calling contract's context; importing it
+does not borrow the exporting contract's authority. Public aliases use the
+module's initialized binding, including any supported rebinding in its module
+body.
+
+Alias lookup does not create additional transaction entrypoints. A name used
+with a direct transaction, `importlib.call(...)` or `importlib.has_export(...)`
+must satisfy the ordinary export rules. Private-function aliases, storage and
+event handles, and ordinary data globals are not exposed through this mechanism.
+An interface check on a global attribute does not make that attribute public.
+
 ## Caller And Signer Semantics
 
 The most important security rule is the split between `ctx.signer` and

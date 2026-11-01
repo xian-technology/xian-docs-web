@@ -1,7 +1,7 @@
 # Chi Cost Table
 
-These costs describe the native `xian_vm_v1` runtime with gas schedule
-`xvm-gas-2`. Use readonly simulation
+These costs describe the native `xian_vm_v1` runtime with execution revision
+`xvm-execution-3` and gas schedule `xvm-gas-2`. Use readonly simulation
 against the target node for a complete operation estimate; the local Python
 harness has a separate metering implementation.
 
@@ -26,11 +26,17 @@ measured execution time. The current runtime supports `xvm-gas-2`; it does not
 offer `xvm-gas-1` as an alternate execution mode. Validators must use matching
 runtime policies. See the [upgrade procedure](/node/upgrading).
 
-Module initialization also charges for building interface metadata from binding
-names and function signatures. Interface inspection charges for the metadata
-it reads; following imported function aliases is bounded. These costs apply
+Module initialization also charges for building interface metadata and the
+public callable catalog from binding names and function signatures. Interface
+inspection and imported callable lookup charge for the metadata they read;
+following imported function aliases is bounded. These costs apply
 even when a module's interface is inspected before any exported function is
 called. Simulation includes this initialization work.
+
+Events charge for validating and copying their declaration schema and for
+validating each emitted payload, in addition to emission and encoded-value
+costs. Larger schemas and values require more work. An out-of-chi failure
+discards the event and tentative writes.
 
 ## Fee Conversion
 
