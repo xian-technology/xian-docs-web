@@ -140,10 +140,34 @@ Catch the SDK's structured exceptions when behavior depends on failure type:
 
 ## Runtime values in transactions
 
-Transaction preparation recursively normalizes runtime values through nested
-lists and dictionaries. Large Python integers use the `__big_int__` wire wrapper;
-booleans remain JSON booleans. Pass native Python values to SDK helpers rather
-than converting large integers to floating point.
+Transaction arguments accept both typed runtime values and existing tagged JSON,
+including mixtures inside nested lists and dictionaries. Large Python integers
+use the `__big_int__` wrapper; booleans remain JSON booleans. Do not convert large
+integers to floating point.
+
+```python
+from decimal import Decimal
+
+kwargs = {
+    "deadline": {"__time__": [2026, 11, 1, 14, 47, 2, 123456]},
+    "amount": Decimal("1.25"),
+    "raw": b"abc",
+    "precise_text": {"__fixed__": "1.2300"},
+}
+```
+
+Simulation and transaction signing use the same bounded wire encoder. It
+preserves raw tag contents, including decimal trailing zeros, without decoding
+and re-encoding them or mutating the caller's input. It rejects cycles, excessive
+nesting, non-finite Python numbers and non-string object keys. Successful wire
+encoding does not establish that a raw tag has valid runtime semantics; the
+receiving node validates and interprets those tags.
+
+Wire arguments and persistent contract state have different boundaries. The
+runtime's storage `encode` API remains strict: ordinary dictionaries cannot
+impersonate typed values with reserved codec keys. Use actual runtime values
+when writing contract state; accepting raw transaction tags does not weaken
+those [storage rules](/smart-contracts/storage#persistent-sets).
 
 Source deployment targets `xian-tech-py>=0.5.0,<0.6`. Keep application dependency
 constraints aligned with this API even when local development uses sibling
