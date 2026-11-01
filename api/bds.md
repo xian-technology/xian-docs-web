@@ -132,7 +132,9 @@ rebuild. Pruned local history cannot reconstruct older indexed rows.
 The database, recovery spool, snapshot, and RPC source must use the same execution
 policy as the node: execution revision `xvm-execution-2`, gas schedule
 `xvm-gas-2`, bytecode `xvm-1`, and set codec `xian-set-1`. BDS records this policy
-in database metadata and checks the RPC source's genesis before backfill. A
+in database metadata and checks the RPC source's protected committed
+`__execution_policy` value before backfill or a reset. The RPC `/genesis` response
+does not include Xian's custom application genesis fields. A
 missing or different policy is rejected; do not relabel historical data with the
 current policy. Use a fresh current-chain index or a compatible snapshot. Keep
 historical replay in its pinned previous runtime image.
