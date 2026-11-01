@@ -100,8 +100,12 @@ iterables and retain the receiver's kind.
 
 Built-in sets retain their kind and shared identity across contract calls. They
 cannot be persisted or returned as transaction results, including inside another
-container. Convert explicitly with `set(view_result)` before storing or returning
-one. Augmented assignment between built-in sets mutates the original receiver;
+container. Convert explicitly with `set(view_result)` for a transaction result.
+Although the runtime storage codec supports the wrappers, node consensus state
+currently rejects both `set()` and `frozenset()` values. Persist a canonical
+member list, such as `list(set(view_result))`, and reconstruct with `set()` after
+reading it. This restriction also applies to wrappers nested in other containers.
+Augmented assignment between built-in sets mutates the original receiver;
 when the right operand is a dictionary view, it produces a new set and leaves
 aliases of the original unchanged.
 
