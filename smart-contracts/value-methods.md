@@ -71,6 +71,8 @@ inside a container. Construct the data first, then store or pass the data.
 `importlib.Func` and `importlib.Var` aliases can build interface descriptors.
 Native descriptors use a data representation for interface enforcement; Python
 descriptor instance attributes and class checks are not supported.
+Function interfaces compare positional parameter names and order. Keyword-only
+and variadic parameters are outside this historical interface check.
 
 ## Collections and Numeric Values
 
