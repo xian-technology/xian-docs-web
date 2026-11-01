@@ -76,6 +76,18 @@ members. Nested sets also consume this work budget. Normal metered storage
 write limits remain stricter. Native byte charges use canonical compact UTF-8
 JSON; the encoding size cap conservatively accounts for ASCII escaping.
 
+The runtime serializer also checks the ordinary value tree before encoding,
+including payloads without sets: depth is limited to 128 from a root at depth
+zero, with at most 1,048,576 visited values. Dictionary keys and values count
+separately; repeated references count each time. Set members have the separate
+envelope limits above. Cycles and non-finite numbers are rejected. SDK
+transaction kwargs using this serializer receive these checks before signing.
+
+Serializer limits do not replace node or VM limits. The node checks depth 128
+on the complete transaction JSON, including its outer envelope. The VM checks
+external values independently at depth 128 and 131,072 visited values;
+transaction size, execution and storage limits also apply.
+
 Ordinary stored dictionaries cannot contain reserved runtime tag keys such as
 `__set__`, `__frozenset__`, `__fixed__` or `__big_int__`. Supply the actual typed
 value instead of constructing a codec tag by hand.
