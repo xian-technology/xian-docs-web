@@ -51,6 +51,59 @@ than being stored as text. See the
 [State Model](/concepts/state-model#stored-and-event-values) for supported value
 boundaries and rollback behavior.
 
+## Persistent sets
+
+Deterministic `set()` and `frozenset()` values can be stored under the current
+[execution revision](/node/upgrading#current-local-execution-revision).
+Their `xian-set-1` encoding preserves member types, including tuples, nested
+frozen sets, raw Decimal precision and trailing zeros, and float signed zero.
+View-produced builtin sets must first be converted to a deterministic wrapper;
+callables and interface descriptors cannot be stored through either kind.
+Numeric members must be finite, including when chi metering is disabled.
+
+The SDK decodes set query responses into their deterministic wrapper types.
+Raw queries return tagged JSON with `info="dict"`, for example:
+
+```json
+{"__set__":{"codec":"xian-set-1","items":[["int","3"],["str","alice"]]}}
+```
+
+Each set envelope is bounded to depth 64, 131,072 typed member nodes, and
+8 MiB of ASCII-escaped JSON. Across a whole stored payload, the sum of the
+squares of all set cardinalities must not exceed 8,388,608. This bounds the
+work required to normalize sets; a single flat set can contain at most 2,896
+members. Nested sets also consume this work budget. Normal metered storage
+write limits remain stricter. Native byte charges use canonical compact UTF-8
+JSON; the encoding size cap conservatively accounts for ASCII escaping.
+
+Ordinary stored dictionaries cannot contain reserved runtime tag keys such as
+`__set__`, `__frozenset__`, `__fixed__` or `__big_int__`. Supply the actual typed
+value instead of constructing a codec tag by hand.
+
+## Declarations and storage authority
+
+Declare writable `Variable` and `Hash` storage, and `LogEvent` schemas, directly
+at module scope. The compiler binds each declaration to the contract and its
+variable name:
+
+```python
+balance = Variable(default_value=0)
+
+@export
+def update(value: int):
+    balance.set(value)
+```
+
+Constructing writable storage inside a function is not supported. Constructor
+aliases and class information obtained from `importlib.Var(...).type` cannot
+be used to construct storage or choose another contract's writable keys.
+Use the declared object to update your own state, and call the other
+contract's exported functions to request changes to its state.
+
+The direct `ForeignVariable(...)` and `ForeignHash(...)` forms below are the
+read-only exception for function-local references. Use those constructor
+names directly; aliases and descriptor type values do not create references.
+
 ## Dynamic foreign reads
 
 Create a foreign reference inside a function when its target is known only at

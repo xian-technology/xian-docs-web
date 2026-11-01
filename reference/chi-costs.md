@@ -1,6 +1,7 @@
 # Chi Cost Table
 
-These costs describe the native `xian_vm_v1` runtime. Use readonly simulation
+These costs describe the native `xian_vm_v1` runtime with gas schedule
+`xvm-gas-2`. Use readonly simulation
 against the target node for a complete operation estimate; the local Python
 harness has a separate metering implementation.
 
@@ -20,7 +21,16 @@ The result is capped by the transaction's submitted chi limit.
 | returned value | 1 per byte |
 | cross-contract dispatch | 10,000 per call, plus called work |
 
-VM computation and host operations use the fixed `xian_vm_v1` gas schedule.
+VM computation and host operations use deterministic policy constants, not
+measured execution time. The current runtime supports `xvm-gas-2`; it does not
+offer `xvm-gas-1` as an alternate execution mode. Validators must use matching
+runtime policies. See the [upgrade procedure](/node/upgrading).
+
+Module initialization also charges for building interface metadata from binding
+names and function signatures. Interface inspection charges for the metadata
+it reads; following imported function aliases is bounded. These costs apply
+even when a module's interface is inspected before any exported function is
+called. Simulation includes this initialization work.
 
 ## Fee Conversion
 
@@ -49,6 +59,43 @@ Sequence entry counts and encoded byte counts are different units. A list of
 large values can cost much more than a list of the same length containing
 small integers. Return bytes are metered; the Python harness's separate
 128 KiB return-value limit is not a general native-VM return-size guarantee.
+
+## Hashing and Signatures
+
+Every invocation has the ordinary 5,000 raw-unit call-dispatch cost. The table
+below lists **additional** work charges. Direct calls, function aliases and
+iterator callbacks each charge these once per invocation; surrounding argument,
+iteration, storage and transaction work is charged separately.
+
+| Operation | Additional fixed raw cost | Additional byte cost |
+| --- | ---: | ---: |
+| `hashlib.sha256_text` | 0 | 2 per UTF-8 byte |
+| `hashlib.sha3_text` | 0 | 4 per UTF-8 byte |
+| `hashlib.sha256_hex` | 0 | 4 per encoded input byte |
+| `hashlib.sha3_hex` | 0 | 6 per encoded input byte |
+| `hashlib.sha256` | 0 | 4 per raw input byte |
+| `hashlib.sha3` | 0 | 6 per raw input byte |
+| `crypto.verify` | 95,000 | 4 per message UTF-8 byte, plus 2 per encoded key/signature byte |
+| `crypto.key_is_valid` | 0 | 0; wrong-length inputs return `False` without a payload copy |
+
+For verification, the total invocation base is therefore 100,000 raw units
+before the byte charge. Hash and crypto work is charged before payload copying,
+hex classification, decoding and verification. Inputs rejected by an immediate
+length check do not incur a proportional charge for work that was never done.
+Admitted malformed inputs pay for their work, and an out-of-chi failure rolls
+back tentative writes and events.
+
+Text hashing and verification messages are capped at 1 MiB of UTF-8 bytes.
+Explicit hex hashing accepts at most 2 MiB of encoded input (1 MiB decoded).
+Historical aliases accept at most 2 MiB of raw input, then either 1 MiB decoded
+hex or 1 MiB fallback text. Their charge includes raw whitespace and failed hex
+classification. Verification keys and signatures are capped at 64 and 128
+encoded bytes. These admission limits also apply when metering is disabled,
+and the local Python bridges enforce the same limits. They do not impose a
+universal limit on strings created by other operations.
+
+See [Hashlib](/smart-contracts/stdlib/hashlib) and
+[Crypto](/smart-contracts/stdlib/crypto) for input rules and examples.
 
 ## ZK Verification
 

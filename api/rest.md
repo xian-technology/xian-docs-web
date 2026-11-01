@@ -42,6 +42,22 @@ GET /api/abci_query/perf_status
 For key scans, follow the returned `next_after` cursor instead of loading an
 unbounded prefix.
 
+Persisted `set()` and `frozenset()` wrappers use tagged JSON for both top-level
+and nested query values. A top-level wrapper has ABCI `info="dict"`; for example,
+`set([1, 2])` is represented as:
+
+```json
+{"__set__":{"codec":"xian-set-1","items":[["int","1"],["int","2"]]}}
+```
+
+`__frozenset__` identifies the immutable wrapper. Typed members preserve tuple
+and frozen-set nesting, exact integers, decimal kinds and finite float bits.
+Use a compatible runtime decoder or preserve this tagged representation;
+converting it to an ordinary JSON list loses type information. Dictionary-view
+algebra produces a distinct execution-only built-in set; convert it explicitly
+with `set(value)` before persistence. See
+[Storage](/smart-contracts/storage) for supported values and reserved codec tags.
+
 See [BDS Indexed Queries](/api/bds) for indexed block, transaction, event,
 state-history, token, candle, shielded, reward, and patch paths.
 

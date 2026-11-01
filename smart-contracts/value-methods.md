@@ -68,11 +68,13 @@ These callable values are execution-local too. They cannot be persisted,
 returned as transaction results or transferred between contracts, including
 inside a container. Construct the data first, then store or pass the data.
 
-`importlib.Func` and `importlib.Var` aliases can build interface descriptors.
-Native descriptors use a data representation for interface enforcement; Python
-descriptor instance attributes and class checks are not supported.
-Function interfaces compare positional parameter names and order. Keyword-only
-and variadic parameters are outside this historical interface check.
+`importlib.Func` and `importlib.Var` aliases create mutable descriptor objects
+with supported fields, class checks and identity-based equality. Descriptors can
+retain shared identity across contract calls, but cannot be persisted or returned
+as public transaction results. Function interfaces compare positional parameter
+names and order; keyword-only and variadic parameters are excluded. See
+[Interface Patterns](/smart-contracts/imports/interface-patterns) for exact
+matching rules, callable metadata and descriptor boundary restrictions.
 
 ## Collections and Numeric Values
 
@@ -98,21 +100,48 @@ dictionary keys/items view, but not to a wrapper with the same elements;
 ordering comparisons fail. Methods such as `union` and `intersection` accept
 iterables and retain the receiver's kind.
 
-Built-in sets retain their kind and shared identity across contract calls. They
-cannot be persisted or returned as transaction results, including inside another
-container. Convert explicitly with `set(view_result)` for a transaction result.
-Although the runtime storage codec supports the wrappers, node consensus state
-currently rejects both `set()` and `frozenset()` values. Persist a canonical
-member list, such as `list(set(view_result))`, and reconstruct with `set()` after
-reading it. This restriction also applies to wrappers nested in other containers.
+Built-in sets retain their kind and shared identity across contract calls when
+all contained values are allowed across that boundary. They cannot be persisted
+or returned as transaction results, including inside another container. Convert
+explicitly with `set(view_result)` for those uses. The deterministic `set()` and
+`frozenset()` wrappers are supported by the current execution revision's typed
+state codec, including when nested in ordinary containers. Members must satisfy
+the normal state type, numeric-range and finiteness rules. Quiet NaNs and
+infinities may be usable as local members, but cannot be persisted; successful
+wrapper construction alone does not guarantee that a value is valid state.
+
+Frozen wrappers reject `set.add`, `set.remove`, `set.discard`, `set.pop` and
+`set.clear` when passed as an unbound method's receiver, including calls that
+would otherwise make no change. Their members and cached hash cannot be replaced
+or deleted, so they remain stable dictionary keys.
+
 Augmented assignment between built-in sets mutates the original receiver;
 when the right operand is a dictionary view, it produces a new set and leaves
 aliases of the original unchanged.
 
-Set members must belong to the deterministic scalar/structural key domain.
-Callable objects, including functions, constructors and bound methods, are not
-supported set members, even when the same object is an allowed dictionary key.
-This also applies to sets produced by dictionary-view operations.
+Built-in sets use Python-style key eligibility. They accept ordinary hashable
+scalar values, tuples of eligible keys, deterministic frozen sets, and local
+objects that are valid dictionary keys: functions, constructors, bound methods,
+contract handles and interface descriptors. Repeated retrieval of a method from
+the same receiver matches the existing key; ordinary bound methods on distinct
+receivers remain distinct even when those receivers contain equal values. These local objects
+retain their own boundary restrictions. Converting a callable-bearing built-in
+set with `set(...)` or `frozenset(...)` fails rather than making its callbacks
+serializable.
+
+The wrapper and built-in key domains differ. Fixed values from `decimal(...)`,
+`datetime.datetime(...)` and `datetime.timedelta(...)` are accepted by the
+wrappers, but cannot be direct built-in members or tuple-contained built-in keys.
+A deterministic frozen set containing these values is itself a valid built-in
+key. Raw Decimal values, such as `round(decimal('1.25'), 2)`, are hashable except
+for signaling NaNs.
+
+Eligible scalar and structural keys keep their canonical order. Local object
+keys, and tuples containing them, follow those keys in stable encounter order.
+Equal local keys retain the first representative; removing and adding a key
+places it at the end of that group. This order is deterministic for the same
+execution, but reversing the insertion order of distinct callbacks can change
+their iteration order. Mutable receiver contents do not determine method order.
 
 ```python
 keys = {"a": 1, "b": 2}.keys()

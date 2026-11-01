@@ -129,6 +129,14 @@ const events = await client.listEvents("currency", "Transfer", { afterId: 0 });
 Choose a source that retains the missing block range before starting a
 rebuild. Pruned local history cannot reconstruct older indexed rows.
 
+The database, recovery spool, snapshot, and RPC source must use the same execution
+policy as the node: execution revision `xvm-execution-2`, gas schedule
+`xvm-gas-2`, bytecode `xvm-1`, and set codec `xian-set-1`. BDS records this policy
+in database metadata and checks the RPC source's genesis before backfill. A
+missing or different policy is rejected; do not relabel historical data with the
+current policy. Use a fresh current-chain index or a compatible snapshot. Keep
+historical replay in its pinned previous runtime image.
+
 Run maintenance commands in the matching node runtime, with the intended
 node home mounted at `~/.cometbft` and its BDS connection settings available.
 Stop the normal BDS writer while performing a manual reindex or import; keep
@@ -145,6 +153,12 @@ latest height. `--start-height` and `--end-height` select an explicit range.
 `--reset` deletes the BDS schema and local spool before rebuilding; reserve it
 for a deliberate full rebuild with the required history available.
 
+BDS spool and snapshot format version 2 carry the execution policy. Version 1
+artifacts are rejected. Spool replay and compaction check all pending records
+before enqueueing or deleting files. Snapshot import checks policy, table files,
+row counts, and encoded runtime values before resetting the target schema;
+export refuses incompatible database metadata.
+
 A BDS snapshot provides another starting point:
 
 ```bash
@@ -155,6 +169,13 @@ Use `xian-bds-snapshot import --input-path <archive>` in the prepared maintenanc
 runtime to restore it. The import checks the snapshot against the configured
 RPC source. Resume the writer afterward and verify that indexed height advances
 and the spool drains.
+
+Runtime values retain their tagged JSON representation in BDS JSONB columns.
+For example, contract sets and frozen sets keep their `__set__` or
+`__frozenset__` envelope with codec `xian-set-1`, including after spool recovery,
+RPC backfill, and snapshot restore. These collection envelopes are not token
+balances and are not converted to SQL numbers. Transaction envelopes retain the
+original transaction JSON separately from decoded runtime results.
 
 A BDS snapshot contains indexed history. It does not replace the Xian
 application-state snapshot, CometBFT data, or validator configuration needed

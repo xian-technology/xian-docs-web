@@ -5,6 +5,27 @@ validator. A compatible runtime update and a hardfork require different
 coordination. This documentation describes the `xian_vm_v1` codebase; an
 existing network running an earlier runtime is not automatically compatible.
 
+## Current Local Execution Revision
+
+Fresh local genesis commits `__execution_policy` with execution revision
+`xvm-execution-2`, gas schedule `xvm-gas-2`, bytecode `xvm-1` and set codec
+`xian-set-1`. The node requires this exact policy in genesis, persisted state
+and its native runtime. Missing or mismatched policy fails before contract
+bootstrap or state replacement. Contracts and governed state patches cannot
+change this protected record.
+
+This revision starts a fresh local chain; it does not migrate an earlier
+database or activate a second VM at a block height. Preserve earlier state and
+its immutable runtime image. Historical block corpora must be replayed with
+their matching earlier image, as described in
+[Localnet Replay](/node/localnet-e2e#replay-across-architectures).
+
+Application snapshots use format 2 and carry the execution policy. Import and
+peer state sync reject incompatible policy before replacing application state.
+The exported state includes the protected policy in its application-root
+commitment. An existing private network needs a separately agreed migration
+plan before adopting this revision.
+
 ## Choose the Procedure
 
 | Change | Procedure |

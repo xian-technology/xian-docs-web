@@ -172,7 +172,8 @@ reproduces the generated choices; network timing and block grouping can vary.
 
 A successful E2E run exports `replay-corpus/` and performs a local replay. The
 corpus contains public configuration, CometBFT block databases, expected
-result digests, and source revisions. Application state and validator private
+result digests, source revisions, execution policy and the source image ID.
+Application state and validator private
 keys are excluded. A fresh application must re-execute the stored blocks;
 copying an existing state database cannot satisfy this test.
 
@@ -194,6 +195,28 @@ Use a fresh output directory. Its `result.json` records the image,
 architecture, replay height, root, and number of compared blocks. Local runs
 also flag uncommitted source changes; CI requires committed revisions so the
 replay builds can reproduce the source network.
+
+The replay tool checks the selected image's execution policy before extracting
+blocks or creating the output directory. Current-revision replay accepts
+independently built images with the same policy, so ARM64 and x86-64 can be
+compared. The recorded source image ID remains provenance, not a requirement
+that both architectures share the same image bytes.
+
+Unversioned historical corpora require their retained previous image and its
+exact immutable image ID. The current VM cannot silently substitute its
+semantics or gas schedule for an earlier revision:
+
+```bash
+uv run python scripts/localnet_replay_corpus.py \
+  --corpus /path/to/legacy/replay-corpus \
+  --image <retained-previous-image> \
+  --legacy-image-id sha256:<full-retained-image-id> \
+  --output .artifacts/legacy-replay-check
+```
+
+Keep the historical corpus and its expected hashes unchanged. A Git revision
+alone cannot reproduce a run made from uncommitted sources; retain the exact
+image or a verified source/build bundle for that run.
 
 ## Release Safety
 
