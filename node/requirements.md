@@ -2,10 +2,12 @@
 
 ## Supported Operator Hosts
 
-- Linux
-- macOS
+- Linux on x86-64 or ARM64, the primary server platform
+- macOS on Apple Silicon (M-series)
 
 The supported runtime path is Docker-based on both platforms.
+Windows node operation is not supported. Availability of a compiler or SDK
+package for another platform does not establish node support.
 
 ## Tooling
 
@@ -38,9 +40,10 @@ especially with Docker or Podman plus system-level supervision.
 
 ### macOS
 
-macOS is supported, but hard memory limits are most practical through Docker
-Desktop rather than host-native process limits. This is the documented path for
-operator testing on macOS.
+On Apple Silicon macOS, use the ARM64 node image through Docker Desktop.
+Hard memory limits are enforced inside Docker's Linux VM rather than through
+host-native process limits. This is the documented path for operator testing
+on macOS.
 
 ## Recommended Validation
 

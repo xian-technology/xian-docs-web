@@ -5,7 +5,7 @@ The maintained operator path uses `xian-cli`, `xian-stack`, and
 
 ## Requirements
 
-- macOS or Linux
+- Linux (x86-64 or ARM64), or macOS on Apple Silicon
 - Python 3.14
 - `uv`
 - Docker with Compose
