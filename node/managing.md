@@ -96,6 +96,13 @@ Age is measured from each segment's last write. A record can therefore outlive
 the configured interval by the segment's time span and the cleanup interval;
 these are both bounded while the service is running.
 
+File write failures emit a safe UTC diagnostic to stderr at most once per minute;
+cleanup failures emit one per cleanup cycle. These include the operation, error
+type and numeric OS error code without paths or exception payloads. A failed
+record is dropped and later writes/cleanup retry. Failure of stderr itself does
+not stop the node. Alert on these diagnostics and disk usage: retention cannot
+recover space when the filesystem denies access.
+
 Set size limits through `xian setup node`, `xian network create`, or
 `xian network join` with `--app-log-max-file-mb` and
 `--app-log-max-total-mb`. Both must be positive integers, and the total must be
