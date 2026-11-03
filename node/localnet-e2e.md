@@ -51,6 +51,31 @@ and refuse to reuse existing observer or replay directories.
 
 ## Coverage
 
+### IntentKit Payment Integration
+
+Run the focused five-validator payment suite from `xian-stack` with a sibling
+`xian-intentkit` checkout:
+
+```bash
+make localnet-e2e LOCALNET_E2E_SUITE=intentkit-x402 LOCALNET_E2E_INTENTKIT_X402=1
+```
+
+This runs bootstrap, health, core x402 settlement and the IntentKit x402 buyer
+phase. All four are required; a skipped phase fails this suite. The separate
+`IntentKit x402 Integration` GitHub workflow pins sibling revisions, runs weekly
+and on relevant pull requests, and supports manual dispatch. Core node CI does
+not require IntentKit.
+
+The test uses a local HTTP seller, generated test wallets and real settlement
+on the five-node chain. It checks payment state, consumed allowance and buyer/
+seller balances on every validator. It supplies agent context and signer lookup
+and captures the order in memory; LLM orchestration and IntentKit database
+persistence are outside its coverage. No external AI-provider credentials are
+needed. CI publishes source revisions, a phase summary and node report, excluding
+private network/configuration files and signed payment payloads.
+
+### Full Suite
+
 The layered harness covers:
 
 - five-node startup, health, peers, validator count, and app-hash agreement
