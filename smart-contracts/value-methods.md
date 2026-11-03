@@ -266,6 +266,20 @@ string padding. Binary floats and raw Decimal values have their own numeric
 formatting behavior. Numeric `n` formatting uses a fixed C-locale policy rather
 than the validator's locale.
 
+Raw Decimal formatting uses the same explicit grammar in the Python test harness
+and the native runtime, independent of the host Decimal library or prior imports.
+It supports alignment/fill, signs, `z` (remove a negative sign when rounding to
+zero), zero padding, width, comma grouping, precision, and `eEfFgGn%` types.
+Alternate-form `#` and underscore grouping flags are rejected for raw Decimal;
+`#` and `_` remain valid fill characters, for example `#>8.2f`.
+
+```python
+amount = round(decimal('-0.001'), 3)
+assert format(amount, 'z.2f') == '0.00'
+assert '{:z.2f}'.format(amount) == '0.00'
+assert f'{amount:z.2f}' == '0.00'
+```
+
 ```python
 text = "{name}: {amount:04d} {label!r}".format(name="alice", amount=7, label="ok")
 assert text == "alice: 0007 'ok'"
@@ -274,7 +288,9 @@ assert "{name}/{value}".format_map({"name": "x", "value": 3}) == "x/3"
 
 Automatic and explicit numeric field numbering cannot be mixed in one format.
 F-strings use the same value formatter, including conversions and dynamic format
-specifications built from allowed contract expressions:
+specifications built from allowed contract expressions. Each field evaluates its
+value, then its nested specification, then its conversion; specification side
+effects are visible to the conversion in both runtimes:
 
 ```python
 name = "alice"
