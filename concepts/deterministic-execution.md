@@ -91,10 +91,14 @@ Xian also replaces the most common semantic footguns with deterministic rules.
 
 ### Decimal-Backed Values
 
-Contract `float` values are decimal-backed runtime values, not ordinary binary
-IEEE 754 floats.
+Decimal literals use Xian decimal-backed values. Explicit `float(...)` calls
+produce binary IEEE 754 values and require their own numeric edge-case tests.
+Native binary-float powers use a version-pinned software kernel with platform
+math dispatch disabled; NaN power results have a fixed representation. This is
+a deterministic arithmetic policy, not a promise of correctly rounded results
+for every transcendental input.
 
-That avoids the classic:
+Decimal-backed literals avoid the classic:
 
 ```python
 # Standard Python: 0.1 + 0.2 = 0.30000000000000004
@@ -129,7 +133,7 @@ state.
 
 ## What Usually Causes Divergence
 
-Real divergence risks tend to come from operator drift rather than exotic math.
+Divergence risks include implementation edge cases as well as operator drift.
 
 Common examples:
 
@@ -137,6 +141,31 @@ Common examples:
 - validators running mismatched compiler or VM versions
 - local forks of consensus-sensitive repos
 - corrupted or inconsistent local state
+- ambient process state, collection ordering, and numeric boundary differences
+
+## Testing Determinism
+
+The native Contract Determinism campaign executes the reviewed surface corpus
+and seeded generated programs in fresh processes. It varies hash seeds, time
+zones, locale, Decimal context, import warmup, allocator, case order and storage
+reopening. Optimized Python interpreters are checked for rejection rather than
+used for contract execution.
+
+Comparisons preserve types, IEEE float bits, signed zero, Decimal representation,
+collection order, results, errors, chi, writes, events, canonical artifacts and
+persisted state. Authored expectations and failure/rollback checks prevent a
+universally failing implementation from passing merely because failures repeat.
+The CI workflow requires comparisons across Linux x86-64, Linux ARM64 and Apple
+Silicon macOS. The extended corpus currently contains 889 cases: 601 surface
+cases, 256 seeded generated programs and 32 fixed binary-float edge cases. Its
+eleven environment scenarios are selected comparisons, not every combination
+of host settings. Nightly campaigns rotate recorded seeds; failing inputs and observations
+are retained for reproduction.
+
+These checks complement five-node block replay and parallel-versus-serial tests.
+They provide evidence for the tested programs and environments, not a proof for
+every possible contract. Determinism and correctness are separate requirements:
+a consistently wrong result must also fail a semantic test.
 
 ## If Determinism Breaks
 
@@ -156,7 +185,7 @@ the need to restore deterministic execution first.
 | local time | `now` is the finalized block timestamp |
 | system randomness | contract `random` is seeded from public chain context |
 | file/network I/O | forbidden by the sandbox |
-| floating-point drift | decimal-backed contract values |
+| numeric drift | explicit numeric policies and cross-platform boundary tests |
 | hidden mutable process state | durable state lives in contract storage, not module globals |
 | runtime-version drift | validators must align on `xian_vm_v1`, its native runtime, and canonical compiler |
 | encoding differences | deterministic compact encoding rules |

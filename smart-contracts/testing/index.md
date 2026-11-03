@@ -9,6 +9,9 @@ The local harness executes through Python. Validators execute canonical IR
 through the native Xian VM. Use the harness for fast logic tests, then exercise
 deployment and representative calls on a local node before release. Local
 metering results are regression signals, not exact network fee quotes.
+For binary-float powers, the Python harness also uses host Python math while the
+native VM uses its portable policy. Validate exact numeric results and state in
+the native runtime; harness agreement alone is not a cross-platform guarantee.
 
 ## What It Gives You
 

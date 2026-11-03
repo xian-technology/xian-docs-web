@@ -1,7 +1,7 @@
 # Chi Cost Table
 
 These costs describe the native `xian_vm_v1` runtime with execution revision
-`xvm-execution-4` and gas schedule `xvm-gas-2`. Use readonly simulation
+`xvm-execution-5` and gas schedule `xvm-gas-2`. Use readonly simulation
 against the target node for a complete operation estimate; the local Python
 harness has a separate metering implementation.
 

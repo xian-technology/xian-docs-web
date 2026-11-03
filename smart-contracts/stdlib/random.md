@@ -32,6 +32,11 @@ The base seed is derived from:
 - `block_hash`
 - `__input_hash`
 
+The node passes the transaction input hash explicitly. Native execution does
+not inherit seed fields from earlier host activity. Identical transaction and
+block inputs reproduce the same sequence; different transaction input hashes
+can produce different sequences within the same block.
+
 If you pass a value to `random.seed(...)`, it is treated as a literal extra
 salt and resets the sequence for that execution.
 
