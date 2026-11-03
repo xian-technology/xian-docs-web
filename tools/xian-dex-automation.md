@@ -231,6 +231,19 @@ key file. The strategy-vault bootstrap rejects empty files in both preview and
 execute mode. Restore the intended key from backup before continuing. An empty
 file is not treated as permission to generate a replacement identity.
 
+### Operational Logs
+
+Worker and HTTP diagnostics use UTC timestamps, severity, component and safe
+rule/transaction context. Repeated worker failures report an initial failure,
+periodic counts and a recovery transition instead of logging every retry.
+Private keys, raw signed transactions and arbitrary upstream exception text
+are excluded; exception types, stack locations and safe numeric status remain.
+
+The stack exposes `dex_automation_log_path` in status. Its process capture has
+seven-day application retention with size caps and idle cleanup; see
+[Logs and Retention](/node/managing#logs). Transaction outcomes remain in the
+service's durable run records, independently of log expiry.
+
 ### Local Strategy-Vault Exercise
 
 After starting the localnet and installing the demo DEX pool, preview the

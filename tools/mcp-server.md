@@ -231,6 +231,15 @@ this as `ethereum_account_index: 0`.
 These tools return secret key material under the unsafe-wallet opt-in. Preserve
 the phrase and account index securely with your recovery material.
 
+## Operational Logs
+
+The server writes bounded, single-line UTC diagnostics to stderr; stdout remains
+reserved for the stdio MCP protocol. HTTP and Uvicorn logs use the same service
+format. Routine reads use DEBUG, while errors retain safe operation and exception
+context without wallet material, request bodies or credential-bearing URLs.
+Container deployments use their supervisor's rotation policy. For stack-managed
+limits and retention boundaries, see [Logs](/node/managing#logs).
+
 ## Related Tools
 
 - [xian-py](/tools/xian-py)

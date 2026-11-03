@@ -25,11 +25,16 @@ Important keys are:
 - `app_log_json`
 - `app_log_rotation_hours`
 - `app_log_retention_days`
+- `app_log_max_file_mb`
+- `app_log_max_total_mb`
 - `transaction_trace_logging`
 
 Keep transaction tracing off during normal operation. Use `DEBUG` for focused
-diagnosis and reserve `TRACE` for short-lived deep inspection because it can
-emit large transaction result payloads.
+diagnosis and reserve `TRACE` for short-lived deep inspection. Diagnostics use
+bounded metadata; enabling tracing does not permit dumping private payloads.
+Defaults retain application logs for up to seven days within a 250 MiB budget,
+with 50 MiB segments. See [Logs and Retention](/node/managing#logs) for cleanup
+timing, configuration and the separate Docker log limits.
 
 ## Readonly Simulation
 

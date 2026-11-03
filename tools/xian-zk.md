@@ -82,6 +82,12 @@ The prover service is a trusted local companion. It sees witness material. It
 binds to loopback by default; a non-loopback bind requires explicit unsafe-host
 approval, authentication, and transport protection.
 
+Unexpected prover failures return a generic HTTP 500 with an `incident_id`.
+Find that ID in the operator's stderr logs for the UTC timestamp, exception
+type and stack locations. Witness material, request bodies, exception messages
+and local variables are excluded. Configure bounded capture in the service's
+supervisor; the library does not install a global logger or own a log directory.
+
 ## Production Requirements
 
 - Deterministic development bundles expose toxic waste and are test-only.
