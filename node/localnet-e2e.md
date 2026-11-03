@@ -44,6 +44,8 @@ Ordinary developer runs allow missing native ZK support and record the phase
 as skipped, so check the summary before treating a run as full coverage.
 The focused IntentKit suite does not contain the shielded phase and rejects
 this requirement; use the full suite for shielded coverage.
+Resuming after a required phase also requires its saved successful, non-skipped
+result. An earlier optional skip cannot be promoted into required coverage.
 
 Artifacts are written under:
 
