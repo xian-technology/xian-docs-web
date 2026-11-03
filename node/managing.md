@@ -63,8 +63,13 @@ Useful stages include `check_tx`, `prepare_proposal`, `process_proposal`,
 `finalize_*`, and `simulate_tx`.
 
 Xian-owned records have a UTC timestamp with milliseconds, severity, component,
-message and named context. For a failed transaction, search its `tx_hash`, then
-compare its block height, stage and outcome across nodes. Off-chain services use
+message and named context. For a failed transaction, search its hash, then
+compare its block height, stage and outcome across nodes. Node `tx_hash` is the
+canonical execution hash recorded as `hash` inside the finalized execution
+receipt. The CometBFT RPC/submission hash identifies the submitted bytes and is
+a different digest; it appears as `raw_tx_hash` in stages that receive raw bytes.
+Hex letter case can differ, but changing case does not convert one digest to the
+other. Keep both identifiers when collecting an incident. Off-chain services use
 request, rule or incident identifiers where available. Unexpected errors retain
 exception types and stack locations; private keys, request bodies, arguments,
 SQL parameters and local variables are excluded. Expected rejections include
