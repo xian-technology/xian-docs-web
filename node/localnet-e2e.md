@@ -29,6 +29,22 @@ Machine-facing equivalent:
 python3 ./scripts/backend.py localnet-e2e
 ```
 
+The Make target uses the locked `xian-stack` Python environment, including
+the native ZK binding that generates shielded proofs. A fresh host needs a
+Rust toolchain and C compiler to build the native dependencies. To require
+shielded coverage explicitly:
+
+```bash
+make localnet-e2e LOCALNET_E2E_REQUIRE_SHIELDED=1
+```
+
+`make release-safety` always enables this requirement: a missing native binding
+fails before network setup, and a skipped shielded phase fails the run.
+Ordinary developer runs allow missing native ZK support and record the phase
+as skipped, so check the summary before treating a run as full coverage.
+The focused IntentKit suite does not contain the shielded phase and rejects
+this requirement; use the full suite for shielded coverage.
+
 Artifacts are written under:
 
 ```text
