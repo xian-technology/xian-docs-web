@@ -23,6 +23,12 @@ The linter enforces that restricted subset before code is accepted.
 | subscripts / slices | `x[0]`, `x[1:3]` | |
 | imports | `import currency` | module-level only for deployed contracts |
 
+Inside an f-string format specification, write padding and precision directly,
+as in `f"{amount:04d}"` or `f"{price:.{digits}f}"`. The compiler rejects literal
+specification text containing backslashes, braces, quotes or control characters.
+Braces around a width or precision expression still delimit a replacement field.
+Ordinary f-string text outside the specification supports escapes.
+
 ## Forbidden Syntax
 
 | Feature | Error Code | Why |
