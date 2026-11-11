@@ -25,6 +25,10 @@ flowchart LR
 
 ## Quick Start
 
+Use Node.js 24 LTS (minimum supported version: 22.12.0). CI builds and deploys
+with Node.js 24. The default theme ships with VitePress; the local theme adds
+brand styling and interactive Mermaid diagrams.
+
 ```bash
 npm ci
 npm run dev          # local dev server with hot reload

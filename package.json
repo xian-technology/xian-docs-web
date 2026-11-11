@@ -2,6 +2,10 @@
   "name": "xian-docs-web",
   "version": "1.0.0",
   "description": "Official Xian Technology documentation",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
@@ -10,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "mermaid": "^11.16.0",
-    "vitepress": "^2.0.0-alpha.18"
+    "vitepress": "2.0.0-alpha.21"
   },
   "overrides": {
     "postcss": "^8.5.12",

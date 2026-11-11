@@ -33,7 +33,6 @@
 .VPNav {
   background-color: var(--vp-c-bg) !important;
   transition: none !important;
-  transform: translateZ(0);
 }
 
 /* ── Feature cards ─────────────────────────────────────── */
