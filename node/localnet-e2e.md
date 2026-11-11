@@ -29,6 +29,19 @@ Machine-facing equivalent:
 python3 ./scripts/backend.py localnet-e2e
 ```
 
+By default, `make localnet-e2e` rebuilds the node image from the local
+`xian-abci`, `xian-configs`, `xian-contracting` and `xian-py` checkouts.
+Update those checkouts before running if you want to test current `main`.
+Local edits are included in the build. Setting `LOCALNET_E2E_BUILD=0` reuses
+an existing image, so its compiler and VM can differ from the host checkout.
+
+For scheduled and manually dispatched **Localnet Safety** runs, the selected
+`xian-stack` revision determines the inputs. Its `release-manifest.json` pins
+the four node build repositories by commit. The shared checkout action in
+`.github/actions/checkout-localnet/action.yml` pins the CLI and, for the full
+suite, the contract catalog, DEX and DEX recovery worker.
+To reproduce a hosted run locally, check out those same commits before building.
+
 The Make target uses the locked `xian-stack` Python environment, including
 the native ZK binding that generates shielded proofs. A fresh host needs a
 Rust toolchain and C compiler to build the native dependencies. To require
