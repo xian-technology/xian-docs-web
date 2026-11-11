@@ -5,7 +5,22 @@ authoring language without making CPython bytecode the consensus format.
 
 ## Execution profiles
 
-Validators compile cleartext contract source into canonical IR and execute it in Rust. The fresh-chain node requires `xian_vm_v2`. The standalone compiler, Python `ContractingClient` and network SDKs all default to V2. Local tests execute contract code on the same native VM as the fresh chain. V1 remains available for earlier development fixtures. For offline compilation in Python, use `compile_contract_source` or `build_contract_artifacts` from `contracting.artifacts`. Both profiles use the IR envelope `xian_ir_v1`. The `vm_profile` field identifies the execution rules.
+Validators compile cleartext contract source into canonical IR and execute it
+in Rust. The fresh-chain node, Python `ContractingClient` and
+`ParallelBatchExecutor` require `xian_vm_v2`. Local tests execute contract code
+on the same native VM as the fresh chain; there is no current CPython contract
+executor.
+
+For offline compilation in Python, use `compile_contract_source` or
+`build_contract_artifacts` from `contracting.artifacts`. Low-level native V1
+compilation, encoding, storage and VM bindings remain available for historical
+verification and migration tools. They do not provide a V1 public local client.
+Historical Python comparisons use immutable observations captured with pinned
+archived packages.
+
+Both native profiles use the IR envelope `xian_ir_v1`. The `vm_profile` field
+identifies the execution rules. Network SDKs default to V2 and retain explicit
+V1 encoding for historical signed-payload fixtures.
 
 V2 uses bounded integers and exact fixed-point decimals. Source literals preserve their digits, division produces a decimal and the rounding helpers take explicit inputs. See [Numbers, division and rounding](/smart-contracts/numbers).
 
@@ -26,7 +41,6 @@ known. List iteration observes appends, dictionary views reflect the underlying
 dictionary, and changing dictionary size during iteration fails. Materialize an
 iterator or view with `list` or `tuple` before returning or storing it. Native
 ranges are lazy; materialized collections remain subject to allocation limits.
-The historical V1 Python harness limits range construction separately.
 
 Function defaults are evaluated in module definition order and retain their
 identity across calls within an execution. A fresh execution initializes them

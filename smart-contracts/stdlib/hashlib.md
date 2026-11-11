@@ -54,8 +54,8 @@ for example, `"é"` occupies two UTF-8 bytes.
 | historical alias, valid hex branch | 1 MiB decoded bytes |
 | historical alias, fallback text branch | 1 MiB UTF-8 text |
 
-An oversized input raises a resource-limit error. These limits apply to both
-native execution and the local Python harness, including unmetered calls.
+An oversized input raises a resource-limit error. These limits apply to native
+execution, including local V2 tests and unmetered calls.
 They apply regardless of whether the string came from an argument, storage,
 concatenation, or another contract. They are limits on hashing, not a general
 128 KiB string-size restriction.

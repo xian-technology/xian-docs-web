@@ -100,7 +100,8 @@ class descriptor. Immutable `frozenset.copy()` preserves object identity.
 
 Allowed builtins are bounded by deterministic runtime limits:
 
-- the Python harness limits `range(...)` to `131,072` entries; native ranges are lazy, with materialized collections limited to `131,072` entries.
+- `range(...)` values are lazy; materialized collections are limited to
+  `131,072` entries.
 - `bytes(n)` and `bytearray(n)` may allocate at most `131,072` bytes.
 - string, bytes, bytearray, list, and tuple repetition with `*` may not exceed the same sequence or byte limits.
 - exposed integer values have at most 512 magnitude bits. Decimal results have up to 61 whole and 30 fractional digits.

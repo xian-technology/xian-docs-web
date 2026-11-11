@@ -1,7 +1,7 @@
 # Chi Cost Table
 
 These costs describe the native `xian_vm_v2` runtime with execution revision
-`xvm-execution-7` and gas schedule `xvm-gas-3`. Use readonly simulation
+`xvm-execution-8` and gas schedule `xvm-gas-3`. Use readonly simulation
 against the target node for a complete operation estimate. The V2 gas schedule includes the following arithmetic charges.
 
 ## Accounting
@@ -73,8 +73,9 @@ execution-fee debit or fee-derived reward.
 
 Sequence entry counts and encoded byte counts are different units. A list of
 large values can cost much more than a list of the same length containing
-small integers. Return bytes are metered; the Python harness's separate
-128 KiB return-value limit is not a general native-VM return-size guarantee.
+small integers. Return bytes are metered. Operation, heap and boundary traversal
+limits apply separately; the table does not promise a general 128 KiB return-size
+limit.
 
 ## Hashing and Signatures
 

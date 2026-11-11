@@ -24,8 +24,8 @@ infinity; for example, `datetime.timedelta(seconds=-1).minutes` is `-1`.
 
 ## Parsing Text
 
-`strptime` uses an explicit numeric format subset in both the Python harness and
-the native VM. Results do not depend on the machine's locale or timezone database.
+`strptime` uses an explicit numeric format subset. Results do not depend on the
+machine's locale or timezone database.
 
 | Directives | Meaning |
 | --- | --- |

@@ -27,7 +27,7 @@ The message is limited to 1 MiB (1,048,576) UTF-8 bytes. The public-key and
 signature strings are limited to 64 and 128 encoded UTF-8 bytes, respectively;
 valid hexadecimal encodings have exactly these lengths. Oversized operands
 raise a resource-limit error before decoding or signature verification.
-These limits apply in the native runtime and local Python harness, even when
+These limits apply in the native runtime, including local V2 tests, even when
 metering is disabled.
 
 Native verification charges a fixed verification cost plus work proportional

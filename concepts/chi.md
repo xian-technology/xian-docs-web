@@ -57,7 +57,8 @@ chi budget. The VM charges encoded storage and return bytes as well as
 computation. The [Chi Cost Table](/reference/chi-costs) lists the VM's byte costs
 and operation-specific limits.
 
-Local Python harness limits and metering are separate from the network VM.
+Local `ContractingClient` tests use native V2 metering, but their state, call
+context and supplied transaction bytes can differ from a submitted transaction.
 Use a node simulation to estimate the intended transaction.
 
 ## Paid and Free-Metered Modes

@@ -77,5 +77,6 @@ limit. See [Pruning and Retention](/node/pruning).
 - simulate the real call against representative state before choosing a budget
 
 Use the native VM's [chi costs](/reference/chi-costs) for fee reasoning.
-Local Python harness metering is useful for regression tests but uses a
-different meter.
+Local `ContractingClient` metering uses the native V2 VM and is useful for
+regression tests. Use node simulation for a fee estimate against the target
+state, transaction envelope and configuration.

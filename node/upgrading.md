@@ -8,14 +8,23 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-7`, gas schedule `xvm-gas-3`, bytecode `xvm-2` and set codec
+`xvm-execution-8`, gas schedule `xvm-gas-3`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
 change this protected record. The comparison covers all four fields; matching
 gas and codec versions do not make a different execution revision compatible.
 
-Revision 6 uses the V2 numeric profile. The compiler resolves decimal literals from their source digits, the VM checks numeric ABI boundaries and gas schedule 3 charges for numeric work. See [Numbers, division and rounding](/smart-contracts/numbers).
+V2 uses bounded integers and exact fixed-point decimals, with source-digit
+literal handling and checked numeric ABI boundaries. Gas schedule 3 charges for
+numeric work. See [Numbers, division and rounding](/smart-contracts/numbers).
+
+Execution revision 8 allows only exported functions as external V2 entrypoints.
+Constructors run through the trusted deployment path. Code-hash requests reject
+unsupported `kind` selectors instead of treating them as source-hash requests.
+These execution checks do not change the gas, bytecode or set-codec identifiers. Low-level native
+V1 retains revision 7 for historical verification and migration; it is not a
+current node execution policy.
 
 This revision starts a fresh local chain; it does not migrate an earlier
 database or activate a second VM at a block height. Preserve earlier state and

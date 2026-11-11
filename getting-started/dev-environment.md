@@ -64,7 +64,7 @@ Use focused checks while you iterate.
 
 ```bash
 cd ~/xian/xian-contracting
-uv run pytest tests/unit/test_linter.py tests/unit/test_lmdb_store.py tests/unit/test_tracer.py
+uv run pytest tests/unit/test_linter.py tests/unit/test_lmdb_store.py tests/integration/test_numeric_profile_conformance.py
 
 cd ../xian-abci
 uv run pytest tests/abci_methods/test_query.py tests/abci_methods/test_finalize_block.py
@@ -95,7 +95,7 @@ Install Python 3.14, uv, Git and a Rust toolchain. The fresh-chain language ship
 ```bash
 git clone https://github.com/xian-technology/xian-contracting.git
 cd xian-contracting
-git checkout --detach 412c53fc0cee4275ee0a6e6fa195054915447620
+git checkout --detach 572d2ea7bdb9629c6f2c1f2719942bb5334013ab
 uv sync --frozen --group dev
 uv run --no-sync python -c 'from xian_compiler_core import compiler_version; assert compiler_version()["vm_profile"] == "xian_vm_v2"'
 ```

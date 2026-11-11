@@ -5,9 +5,18 @@
 It lets you submit contracts, call exported functions, inspect state, and
 exercise contract interactions without running a full node.
 
-With no profile argument, the client compiles and executes contracts under `xian_vm_v2`, the same numeric and language rules used by the fresh chain. Each test can pass its own temporary `storage_home` to start with clean state. Node simulation uses the target chain’s state and transaction context for fee estimates.
+The client compiles and executes contracts under `xian_vm_v2`, the same numeric
+and language rules used by the fresh chain. Each test can pass its own temporary
+`storage_home` to start with clean state. Node simulation uses the target chain’s
+state and transaction context for fee estimates.
 
-To reproduce an earlier V1 fixture, open its storage explicitly with `ContractingClient(storage_home=fixture_dir, vm_profile="xian_vm_v1")`. Use a separate directory for V2 tests. The V2 proxy exposes the same exported functions that a transaction can call. Test private helpers through an exported function.
+`ContractingClient` rejects an explicit V1 profile or an injected V1 driver with
+`ValueError`. `ParallelBatchExecutor` rejects an executor backed by a V1 driver.
+Use fresh V2 storage for supported local tests.
+Low-level native V1 tooling is reserved for historical verification and
+migration; a V1 profile is not a local-client compatibility mode. Proxies expose
+the same exported functions that a transaction can call. Test private helpers
+through an exported function.
 
 ## What It Gives You
 
