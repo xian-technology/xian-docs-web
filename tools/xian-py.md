@@ -10,7 +10,7 @@ From the directory containing the [V2 contracting checkout](/getting-started/dev
 ```bash
 git clone https://github.com/xian-technology/xian-py.git
 cd xian-py
-git checkout --detach 4c7fc664c2fc142fdd3be53a91dff764f3c3b415
+git checkout --detach 2a3cd927f3f18e4e7f3d0aefdbf11457d83acd8e
 uv sync --frozen
 uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClientConfig(vm_profile="xian_vm_v2").vm_profile)'
 ```
