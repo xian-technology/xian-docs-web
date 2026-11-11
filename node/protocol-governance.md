@@ -65,6 +65,10 @@ A patch proposal identifies:
 - whether emergency threshold/delay applies
 
 Approval schedules the patch; it does not apply it immediately.
+Votes are rejected after the activation height has passed. Approval within the
+activation block can schedule its application at that block's commit boundary.
+If the height is missed, submit a new proposal and patch bundle with a future
+activation height.
 
 ## Local Bundle
 

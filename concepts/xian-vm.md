@@ -58,6 +58,12 @@ limits live object accounting to 128 MiB and 1,048,576 objects; mutable objects
 remain retained until execution ends. Boundary traversal and rendering are
 bounded, and a limit failure rolls back transaction effects.
 
+One shared limit permits 128 active interpreter frames per transaction. It
+covers calls, module initialization, constructors, and nested expression,
+statement and iterator evaluation, including calls between contracts. Metering
+mode does not disable this bound. Exceeding it fails the call and rolls back its
+effects; a later transaction starts with a fresh frame budget.
+
 Runtime fixes can change contract results. Validators participating in one
 network must use a consistent compiler and VM version when replaying blocks.
 

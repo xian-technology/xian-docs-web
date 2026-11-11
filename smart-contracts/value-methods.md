@@ -276,7 +276,9 @@ width = 4
 assert f"{name!r}:{amount:0{width}d}" == "'alice':0007"
 ```
 
-Widths, precision and formatted output are bounded. A format can fail because it
+Widths, precision and formatted output are bounded. Native f-string output is
+limited to 128 KiB in total, measured as UTF-8 bytes across all fields and literal
+text. A format can fail because it
 exceeds a resource limit even when the same expression succeeds in unrestricted
 Python. See [Allowed Syntax](/smart-contracts/valid-code#allowed-syntax) for the
 surrounding expression restrictions.

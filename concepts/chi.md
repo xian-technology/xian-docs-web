@@ -16,8 +16,10 @@ chi_used = (raw_meter_cost // 1000) + 5
 ```
 
 The result is capped by the submitted chi limit. In `paid_metered` mode, the
-sender must be able to cover that limit during admission and is charged for
-`chi_used`. In `free_metered` mode, the transaction remains metered but the
+sender must be able to cover that limit during admission and at execution.
+Execution reserves the full supplied budget at the entry chi rate; contracts
+can spend only the remaining native balance. Unused chi is refunded, leaving
+the sender charged for `chi_used`. In `free_metered` mode, the transaction remains metered but the
 runtime creates no execution-fee debit or fee-derived rewards.
 
 A failed execution in paid mode still debits its consumed chi, but produces no

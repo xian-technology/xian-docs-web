@@ -8,7 +8,7 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-6`, gas schedule `xvm-gas-3`, bytecode `xvm-2` and set codec
+`xvm-execution-7`, gas schedule `xvm-gas-3`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot

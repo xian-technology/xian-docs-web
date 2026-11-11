@@ -77,6 +77,8 @@ mainnet rehearsal bundle uses 14 days. The policy active on the target chain is
 authoritative.
 
 Active validators also have a fixed leave-announcement delay before `leave()`.
+An announcement preserves active eligibility during that delay; ordinary stake
+ranking, jail and minimum-bond rules can still remove a validator from selection.
 After leave, removal, or withdrawal, stake follows the normal unbonding clock.
 
 ## Slashing and Evidence
@@ -97,6 +99,11 @@ Checked-in development bundles apply these defaults:
 
 Evidence IDs are deduplicated. Slashed value is sent to the configured
 `slash_destination`.
+
+Slash debits use cumulative proportional rounding in deterministic participant
+order. Successive cumulative targets preserve the total slash without making
+any participant's bonded or unbonding balance negative. A penalty that rounds
+to zero records no token transfer.
 
 ## Policy
 

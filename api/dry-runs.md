@@ -128,6 +128,9 @@ print(result["state"])
   later state
 - simulation does not authenticate the supplied sender or prove that a nonce
   or signature will pass transaction admission
+- cost estimation does not reserve the eventual transaction's fee budget;
+  a paid transaction sees its balance after that reservation, so an estimate
+  cannot establish affordability or guarantee the same balance-dependent result
 - state can change between simulation and real submission
 - the node serializes queries with state transitions and keeps finalized,
   uncommitted block writes separate from the query view

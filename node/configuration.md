@@ -38,6 +38,10 @@ of them implies that a public endpoint is live.
 Templates under `xian-configs/templates/` are reusable starting points, not
 networks.
 
+Node initialization combines manifest seeds and persistent peers with the
+profile's peer lists, in that order. A profile can add local peers without
+discarding the network's persistent peers.
+
 ## Node Profiles
 
 Profiles are JSON files normally created under `nodes/` by `xian-cli`. They
@@ -114,6 +118,12 @@ These are separate mechanisms:
   archive. Signed manifests can pin the archive hash, chain ID, and signer.
 - CometBFT state sync uses trusted RPC servers, height, hash, and trust period
   to join through the consensus protocol.
+
+Application state sync checks the downloaded archive's height and application
+hash against the trusted offer before replacing durable state. State imports
+validate protected metadata first and replace application values and the durable
+block marker in one database transaction. Exports read both from the same
+committed database snapshot.
 
 Snapshot restore replaces only the `data/` and `xian/` application roots.
 Configuration and node identity are retained locally, including configured

@@ -82,6 +82,11 @@ they are not the recovery-plan artifact format.
 
 ## Snapshot Restore Boundaries
 
+Recovery-plan backups contain validator and node private keys. The CLI creates
+each backup with a unique filename, owner-only file permissions (`0600`) and an
+owner-only backup directory (`0700`). Preserve these permissions when copying
+backups and store them as private custody material.
+
 Stop the node before restoring a snapshot. Restore replaces only the `data/`
 and `xian/` roots. A full node-home archive may contain `config/` or other
 entries, but those entries are not restored.

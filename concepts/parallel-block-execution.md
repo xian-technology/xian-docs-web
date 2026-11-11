@@ -38,6 +38,8 @@ something that could affect it, including:
 - a key or prefix it scanned
 - a key it also writes with non-mergeable semantics
 - sender or nonce state needed for serial admission
+- accounting inputs, including cached chi prices, reward splits and recipients,
+  and validator or delegation metadata used to calculate rewards
 
 Reward outputs are a narrow exception: independent additive reward deltas can
 be merged deterministically. Reads or direct overwrites of the same balance

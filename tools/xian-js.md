@@ -182,6 +182,9 @@ fractions to milliseconds.
 Automatic send helpers reserve nonces per client, chain, and sender. An
 ambiguous broadcast can quarantine that sender until the caller reconciles the
 network state; handle `NonceReservationError` rather than forcing nonce reuse.
+An `async` acknowledgment without CheckTx or finalization evidence also leaves
+the nonce unresolved. Automatic sends resume when the network nonce advances;
+an acknowledgment alone does not confirm admission.
 
 ## Broadcast Modes
 
