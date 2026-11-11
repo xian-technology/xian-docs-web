@@ -5,14 +5,14 @@ operator scripts. The PyPI package is `xian-tech-py`; imports use `xian_py`.
 
 ## Install
 
-From the directory containing the [V2 contracting checkout](/getting-started/dev-environment#contract-only-setup), install the Python 0.5.3 SDK from source. Its uv configuration resolves runtime-types and accounts from that sibling checkout.
+From the directory containing the [V2 contracting checkout](/getting-started/dev-environment#contract-only-setup), install the Python SDK revision below for the V2 defaults. Its uv configuration resolves runtime-types and accounts from that sibling checkout.
 
 ```bash
 git clone https://github.com/xian-technology/xian-py.git
 cd xian-py
-git checkout --detach 2a3cd927f3f18e4e7f3d0aefdbf11457d83acd8e
+git checkout --detach d27676a9fe49ccab4f187ab1ca3829a86db25e74
 uv sync --frozen
-uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClientConfig(vm_profile="xian_vm_v2").vm_profile)'
+uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClientConfig().vm_profile)'
 ```
 
 Optional extras include `hd` for mnemonic/HD wallets, `eth` for
@@ -25,11 +25,11 @@ offline compiler inspection. Contract deployment itself does not need the
 ```python
 import os
 
-from xian_py import Wallet, Xian, XianClientConfig
+from xian_py import Wallet, Xian
 
 wallet = Wallet(private_key=os.environ["XIAN_PRIVATE_KEY"])
 
-with Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
+with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
     balance = client.token().balance_of(wallet.public_key)
     submission = client.token().transfer(
         "bob",
@@ -86,7 +86,7 @@ def increment() -> int:
     return counter.get()
 """
 
-with Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
+with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
     result = client.deploy_contract(
         "con_counter",
         source,
@@ -101,7 +101,7 @@ IR for the node’s `xian_vm_v2` profile. Client-supplied deployment artifacts a
 
 ## Numeric inputs and results
 
-Select the target profile explicitly with `XianClientConfig(vm_profile="xian_vm_v2")` on `Xian` or `XianAsync`. Offline `create_tx` accepts the `vm_profile` keyword directly. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`. The default SDK profile is `xian_vm_v1`.
+The synchronous and asynchronous clients and offline `create_tx` use `xian_vm_v2` by default. For a historical V1 network, pass `config=XianClientConfig(vm_profile="xian_vm_v1")` to the client or `vm_profile="xian_vm_v1"` to `create_tx`. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`.
 
 ## Main Client Surfaces
 
@@ -126,7 +126,7 @@ portfolios, DEX candles, shielded wallet feeds, and developer rewards. These
 reads are eventually consistent with finalized chain state.
 
 ```python
-with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
+with Xian("http://127.0.0.1:26657") as client:
     status = client.get_bds_status()
     events = client.list_events("currency", "Transfer", after_id=0)
     history = client.get_state_history("currency.balances:bob")

@@ -13,18 +13,18 @@ Node.js applications.
 | `@xian-tech/types` | shared public types |
 | `@xian-tech/web-kit` | wallet, RPC, formatting, toast, and React helpers |
 
-Use SDK 0.3.3 for the V2 client and DEX adapter. From the directory containing the [V2 compiler checkout](/getting-started/dev-environment#contract-only-setup), build the matching SDK. Building the optional WASM compiler also requires `wasm-pack` and the `wasm32-unknown-unknown` Rust target.
+The source revision below defaults to V2 and includes the DEX adapter. From the directory containing the [V2 compiler checkout](/getting-started/dev-environment#contract-only-setup), build the matching SDK. Building the optional WASM compiler also requires `wasm-pack` and the `wasm32-unknown-unknown` Rust target.
 
 ```bash
 git clone https://github.com/xian-technology/xian-js.git
 cd xian-js
-git checkout --detach 39812da81a19a8d58584ea0f544c13d57c98b6e7
+git checkout --detach 3c8a5b19c20d83edb06ba124e204cc7d0d6f31ec
 npm ci
 npm run build:compiler
 npm run build
 ```
 
-The SDK examples run inside this workspace. Applications using registry packages require matching published 0.3.3 versions of the client, provider and types.
+The examples use the pinned workspace build. Check the release notes of any registry version you install for its default profile.
 
 ## DEX Planning
 
@@ -80,7 +80,6 @@ import { Ed25519Signer, XianClient } from "@xian-tech/client";
 const signer = new Ed25519Signer(process.env.XIAN_PRIVATE_KEY!);
 const client = new XianClient({
   rpcUrl: "http://127.0.0.1:26657",
-  vmProfile: "xian_vm_v2",
   dashboardUrl: "http://127.0.0.1:8080",
 });
 
@@ -105,7 +104,7 @@ Key and signature length checks alone do not establish a valid signature.
 
 ## Exact numeric arguments
 
-Select `vmProfile: "xian_vm_v2"` for a fresh chain. The default is `xian_vm_v1`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
+The default client uses `xian_vm_v2`. To connect to a historical V1 chain, pass `vmProfile: "xian_vm_v1"` when constructing `XianClient`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
 
 ```ts
 import { fixed, parseContractJson } from "@xian-tech/client";

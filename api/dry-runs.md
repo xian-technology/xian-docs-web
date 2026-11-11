@@ -105,10 +105,10 @@ When the node refuses or aborts a dry run, you get the same envelope with
 ## SDK Example
 
 ```python
-from xian_py import Wallet, Xian, XianClientConfig
+from xian_py import Wallet, Xian
 
 wallet = Wallet()
-client = Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2"))
+client = Xian("http://127.0.0.1:26657", wallet=wallet)
 
 result = client.simulate(
     contract="currency",

@@ -19,6 +19,16 @@ Xian ships tooling for three distinct jobs:
 | [xian-intentkit](/tools/xian-intentkit) | agent-facing automation stack for Xian-native workflows |
 | [xian-dex-automation](/tools/xian-dex-automation) | deterministic DEX event automation service for rule-based trades |
 
+## Solana bridge
+
+The bridge moves supported tokens between Solana and Xian. Its operator holds the
+origin asset and controls minting and burning on the wrapped side. Each transfer
+locks in a fee and exchange ratio. The service calculates
+`(amount received - fee) * ratio` exactly, then rounds down to the destination
+token’s smallest unit. A request must pay out at least one unit. Send the
+amount as a plain decimal string when constructing JSON with JavaScript.
+[Bridge setup, supported tokens and refund workflow](https://github.com/xian-technology/xian-bridge#readme)
+
 ## Developer Productivity Tools
 
 | Tool | Main use |

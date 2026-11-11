@@ -100,9 +100,9 @@ Historical applied-patch queries do:
 ## SDK Use
 
 ```python
-from xian_py import Xian, XianClientConfig
+from xian_py import Xian
 
-with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
+with Xian("http://127.0.0.1:26657") as client:
     status = client.get_bds_status()
     tx = client.get_indexed_tx("<tx_hash>")
     events = client.list_events("currency", "Transfer", after_id=0)

@@ -100,10 +100,10 @@ limits, unauthorized metadata changes, and empty recipients.
 ## Deploy Source
 
 ```python
-from xian_py import Wallet, Xian, XianClientConfig
+from xian_py import Wallet, Xian
 
 wallet = Wallet(private_key="your_private_key_hex")
-with Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
+with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
     result = client.deploy_contract(
         "con_example_token",
         TOKEN_CODE,

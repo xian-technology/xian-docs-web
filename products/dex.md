@@ -138,9 +138,9 @@ pair reserves and own RPC reads, simulation, signing, and submission. See
 [xian-js](/tools/xian-js#dex-planning) for an example.
 
 ```python
-from xian_py import Xian, XianClientConfig
+from xian_py import Xian
 
-with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
+with Xian("http://127.0.0.1:26657") as client:
     pair = client.contract("con_pairs").call(
         "pairFor", tokenA="currency", tokenB="demo_token",
     )
@@ -152,7 +152,7 @@ with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_
 ```ts
 import { XianClient } from "@xian-tech/client";
 
-const client = new XianClient({ vmProfile: "xian_vm_v2", rpcUrl: "http://127.0.0.1:26657" });
+const client = new XianClient({ rpcUrl: "http://127.0.0.1:26657" });
 const pair = await client.contract("con_pairs").call("pairFor", {
   tokenA: "currency",
   tokenB: "demo_token",

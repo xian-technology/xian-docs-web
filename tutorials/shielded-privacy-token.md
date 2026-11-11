@@ -77,11 +77,11 @@ each stored `vk_id` and `vk_hash` before minting supply.
 ```python
 import os
 
-from xian_py import Wallet, Xian, XianClientConfig
+from xian_py import Wallet, Xian
 from xian_zk import ShieldedWallet
 
 account = Wallet(private_key=os.environ["XIAN_PRIVATE_KEY"])
-client = Xian("http://127.0.0.1:26657", wallet=account, config=XianClientConfig(vm_profile="xian_vm_v2"))
+client = Xian("http://127.0.0.1:26657", wallet=account)
 token = client.contract("con_private_usd")
 
 asset_id = token.call("asset_id")

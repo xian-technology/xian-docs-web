@@ -5,7 +5,7 @@ authoring language without making CPython bytecode the consensus format.
 
 ## Execution profiles
 
-Validators compile cleartext contract source into canonical IR and execute it in Rust. The fresh-chain node requires `xian_vm_v2`. Historical nodes and the default off-chain compiler profile use `xian_vm_v1`. The two share the IR envelope name `xian_ir_v1`; the IR's `vm_profile` identifies its execution rules. Replaying a V1 network requires its pinned image and policy.
+Validators compile cleartext contract source into canonical IR and execute it in Rust. The fresh-chain node requires `xian_vm_v2`. The Python and JavaScript network SDKs and the JavaScript SDK compiler wrapper default to V2. The standalone compiler and Python `ContractingClient` default to `xian_vm_v1`, so select V2 explicitly there. The two share the IR envelope name `xian_ir_v1`; the IR's `vm_profile` identifies its execution rules. Replaying a V1 network requires its pinned image and policy.
 
 V2 uses bounded integers and exact fixed-point decimals. Source literals preserve their digits, division produces a decimal and the rounding helpers take explicit inputs. See [Numbers, division and rounding](/smart-contracts/numbers).
 

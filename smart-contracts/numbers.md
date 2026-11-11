@@ -88,13 +88,12 @@ numeric fields, `nonce` and `chi_supplied`. Both require a plain nonnegative
 safe JSON integer; a `__big_int__` wrapper is valid for contract arguments,
 not for either envelope field.
 
-In Python, select `XianClientConfig(vm_profile="xian_vm_v2")` and pass
-`int` or `decimal.Decimal("1.25")` from your **off-chain** application. In
-JavaScript select `vmProfile: "xian_vm_v2"` and pass a safe integer, a
-`bigint`, or `fixed("1.25")`. Use `parseContractJson(text)` for handwritten
-JSON arguments whose digits must survive parsing. SDKs normalize inputs before
-signing. The Python and JavaScript clients retain V1 as their default for
-existing applications.
+The Python and JavaScript network SDKs use `xian_vm_v2` by default.
+Pass a Python `int` or `decimal.Decimal("1.25")` from your off-chain application.
+In JavaScript, pass a safe integer, a `bigint`, or `fixed("1.25")`.
+Use `parseContractJson(text)` to preserve numeric digits in handwritten JSON arguments.
+For a historical V1 network, set `vm_profile="xian_vm_v1"` in the Python
+client configuration or `vmProfile: "xian_vm_v1"` in JavaScript.
 
 See [Python SDK](/tools/xian-py), [JavaScript SDK](/tools/xian-js) and
 [Local contract testing](/smart-contracts/testing/).

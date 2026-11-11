@@ -95,7 +95,7 @@ Install Python 3.14, uv, Git and a Rust toolchain. The fresh-chain language ship
 ```bash
 git clone https://github.com/xian-technology/xian-contracting.git
 cd xian-contracting
-git checkout --detach 12b1c31f98d535a278b0c00e40dd90584f6b52f4
+git checkout --detach beb25b287ed12f6c7ea3f14a2ad4ee577ed76f6b
 uv sync --frozen --extra v2 --group dev
 uv run --no-sync python -c 'from xian_compiler_core import compiler_version; print(compiler_version()["supported_vm_profiles"])'
 ```

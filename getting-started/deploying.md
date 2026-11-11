@@ -9,10 +9,10 @@ The simplest path is:
 ## Deploy A Contract
 
 ```python
-from xian_py import Wallet, Xian, XianClientConfig
+from xian_py import Wallet, Xian
 
 wallet = Wallet(private_key="YOUR_PRIVATE_KEY")
-client = Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2"))
+client = Xian("http://127.0.0.1:26657", wallet=wallet)
 
 source = """
 balances = Hash(default_value=0)
