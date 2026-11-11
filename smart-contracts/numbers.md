@@ -83,7 +83,10 @@ Each reserved numeric wrapper contains exactly one field. Its string uses ASCII
 digits, no exponent or leading plus sign, no redundant leading or fractional
 trailing zeros, and a minus sign only for negative values. Signed V2 requests
 reject untagged JSON fractions, exponent tokens and unsafe bare integers. A
-tagged zero is `{"__fixed__":"0"}`.
+tagged decimal zero is `{"__fixed__":"0"}`. The transaction envelope has two
+numeric fields, `nonce` and `chi_supplied`. Both require a plain nonnegative
+safe JSON integer; a `__big_int__` wrapper is valid for contract arguments,
+not for either envelope field.
 
 In Python, select `XianClientConfig(vm_profile="xian_vm_v2")` and pass
 `int` or `decimal.Decimal("1.25")` from your **off-chain** application. In
