@@ -99,6 +99,8 @@ async function renderDiagram() {
       htmlLabels: false,
       securityLevel: 'strict',
       theme: 'base',
+      layout: 'dagre',
+      look: 'classic',
       themeVariables: {
         fontFamily:
           'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

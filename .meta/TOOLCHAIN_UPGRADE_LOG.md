@@ -50,9 +50,9 @@ declare the local minimum in package metadata and the root README.
   navigation, viewport fit, and the themed missing-page screen.
 - Inspected desktop light/dark, documentation, and mobile screenshots.
 - Internal maintenance notes and graph artifacts remain excluded from output.
-- The two existing low-severity Mermaid/KaTeX audit findings remain. The
-  separate major-version review stays in `.meta/BACKLOG.md`; no forced
-  dependency overrides or audit-gate changes were made.
+- At this checkpoint, the two low-severity Mermaid/KaTeX audit findings
+  remained. The Mermaid upgrade below resolves them without a forced
+  transitive override or audit-gate change.
 
 ### Zensical assessment
 
@@ -67,3 +67,53 @@ and a useful Python documentation ecosystem. Those are reasonable reasons to
 evaluate it for a project that needs them. This site already has working
 search, navigation, diagrams, and static deployment, so retain VitePress
 unless a concrete reader or authoring requirement justifies the migration.
+
+## 2026-11-11: Mermaid and KaTeX
+
+### Decision and actions
+
+1. Reproduced the two low-severity findings with
+   `npm audit --audit-level=low --omit=dev`, and checked the upstream release
+   notes and [KaTeX advisory](https://github.com/advisories/GHSA-238p-pmpm-9mq7).
+2. Updated Mermaid from `11.16.1` to stable `12.3.0` and refreshed its lockfile.
+   This resolves KaTeX to `0.18.10`, above the advisory's patched version.
+   Removed the unused UUID override because Mermaid 12.3 drops that dependency.
+3. Preserved `theme: 'base'`, custom colors, strict rendering, and SVG labels.
+   Explicitly selected `layout: 'dagre'` and `look: 'classic'` because
+   [Mermaid 12 changes those defaults](https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4012.0.0).
+   Zoom and fullscreen implementation code is unchanged.
+4. Built isolated baseline and candidate sites from identical content. Added
+   a temporary, unpublished fixture that enables HTML labels only for that
+   diagram and renders two KaTeX expressions. Normal site diagrams retain
+   SVG labels. Restarted preview servers after rebuilds to discard cached
+   build metadata before browser checks.
+5. Ran the ub-mode complexity, duplication, and mutation discovery tools.
+   They do not support Vue SFCs; no supported source files were selected.
+   Browser interaction checks exercise the actual component instead.
+
+Mermaid 12 targets ES2024-capable browsers, including Safari 17.4 or later.
+The existing Node.js minimum of 22.12.0 already meets its build requirement.
+The bundled lazy ELK chunk exceeds the build's size-warning threshold; the
+site explicitly uses Dagre, and a browser resource check confirms that the
+architecture diagram does not download ELK. No warning threshold or audit
+gate was weakened.
+
+### Validation
+
+- Node.js 24.22.2: clean install, full `npm audit`, and production build pass.
+  npm reports **zero vulnerabilities**, including development dependencies.
+- Compared all 119 published HTML paths plus the isolated math fixture:
+  text, heading anchors, link destinations, and diagram counts are unchanged.
+- All 24 published diagrams and the math fixture render in Chrome and
+  Playwright WebKit 26.5 in desktop/mobile and light/dark combinations.
+  The fixture produces MathML for both expressions with patched KaTeX.
+- Each diagram's controls pass in every combination: zoom in/out, reset,
+  lower bound, fullscreen zoom/reset, Close, Escape, and backdrop dismissal.
+  The upper zoom bound is exercised once per combination.
+- Rendered label text matches the Mermaid 11 baseline. Mermaid 12 wraps
+  labels differently, changing diagram dimensions; Dagre layout selection,
+  classic styling, and the custom palette are retained. Inspected flowchart,
+  sequence, and mathematical-label screenshots.
+- Removed the resolved KaTeX item from `.meta/BACKLOG.md`. The math fixture,
+  browser scripts, screenshots, and duplicate build trees stay outside the
+  repository and published site.
