@@ -23,7 +23,12 @@ the sender charged for `chi_used`. In `free_metered` mode, the transaction remai
 runtime creates no execution-fee debit or fee-derived rewards.
 
 A failed execution in paid mode still debits its consumed chi, but produces no
-fee-reward payouts. That debit reduces the total native-token balance. The
+fee-reward payouts. Every failed metered transaction is charged at least the
+5-chi base cost (never more than its chi limit), including one that fails
+before execution starts, for example because the target contract does not
+exist or cannot be prepared. Such a transaction still gets a failed receipt and
+consumes its nonce. Machine-dependent host faults (out of memory, operating
+system or storage errors) halt the node instead of producing a receipt. That debit reduces the total native-token balance. The
 [governed reward split](/node/staking#rewards-and-commission) applies to
 successful paid executions.
 
@@ -73,13 +78,20 @@ Read `chi_rate` from `chi_cost.S:value`. The canonical bundles initialize it
 to `20`, but validator governance can change it. Applications should query the
 target network instead of hard-coding that initial rate.
 
-Free-metered networks should set explicit caps:
+The fee mode is a chain setting chosen at genesis, not node configuration.
+Genesis stores it as the consensus state value `__fee_policy`, which is part
+of the state hash, so every validator applies the same policy. A node whose
+`xian.toml` sets `tx_fee_mode`, `free_tx_max_chi` or `free_block_max_chi`
+refuses to start. Free-metered networks choose explicit caps when the network
+is created, for example:
 
-```toml
-tx_fee_mode = "free_metered"
-free_tx_max_chi = 1000000
-free_block_max_chi = 20000000
+```bash
+xian network create <name> --tx-fee-mode free_metered \
+  --free-tx-max-chi 1000000 --free-block-max-chi 20000000
 ```
+
+`xian setup node --mode local` accepts the same options. A bundle network records the policy as `fee_policy` in its manifest and every
+`xian node init` builds it into genesis; joining nodes cannot choose it.
 
 The transaction cap limits one submitted budget. The block cap limits the sum
 of submitted budgets accepted into a proposal. Contract balances and

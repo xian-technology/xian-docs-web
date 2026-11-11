@@ -51,10 +51,31 @@ rejects the request.
 Transaction approval previews preserve decimals, large integers and bytes using the SDK's `__fixed__`, `__big_int__` and `__bytes__` JSON wrappers. These let you inspect the
 exact values in nested arguments without rounding large integers.
 
+Transaction approvals show every argument exactly, not a summary. Text that
+contains invisible or text-direction characters (zero-width, bidi overrides,
+control characters) is shown with each such character replaced by a
+`[U+XXXX]` marker, together with a warning, so the reviewed text matches the
+bytes being signed. Message-signing approvals use the same rendering.
+
+The chi limit is estimated (with the SDK's headroom) before the approval is
+shown and displayed with its XIAN cost. If estimation fails, the approval shows
+`Not estimated` as a warning.
+
 Temporary auto-approval rules can be scoped to a site, account, network,
 method, contract, function, and exact arguments. Broad function rules allow
-arguments to change and therefore require separate confirmation. Review and
-revoke saved rules from the connected-apps view.
+arguments to change and therefore require separate confirmation. Every rule
+carries a chi cap taken from the approved transaction; a rule cannot be created
+without one, and stored rules from older versions that have no cap are not
+applied, so those requests prompt again. Review and revoke saved rules from the
+connected-apps view.
+
+Each site may have at most one pending connect request and three other pending
+approvals at a time. Further requests fail immediately with provider error
+`-32002` until the user resolves a pending one.
+
+Auto-lock is extended only by user activity in the wallet and by approvals the
+user resolves. Dapp requests and the wallet's own background polling do not
+keep an unlocked wallet open.
 
 ## Dapp Integration
 

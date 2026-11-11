@@ -27,6 +27,17 @@ locks in a fee and exchange ratio. The service calculates
 `(amount received - fee) * ratio` exactly, then rounds down to the destination
 token’s smallest unit. A request must pay out at least one unit. Send the
 amount as a plain decimal string when constructing JSON with JavaScript.
+Every transfer request needs an `Idempotency-Key` header of at most 128
+characters that does not contain `|`. Replaying a key with the same body
+returns the same transfer while it is open; once it has finished the bridge
+answers `409`.
+
+A Xian payout counts as dropped only when its nonce was consumed by a committed
+block that does not contain it. The bridge proves this by reading the blocks
+between the last height where the nonce was still open and the first where it
+was consumed, never from the node's transaction index, and requires two such
+observations at least 30 seconds apart before the payout is treated as
+dropped.
 [Bridge setup, supported tokens and refund workflow](https://github.com/xian-technology/xian-bridge#readme)
 
 ## Developer Productivity Tools

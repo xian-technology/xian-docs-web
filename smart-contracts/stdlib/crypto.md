@@ -45,10 +45,9 @@ Typical uses include:
 
 `crypto.key_is_valid(key)` is a lightweight shape check.
 
-It returns `True` only when the provided string is:
-
-- exactly 64 hex characters
-- valid hexadecimal
+It returns `True` only when the provided string is exactly 64 lowercase
+hexadecimal characters (`0-9a-f`). Uppercase or mixed-case spellings of a key
+return `False`: they would be distinct account strings for the same key.
 
 In native execution, a string with the wrong byte length returns `False`
 without copying or scanning its contents. This predicate does not perform

@@ -8,7 +8,7 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-9`, gas schedule `xvm-gas-3`, bytecode `xvm-2` and set codec
+`xvm-execution-10`, gas schedule `xvm-gas-4`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
@@ -16,12 +16,17 @@ change this protected record. The comparison covers all four fields; matching
 gas and codec versions do not make a different execution revision compatible.
 
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
-literal handling and checked numeric ABI boundaries. Gas schedule 3 charges for
-numeric work. See [Numbers, division and rounding](/smart-contracts/numbers).
+literal handling and checked numeric ABI boundaries. Gas schedule 4 charges for
+numeric work and for element work inside container operations; see
+[Numbers, division and rounding](/smart-contracts/numbers) and the
+[chi cost table](/reference/chi-costs#element-work).
 
-Execution revision 9 preserves the outer recognized exception type when reporting
-a failed call. Text inside its message cannot change the error category, and
-long error messages are handled without recursive host parsing.
+In execution revision 10 a failed call's error category comes from structured
+exception data produced by the VM (type and arguments), including exceptions
+raised by a constructor during deployment and builtin exceptions raised by host
+calls. Failure text is never parsed, so contract data inside a message cannot
+select an exception type; a failure without structured data stays an opaque
+message.
 Only exported functions are allowed as external V2 entrypoints.
 Constructors run through the trusted deployment path. Code-hash requests reject
 unsupported `kind` selectors instead of treating them as source-hash requests.
@@ -49,9 +54,14 @@ plan before adopting this revision.
 | Compiler, execution, metering, state format, or consensus-rule change | Coordinated network upgrade with an agreed activation boundary |
 | Move an earlier network to `xian_vm_v2` | Rehearse contract and state migration before scheduling the cutover |
 
-The `xian-deploy` upgrade playbook rolls hosts one at a time. Use that flow only
-when the old and target versions can participate in the same network during
-the rollout. It does not coordinate a hardfork activation height.
+The `xian-deploy` upgrade playbook rolls hosts one at a time. After each host
+it waits until CometBFT RPC reports `catching_up: false` and stops the rollout
+when that does not happen within `xian_upgrade_health_timeout_seconds` (default
+600, polled every `xian_upgrade_health_poll_seconds`). Set
+`xian_upgrade_rpc_status_url` when RPC is not reachable on
+`127.0.0.1:<rpc port>` from the host. Use that flow only when the old and
+target versions can participate in the same network during the rollout. It
+does not coordinate a hardfork activation height.
 
 ## Prepare the Release
 

@@ -20,7 +20,6 @@ the network manifest or the generated CometBFT home.
   "block_policy_mode": "periodic",
   "block_policy_interval": "5s",
   "pruning_enabled": false,
-  "tx_fee_mode": "paid_metered",
   "parallel_execution_enabled": false,
   "services": {
     "bds": { "enabled": true },
@@ -50,11 +49,14 @@ do not copy this abbreviated example over an existing profile.
 | `genesis` | optional local genesis override |
 | `snapshot_url`, `snapshot_signing_keys` | bootstrap source and trust roots |
 | `block_policy_*` | idle-block behavior and interval |
-| `tx_fee_mode`, `free_*_chi` | paid or free-metered transaction policy |
 | `services` | BDS, dashboard, monitoring, and optional sidecars |
 | `advanced` | lower-level CometBFT, state-sync, metrics, nonce, and parallel settings |
 
 `xian_vm_v2` is fixed by the node runtime and is not a profile choice.
+
+The transaction fee policy is not a profile choice either: it is chain state
+chosen at genesis (see [Chi](/concepts/chi)), and profiles that set
+`tx_fee_mode`, `free_tx_max_chi` or `free_block_max_chi` are rejected.
 
 Numeric polling intervals, metrics refresh intervals, nonce-expiry settings and
 parallel thresholds must be finite numbers. Profile validation rejects `NaN`,

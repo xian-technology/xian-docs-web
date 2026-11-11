@@ -51,6 +51,7 @@ violations as `xian.lint.E0xx`.
 | set literals, set comprehensions | `xian.syntax.unsupported_expression.set` / `.set_comp` | use `set(...)` |
 | `@` (matrix multiplication) | `xian.syntax.unsupported_operator.mat_mult` | outside the supported contract language |
 | ordinary syntax error | `xian.syntax.parse_error` | source does not parse |
+| non-ASCII identifier (names, parameters, attributes, keywords) | `xian.syntax.unsupported_identifier.non_ascii` | identifiers must be ASCII; string contents may be any text |
 | augmented multiplication (`x *= y`) | `xian.lint.E001` | write `x = x * y` |
 | one-line compound statements (`if x: y` on one line) | `xian.lint.E001` | bodies must start on their own line |
 | names starting or ending with `_` | `xian.lint.E002` | blocks Python internals / escape paths |
@@ -69,6 +70,8 @@ violations as `xian.lint.E0xx`.
 | invalid export return annotation | `xian.lint.E018` | export returns may only use allowed types |
 | nested function definition | `xian.lint.E019` | avoids closures and hidden state |
 | invalid decorator arguments | `xian.lint.E021` | `@export` only supports `typecheck=True/False`; `@construct` takes no arguments |
+| `Variable`, `Hash` or `LogEvent` called anywhere except as the whole value of a module-level `name = X(...)` | `xian.lint.E022` | storage and events are declared once, at module level |
+| positional or `*args` arguments to `Variable`/`Hash`/`ForeignVariable`/`ForeignHash`, `**kwargs` to any of these or `LogEvent`, or a `ForeignVariable`/`ForeignHash` without `foreign_contract=` and `foreign_name=` or with `contract=`/`name=` | `xian.lint.E023` | declarations use explicit keyword arguments; `LogEvent` takes its event name and params positionally |
 
 ## Allowed Builtins
 

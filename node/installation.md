@@ -143,6 +143,24 @@ Remote configuration runs with a Python entrypoint override so the integrated
 image's supervisor and validator services start only with the Compose runtime.
 Use a deployment revision that includes this override.
 
+`deploy.yml` rewrites node configuration but never restores a snapshot, even
+when the node profile carries `snapshot_url`; a profile-only change reaches a
+running node after `playbooks/restart.yml`. To restore the profile's signed
+snapshot, run `playbooks/restore-network-snapshot.yml`, which stops the
+runtime, restores, and starts it again one host at a time.
+
+CometBFT RPC binds to `127.0.0.1` by default. Publishing it on another address
+requires `xian_public_rpc_enabled: true`. Docker inserts its own iptables rules
+ahead of UFW, so a port published on `0.0.0.0` is reachable even when UFW does
+not allow it: the bind address, not the firewall, controls exposure. Verify
+exposure from outside the host.
+
+When deploy builds a bundle genesis, set `xian_network_manifest` to the network
+manifest used by `xian node init`. Deploy takes `chain_id`, `genesis_time` and
+`runtime_features` from it with the same profile-over-manifest precedence, so
+deploy-built and CLI-built genesis are byte-identical. A bundle genesis without
+a fixed `genesis_time` is rejected.
+
 Store inventory secrets in Ansible Vault, SOPS, CI secrets, or another secret
 manager. Do not commit validator keys, database passwords, or rendered secret
 files.

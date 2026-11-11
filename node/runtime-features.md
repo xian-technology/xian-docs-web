@@ -58,6 +58,11 @@ Bound and rate-limit it on any exposed endpoint.
 `free_metered` requires explicit `free_tx_max_chi` and
 `free_block_max_chi` caps. It does not make execution unlimited.
 
+The mode and caps are fixed in genesis as the hashed consensus state value
+`__fee_policy`. They are not node settings: `xian.toml` fee keys are rejected
+at startup, and `configure_node` accepts the fee options only together with
+`--genesis-bundle`.
+
 ## Parallel Execution
 
 Parallel execution speculates in isolated workers and commits only results

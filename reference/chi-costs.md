@@ -1,7 +1,7 @@
 # Chi Cost Table
 
 These costs describe the native `xian_vm_v2` runtime with execution revision
-`xvm-execution-9` and gas schedule `xvm-gas-3`. Use readonly simulation
+`xvm-execution-10` and gas schedule `xvm-gas-4`. Use readonly simulation
 against the target node for a complete operation estimate. The V2 gas schedule includes the following arithmetic charges.
 
 ## Accounting
@@ -21,8 +21,8 @@ The result is capped by the transaction's submitted chi limit.
 | cross-contract dispatch | 10,000 per call, plus called work |
 
 VM computation and host operations use deterministic policy constants, not
-measured execution time. The current runtime supports `xvm-gas-3`; it does not
-offer `xvm-gas-1` as an alternate execution mode. Validators must use matching
+measured execution time. The current runtime supports `xvm-gas-4`; it does not
+offer an earlier schedule as an alternate execution mode. Validators must use matching
 runtime policies. See the [upgrade procedure](/node/upgrading).
 
 Module initialization also charges for building interface metadata and the
@@ -36,6 +36,26 @@ Events charge for validating and copying their declaration schema and for
 validating each emitted payload, in addition to emission and encoded-value
 costs. Larger schemas and values require more work. An out-of-chi failure
 discards the event and tentative writes.
+
+## Element work
+
+`xvm-gas-4` charges work that grows with container size inside a single
+operation, in addition to the operation's own cost. Each unit costs 8 raw chi:
+
+| Element work | Units |
+| --- | ---: |
+| value comparison, including each dictionary key probe and each comparison made by `in`, `index`, `count`, `==` and `<` | 1 per comparison |
+| copying a container (list, tuple, set, dict) | 1 per member copied |
+| copying text or binary data | 1 per 64 bytes |
+| allocating a container | 1 per member |
+
+Pending units are charged before the next expression or statement. One
+operation may accumulate at most 2^20 uncharged units; beyond that the
+transaction fails with `operation exceeds the element work limit`.
+
+Copies are therefore no longer free. `items += [x]` builds and copies a new
+list on every call, so growing a list that way in a loop costs chi quadratic in
+its length; use `items.append(x)`, which does not copy.
 
 ## V2 arithmetic
 

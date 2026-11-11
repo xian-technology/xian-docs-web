@@ -87,8 +87,13 @@ each backup with a unique filename, owner-only file permissions (`0600`) and an
 owner-only backup directory (`0700`). Preserve these permissions when copying
 backups and store them as private custody material.
 
-Stop the node before restoring a snapshot. Restore replaces only the `data/`
-and `xian/` roots. A full node-home archive may contain `config/` or other
+Stop the node before restoring a snapshot. `xian snapshot restore` and
+`xian node init --restore-snapshot` check the node's runtime state first and
+refuse while its runtime containers are up, even if the node processes are
+crash-looping; stop it with `xian node stop <name>`. On remote hosts,
+`xian-deploy`'s `playbooks/restore-network-snapshot.yml` performs the stop,
+restore and start for you. Restore replaces only the `data/` and `xian/`
+roots. A full node-home archive may contain `config/` or other
 entries, but those entries are not restored.
 
 The restore helper preserves local validator signing state, validator keys, and

@@ -49,16 +49,17 @@ The registering account becomes the consensus key. Registration requires
 an account. Use the account corresponding to the node's validator key, and keep
 any separate reward key in the registration's `reward_key` field.
 
-Consensus identities must be 32-byte Ed25519 public keys encoded as 64 hex
-characters. The node compares these keys case-insensitively and emits a single
-consensus identity for equivalent spellings; this does not rename contract
-accounts or state keys. Use one consistent spelling in contract calls.
+Consensus identities must be 32-byte Ed25519 public keys in canonical form:
+exactly 64 lowercase hex characters. Hex-case variants verify with the same key
+but are distinct account strings, so `register()` and genesis `genesis_nodes`
+reject anything else, and the node treats a non-canonical key in state as
+malformed.
 
 Malformed identities are excluded from consensus updates. An empty or entirely
-invalid desired set does not erase the last effective nonempty validator set.
-Equivalent key spellings with conflicting voting powers also reject the desired
-update. Operators must correct the on-chain membership rather than treating
-these cases as successful removals. The effective consensus baseline is
+invalid desired set does not erase the last effective nonempty validator set,
+and neither does a set with an invalid power or a total power above CometBFT's
+`MaxTotalVotingPower` (`MaxInt64 / 8`). Operators must correct the on-chain
+membership rather than treating these cases as successful removals. The effective consensus baseline is
 persisted in application state so later updates remain consistent after restart
 or snapshot restore.
 
@@ -74,13 +75,35 @@ Auto/hybrid selection excludes jailed and leaving validators, enforces bond and
 activation-delay gates, ranks by total bond, and applies configured churn and
 replacement-margin limits.
 
+In `manual` mode an `add_member` proposal records the candidate's requested
+power when the proposal is created; activation uses that power even if the
+candidate edits its registration while the vote is open. Change it later with
+`set_member_power`.
+
+The active set is never empty. The last active validator cannot leave, and
+governance cannot remove or jail it; a governance-requested rebalance that
+would select nobody is rejected, while epoch and evidence-triggered rebalances
+that would select nobody keep the current set. Evidence still slashes the last
+active validator but does not jail it.
+
+`add_member`, `remove_member` and `jail_member` proposals are re-checked when
+they finalize. A proposal whose target is no longer eligible (a jailed
+candidate, an already removed or jailed member, or the last active validator)
+is finalized as `rejected` without side effects.
+
 ## Voting Power
 
 | Mode | Active power |
 | --- | --- |
 | `equal` | fixed equal power |
 | `requested` | validator's requested power |
-| `stake_weighted` | integer total bonded stake, minimum 1 |
+| `stake_weighted` | integer total bonded stake, minimum 1, clamped to `10^12` |
+
+A single validator's power is at most `10^12` (`MAX_VALIDATOR_POWER`):
+registration, `update_registration`, genesis powers and `set_member_power`
+reject larger values. Every power change also keeps the active total within
+CometBFT's `MaxTotalVotingPower` (`MaxInt64 / 8`), so no selection produces a
+validator update that consensus would reject.
 
 The checked-in local/dev/test bundles use manual selection and equal power. The
 draft `xian-mainnet-1` rehearsal bundle uses `auto_top_n`, at most 13 active

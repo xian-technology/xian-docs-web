@@ -36,6 +36,10 @@ balances.clear()
 balances.clear("alice")
 ```
 
+Without arguments, `all()` and `clear()` cover the whole hash. Any argument is a
+key prefix: `all("")` and `clear("")` address only entries whose first
+dimension is the empty string, not the whole hash.
+
 ## Clone Another Hash
 
 Use `clone_from(...)` when you want a one-time snapshot of another `Hash` or

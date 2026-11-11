@@ -122,6 +122,12 @@ timestamps, and constructor `now`. Microsecond precision is preserved. A timesta
 without a timezone is rejected. When omitted, the timestamp is sampled once in
 UTC for that build, so separate builds can produce different genesis state.
 
+Networks that build genesis from a bundle on each node must pin
+`genesis_time` in the network manifest. `xian network create` samples it once
+into the manifest; `xian node init`, network join and operator bundles reject a
+bundle genesis without it, because every node would otherwise sample its own
+clock and build a different genesis.
+
 Compare the complete generated genesis and application hashes before distributing
 the accepted file to validators. This controls genesis construction only; do not
 regenerate genesis for a running network as an operational update.

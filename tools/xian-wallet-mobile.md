@@ -80,6 +80,18 @@ only on a trusted local/private network; prefer HTTPS elsewhere.
   save cannot restore the unlocked state
 - WalletConnect approves required Xian scopes only and rechecks chain, method,
   and account on every request
+- connect and request dialogs show WalletConnect's domain verification for the
+  calling site: verified domain, unverified (WalletConnect could not confirm
+  the site), domain mismatch (the request came from a different site than the
+  app claims) or known scam domain; treat anything but a verified domain with
+  suspicion
+- transaction requests show the chi limit before approval, estimated with the
+  SDK's headroom when the dapp did not set one (`Not estimated` if estimation
+  fails)
+- auto-approval rules always carry a chi cap; none is offered for a request
+  without a chi limit, and older stored rules without a cap are not applied
+- invisible and text-direction characters in signed text are shown as
+  `[U+XXXX]` markers with a warning
 - external message signatures use a chain- and account-bound envelope
 
 Record the recovery phrase offline. A device backup is not a substitute for
