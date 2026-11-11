@@ -15,10 +15,9 @@ uv sync --frozen
 uv run --frozen xian-mcp-server
 ```
 
-These commands use the locked published dependencies, including
-`xian-tech-py` version `0.5.2` or newer within the supported `0.5` series.
-Sibling repositories are not required. The Dockerfile's `pypi` target also
-uses published dependencies:
+The lockfile pins Git revisions of the V2-compatible Python SDK and runtime
+types. Both the standalone checkout and the Dockerfile’s `pypi` target use
+these dependencies:
 
 ```bash
 docker build --target pypi -t xian-mcp-server:latest .

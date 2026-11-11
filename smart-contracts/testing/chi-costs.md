@@ -18,7 +18,7 @@ def counter_contract():
         return counter.get()
 
 
-client = ContractingClient(vm_profile="xian_vm_v2", metering=True)
+client = ContractingClient(metering=True)
 client.flush()
 client.submit(counter_contract, name="con_counter")
 

@@ -80,7 +80,7 @@ from contracting.local import ContractingClient
 
 class TestDex(unittest.TestCase):
     def setUp(self):
-        self.client = ContractingClient(vm_profile="xian_vm_v2")
+        self.client = ContractingClient()
         self.client.flush()
 
         # Submit token first (the DEX depends on it)
@@ -180,7 +180,7 @@ def registry_contract():
 
 class TestRegistry(unittest.TestCase):
     def setUp(self):
-        self.client = ContractingClient(vm_profile="xian_vm_v2")
+        self.client = ContractingClient()
         self.client.flush()
         self.client.submit(token_contract, name="con_token")
         self.client.submit(registry_contract, name="con_registry")

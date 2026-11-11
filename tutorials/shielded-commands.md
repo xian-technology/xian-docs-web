@@ -51,7 +51,7 @@ from pathlib import Path
 
 from contracting.local import ContractingClient
 
-client = ContractingClient(vm_profile="xian_vm_v2")
+client = ContractingClient()
 client.flush()
 
 zk_registry_source = Path(

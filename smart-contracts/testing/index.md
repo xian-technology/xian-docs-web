@@ -5,7 +5,9 @@
 It lets you submit contracts, call exported functions, inspect state, and
 exercise contract interactions without running a full node.
 
-Set `vm_profile="xian_vm_v2"` to use the Rust compiler and native VM for local deployments, exports and cross-contract calls. The default client uses the historical V1 harness. Use a temporary storage directory per profile. Node simulation includes the target state and transaction context used for fee estimates.
+With no profile argument, the client compiles and executes contracts under `xian_vm_v2`, the same numeric and language rules used by the fresh chain. Each test can pass its own temporary `storage_home` to start with clean state. Node simulation uses the target chain’s state and transaction context for fee estimates.
+
+To reproduce an earlier V1 fixture, open its storage explicitly with `ContractingClient(storage_home=fixture_dir, vm_profile="xian_vm_v1")`. Use a separate directory for V2 tests. The V2 proxy exposes the same exported functions that a transaction can call. Test private helpers through an exported function.
 
 ## What It Gives You
 
@@ -19,7 +21,7 @@ Set `vm_profile="xian_vm_v2"` to use the Rust compiler and native VM for local d
 ```python
 from contracting.local import ContractingClient
 
-client = ContractingClient(vm_profile="xian_vm_v2")
+client = ContractingClient()
 client.flush()
 
 client.submit(my_contract_func, name="con_example")
@@ -47,4 +49,4 @@ Use it for:
 
 Use the V2 source checkout and environment described in [Contract-only setup](/getting-started/dev-environment#contract-only-setup). Run the examples with its `uv run` command.
 
-The V2 extra installs the native VM used by the local client.
+The base installation includes the native VM.

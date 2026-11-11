@@ -41,12 +41,10 @@ def counter_contract():
 
 
 @pytest.fixture
-def client():
-    local = ContractingClient(vm_profile="xian_vm_v2")
-    local.flush()
-    local.submit(counter_contract, name="con_counter")
-    yield local
-    local.flush()
+def client(tmp_path):
+    with ContractingClient(storage_home=tmp_path) as local:
+        local.submit(counter_contract, name="con_counter")
+        yield local
 
 
 def test_increment(client):

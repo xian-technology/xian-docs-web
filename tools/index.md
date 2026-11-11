@@ -48,11 +48,7 @@ Python application SDK:
 
 See the [Python SDK source installation](/tools/xian-py#install).
 
-CLI automation and operator tooling:
-
-```bash
-uv tool install xian-tech-cli
-```
+For CLI automation and operator tools, use the [CLI source installation](/tools/xian-cli#install).
 
 Local contract runtime and testing:
 

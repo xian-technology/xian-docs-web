@@ -95,11 +95,11 @@ Install Python 3.14, uv, Git and a Rust toolchain. The fresh-chain language ship
 ```bash
 git clone https://github.com/xian-technology/xian-contracting.git
 cd xian-contracting
-git checkout --detach beb25b287ed12f6c7ea3f14a2ad4ee577ed76f6b
-uv sync --frozen --extra v2 --group dev
-uv run --no-sync python -c 'from xian_compiler_core import compiler_version; print(compiler_version()["supported_vm_profiles"])'
+git checkout --detach 39f533980f0ae482ea1a9819f0b961311a020ad1
+uv sync --frozen --group dev
+uv run --no-sync python -c 'from xian_compiler_core import compiler_version; assert compiler_version()["vm_profile"] == "xian_vm_v2"'
 ```
 
-Run tests from this environment using `uv run --no-sync pytest path/to/test_contract.py`. The `v2` extra installs the native VM from the same checkout. A package-index installation requires published matching versions of all four packages.
+Run tests from this environment using `uv run --no-sync pytest path/to/test_contract.py`. This installation includes the native VM. A package-index installation requires published matching versions of all four packages.
 
 Continue with [Your first smart contract](/getting-started/first-contract).

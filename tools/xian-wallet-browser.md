@@ -15,6 +15,9 @@ dapps.
 
 Verify release provenance before importing a funded account.
 
+For the V2 chain, build the wallet from current source with the
+[V2 JavaScript SDK](/tools/xian-js#install). Check the SDK revision when using a release build.
+
 ## Initial Setup
 
 The wallet can:

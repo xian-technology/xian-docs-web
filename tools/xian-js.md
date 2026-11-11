@@ -18,7 +18,7 @@ The source revision below defaults to V2 and includes the DEX adapter. From the 
 ```bash
 git clone https://github.com/xian-technology/xian-js.git
 cd xian-js
-git checkout --detach 3c8a5b19c20d83edb06ba124e204cc7d0d6f31ec
+git checkout --detach 908777ad886b2d399ad10861ae43dc9c211640d9
 npm ci
 npm run build:compiler
 npm run build
@@ -65,7 +65,7 @@ minimum output, adds an approval only when allowance is insufficient, selects
 the supporting fee-on-transfer entrypoint for flagged source/destination
 tokens, and rejects flagged intermediate tokens.
 
-Supply reserve balances, allowance and input amounts as exact strings. Fill each pair's `precision0` and `precision1` from token metadata where declared. The V2 adapter applies the router's settlement precision. The historical adapter remains available for V1 networks. Other DEXes
+Supply reserve balances, allowance and input amounts as exact strings. Fill each pair's `precision0` and `precision1` from token metadata where declared. The V2 adapter applies the router's settlement precision. The V1 adapter remains available for earlier integration fixtures. Other DEXes
 can use `selectBestExactInRoute` with their own pool/quote adapter and the
 generic execution planner with their own approval and swap-call builders.
 
@@ -104,7 +104,7 @@ Key and signature length checks alone do not establish a valid signature.
 
 ## Exact numeric arguments
 
-The default client uses `xian_vm_v2`. To connect to a historical V1 chain, pass `vmProfile: "xian_vm_v1"` when constructing `XianClient`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
+The default client uses `xian_vm_v2`. To reproduce a V1 fixture, pass `vmProfile: "xian_vm_v1"` when constructing `XianClient`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
 
 ```ts
 import { fixed, parseContractJson } from "@xian-tech/client";

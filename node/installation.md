@@ -33,12 +33,8 @@ cd ../xian-stack
 make validate
 ```
 
-For an isolated operator installation:
-
-```bash
-uv tool install xian-tech-cli
-xian --help
-```
+Use the CLI from the same workspace for fresh-chain management. Run
+`uv run --project ~/xian/xian-cli xian --help` to check the installation.
 
 Node lifecycle still requires access to compatible `xian-stack` and
 `xian-configs` assets.

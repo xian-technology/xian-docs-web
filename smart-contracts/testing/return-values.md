@@ -24,7 +24,7 @@ def my_contract():
         balances[to] += amount
         return True
 
-client = ContractingClient(vm_profile="xian_vm_v2")
+client = ContractingClient()
 client.flush()
 client.submit(my_contract, name="con_test")
 contract = client.get_contract_proxy("con_test")
@@ -74,7 +74,7 @@ def token_with_events():
         balances[to] += amount
         Transfer({"from": ctx.caller, "to": to, "amount": amount})
 
-client = ContractingClient(vm_profile="xian_vm_v2")
+client = ContractingClient()
 client.flush()
 client.submit(token_with_events, name="con_token")
 token = client.get_contract_proxy("con_token")
@@ -97,7 +97,7 @@ import unittest
 
 class TestReturnValues(unittest.TestCase):
     def setUp(self):
-        self.client = ContractingClient(vm_profile="xian_vm_v2")
+        self.client = ContractingClient()
         self.client.flush()
         self.client.submit(my_contract, name="con_test")
         self.contract = self.client.get_contract_proxy("con_test")

@@ -84,7 +84,7 @@ allowance stored at `approvals[owner, spender]`.
 ```python
 from contracting.local import ContractingClient
 
-client = ContractingClient(vm_profile="xian_vm_v2")
+client = ContractingClient()
 client.flush()
 client.submit(TOKEN_CODE, name="con_example_token")
 token = client.get_contract_proxy("con_example_token")

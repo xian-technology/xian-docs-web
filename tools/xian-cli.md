@@ -6,10 +6,16 @@ transaction commands.
 
 ## Install
 
+For the fresh-chain tools, use the sibling source checkouts described in
+[Development environment](/getting-started/dev-environment). From the workspace root:
+
 ```bash
-uv tool install xian-tech-cli
-xian --help
+cd xian-cli
+uv sync --frozen
+uv run --no-sync xian --help
 ```
+
+Run the commands below in that environment.
 
 Runtime-heavy commands require `xian-stack` and `xian-configs`, either as
 sibling checkouts or through explicit directory flags.

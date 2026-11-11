@@ -6,8 +6,7 @@ Xian has two related linting surfaces:
 - the optional standalone `xian-linter` HTTP service
 
 Both use the Rust `xian-compiler-core` as the authoritative contract-language
-and diagnostic surface. The standalone package also runs PyFlakes and can run
-optional native IR validation in `xian_vm_v2` mode.
+and diagnostic surface. The standalone package runs PyFlakes and validates the V2 IR in the native VM by default.
 
 The published PyPI package name for the standalone service is
 `xian-tech-linter`. The import package and console command remain
@@ -33,7 +32,6 @@ def transfer(amount: decimal, to: str):
 errors = diagnose_contract_source(
     module_name="con_example",
     source=source,
-    vm_profile="xian_vm_v2",
 )
 
 for error in errors:
@@ -57,8 +55,8 @@ Use linter 0.4.3 with the [V2 compiler and VM checkout](/getting-started/dev-env
 ```bash
 git clone https://github.com/xian-technology/xian-linter.git
 cd xian-linter
-git checkout --detach a6f279709a5f31cd8eacb6f85d462de164774f7f
-uv sync --frozen --extra server --extra vm
+git checkout --detach 917149537bda442d9e3fd48a4dc4ab3d187ed2a5
+uv sync --frozen --extra server
 ```
 
 Start the service:
@@ -109,7 +107,7 @@ allow additional PyFlakes names:
 POST /lint?whitelist_patterns=my_helper,con_*
 ```
 
-All endpoints use the default source-linting mode unless a mode is selected:
+All endpoints default to `xian_vm_v2`. A request can also name the profile explicitly.
 
 ```text
 POST /lint?mode=xian_vm_v2
@@ -124,8 +122,8 @@ The standalone package supports three modes:
 
 | Mode | What it checks |
 |------|----------------|
-| `python` | authoritative Rust compiler diagnostics plus PyFlakes warnings; the name is retained for API compatibility |
-| `xian_vm_v2` | V2 numeric rules and PyFlakes warnings, plus native IR validation when `xian_vm_core` is installed |
+| `python` | V1 compiler diagnostics and PyFlakes warnings (compatibility mode) |
+| `xian_vm_v2` | default mode with V2 compiler diagnostics, PyFlakes warnings and native IR validation |
 | `xian_vm_v1` | historical compiler and VM profile for V1 sources |
 
 The VM mode is linting only. It does not execute the contract or simulate
@@ -137,7 +135,7 @@ Inline usage:
 ```python
 from xian_linter import lint_code_sync
 
-errors = lint_code_sync(source, mode="xian_vm_v2")
+errors = lint_code_sync(source)
 ```
 
 ### Raw Source Example

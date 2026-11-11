@@ -14,11 +14,9 @@ from contracting.local import ContractingClient
 
 
 @pytest.fixture
-def client():
-    local = ContractingClient(vm_profile="xian_vm_v2")
-    local.flush()
-    yield local
-    local.flush()
+def client(tmp_path):
+    with ContractingClient(storage_home=tmp_path) as local:
+        yield local
 ```
 
 ## Submit and Call

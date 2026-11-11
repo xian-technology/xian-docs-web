@@ -10,7 +10,7 @@ From the directory containing the [V2 contracting checkout](/getting-started/dev
 ```bash
 git clone https://github.com/xian-technology/xian-py.git
 cd xian-py
-git checkout --detach d27676a9fe49ccab4f187ab1ca3829a86db25e74
+git checkout --detach 36ae74d9150506c3d07d54d5ec21150fa7b22c58
 uv sync --frozen
 uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClientConfig().vm_profile)'
 ```
@@ -101,7 +101,7 @@ IR for the node’s `xian_vm_v2` profile. Client-supplied deployment artifacts a
 
 ## Numeric inputs and results
 
-The synchronous and asynchronous clients and offline `create_tx` use `xian_vm_v2` by default. For a historical V1 network, pass `config=XianClientConfig(vm_profile="xian_vm_v1")` to the client or `vm_profile="xian_vm_v1"` to `create_tx`. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`.
+The synchronous and asynchronous clients and offline `create_tx` use `xian_vm_v2` by default. To reproduce a V1 fixture, pass `config=XianClientConfig(vm_profile="xian_vm_v1")` to the client or `vm_profile="xian_vm_v1"` to `create_tx`. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`.
 
 ## Main Client Surfaces
 
@@ -174,7 +174,7 @@ impersonate typed values with reserved codec keys. Use actual runtime values
 when writing contract state; accepting raw transaction tags does not weaken
 those [storage rules](/smart-contracts/storage#persistent-sets).
 
-Source deployment targets `xian-tech-py>=0.5.0,<0.6`. Keep application dependency
+For V2 source deployment, use the SDK revision in the installation section. Keep application dependency
 constraints aligned with this API even when local development uses sibling
 source overrides.
 
