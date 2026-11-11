@@ -111,8 +111,7 @@ The layered harness covers:
   authorized ownership transfer, and rejection of unauthorized metadata changes
 - shared execution budgets across serial and nested constructors, including
   consumed-chi accounting after failed execution
-- rejection of unencodable writes with rollback and continued block production,
-  while retaining return-only value rendering
+- rejection of unencodable writes with rollback and continued block production
 - dictionary duplicate replacement, numeric-key equality, exact large-integer
   comparisons, and nested list removal; unhashable-key failures roll back writes
   and events, with matching receipts on all five validators and a successful

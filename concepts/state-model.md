@@ -29,17 +29,23 @@ state queries. Contract names and hash key parts cannot contain the reserved
 Stored values and event fields must be representable by the node's consensus
 encoder. This includes ordinary scalar values, supported decimal and datetime
 values, bytes, and nested lists, tuples, and dictionaries with string keys.
-Sets, frozen sets, byte arrays, durations, and dictionaries with non-string
-keys cannot be persisted or emitted. Storage keys must also be valid UTF-8.
+Deterministic `set()` and `frozenset()` values use the tagged set codec.
+Event fields must also satisfy their declared schema. Storage keys must be
+valid UTF-8.
 
-An unencodable write or event fails the transaction and discards all of its
-application writes and events. Consumed chi is retained and the normal failure
-fee policy applies. The node does not silently stringify an unsupported stored
-value or event field.
+A temporary dictionary can use an integer key for a contract-local lookup.
+Dictionaries in external arguments, returned values, and state require string
+keys at every nesting depth. For example, a contract can look up
+`by_id[7]` and return the value, or build a separate mapping with string IDs
+for its public interface.
 
-Return values have a different boundary: the node can render an unsupported
-return-only value as text. A successful return therefore does not demonstrate
-that the same value is suitable for storage or events.
+Returning `{"items": [{7: "alice"}]}` fails at the native VM boundary. The
+transaction discards all tentative writes and events. An unencodable write
+or event likewise fails the transaction. Consumed chi and the normal failure
+fee policy still apply.
+
+See [Storage](/smart-contracts/storage) for the set codec and limits, and
+[Simulated responses](/api/dry-runs#response-shape) for the response envelope.
 
 ## Transaction Isolation
 
