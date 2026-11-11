@@ -121,7 +121,7 @@ These are separate mechanisms:
 
 Application state sync checks the downloaded archive's height and application
 hash against the trusted offer before replacing durable state. State imports
-validate protected metadata first and replace application values and the durable
+reject duplicate state or nonce keys, validate protected metadata first, and replace application values and the durable
 block marker in one database transaction. Exports read both from the same
 committed database snapshot.
 
