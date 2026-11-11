@@ -206,7 +206,7 @@ these bounds:
 | Code | Meaning |
 |------|---------|
 | `E000` | standalone wrapper processing error |
-| `xian.lint.E001` through `xian.lint.E023` | contract-language semantic rules such as imports, decorators, annotations, exports, and reserved names |
+| `xian.lint.E0xx` (E001–E003, E005, E008–E019, E021) | contract-language semantic rules such as imports, decorators, annotations, exports, and reserved names |
 | `xian.syntax.*` | parser or unsupported syntax-tree diagnostics |
 | `xian.ir.*` | canonical IR lowering diagnostics |
 | `xian.limit.*` | deterministic compiler admission bounds |

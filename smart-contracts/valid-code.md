@@ -31,31 +31,44 @@ Ordinary f-string text outside the specification supports escapes.
 
 ## Forbidden Syntax
 
-| Feature | Error Code | Why |
+The compiler reports unsupported Python syntax as
+`xian.syntax.unsupported_statement.<kind>`,
+`xian.syntax.unsupported_expression.<kind>` or
+`xian.syntax.unsupported_operator.<kind>`, and contract-language rule
+violations as `xian.lint.E0xx`.
+
+| Feature | Diagnostic | Why |
 |---------|------------|-----|
-| `try/except`, `with`, `lambda`, `yield`, `yield from`, `nonlocal`, `@`, set literals, set comprehensions, semicolons, one-line compound statements | `E001` | outside the supported contract language |
-| names starting or ending with `_` | `E002` | blocks Python internals / escape paths |
-| import inside a function | `E003` | imports must be explicit and module-level |
-| `from x import y` | `E004` | use `import x` then `x.y` |
-| stdlib module import | `E005` | only deployed contracts and runtime modules are allowed |
-| class definitions | `E006` | contracts are module/function based |
-| async functions | `E007` | no async execution in contracts |
-| invalid decorators | `E008` | only `@export` and `@construct` |
-| multiple constructors | `E009` | only one constructor allowed |
-| multiple decorators on one function | `E010` | single-decorator model |
-| forbidden ORM kwargs | `E011` | runtime owns those names |
-| tuple unpacking of ORM declarations | `E012` | storage declarations must be explicit |
-| no `@export` function present | `E013` | contract needs a public API |
-| forbidden builtin or reserved name | `E014` | unsafe builtins and reserved identifiers are blocked |
-| exported arg shadows ORM name | `E015` | avoids confusing state collisions |
-| invalid argument annotation | `E016` | exported args must use allowed types |
-| missing export annotation | `E017` | exported args must be typed |
-| invalid export return annotation | `E018` | export returns may only use allowed types |
-| nested function definition | `E019` | avoids closures and hidden state |
-| parse error | `E020` | ordinary syntax error |
-| invalid decorator arguments | `E021` | `@export` only supports `typecheck=True/False`; `@construct` takes no arguments |
-| profile-blocked syntax | `E022` | rejected by the active validation profile |
-| profile-blocked builtin | `E023` | builtin is not supported by the active validation profile |
+| `try/except` | `xian.syntax.unsupported_statement.try` | outside the supported contract language |
+| `with` / `async with` | `xian.syntax.unsupported_statement.with` | outside the supported contract language |
+| `del` | `xian.syntax.unsupported_statement.delete` | remove dict entries with `pop(key)` instead |
+| `global`, `nonlocal` | `xian.syntax.unsupported_statement.global` / `.nonlocal` | no hidden shared state |
+| `match`, annotated assignment (`x: int = 0`), `type` aliases | `xian.syntax.unsupported_statement.match` / `.ann_assign` / `.type_alias` | outside the supported contract language |
+| `from x import y` | `xian.syntax.unsupported_statement.import_from` | use `import x` then `x.y` |
+| class definitions | `xian.syntax.unsupported_statement.class_def` | contracts are module/function based |
+| async functions, `async for`, `await` | `xian.syntax.unsupported_statement.async_function_def` / `.async_for`, `xian.syntax.unsupported_expression.await` | no async execution in contracts |
+| `lambda`, `yield`, `yield from`, `:=`, generator expressions | `xian.syntax.unsupported_expression.lambda` / `.yield` / `.named_expr` / `.generator_exp` | outside the supported contract language |
+| set literals, set comprehensions | `xian.syntax.unsupported_expression.set` / `.set_comp` | use `set(...)` |
+| `@` (matrix multiplication) | `xian.syntax.unsupported_operator.mat_mult` | outside the supported contract language |
+| ordinary syntax error | `xian.syntax.parse_error` | source does not parse |
+| augmented multiplication (`x *= y`) | `xian.lint.E001` | write `x = x * y` |
+| one-line compound statements (`if x: y` on one line) | `xian.lint.E001` | bodies must start on their own line |
+| names starting or ending with `_` | `xian.lint.E002` | blocks Python internals / escape paths |
+| import inside a function | `xian.lint.E003` | imports must be explicit and module-level |
+| stdlib module import | `xian.lint.E005` | only deployed contracts and runtime modules are allowed |
+| invalid decorators | `xian.lint.E008` | only `@export` and `@construct` |
+| multiple constructors | `xian.lint.E009` | only one constructor allowed |
+| multiple decorators on one function | `xian.lint.E010` | single-decorator model |
+| forbidden ORM kwargs | `xian.lint.E011` | runtime owns those names |
+| tuple unpacking of ORM declarations | `xian.lint.E012` | storage declarations must be explicit |
+| no `@export` function present | `xian.lint.E013` | contract needs a public API |
+| forbidden builtin or reserved name | `xian.lint.E014` | unsafe builtins and reserved identifiers are blocked |
+| exported arg shadows ORM name | `xian.lint.E015` | avoids confusing state collisions |
+| invalid argument annotation | `xian.lint.E016` | exported args must use allowed types |
+| missing export annotation | `xian.lint.E017` | exported args must be typed |
+| invalid export return annotation | `xian.lint.E018` | export returns may only use allowed types |
+| nested function definition | `xian.lint.E019` | avoids closures and hidden state |
+| invalid decorator arguments | `xian.lint.E021` | `@export` only supports `typecheck=True/False`; `@construct` takes no arguments |
 
 ## Allowed Builtins
 
