@@ -12,12 +12,12 @@ TransferEvent = LogEvent(
     {
         "from": indexed(str),
         "to": indexed(str),
-        "amount": (int, float, decimal),
+        "amount": (int, decimal),
     },
 )
 
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
 
@@ -80,7 +80,7 @@ they cannot be stored or returned as public transaction results.
 - event emission consumes chi
 
 Schemas must contain at least one field and can index at most three fields.
-Supported field types are `str`, `int`, `float`, `bool`, `bytes`, `bytearray`,
+Supported field types are `str`, `int`, `bool`, `bytes`, `bytearray`,
 `set`, `frozenset` and `decimal`, or a nonempty tuple of these types. Each
 field's `str(value)` representation must fit within 1,024 UTF-8 bytes. For a
 string field, multibyte characters therefore consume more than one byte.

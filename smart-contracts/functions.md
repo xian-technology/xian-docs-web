@@ -12,21 +12,18 @@ Exported functions define the external contract API.
 
 ```python
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount
     balances[to] += amount
 ```
 
-By default, these annotations define the public interface and pass through the
-linter, but they are not enforced automatically at runtime.
-
-If a contract wants runtime enforcement, it can opt in on a per-function basis:
+V2 checks numeric arguments and returns on every export. Enable full annotation checking with `typecheck=True`.
 
 ```python
 @export(typecheck=True)
-def calculate(limit: float) -> str:
+def calculate(limit: decimal) -> str:
     return "YES" if limit > 0.1 else "NO"
 ```
 
@@ -43,7 +40,7 @@ Every exported argument must be annotated:
 def create_order(
     item: str,
     quantity: int,
-    price: float,
+    price: decimal,
     metadata: dict[str, int],
 ):
     orders[item] = {
@@ -57,7 +54,7 @@ Allowed annotation types:
 
 - `str`
 - `int`
-- `float`
+- `decimal`
 - `bool`
 - `bytes`
 - `bytearray`
@@ -79,17 +76,7 @@ for example:
 If `typecheck=True` is enabled, those nested container annotations are checked
 recursively at runtime.
 
-`float` is the normal annotation for decimal-backed numeric values in Xian.
-Although the annotation says `float`, contract execution uses deterministic
-`ContractingDecimal` values under the hood.
-
-The same rule applies to opt-in runtime checks. A `float` annotation accepts
-decimal-backed numeric values such as `ContractingDecimal`, as well as normal
-Python `int` / `float` values from local testing.
-
-That also applies to float literal default values in exported signatures, so a
-default like `rate: float = 0.1` is compiled with the same deterministic
-decimal semantics as any other float literal in contract code.
+An exported decimal parameter accepts a decimal or an exactly representable integer. An integer parameter accepts integers. The source default in `rate: decimal = 0.1` is exactly one tenth. See [Numbers, division and rounding](/smart-contracts/numbers).
 
 ### Return Annotations
 
@@ -111,7 +98,7 @@ def balance_of(address: str) -> Decimal:
     return balances[address]
 ```
 
-Use `-> float` for user-facing decimal amounts. Do not annotate exported
+Use `-> decimal` for user-facing decimal amounts. Do not annotate exported
 signatures with Python `Decimal`.
 
 ### Return Values
@@ -125,8 +112,7 @@ def owner_of_contract() -> str:
     return owner.get()
 ```
 
-If a function returns a decimal-backed value, the caller receives a
-`ContractingDecimal` result object.
+Calls between contracts exchange native values. The wire representation of a decimal result is a tagged canonical string. Python and JavaScript clients decode it into their SDK-specific result types.
 
 ## Constructor
 
@@ -155,7 +141,7 @@ def ensure_nonnegative(amount):
     assert amount >= 0, "Amount must be non-negative"
 
 @export
-def approve(amount: float, to: str):
+def approve(amount: decimal, to: str):
     ensure_nonnegative(amount)
     approvals[ctx.caller, to] = amount
 ```
@@ -192,7 +178,7 @@ so reading a later generator's target before its first assignment also fails.
 
 ```python
 @export
-def withdraw(amount: float):
+def withdraw(amount: decimal):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount

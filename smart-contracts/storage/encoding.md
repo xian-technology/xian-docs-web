@@ -6,7 +6,7 @@ Contract state is stored through a deterministic JSON-based encoding layer.
 
 The encoder has explicit markers for:
 
-- `ContractingDecimal`
+- contract `decimal`
 - `datetime.datetime` / contract `Datetime`
 - `datetime.timedelta` / contract `Timedelta`
 - `bytes`
@@ -19,7 +19,7 @@ representation.
 
 For numeric values, this means:
 
-- contract `float` values are stored as `ContractingDecimal`
+- integers outside the JSON safe range use the `__big_int__` marker
 - decimal values are encoded with the `__fixed__` marker
 - the same numeric value always produces the same stored representation
 
@@ -37,5 +37,4 @@ For numeric values, this means:
 
 That byte count includes both key and value.
 
-See [Chi Cost Table](/reference/chi-costs). Local Python harness measurements
-use a separate meter and should not be used as exact node fee quotes.
+See [Numbers, division and rounding](/smart-contracts/numbers) for numeric limits and wire examples. See [Chi Cost Table](/reference/chi-costs) for metering.

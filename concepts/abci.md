@@ -32,7 +32,7 @@ deterministic application through the ABCI contract.
 - application snapshot export/import
 - optional dashboard HTTP and WebSocket services
 
-It also wires the fixed `xian_vm_v1` execution runtime.
+It also wires the fixed `xian_vm_v2` execution runtime.
 
 ## Transaction Path Across The Boundary
 
@@ -58,7 +58,7 @@ flowchart TD
   Mempool["Mempool and gossip"]
   Proposal["PrepareProposal and ProcessProposal"]
   Decision["CometBFT decides the ordered block"]
-  Execute["FinalizeBlock executes xian_vm_v1"]
+  Execute["FinalizeBlock executes xian_vm_v2"]
   Result["Return results and app_hash; buffer writes"]
   Commit["Commit persists application state"]
   Next["Next consensus height"]

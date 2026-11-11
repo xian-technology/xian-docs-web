@@ -13,14 +13,18 @@ Node.js applications.
 | `@xian-tech/types` | shared public types |
 | `@xian-tech/web-kit` | wallet, RPC, formatting, toast, and React helpers |
 
-Install only the packages your application uses:
-
-The generic DEX planner and Xian v1 adapter are available in
-`@xian-tech/dex` version `0.3.0` or newer.
+Use SDK 0.3.3 for the V2 client and DEX adapter. From the directory containing the [V2 compiler checkout](/getting-started/dev-environment#contract-only-setup), build the matching SDK. Building the optional WASM compiler also requires `wasm-pack` and the `wasm32-unknown-unknown` Rust target.
 
 ```bash
-npm install @xian-tech/client @xian-tech/provider
+git clone https://github.com/xian-technology/xian-js.git
+cd xian-js
+git checkout --detach 39812da81a19a8d58584ea0f544c13d57c98b6e7
+npm ci
+npm run build:compiler
+npm run build
 ```
+
+The SDK examples run inside this workspace. Applications using registry packages require matching published 0.3.3 versions of the client, provider and types.
 
 ## DEX Planning
 
@@ -31,20 +35,20 @@ transport:
 ```ts
 import {
   deadlineFromNow,
-  planXianDexV1ExactInExecution,
-  selectBestXianDexV1ExactInRoute,
+  planXianDexV2ExactInExecution,
+  selectBestXianDexV2ExactInRoute,
 } from "@xian-tech/dex";
 
-const quote = selectBestXianDexV1ExactInRoute({
+const quote = selectBestXianDexV2ExactInRoute({
   pairs,
   fromToken: "currency",
   toToken: "con_usdc",
-  amountIn: 10,
+  amountIn: "10",
   feeBps: 30,
 });
 if (!quote) throw new Error("No route");
 
-const plan = planXianDexV1ExactInExecution({
+const plan = planXianDexV2ExactInExecution({
   quote,
   recipient: agentAddress,
   allowance,
@@ -61,7 +65,7 @@ minimum output, adds an approval only when allowance is insufficient, selects
 the supporting fee-on-transfer entrypoint for flagged source/destination
 tokens, and rejects flagged intermediate tokens.
 
-The canonical contract ABI is isolated in the Xian DEX v1 adapter. Other DEXes
+Supply reserve balances, allowance and input amounts as exact strings. Fill each pair's `precision0` and `precision1` from token metadata where declared. The V2 adapter applies the router's settlement precision. The historical adapter remains available for V1 networks. Other DEXes
 can use `selectBestExactInRoute` with their own pool/quote adapter and the
 generic execution planner with their own approval and swap-call builders.
 
@@ -76,6 +80,7 @@ import { Ed25519Signer, XianClient } from "@xian-tech/client";
 const signer = new Ed25519Signer(process.env.XIAN_PRIVATE_KEY!);
 const client = new XianClient({
   rpcUrl: "http://127.0.0.1:26657",
+  vmProfile: "xian_vm_v2",
   dashboardUrl: "http://127.0.0.1:8080",
 });
 
@@ -97,6 +102,19 @@ an injected wallet provider.
 points, invalid point encodings, and noncanonical signature scalars. Verification
 uses the exact message bytes; do not trim or otherwise rewrite signed text.
 Key and signature length checks alone do not establish a valid signature.
+
+## Exact numeric arguments
+
+Select `vmProfile: "xian_vm_v2"` for a fresh chain. The default is `xian_vm_v1`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
+
+```ts
+import { fixed, parseContractJson } from "@xian-tech/client";
+
+const amount = fixed("1.000000000000000000000000000001");
+const kwargs = parseContractJson('{"shares":9007199254740993,"price":1.25}');
+```
+
+`parseContractJson` preserves the original JSON digits while creating typed argument values suitable for simulation and wallet signing.
 
 ## Deploy Source
 

@@ -5,9 +5,7 @@ Use it to call exports, change signers, inspect state, and test rollback.
 
 ## Setup
 
-```bash
-uv add xian-tech-contracting pytest
-```
+Use the V2 source checkout and environment described in [Contract-only setup](/getting-started/dev-environment#contract-only-setup). Run the examples with its `uv run` command.
 
 ```python
 import pytest
@@ -17,7 +15,7 @@ from contracting.local import ContractingClient
 
 @pytest.fixture
 def client():
-    local = ContractingClient()
+    local = ContractingClient(vm_profile="xian_vm_v2")
     local.flush()
     yield local
     local.flush()
@@ -34,14 +32,14 @@ def token_contract():
         balances[ctx.caller] = initial_supply
 
     @export
-    def transfer(amount: float, to: str):
+    def transfer(amount: decimal, to: str):
         assert amount > 0, "Amount must be positive"
         assert balances[ctx.caller] >= amount, "Insufficient balance"
         balances[ctx.caller] -= amount
         balances[to] += amount
 
     @export
-    def balance_of(address: str) -> float:
+    def balance_of(address: str) -> decimal:
         return balances[address]
 
 

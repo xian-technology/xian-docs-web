@@ -26,7 +26,7 @@ foreign_balances = ForeignHash(
 TransferEvent = LogEvent("Transfer", {
     "from": indexed(str),
     "to": indexed(str),
-    "amount": (int, float, decimal),
+    "amount": (int, decimal),
 })
 ```
 
@@ -38,7 +38,7 @@ def seed():
     owner.set(ctx.caller)
 
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     pass
 
 def helper():
@@ -50,7 +50,7 @@ def helper():
 Allowed for exported arguments and exported return annotations:
 
 ```python
-str, int, float, bool, bytes, bytearray, dict, list, set, frozenset, Any
+str, int, decimal, bool, bytes, bytearray, dict, list, set, frozenset, Any
 datetime.datetime, datetime.timedelta
 ```
 
@@ -208,19 +208,19 @@ assert ctx.caller == ctx.signer, "Direct calls only"
 
 ```python
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     ...
 
 @export
-def approve(amount: float, to: str):
+def approve(amount: decimal, to: str):
     ...
 
 @export
-def transfer_from(amount: float, to: str, main_account: str):
+def transfer_from(amount: decimal, to: str, main_account: str):
     ...
 
 @export
-def balance_of(address: str) -> float:
+def balance_of(address: str) -> decimal:
     ...
 ```
 

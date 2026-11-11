@@ -40,5 +40,5 @@ validators must stay aligned on:
 
 - network configuration
 - `xian-abci` and `xian-contracting` versions
-- the fixed `xian_vm_v1` runtime and gas policy
+- the fixed `xian_vm_v2` runtime and gas policy
 - the canonical Rust compiler and validator-derived VM IR

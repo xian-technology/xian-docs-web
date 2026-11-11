@@ -2,27 +2,20 @@
 
 Choose the upgrade procedure with the network's operators before changing a
 validator. A compatible runtime update and a hardfork require different
-coordination. This documentation describes the `xian_vm_v1` codebase; an
+coordination. This documentation describes the `xian_vm_v2` codebase; an
 existing network running an earlier runtime is not automatically compatible.
 
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-5`, gas schedule `xvm-gas-2`, bytecode `xvm-1` and set codec
+`xvm-execution-6`, gas schedule `xvm-gas-3`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
 change this protected record. The comparison covers all four fields; matching
 gas and codec versions do not make a different execution revision compatible.
 
-Revision 5 forwards the transaction input hash into native execution and isolates
-host calls from ambient process state. This changes contract random sequences
-and can change resulting state. Returned storage-write and per-contract-cost
-maps also use stable key ordering; nested authored dictionaries retain their
-order. Binary-float power uses a pinned portable software
-implementation and canonical NaN results, replacing platform-dependent host
-math. The unchanged gas schedule does not make revision 4 compatible.
-Revision 4's canonical f-string corrections remain included.
+Revision 6 uses the V2 numeric profile. The compiler resolves decimal literals from their source digits, the VM checks numeric ABI boundaries and gas schedule 3 charges for numeric work. See [Numbers, division and rounding](/smart-contracts/numbers).
 
 This revision starts a fresh local chain; it does not migrate an earlier
 database or activate a second VM at a block height. Preserve earlier state and
@@ -42,7 +35,7 @@ plan before adopting this revision.
 | --- | --- |
 | Compatible image or operational update | Validate first, then restart nodes in the agreed maintenance order |
 | Compiler, execution, metering, state format, or consensus-rule change | Coordinated network upgrade with an agreed activation boundary |
-| Move an earlier network to `xian_vm_v1` | Rehearse contract and state migration before scheduling the cutover |
+| Move an earlier network to `xian_vm_v2` | Rehearse contract and state migration before scheduling the cutover |
 
 The `xian-deploy` upgrade playbook rolls hosts one at a time. Use that flow only
 when the old and target versions can participate in the same network during
@@ -57,7 +50,7 @@ Use one accepted release bundle for the fleet. Record:
 - network manifest, genesis, and effective shared configuration
 - the expected state at the transition and the restart procedure
 
-The `xian_vm_v1` name alone is not a compatibility guarantee: two releases can
+The `xian_vm_v2` name alone is not a compatibility guarantee: two releases can
 use that name while differing in compiler output, VM behavior, or metering.
 Fee mode and free-metered transaction/block caps must also agree across nodes.
 Ed25519 signature acceptance is also consensus-sensitive: stricter rejection
@@ -112,7 +105,7 @@ xian node health validator-1
 
 ## Migrating an Earlier Network
 
-`xian_vm_v1` executes persisted canonical IR in `__xian_ir_v1__`. Stored source
+`xian_vm_v2` executes persisted canonical IR in `__xian_ir_v1__`. Stored source
 alone is not an executable contract on this runtime, and startup does not
 compile an earlier network's source-only contracts automatically.
 

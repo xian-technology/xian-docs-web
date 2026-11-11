@@ -63,8 +63,8 @@ The builtin allowlist is intentionally small:
 
 ```text
 Exception False None True abs all any ascii bin bool bytearray bytes chr
-dict divmod filter float format frozenset hex import int isinstance issubclass len
-list map max min oct ord pow range reversed round set sorted str sum tuple zip
+decimal dict divmod filter format frozenset hex import int isinstance issubclass len
+list map max min mul_div_ceil mul_div_floor oct ord pow quantize range reversed set sqrt sorted str sum tuple zip
 ```
 
 Everything else is treated as forbidden.
@@ -103,9 +103,9 @@ Allowed builtins are bounded by deterministic runtime limits:
 - the Python harness limits `range(...)` to `131,072` entries; native ranges are lazy, with materialized collections limited to `131,072` entries.
 - `bytes(n)` and `bytearray(n)` may allocate at most `131,072` bytes.
 - string, bytes, bytearray, list, and tuple repetition with `*` may not exceed the same sequence or byte limits.
-- integer multiplication, exponentiation, and left shifts may not create integers larger than `1,048,576` bits.
+- exposed integer values have at most 512 magnitude bits. Decimal results have up to 61 whole and 30 fractional digits.
 - `int(...)` string and bytes inputs may be at most `8,192` characters or bytes.
-- three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus, requires a nonnegative exponent, and rejects exponent values with more than `8,192` bits.
+- three-argument `pow(base, exponent, modulus)` keeps the result bounded by the modulus, requires a nonnegative integer exponent, and enforces the V2 integer bounds.
 - returned contract values are charged by encoded size; keep responses small
   and paginate collections.
 - submitted contract source may not exceed `131,072` bytes.
@@ -119,19 +119,17 @@ The same allowlist applies to exported arguments and exported return
 annotations:
 
 ```python
-str, int, float, bool, bytes, bytearray, dict, list, set, frozenset, Any
+str, int, decimal, bool, bytes, bytearray, dict, list, set, frozenset, Any
 datetime.datetime, datetime.timedelta
 ```
 
-In Xian, `float` in an export signature means a deterministic decimal-backed
-value at runtime. Use `float` for user-facing decimal amounts, not Python
-`Decimal`.
+Use `decimal` for fractional values. Numeric annotations are enforced even on plain `@export` functions. See [Numbers, division and rounding](/smart-contracts/numbers).
 
 Examples:
 
 ```python
 @export
-def balance_of(address: str) -> float:
+def balance_of(address: str) -> decimal:
     return balances[address]
 
 @export
@@ -150,11 +148,11 @@ example `list[int]` and `dict[str, int]`.
 
 ```python
 @export
-def balance_of(address: str) -> float:
+def balance_of(address: str) -> decimal:
     return balances[address]
 
 @export(typecheck=True)
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     balances[ctx.caller] -= amount
     balances[to] += amount
 ```
@@ -175,7 +173,7 @@ def bad(value: Decimal):
 Allowed imports are deployed contracts, for example `import currency`.
 
 Runtime-provided modules such as `hashlib`, `datetime`, `random`, `importlib`,
-`crypto`, `zk`, and `decimal` are injected directly into contract scope and do
+`crypto`, `zk`, and the `decimal` constructor are injected directly into contract scope and do
 not need `import` statements.
 
 The Python standard library is not generally available to contracts beyond that

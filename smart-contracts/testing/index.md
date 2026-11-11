@@ -5,13 +5,7 @@
 It lets you submit contracts, call exported functions, inspect state, and
 exercise contract interactions without running a full node.
 
-The local harness executes through Python. Validators execute canonical IR
-through the native Xian VM. Use the harness for fast logic tests, then exercise
-deployment and representative calls on a local node before release. Local
-metering results are regression signals, not exact network fee quotes.
-For binary-float powers, the Python harness also uses host Python math while the
-native VM uses its portable policy. Validate exact numeric results and state in
-the native runtime; harness agreement alone is not a cross-platform guarantee.
+Set `vm_profile="xian_vm_v2"` to use the Rust compiler and native VM for local deployments, exports and cross-contract calls. The default client uses the historical V1 harness. Use a temporary storage directory per profile. Node simulation includes the target state and transaction context used for fee estimates.
 
 ## What It Gives You
 
@@ -25,7 +19,7 @@ the native runtime; harness agreement alone is not a cross-platform guarantee.
 ```python
 from contracting.local import ContractingClient
 
-client = ContractingClient()
+client = ContractingClient(vm_profile="xian_vm_v2")
 client.flush()
 
 client.submit(my_contract_func, name="con_example")
@@ -51,8 +45,6 @@ Use it for:
 
 ## Installation
 
-```bash
-uv add xian-tech-contracting
-```
+Use the V2 source checkout and environment described in [Contract-only setup](/getting-started/dev-environment#contract-only-setup). Run the examples with its `uv run` command.
 
-This installs the local contract runtime, linter, and testing client.
+The V2 extra installs the native VM used by the local client.

@@ -38,7 +38,7 @@ sandboxing, metering, and deterministic state transitions.
 ### Fixed Xian VM Runtime
 
 Python is the source language. Validators execute deployed contracts through
-the fixed `xian_vm_v1` runtime using validator-derived canonical IR.
+the fixed `xian_vm_v2` runtime using validator-derived canonical IR.
 
 ### Full Operator Stack
 

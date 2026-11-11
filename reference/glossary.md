@@ -72,7 +72,7 @@ A key-value mapping that persists on-chain. Supports up to 16 key dimensions. De
 
 ### Metering
 The system that charges contract execution work. Xian uses the native
-`xian_vm_v1` gas schedule to prevent infinite loops and ensure deterministic
+`xian_vm_v2` gas schedule to prevent infinite loops and ensure deterministic
 chi accounting.
 
 ## N

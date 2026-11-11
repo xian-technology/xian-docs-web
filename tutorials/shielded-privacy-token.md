@@ -22,8 +22,10 @@ sender field but does not provide network-layer anonymity.
 - `xian-tech-zk` for proving and wallet operations
 - a BDS-enabled node for resumable wallet history
 
+Use the [V2 Python SDK environment](/tools/xian-py#install). Install the native proving toolkit into that environment from its sibling source checkout:
+
 ```bash
-uv add xian-tech-py xian-tech-zk
+uv pip install ../xian-contracting/packages/xian-zk
 ```
 
 ## 1. Prepare Verifying Keys
@@ -75,11 +77,11 @@ each stored `vk_id` and `vk_hash` before minting supply.
 ```python
 import os
 
-from xian_py import Wallet, Xian
+from xian_py import Wallet, Xian, XianClientConfig
 from xian_zk import ShieldedWallet
 
 account = Wallet(private_key=os.environ["XIAN_PRIVATE_KEY"])
-client = Xian("http://127.0.0.1:26657", wallet=account)
+client = Xian("http://127.0.0.1:26657", wallet=account, config=XianClientConfig(vm_profile="xian_vm_v2"))
 token = client.contract("con_private_usd")
 
 asset_id = token.call("asset_id")

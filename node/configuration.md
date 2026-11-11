@@ -65,7 +65,7 @@ data/priv_validator_state.json
 settings. Genesis, validator state, and keys must not be changed casually on an
 existing network.
 
-`xian_vm_v1` is the only supported execution runtime. Execution mode, VM
+`xian_vm_v2` is the only supported execution runtime. Execution mode, VM
 bytecode, and gas schedule are not operator-selectable configuration.
 
 ## Runtime Settings

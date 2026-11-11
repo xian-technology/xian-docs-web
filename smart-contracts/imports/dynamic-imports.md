@@ -54,7 +54,7 @@ contract:
 - `submitted`
 
 `importlib.code_hash(...)` returns the canonical SHA3-256 digest of the stored
-execution artifact by default. On `xian_vm_v1`, that is the persisted VM IR.
+execution artifact by default. On `xian_vm_v2`, that is the persisted VM IR.
 Pass `kind="source"` to hash canonical source instead.
 
 ## When to Use It

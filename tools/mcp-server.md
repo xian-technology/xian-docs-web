@@ -167,7 +167,7 @@ the `dex_plan_*` tools are read-only. `buy_on_dex`, `sell_on_dex`, and the
 `XIAN_MCP_ENABLE_UNSAFE_WALLET_TOOLS=1`.
 
 For the agent-oriented flow, call a `dex_plan_*` tool and show its complete
-audit JSON before asking for authorization. It includes the exact calls,
+audit JSON before asking for authorization. It includes `plan_version: 2`, the exact typed calls,
 amounts, recipient, deadline, warnings, an opaque `plan_id`, canonical SHA-256
 digest, and issue/expiry timestamps. After approval, call the matching
 `dex_submit_*` tool with only `private_key`, `plan_id`, and the optional
@@ -198,6 +198,10 @@ The buy/sell helpers send exact decimal amount and slippage values and convert
 `deadline_min` into the Xian VM datetime payload expected by the canonical DEX
 contracts. The target network must already have the canonical DEX contracts and
 liquidity for the requested pair.
+
+## Exact numeric arguments
+
+Token and DEX tools accept amount text (such as `"1.000000000000000000000000000001"`) or an integer. For a generic contract call or simulation pass `{"amount":{"__fixed__":"1.25"}}`. Ordinary strings in generic arguments stay strings. Results expose decimals as plain strings and integers beyond JavaScript's safe range in `__big_int__` wrappers. DEX plans expose the exact typed arguments used for simulation and signing.
 
 ## Typical Uses
 

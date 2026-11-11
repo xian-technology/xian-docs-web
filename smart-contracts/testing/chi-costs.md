@@ -6,7 +6,6 @@ estimates against the target state and runtime configuration.
 ## Local Regression Test
 
 ```python
-from contracting.execution.executor import Executor
 from contracting.local import ContractingClient
 
 
@@ -19,16 +18,11 @@ def counter_contract():
         return counter.get()
 
 
-client = ContractingClient()
+client = ContractingClient(vm_profile="xian_vm_v2", metering=True)
 client.flush()
 client.submit(counter_contract, name="con_counter")
 
-executor = Executor(
-    metering=True,
-    driver=client.raw_driver,
-    bypass_balance_amount=True,
-)
-output = executor.execute(
+output = client.executor.execute(
     sender="sys",
     contract_name="con_counter",
     function_name="increment",
@@ -39,9 +33,6 @@ output = executor.execute(
 assert output["status_code"] == 0
 assert output["chi_used"] < 10_000
 ```
-
-`bypass_balance_amount=True` skips the local paid-fee balance precheck. Use it
-only for isolated cost tests, never as a model for node execution.
 
 Keep local assertions broad enough to detect regressions without treating one
 development-machine measurement as a network fee quote.

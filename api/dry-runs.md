@@ -30,7 +30,7 @@ flowchart TD
   Encode["Hex-encode simulate_tx payload"]
   Query["CometBFT abci_query"]
   Worker["Bounded simulation subprocess"]
-  Runtime["xian_vm_v1 against committed application state"]
+  Runtime["xian_vm_v2 against committed application state"]
   Drop["Drop simulated writes"]
   Result["Return status, chi_used, result, and write preview"]
 
@@ -77,7 +77,7 @@ The simulator returns:
   "state": [
     {
       "key": "currency.balances:sender_public_key",
-      "value": "999900"
+      "value": {"__fixed__": "999900"}
     }
   ],
   "chi_used": 342,
@@ -90,12 +90,9 @@ Key fields:
 - `status`: `0` for success, `1` for failure
 - `chi_used`: estimated chi consumed
 - `state`: preview of writes that would occur
-- `result`: JSON-compatible result or failure description. Dictionaries with
-  string keys remain objects, tuples become arrays, and decimals become strings.
-  Successful values that cannot be represented this way, such as sets or
-  dictionaries with numeric keys, use a safe string representation limited to
-  1,024 characters. This fallback preserves the execution status, chi and
-  simulated writes.
+- `result` contains the return value or a failure description. The raw ABCI response uses `{"__fixed__":"1.25"}` for a decimal and `{"__big_int__":"9007199254740993"}` for a wide integer, including inside write previews and nested objects. Tuples become arrays. Persistable sets retain their `__set__` or `__frozenset__` envelope. A local-only result such as a dictionary with non-string keys can be rendered as bounded text.
+
+The Python and JavaScript SDKs decode the raw envelope according to their result types. MCP presents decimals as strings. See [Numeric wire values](/smart-contracts/numbers#transactions-and-sdks).
 
 When the node refuses or aborts a dry run, you get the same envelope with
 `status = 1`. Typical operator-controlled failure cases are:
@@ -108,10 +105,10 @@ When the node refuses or aborts a dry run, you get the same envelope with
 ## SDK Example
 
 ```python
-from xian_py import Wallet, Xian
+from xian_py import Wallet, Xian, XianClientConfig
 
 wallet = Wallet()
-client = Xian("http://127.0.0.1:26657", wallet=wallet)
+client = Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2"))
 
 result = client.simulate(
     contract="currency",

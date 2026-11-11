@@ -17,7 +17,7 @@ flowchart TD
   Dashboard["Dashboard /ws<br/>subscription filters and routing"]
   Comet["CometBFT /websocket<br/>NewBlock and Tx subscriptions"]
   ABCI["xian-abci FinalizeBlock<br/>state changes and contract events"]
-  Runtime["xian_vm_v1 contract execution"]
+  Runtime["xian_vm_v2 contract execution"]
 
   App -->|"subscribe and unsubscribe"| Dashboard
   Dashboard -->|"persistent subscriptions"| Comet

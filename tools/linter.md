@@ -7,7 +7,7 @@ Xian has two related linting surfaces:
 
 Both use the Rust `xian-compiler-core` as the authoritative contract-language
 and diagnostic surface. The standalone package also runs PyFlakes and can run
-optional native IR validation in `xian_vm_v1` mode.
+optional native IR validation in `xian_vm_v2` mode.
 
 The published PyPI package name for the standalone service is
 `xian-tech-linter`. The import package and console command remain
@@ -24,7 +24,7 @@ source = """
 balances = Hash(default_value=0)
 
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     balances[ctx.caller] -= amount
     balances[to] += amount
@@ -33,6 +33,7 @@ def transfer(amount: float, to: str):
 errors = diagnose_contract_source(
     module_name="con_example",
     source=source,
+    vm_profile="xian_vm_v2",
 )
 
 for error in errors:
@@ -51,23 +52,19 @@ The compiler returns structured diagnostics with:
 Install the base package for inline use, or the server extra for the HTTP
 service:
 
-```bash
-uv add xian-tech-linter
-uv add "xian-tech-linter[server]"
-```
-
-Install the VM extra when you want native Xian VM IR validation as part of
-`xian_vm_v1` mode:
+Use linter 0.4.3 with the [V2 compiler and VM checkout](/getting-started/dev-environment#contract-only-setup). From its parent directory:
 
 ```bash
-uv add "xian-tech-linter[vm]"
-uv add "xian-tech-linter[server,vm]"
+git clone https://github.com/xian-technology/xian-linter.git
+cd xian-linter
+git checkout --detach a6f279709a5f31cd8eacb6f85d462de164774f7f
+uv sync --frozen --extra server --extra vm
 ```
 
 Start the service:
 
 ```bash
-xian-linter
+uv run --no-sync xian-linter
 ```
 
 The default listen address is `http://localhost:8000`.
@@ -115,20 +112,21 @@ POST /lint?whitelist_patterns=my_helper,con_*
 All endpoints use the default source-linting mode unless a mode is selected:
 
 ```text
-POST /lint?mode=xian_vm_v1
+POST /lint?mode=xian_vm_v2
 ```
 
-The alias `lint_mode=xian_vm_v1` is also accepted for integrations that already
+The alias `lint_mode=xian_vm_v2` is also accepted for integrations that already
 use `mode` for their own routing.
 
 ## Lint Modes
 
-The standalone package supports two modes:
+The standalone package supports three modes:
 
 | Mode | What it checks |
 |------|----------------|
 | `python` | authoritative Rust compiler diagnostics plus PyFlakes warnings; the name is retained for API compatibility |
-| `xian_vm_v1` | the same Rust compiler diagnostics and PyFlakes warnings, plus native IR validation when `xian_vm_core` is installed |
+| `xian_vm_v2` | V2 numeric rules and PyFlakes warnings, plus native IR validation when `xian_vm_core` is installed |
+| `xian_vm_v1` | historical compiler and VM profile for V1 sources |
 
 The VM mode is linting only. It does not execute the contract or simulate
 storage, imports, environment values, or host syscalls. Use runtime tests or
@@ -139,13 +137,13 @@ Inline usage:
 ```python
 from xian_linter import lint_code_sync
 
-errors = lint_code_sync(source, mode="xian_vm_v1")
+errors = lint_code_sync(source, mode="xian_vm_v2")
 ```
 
 ### Raw Source Example
 
 ```bash
-curl -X POST "http://localhost:8000/lint?mode=xian_vm_v1" \
+curl -X POST "http://localhost:8000/lint?mode=xian_vm_v2" \
   -H "Content-Type: text/plain" \
   --data-binary $'import os\n\n@export\ndef hack():\n    os.system("rm -rf /")'
 ```

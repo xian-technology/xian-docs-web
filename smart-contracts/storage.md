@@ -56,7 +56,7 @@ boundaries and rollback behavior.
 Deterministic `set()` and `frozenset()` values can be stored under the current
 [execution revision](/node/upgrading#current-local-execution-revision).
 Their `xian-set-1` encoding preserves member types, including tuples, nested
-frozen sets, raw Decimal precision and trailing zeros, and float signed zero.
+frozen sets, bounded integers and exact fixed-point decimals.
 View-produced builtin sets must first be converted to a deterministic wrapper;
 callables and interface descriptors cannot be stored through either kind.
 Numeric members must be finite, including when chi metering is disabled.

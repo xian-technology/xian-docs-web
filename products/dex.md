@@ -131,16 +131,16 @@ deployment ceilings.
 ## Reading DEX State From SDKs
 
 For reusable TypeScript route enumeration, quotes, price impact, slippage,
-deadlines, and ordered approval/swap call plans, use the canonical Xian DEX v1
+deadlines, and ordered approval/swap call plans, use the exact fixed-point Xian DEX V2
 adapter from `@xian-tech/dex`. The package keeps protocol-neutral routing and
 constant-product math separate from this contract ABI. Callers supply current
 pair reserves and own RPC reads, simulation, signing, and submission. See
 [xian-js](/tools/xian-js#dex-planning) for an example.
 
 ```python
-from xian_py import Xian
+from xian_py import Xian, XianClientConfig
 
-with Xian("http://127.0.0.1:26657") as client:
+with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
     pair = client.contract("con_pairs").call(
         "pairFor", tokenA="currency", tokenB="demo_token",
     )
@@ -152,7 +152,7 @@ with Xian("http://127.0.0.1:26657") as client:
 ```ts
 import { XianClient } from "@xian-tech/client";
 
-const client = new XianClient({ rpcUrl: "http://127.0.0.1:26657" });
+const client = new XianClient({ vmProfile: "xian_vm_v2", rpcUrl: "http://127.0.0.1:26657" });
 const pair = await client.contract("con_pairs").call("pairFor", {
   tokenA: "currency",
   tokenB: "demo_token",

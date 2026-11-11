@@ -54,7 +54,7 @@ do not copy this abbreviated example over an existing profile.
 | `services` | BDS, dashboard, monitoring, and optional sidecars |
 | `advanced` | lower-level CometBFT, state-sync, metrics, nonce, and parallel settings |
 
-`xian_vm_v1` is fixed by the node runtime and is not a profile choice.
+`xian_vm_v2` is fixed by the node runtime and is not a profile choice.
 
 ## Create and Inspect Profiles
 

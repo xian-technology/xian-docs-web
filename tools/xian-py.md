@@ -5,8 +5,14 @@ operator scripts. The PyPI package is `xian-tech-py`; imports use `xian_py`.
 
 ## Install
 
+From the directory containing the [V2 contracting checkout](/getting-started/dev-environment#contract-only-setup), install the Python 0.5.3 SDK from source. Its uv configuration resolves runtime-types and accounts from that sibling checkout.
+
 ```bash
-uv add xian-tech-py
+git clone https://github.com/xian-technology/xian-py.git
+cd xian-py
+git checkout --detach 4c7fc664c2fc142fdd3be53a91dff764f3c3b415
+uv sync --frozen
+uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClientConfig(vm_profile="xian_vm_v2").vm_profile)'
 ```
 
 Optional extras include `hd` for mnemonic/HD wallets, `eth` for
@@ -19,11 +25,11 @@ offline compiler inspection. Contract deployment itself does not need the
 ```python
 import os
 
-from xian_py import Wallet, Xian
+from xian_py import Wallet, Xian, XianClientConfig
 
 wallet = Wallet(private_key=os.environ["XIAN_PRIVATE_KEY"])
 
-with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
+with Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
     balance = client.token().balance_of(wallet.public_key)
     submission = client.token().transfer(
         "bob",
@@ -80,7 +86,7 @@ def increment() -> int:
     return counter.get()
 """
 
-with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
+with Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
     result = client.deploy_contract(
         "con_counter",
         source,
@@ -91,7 +97,11 @@ with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
 
 `deploy_contract` and `submit_contract` send source to
 `submission.submit_contract`. Validators lint and compile it into canonical
-`xian_vm_v1` IR. Client-supplied deployment artifacts are not accepted.
+IR for the node’s `xian_vm_v2` profile. Client-supplied deployment artifacts are not accepted.
+
+## Numeric inputs and results
+
+Select the target profile explicitly with `XianClientConfig(vm_profile="xian_vm_v2")` on `Xian` or `XianAsync`. Offline `create_tx` accepts the `vm_profile` keyword directly. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`. The default SDK profile is `xian_vm_v1`.
 
 ## Main Client Surfaces
 
@@ -116,7 +126,7 @@ portfolios, DEX candles, shielded wallet feeds, and developer rewards. These
 reads are eventually consistent with finalized chain state.
 
 ```python
-with Xian("http://127.0.0.1:26657") as client:
+with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
     status = client.get_bds_status()
     events = client.list_events("currency", "Transfer", after_id=0)
     history = client.get_state_history("currency.balances:bob")
@@ -152,16 +162,11 @@ kwargs = {
     "deadline": {"__time__": [2026, 11, 1, 14, 47, 2, 123456]},
     "amount": Decimal("1.25"),
     "raw": b"abc",
-    "precise_text": {"__fixed__": "1.2300"},
+    "price": {"__fixed__": "1.23"},
 }
 ```
 
-Simulation and transaction signing use the same bounded wire encoder. It
-preserves raw tag contents, including decimal trailing zeros, without decoding
-and re-encoding them or mutating the caller's input. It rejects cycles, excessive
-nesting, non-finite Python numbers and non-string object keys. Successful wire
-encoding does not establish that a raw tag has valid runtime semantics; the
-receiving node validates and interprets those tags.
+Simulation and signing use the same bounded V2 encoder. For a typed amount, prefer `Decimal("1.23")`. A prebuilt numeric tag must already contain its canonical text. The encoder rejects Python floats for contract data and recursively checks nested values.
 
 Wire arguments and persistent contract state have different boundaries. The
 runtime's storage `encode` API remains strict: ordinary dictionaries cannot

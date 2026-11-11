@@ -100,9 +100,9 @@ Historical applied-patch queries do:
 ## SDK Use
 
 ```python
-from xian_py import Xian
+from xian_py import Xian, XianClientConfig
 
-with Xian("http://127.0.0.1:26657") as client:
+with Xian("http://127.0.0.1:26657", config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
     status = client.get_bds_status()
     tx = client.get_indexed_tx("<tx_hash>")
     events = client.list_events("currency", "Transfer", after_id=0)
@@ -129,9 +129,9 @@ const events = await client.listEvents("currency", "Transfer", { afterId: 0 });
 Choose a source that retains the missing block range before starting a
 rebuild. Pruned local history cannot reconstruct older indexed rows.
 
-The database, recovery spool, snapshot, and RPC source must use the same execution
-policy as the node: execution revision `xvm-execution-5`, gas schedule
-`xvm-gas-2`, bytecode `xvm-1`, and set codec `xian-set-1`. BDS records this policy
+The V2 index uses BDS database schema version 8. The database, recovery spool, snapshot, and RPC source must use the same execution
+policy as the node: execution revision `xvm-execution-6`, gas schedule
+`xvm-gas-3`, bytecode `xvm-2`, and set codec `xian-set-1`. BDS records this policy
 in database metadata and checks the RPC source's protected committed
 `__execution_policy` value before backfill or a reset. The RPC `/genesis` response
 does not include Xian's custom application genesis fields. A

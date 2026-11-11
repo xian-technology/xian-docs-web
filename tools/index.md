@@ -32,15 +32,11 @@ Xian ships tooling for three distinct jobs:
 
 TypeScript / browser tooling:
 
-```bash
-npm install @xian-tech/client @xian-tech/provider
-```
+See the [TypeScript SDK source installation](/tools/xian-js).
 
 Python application SDK:
 
-```bash
-uv add xian-tech-py
-```
+See the [Python SDK source installation](/tools/xian-py#install).
 
 CLI automation and operator tooling:
 
@@ -50,9 +46,7 @@ uv tool install xian-tech-cli
 
 Local contract runtime and testing:
 
-```bash
-uv add xian-tech-contracting
-```
+Use the V2 source checkout and environment described in [Contract-only setup](/getting-started/dev-environment#contract-only-setup). Run the examples with its `uv run` command.
 
 Shielded proving toolkit:
 

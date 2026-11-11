@@ -24,7 +24,7 @@ balances.
 
 ```python
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert to != "", "Recipient is required"
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
@@ -70,12 +70,7 @@ re-entered.
 
 ## Numeric Semantics
 
-Contract `float` values are deterministic decimal-backed numbers, not binary
-Python floats. They support 61 whole digits and 30 fractional digits; extra
-fractional digits truncate toward zero and out-of-range values fail.
-
-Use `int` for integral quantities and test rounding/boundary behavior for
-amounts and rates.
+Use integers for indivisible units. Use `decimal` for fractions. Inputs must fit exactly; multiplication and division truncate fractional results toward zero at 30 places. For settlement at a token's precision, choose an explicit rounding mode. See [Numbers, division and rounding](/smart-contracts/numbers).
 
 ## Randomness
 

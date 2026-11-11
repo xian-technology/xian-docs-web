@@ -13,7 +13,7 @@ flowchart TD
   RPC["CometBFT RPC and optional dashboard APIs"]
   Comet["CometBFT consensus and block ordering"]
   ABCI["xian-abci application"]
-  Runtime["Native xian_vm_v1 and deterministic host operations"]
+  Runtime["Native xian_vm_v2 and deterministic host operations"]
   State["LMDB application state"]
 
   Apps --> SDKs
@@ -57,7 +57,7 @@ Contract authors submit restricted Python source. Validators normalize, lint,
 and compile that source with the canonical compiler, then store:
 
 - `__source__`: normalized source for inspection
-- `__xian_ir_v1__`: canonical IR executed by the native `xian_vm_v1` runtime
+- `__xian_ir_v1__`: canonical IR executed by the native `xian_vm_v2` runtime
 
 Clients cannot choose the executable IR; submitted deployment artifacts are
 rejected. The native VM performs deterministic computation and calls explicit

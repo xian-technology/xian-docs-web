@@ -19,12 +19,12 @@ def my_contract():
         return balances[address]
 
     @export
-    def transfer(amount: float, to: str):
+    def transfer(amount: decimal, to: str):
         balances[ctx.caller] -= amount
         balances[to] += amount
         return True
 
-client = ContractingClient()
+client = ContractingClient(vm_profile="xian_vm_v2")
 client.flush()
 client.submit(my_contract, name="con_test")
 contract = client.get_contract_proxy("con_test")
@@ -60,7 +60,7 @@ def token_with_events():
     Transfer = LogEvent("Transfer", {
         "from": indexed(str),
         "to": indexed(str),
-        "amount": (int, float),
+        "amount": (int, decimal),
     })
 
     @construct
@@ -68,13 +68,13 @@ def token_with_events():
         balances[ctx.caller] = 1000
 
     @export
-    def transfer(amount: float, to: str):
+    def transfer(amount: decimal, to: str):
         assert balances[ctx.caller] >= amount, "Insufficient balance"
         balances[ctx.caller] -= amount
         balances[to] += amount
         Transfer({"from": ctx.caller, "to": to, "amount": amount})
 
-client = ContractingClient()
+client = ContractingClient(vm_profile="xian_vm_v2")
 client.flush()
 client.submit(token_with_events, name="con_token")
 token = client.get_contract_proxy("con_token")
@@ -97,7 +97,7 @@ import unittest
 
 class TestReturnValues(unittest.TestCase):
     def setUp(self):
-        self.client = ContractingClient()
+        self.client = ContractingClient(vm_profile="xian_vm_v2")
         self.client.flush()
         self.client.submit(my_contract, name="con_test")
         self.contract = self.client.get_contract_proxy("con_test")
@@ -117,24 +117,17 @@ class TestReturnValues(unittest.TestCase):
 
 ## Numeric Return Types
 
-Decimal-backed values are returned as `ContractingDecimal` objects. In normal
-contract code, these usually come from values annotated or written with `float`
-syntax:
+The native local Python client returns an exact decimal object. Raw ABCI simulation and transaction results instead carry a `__fixed__` wrapper for the same value and a `__big_int__` wrapper for an integer outside the JSON safe range. Compare it with an integer or
+an off-chain `Decimal` created from text.
 
 ```python
+from decimal import Decimal
+
 balance = contract.balance_of(address="sys")
-# balance is a ContractingDecimal, but comparisons work
-assert balance == 1000
-assert balance >= 500
-assert float(balance) == 1000.0
+assert balance == Decimal("1000")
 ```
 
-Decimal policy:
-
-- up to `61` whole digits
-- up to `30` fractional digits
-- extra fractional digits are truncated toward zero
-- values outside the supported range raise an overflow error
+See [Numbers, division and rounding](/smart-contracts/numbers) for result limits and rounding.
 
 ## Handling Failures
 

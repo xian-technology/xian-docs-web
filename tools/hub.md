@@ -4,6 +4,8 @@ The maintained contract hub is `xian-contracting-hub-web`.
 
 It is a curated contract catalog and deployment UI for the Xian ecosystem.
 
+Catalog source is checked using the V2 compiler and native IR validator. Contracts can use exact decimal parameters and the V2 arithmetic helpers. See [Numbers, division and rounding](/smart-contracts/numbers).
+
 ## What It Does
 
 The hub is meant for discovery and inspection, not only raw deployment.

@@ -6,7 +6,7 @@ transaction validity, fees, or deterministic execution.
 
 ## Execution Runtime
 
-`xian_vm_v1` is the only supported execution runtime. Validators derive
+`xian_vm_v2` is the only supported execution runtime. Validators derive
 canonical IR from submitted source and execute it through the native VM. There
 is no supported operator switch to a second engine or gas schedule.
 

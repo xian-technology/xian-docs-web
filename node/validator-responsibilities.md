@@ -15,7 +15,7 @@ Validators are expected to:
 
 ## Determinism Discipline
 
-The current supported validator runtime is the fixed `xian_vm_v1` path.
+The current supported validator runtime is the fixed `xian_vm_v2` path.
 
 Validators must stay aligned on:
 

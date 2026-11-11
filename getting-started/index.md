@@ -10,9 +10,7 @@ If you want to write and test contracts locally without running a node:
 - install `xian-tech-contracting`
 - work with `ContractingClient`
 
-```bash
-uv add xian-tech-contracting
-```
+Use the V2 source checkout and environment described in [Contract-only setup](/getting-started/dev-environment#contract-only-setup). Run the examples with its `uv run` command.
 
 This gives you:
 

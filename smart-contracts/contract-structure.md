@@ -19,7 +19,7 @@ metadata = Hash()
 TransferEvent = LogEvent("Transfer", {
     "from": indexed(str),
     "to": indexed(str),
-    "amount": (int, float, decimal),
+    "amount": (int, decimal),
 })
 ```
 
@@ -61,7 +61,7 @@ Rules:
 
 ```python
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount
@@ -87,7 +87,7 @@ Rules:
 Whitelisted annotation types are:
 
 ```python
-str, int, float, bool, bytes, bytearray, dict, list, set, frozenset, Any
+str, int, decimal, bool, bytes, bytearray, dict, list, set, frozenset, Any
 datetime.datetime, datetime.timedelta
 ```
 
@@ -99,11 +99,11 @@ those whitelisted types.
 Functions without decorators are private to the contract module:
 
 ```python
-def calculate_fee(amount: float) -> float:
+def calculate_fee(amount: decimal) -> decimal:
     return amount * 0.01
 
 @export
-def transfer_with_fee(to: str, amount: float):
+def transfer_with_fee(to: str, amount: decimal):
     fee = calculate_fee(amount)
     balances[ctx.caller] -= amount
     balances[to] += amount - fee

@@ -9,10 +9,10 @@ The simplest path is:
 ## Deploy A Contract
 
 ```python
-from xian_py import Wallet, Xian
+from xian_py import Wallet, Xian, XianClientConfig
 
 wallet = Wallet(private_key="YOUR_PRIVATE_KEY")
-client = Xian("http://127.0.0.1:26657", wallet=wallet)
+client = Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2"))
 
 source = """
 balances = Hash(default_value=0)
@@ -22,7 +22,7 @@ def seed():
     balances[ctx.caller] = 1_000_000
 
 @export
-def balance_of(address: str) -> float:
+def balance_of(address: str) -> decimal:
     return balances[address]
 """
 

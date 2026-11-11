@@ -102,7 +102,7 @@ assignment and supported mutator methods to update collection contents.
 | View `.mapping` | A live, read-only mapping proxy with indexing, membership, iteration, `len`, `get`, `keys`, `values`, `items` and `copy`. |
 | Range | `start`, `stop`, `step`, `count` and `index`; these queries do not materialize the range. A missing value makes `index` fail. |
 | Integer/boolean | `bit_length`, `bit_count`, `is_integer`, `as_integer_ratio`, `conjugate`, `to_bytes` and `from_bytes`; numeric attributes include `real`, `imag`, `numerator` and `denominator`. |
-| Binary float | `is_integer`, `as_integer_ratio`, `hex`, `fromhex`, `conjugate`, `real` and `imag`. |
+| Decimal | Use the arithmetic and explicit rounding helpers in [Numbers, division and rounding](/smart-contracts/numbers). |
 
 Mapping proxies retain their source dictionary and reflect subsequent changes.
 They cannot be persisted or returned across a VM boundary. Use `proxy.copy()`
@@ -122,9 +122,7 @@ or returned as transaction results, including inside another container. Convert
 explicitly with `set(view_result)` for those uses. The deterministic `set()` and
 `frozenset()` wrappers are supported by the current execution revision's typed
 state codec, including when nested in ordinary containers. Members must satisfy
-the normal state type, numeric-range and finiteness rules. Quiet NaNs and
-infinities may be usable as local members, but cannot be persisted; successful
-wrapper construction alone does not guarantee that a value is valid state.
+the normal state type and numeric-range rules.
 
 Frozen wrappers reject `set.add`, `set.remove`, `set.discard`, `set.pop` and
 `set.clear` when passed as an unbound method's receiver, including calls that
@@ -149,8 +147,7 @@ The wrapper and built-in key domains differ. Fixed values from `decimal(...)`,
 `datetime.datetime(...)` and `datetime.timedelta(...)` are accepted by the
 wrappers, but cannot be direct built-in members or tuple-contained built-in keys.
 A deterministic frozen set containing these values is itself a valid built-in
-key. Raw Decimal values, such as `round(decimal('1.25'), 2)`, are hashable except
-for signaling NaNs.
+key.
 
 Eligible scalar and structural keys keep their canonical order. Local object
 keys, and tuples containing them, follow those keys in stable encounter order.
@@ -182,9 +179,7 @@ assert encoded.hex() == "0101"
 assert int.from_bytes(encoded, byteorder="big", signed=False) == number
 ```
 
-Decimal literals and explicit `float("1.5")` values are different runtime types:
-the former use Xian's deterministic decimal wrapper, while the latter produce
-binary64 floats. Do not assume they expose the same methods or rounding behavior.
+Decimal literals produce exact fixed-point values in V2.
 
 ## Text and Binary Operations
 
@@ -260,25 +255,7 @@ Field lookup is restricted to the same public value surface as ordinary contract
 expressions; formatting does not grant access to private attributes or Python
 internals. Format widths and output growth are bounded.
 
-Nonempty format specifications are type-specific. In particular, the fixed
-Xian decimal wrapper does not support them; convert it to text before applying
-string padding. Binary floats and raw Decimal values have their own numeric
-formatting behavior. Numeric `n` formatting uses a fixed C-locale policy rather
-than the validator's locale.
-
-Raw Decimal formatting uses the same explicit grammar in the Python test harness
-and the native runtime, independent of the host Decimal library or prior imports.
-It supports alignment/fill, signs, `z` (remove a negative sign when rounding to
-zero), zero padding, width, comma grouping, precision, and `eEfFgGn%` types.
-Alternate-form `#` and underscore grouping flags are rejected for raw Decimal;
-`#` and `_` remain valid fill characters, for example `#>8.2f`.
-
-```python
-amount = round(decimal('-0.001'), 3)
-assert format(amount, 'z.2f') == '0.00'
-assert '{:z.2f}'.format(amount) == '0.00'
-assert f'{amount:z.2f}' == '0.00'
-```
+V2 formats fixed-point decimals directly. For example, `f"{1.239:.2f}"` yields `"1.23"`. Formatting truncates discarded digits toward zero. To display using another rounding rule, first call `quantize(value, places, mode)`. The canonical wire string omits trailing fractional zeros.
 
 ```python
 text = "{name}: {amount:04d} {label!r}".format(name="alice", amount=7, label="ok")

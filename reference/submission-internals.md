@@ -25,7 +25,7 @@ flowchart TD
 
 Xian deployments are source-backed.
 
-`xian_vm_v1` requires submitted source for native deployment. Validators derive
+`xian_vm_v2` requires submitted source for native deployment. Validators derive
 the stored VM IR with the canonical Rust compiler and reject submitted
 `deployment_artifacts`.
 
@@ -99,7 +99,7 @@ Every deployed contract stores metadata such as:
 
 For execution artifacts:
 
-- `__xian_ir_v1__` is the persisted VM IR for `xian_vm_v1`
+- `__xian_ir_v1__` is the persisted VM IR for `xian_vm_v2`
 
 `__source__` is the human-facing canonical source. It is normalized before
 storage.

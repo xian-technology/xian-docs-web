@@ -7,7 +7,7 @@ consensus.
 ## Authoring and Execution
 
 Contract authors write familiar Python syntax. Before deployment, the Xian
-compiler validates that source and lowers it to canonical `xian_vm_v1` IR.
+compiler validates that source and lowers it to canonical `xian_vm_v2` IR.
 Validators execute that IR through the fixed native runtime.
 
 This distinction is important: Python is the source language, while Xian
@@ -24,7 +24,7 @@ defines the executable semantics.
 
 ```python
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount
@@ -40,7 +40,7 @@ disagree:
 - no unrestricted imports or dynamic code execution
 - no classes, async, generators, or broad reflection
 - `now` comes from finalized block time
-- contract `float` values use deterministic decimal-backed semantics
+- contract `decimal` values use fixed-point arithmetic with 30 fractional places
 - `random` is reproducible from public execution context and is not secret
 - storage, events, imports, cryptography, and ZK verification use explicit
   runtime operations

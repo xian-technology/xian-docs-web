@@ -90,11 +90,16 @@ localnet runs.
 
 ## Contract-Only Setup
 
-If you only want to write and test contracts and do not need the full
-workspace, a smaller setup is enough:
+Install Python 3.14, uv, Git and a Rust toolchain. The fresh-chain language ships in the source checkouts below. Use a separate folder for these commands. The pinned revision supplies contracting 1.1.4, compiler-core 0.2.1, VM-core 0.1.3 and runtime-types 0.1.6.
 
 ```bash
-uv add xian-tech-contracting
+git clone https://github.com/xian-technology/xian-contracting.git
+cd xian-contracting
+git checkout --detach 12b1c31f98d535a278b0c00e40dd90584f6b52f4
+uv sync --frozen --extra v2 --group dev
+uv run --no-sync python -c 'from xian_compiler_core import compiler_version; print(compiler_version()["supported_vm_profiles"])'
 ```
 
-Then start with [Your First Smart Contract](/getting-started/first-contract).
+Run tests from this environment using `uv run --no-sync pytest path/to/test_contract.py`. The `v2` extra installs the native VM from the same checkout. A package-index installation requires published matching versions of all four packages.
+
+Continue with [Your first smart contract](/getting-started/first-contract).

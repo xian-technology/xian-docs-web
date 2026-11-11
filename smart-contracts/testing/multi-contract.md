@@ -20,19 +20,19 @@ def token_contract():
         balances[ctx.caller] = 1_000_000
 
     @export
-    def transfer(amount: float, to: str):
+    def transfer(amount: decimal, to: str):
         assert amount > 0, "Amount must be positive"
         assert balances[ctx.caller] >= amount, "Insufficient balance"
         balances[ctx.caller] -= amount
         balances[to] += amount
 
     @export
-    def approve(amount: float, to: str):
+    def approve(amount: decimal, to: str):
         assert amount >= 0, "Amount must be non-negative"
         approvals[ctx.caller, to] = amount
 
     @export
-    def transfer_from(amount: float, to: str, main_account: str):
+    def transfer_from(amount: decimal, to: str, main_account: str):
         assert amount > 0, "Amount must be positive"
         assert approvals[main_account, ctx.caller] >= amount, "Not enough approved"
         assert balances[main_account] >= amount, "Insufficient balance"
@@ -56,12 +56,12 @@ def dex_contract():
     pools = Hash(default_value=0)
 
     @export
-    def deposit(amount: float):
+    def deposit(amount: decimal):
         con_token.transfer_from(amount=amount, to=ctx.this, main_account=ctx.caller)
         pools[ctx.caller] += amount
 
     @export
-    def withdraw(amount: float):
+    def withdraw(amount: decimal):
         assert pools[ctx.caller] >= amount, "Insufficient pool balance"
         pools[ctx.caller] -= amount
         con_token.transfer(amount=amount, to=ctx.caller)
@@ -80,7 +80,7 @@ from contracting.local import ContractingClient
 
 class TestDex(unittest.TestCase):
     def setUp(self):
-        self.client = ContractingClient()
+        self.client = ContractingClient(vm_profile="xian_vm_v2")
         self.client.flush()
 
         # Submit token first (the DEX depends on it)
@@ -180,7 +180,7 @@ def registry_contract():
 
 class TestRegistry(unittest.TestCase):
     def setUp(self):
-        self.client = ContractingClient()
+        self.client = ContractingClient(vm_profile="xian_vm_v2")
         self.client.flush()
         self.client.submit(token_contract, name="con_token")
         self.client.submit(registry_contract, name="con_registry")

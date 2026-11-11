@@ -5,6 +5,7 @@ checks, contract queries, simulation, and wallet-based deployment and calls.
 Private keys stay in the injected wallet. Select the same network in the IDE
 and wallet before signing.
 
+The editor compiles and simulates for `xian_vm_v2`. Enter decimal arguments as decimal text. Integer, decimal and nested JSON argument fields preserve the digits you enter through simulation and wallet signing.
 
 ## Hosting the IDE
 

@@ -6,9 +6,7 @@ Use `ContractingClient` to compile and test contracts without running a node.
 
 Xian's core Python packages require Python 3.14.
 
-```bash
-uv add xian-tech-contracting pytest
-```
+Use the V2 source checkout and environment described in [Contract-only setup](/getting-started/dev-environment#contract-only-setup). Run the examples with its `uv run` command.
 
 The package name is `xian-tech-contracting`; imports use `contracting`.
 
@@ -44,7 +42,7 @@ def counter_contract():
 
 @pytest.fixture
 def client():
-    local = ContractingClient()
+    local = ContractingClient(vm_profile="xian_vm_v2")
     local.flush()
     local.submit(counter_contract, name="con_counter")
     yield local

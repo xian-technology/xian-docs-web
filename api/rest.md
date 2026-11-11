@@ -39,6 +39,8 @@ GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
 ```
 
+For a scalar `/get/<key>` query, inspect `response.info`. A decimal uses `"decimal"` and an integer uses `"int"`. The base64-decoded ABCI `response.value` is canonical numeric text, including for a wide integer. Nested numbers inside a structured value use the V2 wire tags. This scalar query format is separate from the JSON simulation envelope.
+
 For key scans, follow the returned `next_after` cursor instead of loading an
 unbounded prefix.
 
@@ -51,7 +53,7 @@ and nested query values. A top-level wrapper has ABCI `info="dict"`; for example
 ```
 
 `__frozenset__` identifies the immutable wrapper. Typed members preserve tuple
-and frozen-set nesting, exact integers, decimal kinds and finite float bits.
+and frozen-set nesting, bounded integers and exact decimals.
 Use a compatible runtime decoder or preserve this tagged representation;
 converting it to an ordinary JSON list loses type information. Dictionary-view
 algebra produces a distinct execution-only built-in set; convert it explicitly

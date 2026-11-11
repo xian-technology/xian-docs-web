@@ -14,13 +14,13 @@ metadata = Hash()
 TransferEvent = LogEvent("Transfer", {
     "from": indexed(str),
     "to": indexed(str),
-    "amount": (int, float, decimal),
+    "amount": (int, decimal),
 })
 
 ApproveEvent = LogEvent("Approve", {
     "from": indexed(str),
     "to": indexed(str),
-    "amount": (int, float, decimal),
+    "amount": (int, decimal),
 })
 
 @construct
@@ -45,7 +45,7 @@ def change_metadata(key: str, value: Any):
     metadata[key] = value
 
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     assert to != "", "Recipient is required"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
@@ -54,14 +54,14 @@ def transfer(amount: float, to: str):
     TransferEvent({"from": ctx.caller, "to": to, "amount": amount})
 
 @export
-def approve(amount: float, to: str):
+def approve(amount: decimal, to: str):
     assert amount >= 0, "Amount must be non-negative"
     assert to != "", "Spender is required"
     approvals[ctx.caller, to] = amount
     ApproveEvent({"from": ctx.caller, "to": to, "amount": amount})
 
 @export
-def transfer_from(amount: float, to: str, main_account: str):
+def transfer_from(amount: decimal, to: str, main_account: str):
     assert amount > 0, "Amount must be positive"
     assert approvals[main_account, ctx.caller] >= amount, "Insufficient allowance"
     assert balances[main_account] >= amount, "Insufficient balance"
@@ -71,7 +71,7 @@ def transfer_from(amount: float, to: str, main_account: str):
     TransferEvent({"from": main_account, "to": to, "amount": amount})
 
 @export
-def balance_of(address: str) -> float:
+def balance_of(address: str) -> decimal:
     return balances[address]
 '''
 ```
@@ -84,7 +84,7 @@ allowance stored at `approvals[owner, spender]`.
 ```python
 from contracting.local import ContractingClient
 
-client = ContractingClient()
+client = ContractingClient(vm_profile="xian_vm_v2")
 client.flush()
 client.submit(TOKEN_CODE, name="con_example_token")
 token = client.get_contract_proxy("con_example_token")
@@ -100,10 +100,10 @@ limits, unauthorized metadata changes, and empty recipients.
 ## Deploy Source
 
 ```python
-from xian_py import Wallet, Xian
+from xian_py import Wallet, Xian, XianClientConfig
 
 wallet = Wallet(private_key="your_private_key_hex")
-with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
+with Xian("http://127.0.0.1:26657", wallet=wallet, config=XianClientConfig(vm_profile="xian_vm_v2")) as client:
     result = client.deploy_contract(
         "con_example_token",
         TOKEN_CODE,

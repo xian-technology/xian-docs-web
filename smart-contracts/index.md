@@ -4,6 +4,8 @@ Xian smart contracts are written in Python, but not in unrestricted CPython.
 They run inside a deterministic sandbox with a small, explicit language
 surface, persistent state primitives, and chi metering.
 
+Use the [Numbers, division and rounding](/smart-contracts/numbers) reference for contract amounts, settlement precision and wire values.
+
 ## What Makes Xian Contracts Different
 
 - **Python syntax, chain-safe semantics**: contracts look like normal Python
@@ -31,7 +33,7 @@ def seed():
     balances[ctx.caller] = 1_000_000
 
 @export
-def transfer(amount: float, to: str):
+def transfer(amount: decimal, to: str):
     assert amount > 0, "Amount must be positive"
     assert balances[ctx.caller] >= amount, "Insufficient balance"
     balances[ctx.caller] -= amount

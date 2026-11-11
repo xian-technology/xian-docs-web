@@ -7,7 +7,7 @@ known ahead of time.
 import currency
 
 @export
-def pay(amount: float, to: str):
+def pay(amount: decimal, to: str):
     currency.transfer(amount=amount, to=to)
 ```
 

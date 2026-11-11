@@ -28,7 +28,7 @@ Xian removes or controls those sources explicitly.
 
 Xian separates contract authorship from contract execution.
 
-The supported machine contract is `xian_vm_v1`. Validators must align on
+The supported machine contract is `xian_vm_v2`. Validators must align on
 `xian-abci`, `xian-contracting`, the native VM runtime, its fixed gas schedule,
 and canonical Rust source-to-IR compilation. There is no operator-selectable
 fallback execution engine.
@@ -64,7 +64,7 @@ That means:
 
 Chi accounting is part of execution semantics, so it must be deterministic.
 
-`xian_vm_v1` meters directly at the VM and host-operation layer through the
+`xian_vm_v2` meters directly at the VM and host-operation layer through the
 fixed VM gas schedule.
 
 In all cases, the user-visible transaction chi budget remains the hard bound
@@ -89,21 +89,9 @@ system syscalls.
 
 Xian also replaces the most common semantic footguns with deterministic rules.
 
-### Decimal-Backed Values
+### Exact Numbers
 
-Decimal literals use Xian decimal-backed values. Explicit `float(...)` calls
-produce binary IEEE 754 values and require their own numeric edge-case tests.
-Native binary-float powers use a version-pinned software kernel with platform
-math dispatch disabled; NaN power results have a fixed representation. This is
-a deterministic arithmetic policy, not a promise of correctly rounded results
-for every transcendental input.
-
-Decimal-backed literals avoid the classic:
-
-```python
-# Standard Python: 0.1 + 0.2 = 0.30000000000000004
-# Xian contracts:  0.1 + 0.2 = 0.3
-```
+The compiler reads decimal literals from their original digits. Validators perform integer and scaled-integer arithmetic in the native VM. The type, bounds and rounding of each operation are part of the execution profile. See [Numbers, division and rounding](/smart-contracts/numbers).
 
 ### Chain Time
 
@@ -151,16 +139,7 @@ zones, locale, Decimal context, import warmup, allocator, case order and storage
 reopening. Optimized Python interpreters are checked for rejection rather than
 used for contract execution.
 
-Comparisons preserve types, IEEE float bits, signed zero, Decimal representation,
-collection order, results, errors, chi, writes, events, canonical artifacts and
-persisted state. Authored expectations and failure/rollback checks prevent a
-universally failing implementation from passing merely because failures repeat.
-The CI workflow requires comparisons across Linux x86-64, Linux ARM64 and Apple
-Silicon macOS. The extended corpus currently contains 889 cases: 601 surface
-cases, 256 seeded generated programs and 32 fixed binary-float edge cases. Its
-eleven environment scenarios are selected comparisons, not every combination
-of host settings. Nightly campaigns rotate recorded seeds; failing inputs and observations
-are retained for reproduction.
+The historical V1 corpus includes binary-float and raw Decimal cases. The V2 conformance vectors check exact digits, magnitude and precision bounds, signed division, rounding, helper results and the wire representation.
 
 These checks complement five-node block replay and parallel-versus-serial tests.
 They provide evidence for the tested programs and environments, not a proof for
@@ -187,5 +166,5 @@ the need to restore deterministic execution first.
 | file/network I/O | forbidden by the sandbox |
 | numeric drift | explicit numeric policies and cross-platform boundary tests |
 | hidden mutable process state | durable state lives in contract storage, not module globals |
-| runtime-version drift | validators must align on `xian_vm_v1`, its native runtime, and canonical compiler |
+| runtime-version drift | validators must align on `xian_vm_v2`, its native runtime, and canonical compiler |
 | encoding differences | deterministic compact encoding rules |

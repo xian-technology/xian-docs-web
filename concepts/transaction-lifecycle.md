@@ -50,7 +50,7 @@ A CheckTx rejection does not enter the mempool or change chain state.
 
 CometBFT fixes transaction order and the block timestamp. During
 `FinalizeBlock`, every validator executes the same ordered calls through
-`xian_vm_v1`.
+`xian_vm_v2`.
 
 For each transaction, the runtime:
 
