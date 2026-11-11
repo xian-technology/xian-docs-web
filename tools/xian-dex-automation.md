@@ -52,6 +52,10 @@ rules:
       max_slippage_bps: 100
 ```
 
+Rule IDs must be unique within a configuration: each ID owns its persisted
+baseline, cooldown and unresolved-outcome hold. Invalid API configuration
+uploads leave the saved configuration unchanged.
+
 The service persists event cursors and run records. Dry-run evaluations record
 the planned action without broadcasting it.
 

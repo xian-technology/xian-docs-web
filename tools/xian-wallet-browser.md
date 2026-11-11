@@ -30,7 +30,7 @@ Set a wallet password, record the recovery phrase offline, and verify the
 active network before receiving or sending funds. The built-in local preset
 targets loopback endpoints; add an explicit preset for any other network.
 
-Remote plaintext HTTP endpoints require a per-preset opt-in. Prefer HTTPS for
+RPC endpoints must use HTTP or HTTPS. Remote plaintext HTTP endpoints require a per-preset opt-in. Prefer HTTPS for
 anything outside a trusted local or private environment.
 
 ## Main Workflows

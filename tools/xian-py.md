@@ -10,7 +10,7 @@ From the directory containing the [V2 contracting checkout](/getting-started/dev
 ```bash
 git clone https://github.com/xian-technology/xian-py.git
 cd xian-py
-git checkout --detach 36ae74d9150506c3d07d54d5ec21150fa7b22c58
+git checkout --detach 9d09285c9aaceca9dbdc3371457a10305f40dcd9
 uv sync --frozen
 uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClientConfig().vm_profile)'
 ```
@@ -42,6 +42,13 @@ with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
 
 Use `XianAsync` in asynchronous applications. The sync and async clients expose
 the same core concepts.
+
+Close clients with their context manager or `close()`. `XianAsync` leaves a
+caller-supplied HTTP session open; any replacement session the client creates
+after that session closes is owned and closed by the client.
+
+Hex-encoded private-key seeds contain exactly 64 hexadecimal characters;
+whitespace is not part of the encoding.
 
 ## Mnemonic Accounts and Recovery
 

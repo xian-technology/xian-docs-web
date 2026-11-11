@@ -55,6 +55,9 @@ Design highlights:
 - governance changes are explicit and delayed, executed through Xian's
   `validators` and `governance` contracts after handoff
 
+Recapitalization requires an existing vault type and rejects an unknown ID
+before transferring tokens. Existing inactive types remain recapitalizable.
+
 ## Installing The Protocol
 
 Validate the hash-pinned bundle with the generic `xian-cli` helper, then run

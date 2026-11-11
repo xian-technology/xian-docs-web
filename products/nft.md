@@ -56,6 +56,9 @@ full XSC-0005 surface:
 - per-token and collection-wide approval management
 - profiles, global activity feed, and operator tools for collection metadata
 
+Image content can contain a UTF-8 HTTP(S) or IPFS URL; the marketplace resolves
+that URL as an image source. Embedded image bytes and SVG content remain supported.
+
 ```bash
 cd xian-nft
 npm install

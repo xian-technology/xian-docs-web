@@ -18,7 +18,7 @@ The source revision below defaults to V2 and includes the DEX adapter. From the 
 ```bash
 git clone https://github.com/xian-technology/xian-js.git
 cd xian-js
-git checkout --detach 908777ad886b2d399ad10861ae43dc9c211640d9
+git checkout --detach 088d786c3f98dbd52ed50db29f279ef935614e95
 npm ci
 npm run build:compiler
 npm run build
@@ -96,6 +96,11 @@ console.log(submission.txHash, submission.finalized);
 
 Do not put private keys in browser application code. Browser dapps should use
 an injected wallet provider.
+
+`requestTimeoutMs` bounds the full HTTP request, including reading the JSON
+response body, for RPC and shielded-relayer clients. A caller's abort signal
+cancels the same operation. The web-kit RPC store also supports session-only
+endpoint selection when persistent storage is not configured.
 
 `verifyMessage` and `verifyXianMessage` reject small-order keys and signature
 points, invalid point encodings, and noncanonical signature scalars. Verification

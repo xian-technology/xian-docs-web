@@ -56,6 +56,10 @@ do not copy this abbreviated example over an existing profile.
 
 `xian_vm_v2` is fixed by the node runtime and is not a profile choice.
 
+Numeric polling intervals, metrics refresh intervals, nonce-expiry settings and
+parallel thresholds must be finite numbers. Profile validation rejects `NaN`,
+infinity and numbers too large to represent as finite runtime settings.
+
 ## Create and Inspect Profiles
 
 ```bash

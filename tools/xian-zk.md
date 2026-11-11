@@ -72,6 +72,10 @@ Use `--help` for the command-specific note, command, and promotion arguments.
 Only public registry manifests belong in deployment handoffs; private proving
 material must remain offline.
 
+Bundle integer metadata, including tree depth and leaf capacity, must use
+integers rather than booleans. Validation checks that the declared leaf
+capacity is large enough for the declared tree depth before accepting the bundle.
+
 ## Prover Service
 
 ```bash
