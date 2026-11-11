@@ -193,10 +193,17 @@ For event-driven agents, choose the delivery guarantee explicitly:
 Services that must not miss events should combine the live wait for
 responsiveness with indexed cursor reads for recovery.
 
-The buy/sell helpers send exact decimal amount and slippage values and convert
-`deadline_min` into the Xian VM datetime payload expected by the canonical DEX
-contracts. The target network must already have the canonical DEX contracts and
-liquidity for the requested pair.
+The buy/sell helpers call `con_dex_helper` on the direct pair and sign their
+own price bound, derived from a fresh quote and the `slippage` percentage
+(0 to below 100): `buy_on_dex` signs `max_input` (quoted input plus slippage,
+rounded up to the sell token's precision) and `sell_on_dex` signs `min_out`
+(quoted output minus slippage, rounded down to the buy token's precision). The
+contract reverts when execution would cross that bound, and the tool result
+reports the quote and bound under `trade_bounds`. Both need a `sell_token`
+allowance to `con_dex_helper`: at least `max_input` for a buy and `amount` for a
+sell. Amounts are sent as exact decimals and `deadline_min` becomes the Xian VM
+datetime payload. The target network must already have the canonical DEX
+contracts and liquidity for the requested pair.
 
 ## Exact numeric arguments
 
