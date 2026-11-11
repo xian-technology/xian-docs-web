@@ -92,6 +92,22 @@ and must agree across the network. Coordinate changes to those values with
 the validator set. Logging, query limits, and serial-equivalent parallel
 execution can vary by node.
 
+## Stack Credentials
+
+`xian-stack` creates a private, Git-ignored `.stack-secrets.env` for
+`XIAN_BDS_PASSWORD` and `XIAN_POSTGRAPHILE_PASSWORD`.
+`XIAN_STACK_SECRETS_ENV` selects a different path.
+
+The file is literal data. Its current format stores values as JSON-quoted
+strings; a shared reader decodes them for the supported stack workflows.
+Nonempty environment values for either password take precedence over the stored
+value.
+
+Use the supported `xian` node commands, or run
+`python3 ./scripts/backend.py ...` from the stack checkout. Do not source this
+file or evaluate its contents in a shell: variable and command expressions in
+credentials are literal characters.
+
 ## Reproducible Genesis Builds
 
 The Python genesis helpers in `xian.genesis_builder` accept an optional
