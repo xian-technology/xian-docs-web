@@ -37,8 +37,12 @@ succeed, so it also requires a new chain. Revision 14 keeps the gas schedule
 and reads a `{"__delta__": ...}` transaction argument only as `[days, seconds]`,
 two integers, the form the encoder writes: the earlier decoder also accepted a
 two-character string or the two keys of an object. A transaction with an
-argument spelled that way is now rejected as not canonical, so revision 14
-requires a new chain as well.
+argument spelled that way is now rejected as not canonical. Revision 14 also
+lets a contract store, return and emit a `datetime.timedelta` or a `bytearray`:
+before it, such a write or event failed the transaction because receipts and
+the state root had no JSON form for these types; they now use
+`{"__delta__":[days,seconds]}` and `{"__bytearray__":"hex"}`. Both changes alter
+transaction outcomes, so revision 14 requires a new chain as well.
 
 Since execution revision 10 a failed call's error category comes from structured
 exception data produced by the VM (type and arguments), including exceptions

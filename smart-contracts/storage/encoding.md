@@ -30,7 +30,9 @@ Time values use arrays of integers:
 - `datetime.timedelta` is `{"__delta__":[days,seconds]}`, exactly two integers
 
 A transaction whose arguments use any other payload for these markers is
-rejected as not canonical.
+rejected as not canonical. Receipts and simulation results show a stored or
+returned timedelta in the same `{"__delta__":[days,seconds]}` form and a
+bytearray as `{"__bytearray__":"hex"}`.
 
 ## Practical Advice
 

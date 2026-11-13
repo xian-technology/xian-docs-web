@@ -90,7 +90,7 @@ Key fields:
 - `status`: `0` for success, `1` for failure
 - `chi_used`: estimated chi consumed
 - `state`: preview of writes that would occur
-- `result` contains the return value or a failure description. The raw ABCI response uses `{"__fixed__":"1.25"}` for a decimal and `{"__big_int__":"9007199254740993"}` for a wide integer, including inside write previews and nested objects. Tuples become arrays. Persistable sets retain their `__set__` or `__frozenset__` envelope. If a returned dictionary has a non-string key at any nesting depth, V2 reports a failed call and discards its writes and events.
+- `result` contains the return value or a failure description. The raw ABCI response uses `{"__fixed__":"1.25"}` for a decimal and `{"__big_int__":"9007199254740993"}` for a wide integer, `{"__delta__":[1,0]}` for a timedelta and `{"__bytearray__":"00ff"}` for a bytearray, including inside write previews and nested objects. Tuples become arrays. Persistable sets retain their `__set__` or `__frozenset__` envelope. If a returned dictionary has a non-string key at any nesting depth, V2 reports a failed call and discards its writes and events.
 
 The Python and JavaScript SDKs decode the raw envelope according to their result types. MCP presents decimals as strings. See [Numeric wire values](/smart-contracts/numbers#transactions-and-sdks).
 
