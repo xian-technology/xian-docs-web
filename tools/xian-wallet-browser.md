@@ -57,9 +57,11 @@ control characters) is shown with each such character replaced by a
 `[U+XXXX]` marker, together with a warning, so the reviewed text matches the
 bytes being signed. Message-signing approvals use the same rendering.
 
-The chi limit is estimated (with the SDK's headroom) before the approval is
-shown and displayed with its XIAN cost. If estimation fails, the approval shows
-`Not estimated` as a warning.
+The chi limit is estimated before the approval is shown and displayed with its
+XIAN cost; the wallet supplies exactly the simulated chi. If estimation fails,
+the approval shows `Not estimated` as a warning. A transaction that runs out of
+chi because the chain state changed after the estimate is shown as a failure
+that says so; review it and try again.
 
 Temporary auto-approval rules can be scoped to a site, account, network,
 method, contract, function, and exact arguments. Broad function rules allow

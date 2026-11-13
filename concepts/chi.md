@@ -122,8 +122,8 @@ The block cap counts the chi each transaction **supplies**, the only amount
 known before execution, not the chi it uses. Oversupplying therefore shrinks
 how many transactions fit in a block even though unused chi is refunded:
 with the default 500,000 block cap, transactions that each supply 100,000 chi
-fill a block after five. Supply a simulated estimate plus a small margin
-rather than a large fixed budget.
+fill a block after five. Supply the simulated estimate rather than a large
+fixed budget.
 
 A node whose `xian.toml` sets `tx_fee_mode`, `max_tx_chi` or `max_block_chi`
 refuses to start, and node profiles that set them are rejected. Choose the
@@ -148,17 +148,21 @@ Contract balances and application-level payment rules remain unchanged.
 Readonly simulation returns the measured `chi_used` without committing state.
 It includes source/argument bytes and a standard signed transaction envelope.
 Because simulation happens before signing and nonce reservation, the final
-envelope size can differ slightly.
-SDK estimate helpers add configurable headroom. By default both xian-py and
-xian-js supply `estimate + max(ceil(estimate * 5%), 10)` chi when a transaction
-omits an explicit chi limit; unused chi is refunded. Estimates can fail when a node
-disables simulation, caps it below the target transaction, or has different
-state from the eventual execution block. The node never simulates with more
+envelope size can differ by a few bytes, well under one chi.
+For the same chain state, execution charges exactly the simulated `chi_used`,
+so xian-py and xian-js supply exactly that value, with no headroom, when a
+transaction omits an explicit chi limit (`estimate_chi`/`estimateChi` return it
+as `estimated`). Estimates can fail when a node disables simulation, caps it
+below the target transaction, or has different state from the eventual
+execution block. If the state changes between the estimate and execution (a
+pool moved, a recipient was created), the transaction can run out of chi: it
+fails with `Out of chi.`, pays for the chi it used and changes nothing else.
+Wallets and apps report that as a state change; estimate again and resubmit. The node never simulates with more
 than the chain's `max_tx_chi`, so a dry run cannot report success for work
 that no admitted transaction could pay for.
 
-Use simulation as an estimate, then provide a bounded margin. Do not copy
-historical benchmark values into a transaction policy.
+Supply the simulated chi. Do not copy historical benchmark values into a
+transaction policy.
 
 ## Contract Design
 

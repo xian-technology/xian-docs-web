@@ -53,8 +53,11 @@ preview = client.simulate(
 chi_used = preview["chi_used"]
 ```
 
-Simulation does not commit state. Add bounded headroom because state can change
-before the transaction is included.
+Simulation does not commit state. For the same state, execution charges exactly
+the simulated `chi_used`, so clients supply that value. If the state changes
+before the transaction is included, the transaction can run out of chi; it
+then fails, pays for the chi it used and changes nothing else, and can be
+estimated again and resubmitted.
 
 ## Cost Drivers
 

@@ -266,9 +266,9 @@ uv run --extra dev python scripts/bootstrap_strategy_vault.py --execute
 ```
 
 The standard localnet helper uses 100 currency only as a minimum keeper floor.
-It estimates the exact prepared vault call with explicit chi headroom, reads
-`chi_cost.current_value()`, computes `ceil(supplied_chi / chi_cost)`, and raises
-the funding target when required. `--keeper-gas-funding` is a minimum override.
+It estimates the exact prepared vault call, reads `chi_cost.current_value()`,
+computes `ceil(estimated_chi / chi_cost)`, and raises the funding target when
+required; the swap supplies exactly that estimated chi. `--keeper-gas-funding` is a minimum override.
 The estimate and submission reuse one call plan so quote/deadline kwargs cannot
 drift between preflight and execution.
 

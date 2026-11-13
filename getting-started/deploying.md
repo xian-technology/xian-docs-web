@@ -32,8 +32,8 @@ result = client.deploy_contract(
 )
 ```
 
-Without an explicit `chi`, the SDK simulates the deployment and supplies the
-estimate plus headroom. An explicit budget must stay within the chain's
+Without an explicit `chi`, the SDK simulates the deployment and supplies
+exactly the simulated chi. An explicit budget must stay within the chain's
 per-transaction cap (`max_tx_chi`, 200,000 chi by default); see
 [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 

@@ -85,9 +85,11 @@ only on a trusted local/private network; prefer HTTPS elsewhere.
   the site), domain mismatch (the request came from a different site than the
   app claims) or known scam domain; treat anything but a verified domain with
   suspicion
-- transaction requests show the chi limit before approval, estimated with the
-  SDK's headroom when the dapp did not set one (`Not estimated` if estimation
+- transaction requests show the chi limit before approval: exactly the
+  simulated chi when the dapp did not set one (`Not estimated` if estimation
   fails)
+- a transaction that runs out of chi because the chain state changed after the
+  estimate is reported as such, so you can review it and try again
 - auto-approval rules always carry a chi cap; none is offered for a request
   without a chi limit, and older stored rules without a cap are not applied
 - invisible and text-direction characters in signed text are shown as

@@ -113,7 +113,7 @@ with Xian("http://127.0.0.1:26657", wallet=wallet) as client:
     )
 ```
 
-The SDK estimates the deployment's chi through simulation and adds headroom;
-an explicit `chi` must stay within the chain's per-transaction cap. Validators
+The SDK estimates the deployment's chi through simulation and supplies exactly
+that; an explicit `chi` must stay within the chain's per-transaction cap. Validators
 compile the submitted source. See
 [XSC-0001](/smart-contracts/standards/xsc-0001) before adding extensions.
