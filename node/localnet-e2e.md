@@ -44,7 +44,8 @@ To reproduce a hosted run locally, check out those same commits before building.
 
 The Make target uses the locked `xian-stack` Python environment, including
 the native ZK binding that generates shielded proofs. A fresh host needs a
-Rust toolchain and C compiler to build the native dependencies. To require
+Rust toolchain (1.98 or newer) and C compiler to build the native
+dependencies. To require
 shielded coverage explicitly:
 
 ```bash

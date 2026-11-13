@@ -90,7 +90,10 @@ localnet runs.
 
 ## Contract-Only Setup
 
-Install Python 3.14, uv, Git and a Rust toolchain. The fresh-chain language ships in the source checkouts below. Use a separate folder for these commands. The pinned revision supplies contracting 1.1.4, compiler-core 0.2.1, VM-core 0.1.3 and runtime-types 0.1.6.
+Install Python 3.14, uv, Git and Rust 1.98 or newer. Older toolchains strip
+macOS native libraries in a way macOS 27 refuses to load
+([rust-lang/rust#157750](https://github.com/rust-lang/rust/issues/157750)),
+and current native crates declare that minimum. The fresh-chain language ships in the source checkouts below. Use a separate folder for these commands. The pinned revision supplies contracting 1.1.4, compiler-core 0.2.1, VM-core 0.1.3 and runtime-types 0.1.6.
 
 ```bash
 git clone https://github.com/xian-technology/xian-contracting.git
