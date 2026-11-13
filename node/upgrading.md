@@ -41,8 +41,12 @@ argument spelled that way is now rejected as not canonical. Revision 14 also
 lets a contract store, return and emit a `datetime.timedelta` or a `bytearray`:
 before it, such a write or event failed the transaction because receipts and
 the state root had no JSON form for these types; they now use
-`{"__delta__":[days,seconds]}` and `{"__bytearray__":"hex"}`. Both changes alter
-transaction outcomes, so revision 14 requires a new chain as well.
+`{"__delta__":[days,seconds]}` and `{"__bytearray__":"hex"}`. Revision 14 also
+changes the state root (`xian-state-root-v3`): a leaf now hashes a value's
+stored bytes instead of its receipt JSON, in which a datetime looked like its
+text and bytes like equal text, so different states could share an app hash.
+These changes alter transaction outcomes and app hashes, so revision 14
+requires a new chain as well.
 
 Since execution revision 10 a failed call's error category comes from structured
 exception data produced by the VM (type and arguments), including exceptions

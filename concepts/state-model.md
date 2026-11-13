@@ -68,7 +68,10 @@ and the state-root marker are committed atomically in LMDB. The LMDB marker is
 authoritative after restart; auxiliary metadata files are repairable copies.
 
 The application computes a 32-byte Merkle root over canonical consensus state.
-CometBFT records that `app_hash` in the next block header. Validators that
+Each leaf commits to a consensus key and the exact bytes stored for its value
+(the canonical V2 storage encoding), so two states hash alike only when they
+store the same values: a datetime and its text, or bytes and equal text, are
+different leaves. CometBFT records that `app_hash` in the next block header. Validators that
 execute the same block differently produce a different root and cannot remain
 aligned with the network.
 
