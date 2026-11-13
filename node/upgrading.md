@@ -45,6 +45,9 @@ the state root had no JSON form for these types; they now use
 changes the state root (`xian-state-root-v3`): a leaf now hashes a value's
 stored bytes instead of its receipt JSON, in which a datetime looked like its
 text and bytes like equal text, so different states could share an app hash.
+Revision 14 also pays out the fee of a failed paid transaction through the
+[governed reward split](/node/staking#rewards-and-commission) instead of
+debiting it without a recipient (see [Chi accounting](/concepts/chi#accounting)).
 These changes alter transaction outcomes and app hashes, so revision 14
 requires a new chain as well.
 

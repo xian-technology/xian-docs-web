@@ -25,15 +25,21 @@ also requires the transferred amount plus that reservation
 would fail for its fee after reservation is not admitted. In `free_metered` mode, the transaction remains metered but the
 runtime creates no execution-fee debit or fee-derived rewards.
 
-A failed execution in paid mode still debits its consumed chi, but produces no
-fee-reward payouts. Every failed metered transaction is charged at least the
-5-chi base cost (never more than its chi limit), including one that fails
-before execution starts, for example because the target contract does not
-exist or cannot be prepared. Such a transaction still gets a failed receipt and
-consumes its nonce. Machine-dependent host faults (out of memory, operating
-system or storage errors) halt the node instead of producing a receipt. That debit reduces the total native-token balance. The
-[governed reward split](/node/staking#rewards-and-commission) applies to
-successful paid executions.
+A failed execution in paid mode still debits its consumed chi. Every failed
+metered transaction is charged at least the 5-chi base cost (never more than its
+chi limit), including one that fails before execution starts, for example
+because the target contract does not exist or cannot be prepared. Such a
+transaction still gets a failed receipt and consumes its nonce.
+Machine-dependent host faults (out of memory, operating system or storage
+errors) halt the node instead of producing a receipt.
+
+The [governed reward split](/node/staking#rewards-and-commission) applies to
+the fee of every paid execution, successful or failed. A failed call earns no
+developer reward: the developer share goes to the validators, as it does for a
+contract without a developer. A sender whose balance cannot cover the failure
+fee is charged the whole balance, and exactly that amount is paid out. The
+failed receipt lists these payouts in `rewards` and `reward_records`. The
+native-token supply only shrinks by the governed burn share.
 
 ## VM Costs
 

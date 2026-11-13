@@ -89,6 +89,7 @@ The decoded execution payload includes:
 | `result` | encoded function result or error |
 | `state` | committed writes, including fee effects where applicable |
 | `events` | committed contract events |
+| `rewards`, `reward_records` | fee payouts by recipient, also for a failed paid transaction |
 
 SDK receipts wrap this together with the original transaction, RPC metadata,
 and success/error helpers.
@@ -108,7 +109,7 @@ until the results arrive or the configured timeout expires.
 | Failure | State/effects |
 | --- | --- |
 | CheckTx rejection | no mempool entry, no state, no fee |
-| assertion or runtime error | application writes/events roll back; paid mode charges consumed chi |
+| assertion or runtime error | application writes/events roll back; paid mode charges consumed chi and pays that fee out (no developer share) |
 | out of chi | application writes/events roll back; failed execution reports a bounded cost up to the submitted limit |
 
 ## Indexing
