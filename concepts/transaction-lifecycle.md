@@ -63,8 +63,8 @@ For each transaction, the runtime:
 4. buffers writes, events, return value, and fee/reward effects
 5. discards application writes and events on failure
 
-Optional parallel execution may speculate in worker processes, but accepted
-results must remain equivalent to serial block order. Conflicts run serially.
+Transactions in a block run one after another in block order. See
+[Block Execution](/concepts/block-execution).
 
 ## Commit
 
@@ -119,6 +119,6 @@ history/event rows can appear shortly after finality.
 
 ## Related Pages
 
-- [Parallel Block Execution](/concepts/parallel-block-execution)
+- [Block Execution](/concepts/block-execution)
 - [Chi and Metering](/concepts/chi)
 - [BDS Indexed Queries](/api/bds)

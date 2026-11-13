@@ -9,7 +9,6 @@ machine with five validators, the fixed Xian VM, and optional indexed services.
 | --- | --- |
 | disposable five-node network | `LOCALNET_NODES=5 make localnet-init && make localnet-up` |
 | broad whole-stack E2E | `make localnet-e2e` |
-| E2E with parallel execution | `make localnet-parallel-e2e` |
 | validator/governance safety | `make localnet-protocol-safety` |
 | release-grade gate | `make release-safety` |
 
@@ -146,7 +145,8 @@ The layered harness covers:
 - governed forward state patches
 - application logging modes
 - shielded-note and relayed proof flows with governed verifier registration
-- parallel execution acceptance and fallback behavior
+- same-block ordering: independent writers, one sender's nonce sequence,
+  read-after-write, and prefix scans within a block
 - restart/chaos convergence and soak checks
 - process crashes before state persistence, after persistence, and before the
   commit response, with transaction effects and nonces checked after recovery
@@ -154,8 +154,6 @@ The layered harness covers:
   quorum, reconvergence after healing, and a full-network restart
 - fresh non-validator catch-up from genesis and peer state sync interrupted
   after the first snapshot chunk
-- the same blocks executed by serial and parallel validators, comparing
-  application hashes, transaction results, events, and consensus updates
 - nonce gaps, conflicting pending nonces, submission-node restart, replay
   rejection, and a queued transaction whose balance becomes insufficient
 - zero-chi admission rejection at every node without consuming the sender's nonce
@@ -272,19 +270,17 @@ make release-safety
 ```
 
 This runs release validation for the contracting/runtime repos, stack
-validation, parallel E2E, a node capability report, and protocol-safety
+validation, the full E2E, a node capability report, and protocol-safety
 coverage. Use it before tagging changes to execution, genesis, networking,
 governance, validator behavior, or localnet plumbing.
 
 ## Topology Matrix
 
-Exercise both integrated and fidelity topology, with parallel execution off and
-on when the change can affect process boundaries or speculation:
+Exercise both integrated and fidelity topology when the change can affect
+process boundaries:
 
 ```bash
 XIAN_LOCALNET_TOPOLOGY=fidelity \
-XIAN_LOCALNET_PARALLEL_EXECUTION_ENABLED=1 \
-XIAN_LOCALNET_PARALLEL_EXECUTION_WORKERS=4 \
 make localnet-e2e
 ```
 

@@ -70,22 +70,13 @@ at startup, and `configure_node` accepts `--tx-fee-mode`, `--max-tx-chi` and
 `--max-block-chi` only together with `--genesis-bundle`. See
 [Chain Chi Caps](/concepts/chi#chain-chi-caps) for the rules and enforcement.
 
-## Parallel Execution
+## Block Execution
 
-Parallel execution speculates in isolated workers and commits only results
-equivalent to serial block order. It is disabled by default.
-
-Key settings include:
-
-- `parallel_execution_enabled`
-- `parallel_execution_workers`
-- `parallel_execution_min_transactions`
-- speculative-wave and acceptance guardrails
-- worker warming and access estimates
-
-Test against the real workload and watch acceptance and fallback counters.
-Independent state access benefits most; hot shared state and broad scans often
-fall back to serial execution. See [Parallel Block Execution](/concepts/parallel-block-execution).
+Blocks always execute serially, in canonical order, in the Rust block
+executor. The settings of the removed parallel executor
+(`parallel_execution_*`) are not accepted: a `xian.toml` that sets any of them
+is rejected at startup with an error naming the keys to delete. See
+[Block Execution](/concepts/block-execution).
 
 ## Metrics and Health
 

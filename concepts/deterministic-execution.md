@@ -141,7 +141,8 @@ used for contract execution.
 
 The historical V1 corpus includes binary-float and raw Decimal cases. The V2 conformance vectors check exact digits, magnitude and precision bounds, signed division, rounding, helper results and the wire representation.
 
-These checks complement five-node block replay and parallel-versus-serial tests.
+These checks complement five-node block replay and Rust-versus-Python block
+execution differential tests.
 They provide evidence for the tested programs and environments, not a proof for
 every possible contract. Determinism and correctness are separate requirements:
 a consistently wrong result must also fail a semantic test.

@@ -20,7 +20,6 @@ the network manifest or the generated CometBFT home.
   "block_policy_mode": "periodic",
   "block_policy_interval": "5s",
   "pruning_enabled": false,
-  "parallel_execution_enabled": false,
   "services": {
     "bds": { "enabled": true },
     "dashboard": { "enabled": true, "host": "127.0.0.1", "port": 18080 },
@@ -50,7 +49,7 @@ do not copy this abbreviated example over an existing profile.
 | `snapshot_url`, `snapshot_signing_keys` | bootstrap source and trust roots |
 | `block_policy_*` | idle-block behavior and interval |
 | `services` | BDS, dashboard, monitoring, and optional sidecars |
-| `advanced` | lower-level CometBFT, state-sync, metrics, nonce, and parallel settings |
+| `advanced` | lower-level CometBFT, state-sync, metrics, and nonce settings |
 
 `xian_vm_v2` is fixed by the node runtime and is not a profile choice.
 
@@ -61,6 +60,12 @@ Set the policy with `xian network create` (or `xian setup node --mode local`)
 through `--tx-fee-mode`, `--max-tx-chi` and `--max-block-chi`; it is recorded
 as `fee_policy` in the network manifest.
 
+Profiles and network templates that still carry the settings of the removed
+parallel executor (`parallel_execution_enabled`, `parallel_execution_workers`,
+`parallel_execution_min_transactions` or `advanced.parallel_execution`) are
+rejected as unknown fields. Delete those fields; blocks always execute serially
+(see [Block Execution](/concepts/block-execution)).
+
 `advanced.metrics.host` and `advanced.metrics.port` are the host-side address
 and port on which the node's application metrics are published (default
 `127.0.0.1:9108`, local only). Inside the container the node always listens on
@@ -68,8 +73,8 @@ and port on which the node's application metrics are published (default
 host needs the stack's public-metrics opt-in; see
 [Public Exposure](/node/configuration#public-exposure).
 
-Numeric polling intervals, metrics refresh intervals, nonce-expiry settings and
-parallel thresholds must be finite numbers. Profile validation rejects `NaN`,
+Numeric polling intervals, metrics refresh intervals and nonce-expiry settings
+must be finite numbers. Profile validation rejects `NaN`,
 infinity and numbers too large to represent as finite runtime settings.
 
 ## Create and Inspect Profiles

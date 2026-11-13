@@ -11,8 +11,7 @@ and language rules used by the fresh chain. Each test can pass its own temporary
 state and transaction context for fee estimates.
 
 `ContractingClient` rejects an explicit V1 profile or an injected V1 driver with
-`ValueError`. `ParallelBatchExecutor` rejects an executor backed by a V1 driver.
-Use fresh V2 storage for supported local tests.
+`ValueError`. Use fresh V2 storage for supported local tests.
 Low-level native V1 tooling is reserved for historical verification and
 migration; a V1 profile is not a local-client compatibility mode. Proxies expose
 the same exported functions that a transaction can call. Test private helpers

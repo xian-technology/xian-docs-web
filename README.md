@@ -59,8 +59,8 @@ The site is statically generated; the build output goes to
   - `getting-started/` — environment setup, first contract, deployment
     walk-through.
   - `concepts/` — ABCI, consensus, chi, deterministic execution, state
-    model, time / blocks, transaction lifecycle, parallel block
-    execution, the Xian VM, and the shielded zk stack.
+    model, time / blocks, transaction lifecycle, block execution, the
+    Xian VM, and the shielded zk stack.
   - `smart-contracts/` — contract authoring guidance.
   - `api/` — REST, GraphQL, websockets, dry-runs.
   - `tools/` — operator and developer tools.

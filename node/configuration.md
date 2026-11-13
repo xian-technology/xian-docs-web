@@ -46,7 +46,7 @@ discarding the network's persistent peers.
 
 Profiles are JSON files normally created under `nodes/` by `xian-cli`. They
 select local paths, keys, images, peers, pruning, block policy, logging,
-simulation, parallel execution, metrics publishing, and optional services. The
+simulation, metrics publishing, and optional services. The
 fee policy is not a profile setting; it lives in the network manifest and
 genesis.
 
@@ -81,7 +81,6 @@ Top-level Xian settings cover:
 - pruning and retained block history
 - application metrics and logging
 - readonly simulation limits
-- speculative parallel execution
 - pending nonce reservation
 
 The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
@@ -90,8 +89,10 @@ and spool behavior. See [Runtime Features](/node/runtime-features).
 The transaction fee mode and the per-transaction and per-block chi caps are
 not `xian.toml` settings: they are the genesis fee policy `__fee_policy`,
 identical on every validator, and a `xian.toml` that sets them is rejected at
-startup. See [Chain Chi Caps](/concepts/chi#chain-chi-caps). Logging, query
-limits, and serial-equivalent parallel execution can vary by node.
+startup. See [Chain Chi Caps](/concepts/chi#chain-chi-caps). Logging and query
+limits can vary by node. The settings of the removed parallel executor
+(`parallel_execution_*`) are rejected at startup as well; see
+[Block Execution](/concepts/block-execution#no-parallel-execution).
 
 ## Stack Credentials
 

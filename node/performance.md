@@ -10,7 +10,7 @@ Record the release revisions or image digests, node topology, CPU and memory
 limits, state size, validator/delegator population, and enabled services. Use
 the same workload and initial state when comparing configurations.
 
-Start with parallel execution disabled. Observe:
+Observe:
 
 - submitted, included, successful, and failed transaction counts separately
 - block execution and commit duration, including slower blocks
@@ -47,7 +47,7 @@ metrics endpoint for trends. Useful timing scopes include:
 | Scope | What it helps investigate |
 | --- | --- |
 | `finalize_decode` | transaction decoding and admission work |
-| `finalize_execute`, `finalize_parallel` | serial or speculative execution |
+| `finalize_execute` | block transaction execution |
 | `tx_process_output` | result shaping and reward effects |
 | `finalize_result_assembly` | transaction result and event serialization |
 | `finalize_state_root` | application-hash preparation |
@@ -56,21 +56,8 @@ metrics endpoint for trends. Useful timing scopes include:
 Some scopes contain other scopes. Do not add all timings together as if they
 were independent parts of block latency.
 
-## Tune Parallel Execution
-
-Enable parallel execution only after recording the serial baseline. Increase
-the worker count gradually and compare completed work, latency, memory, and
-fallback counters under the same workload.
-
-Independent reads and writes are the best candidates. Repeated senders,
-shared balances, broad scans, and other overlapping state access reduce the
-amount of reusable speculative work. More workers can increase memory and
-coordination costs without improving throughput.
-
-Keep a configuration only if it improves measured performance and produces
-the same state, transaction results, and events as serial execution. See
-[Parallel Block Execution](/concepts/parallel-block-execution) for controls
-and acceptance counters.
+Blocks execute serially; there is no parallel-execution setting to tune. See
+[Block Execution](/concepts/block-execution).
 
 ## Include Optional Services
 

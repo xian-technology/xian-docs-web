@@ -169,7 +169,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/concepts/' },
             { text: 'Transaction Lifecycle', link: '/concepts/transaction-lifecycle' },
-            { text: 'Parallel Block Execution', link: '/concepts/parallel-block-execution' },
+            { text: 'Block Execution', link: '/concepts/block-execution' },
             { text: 'Consensus & Finality', link: '/concepts/consensus' },
             { text: 'Time & Block Policy', link: '/concepts/time-and-blocks' },
             { text: 'The ABCI Layer', link: '/concepts/abci' },

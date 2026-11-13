@@ -41,7 +41,6 @@ At minimum, alert on:
 - disk space and retained history
 - application errors and transaction rejection rate
 - BDS indexed height, lag, queue, pool, and spool when enabled
-- parallel-execution acceptance and fallback ratios when enabled
 
 An RPC endpoint that answers can still be unhealthy if height or block age is
 stale. Compare against trusted peers.

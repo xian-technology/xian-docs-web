@@ -70,9 +70,8 @@ enabled service. Five-second periodic blocks keep contract time moving while an
 interactive development node is idle.
 
 IntentKit, DEX automation, the shielded relayer, product contract deployment,
-state sync, and speculative parallel execution remain explicit choices because
-they require extra repositories, credentials, product bootstrap, a peer
-network, or a dedicated test scenario.
+and state sync remain explicit choices because they require extra repositories,
+credentials, product bootstrap, or a peer network.
 
 Use `--plan` or `--dry-run` where supported to inspect paths and actions before
 writing files.

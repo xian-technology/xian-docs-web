@@ -6,8 +6,8 @@ authoring language without making CPython bytecode the consensus format.
 ## Execution profiles
 
 Validators compile cleartext contract source into canonical IR and execute it
-in Rust. The fresh-chain node, Python `ContractingClient` and
-`ParallelBatchExecutor` require `xian_vm_v2`. Local tests execute contract code
+in Rust. The fresh-chain node and the Python `ContractingClient` require
+`xian_vm_v2`. Local tests execute contract code
 on the same native VM as the fresh chain; there is no current CPython contract
 executor.
 

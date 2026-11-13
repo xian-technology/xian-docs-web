@@ -20,8 +20,8 @@ not just how to call one contract function at a time.
 
 - [The Xian VM](/concepts/xian-vm) for the split between Python authoring and
   VM-native execution policy
-- [Parallel Block Execution](/concepts/parallel-block-execution) for
-  speculative serial-equivalent execution
+- [Block Execution](/concepts/block-execution) for serial block execution in
+  Rust
 - [Time & Block Policy](/concepts/time-and-blocks) for `now`, idle blocks, and
   block-production policy
 
