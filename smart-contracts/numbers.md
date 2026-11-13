@@ -44,6 +44,14 @@ multiple, `"ceil"` for the higher multiple and `"half_even"` for the nearest
 multiple with ties going to the even coefficient. Spell out the mode in
 contract code. There is no `round()` builtin. Decimal display formatting also truncates discarded digits toward zero. To display a price rounded half-even, use `f'{quantize(price, 2, "half_even"):.2f}'`.
 
+`str(x)` of a decimal is plain fixed-point text: no exponent, no trailing
+fractional zeros, and `0` for zero. `str(decimal("1000.50"))` is `"1000.5"`
+and `str(decimal("1e6"))` is `"1000000"`. Signed messages that embed an amount,
+such as [XSC-0002 permits](/smart-contracts/standards/xsc-0002), can use
+`str(amount)` directly. Off-chain, `ContractingDecimal` from current
+`xian-runtime-types` prints the same text and accepts the same format specs, for
+example `f"{amount:.4f}"`.
+
 ```python
 @export
 def fee(units: int, basis_points: int) -> int:

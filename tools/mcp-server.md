@@ -205,6 +205,24 @@ sell. Amounts are sent as exact decimals and `deadline_min` becomes the Xian VM
 datetime payload. The target network must already have the canonical DEX
 contracts and liquidity for the requested pair.
 
+## Tool Errors and Result Encoding
+
+A transaction tool returns the CheckTx submission (`tx_hash`, `accepted`,
+`nonce`, chi). When the node rejects the submission at CheckTx
+(`accepted: false`), `send_transaction`, `send_tokens`, `buy_on_dex` and
+`sell_on_dex` report a tool error (`isError: true`) that carries the node's
+reason, such as an exceeded chi cap or an insufficient balance. An accepted
+submission is not an execution result; confirm execution with
+`get_transaction(tx_hash)`.
+
+`get_dex_price` reports a missing pair as a tool error rather than a successful
+result with an error field.
+
+Results are encoded explicitly: JSON scalars, exact decimals as plain text,
+integers beyond JavaScript's safe range as `{"__big_int__": ...}`, contract
+times, dataclasses, mappings and sequences. A result of any other type is
+reported as a tool error instead of being converted with `str()`.
+
 ## Exact numeric arguments
 
 Token and DEX tools accept amount text (such as `"1.000000000000000000000000000001"`) or an integer. For a generic contract call or simulation pass `{"amount":{"__fixed__":"1.25"}}`. Ordinary strings in generic arguments stay strings. Results expose decimals as plain strings and integers beyond JavaScript's safe range in `__big_int__` wrappers. DEX plans expose the exact typed arguments used for simulation and signing.
