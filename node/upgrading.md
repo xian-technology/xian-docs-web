@@ -8,7 +8,7 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-13`, gas schedule `xvm-gas-6`, bytecode `xvm-2` and set codec
+`xvm-execution-14`, gas schedule `xvm-gas-6`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
@@ -33,7 +33,12 @@ changes chi for the same transactions, so each requires a new chain. Revision
 13 keeps the gas schedule and bounds storage keys at 511 bytes, the largest key
 LMDB stores: a write with a longer key now fails its transaction instead of
 halting the chain when the block commits. It changes which transactions
-succeed, so it also requires a new chain.
+succeed, so it also requires a new chain. Revision 14 keeps the gas schedule
+and reads a `{"__delta__": ...}` transaction argument only as `[days, seconds]`,
+two integers, the form the encoder writes: the earlier decoder also accepted a
+two-character string or the two keys of an object. A transaction with an
+argument spelled that way is now rejected as not canonical, so revision 14
+requires a new chain as well.
 
 Since execution revision 10 a failed call's error category comes from structured
 exception data produced by the VM (type and arguments), including exceptions

@@ -23,6 +23,15 @@ For numeric values, this means:
 - decimal values are encoded with the `__fixed__` marker
 - the same numeric value always produces the same stored representation
 
+Time values use arrays of integers:
+
+- `datetime.datetime` is `{"__time__":[year,month,day,hour,minute,second,microsecond]}`;
+  three to seven integers are read
+- `datetime.timedelta` is `{"__delta__":[days,seconds]}`, exactly two integers
+
+A transaction whose arguments use any other payload for these markers is
+rejected as not canonical.
+
 ## Practical Advice
 
 - keep values JSON-like where possible
