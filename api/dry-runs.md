@@ -101,7 +101,7 @@ When the node refuses or aborts a dry run, you get the same envelope with
 - simulation capacity exceeded on this node
 - simulation timed out on this node
 - simulation chi budget exceeded during readonly execution (the budget is the
-  smaller of the node's `simulation_max_chi` and the chain's `max_tx_chi`)
+  chain's `max_tx_chi`, lowered by the node's `simulation_max_chi` when set)
 
 ## SDK Example
 
@@ -152,7 +152,7 @@ Readonly simulation is node-local and configurable as top-level keys in
 simulation_enabled = true
 simulation_max_concurrency = 2
 simulation_timeout_ms = 3000
-simulation_max_chi = 1000000
+# simulation_max_chi = 50000  # optional; unset by default
 ```
 
 What these keys do:
@@ -160,13 +160,14 @@ What these keys do:
 - `simulation_enabled`: turn the `simulate_tx` query path on or off
 - `simulation_max_concurrency`: maximum concurrent dry runs accepted by this node
 - `simulation_timeout_ms`: wall-clock timeout for one dry run worker
-- `simulation_max_chi`: operator cap on the readonly chi budget
+- `simulation_max_chi`: optional operator cap on the readonly chi budget
 
-The node simulates with `min(simulation_max_chi, max_tx_chi)`, where
-`max_tx_chi` is the chain's per-transaction cap from the genesis fee policy
-(200,000 chi by default). `simulation_max_chi` can therefore only lower the
-budget; a dry run never reports success for more chi than a submitted
-transaction may supply. A governed change to the fee policy applies to
+By default the node simulates with `max_tx_chi`, the chain's
+per-transaction cap from the genesis fee policy (200,000 chi by default).
+When `simulation_max_chi` is set, the budget is
+`min(simulation_max_chi, max_tx_chi)`, so the setting can only lower it; a dry
+run never reports success for more chi than a submitted transaction may
+supply. A governed change to the fee policy applies to
 simulation once it is committed. See
 [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 

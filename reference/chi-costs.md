@@ -128,7 +128,7 @@ execution-fee debit or fee-derived reward.
 | chain per-transaction chi cap (`max_tx_chi`, default) | 200,000 |
 | chain per-block chi cap (`max_block_chi`, default) | 500,000 |
 | VM ceiling for one V2 transaction (`max_tx_chi` in `runtime_info()`) | 1,000,000 |
-| node simulation chi budget | `simulation_max_chi` (default 1,000,000), never above the chain's `max_tx_chi` |
+| node simulation chi budget | the chain's `max_tx_chi`, lowered by the optional `simulation_max_chi` |
 
 The chain caps are part of the genesis fee policy; see
 [Chi and Metering](/concepts/chi#chain-chi-caps). The block cap counts the chi

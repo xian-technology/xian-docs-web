@@ -44,12 +44,13 @@ Simulation runs contract calls without committing state. Configure it with:
 - `simulation_enabled`
 - `simulation_max_concurrency`
 - `simulation_timeout_ms`
-- `simulation_max_chi`
+- `simulation_max_chi` (optional)
 
-The node simulates with `min(simulation_max_chi, max_tx_chi)`: the operator
-setting can only lower the budget below the chain's per-transaction cap, and a
-governed fee-policy change applies on commit. The profile default of
-`simulation_max_chi` is 1,000,000, so by default the chain cap decides.
+By default the node simulates with the chain's per-transaction cap
+`max_tx_chi`. An operator `simulation_max_chi` can only lower that budget (the
+node then uses `min(simulation_max_chi, max_tx_chi)`), and a governed
+fee-policy change applies on commit. Profiles and `xian.toml` leave
+`simulation_max_chi` unset unless an operator chooses a lower cap.
 
 Simulation is useful for wallets and SDKs, but it is operator-funded compute.
 Bound and rate-limit it on any exposed endpoint.
