@@ -63,11 +63,11 @@ name.set("alice")   # ok
 ## Storage Key
 
 A variable is stored under `contract.variable`. That key may be at most 511
-bytes, the largest key the node's store (LMDB) holds, so a `.set(...)` on a
-variable whose contract and binding names together exceed it fails the
-transaction with `Storage key is too long (N bytes). Max is 511.` Keep binding
-names short; hash entries add their key to this prefix (see
-[Hashes](/smart-contracts/storage/hashes#key-rules)).
+bytes, the largest key the node's store (LMDB) holds. Admission therefore
+rejects a variable name longer than 446 bytes, and a hash name longer than 445
+bytes (`xian.lint.E024`), so the key fits under the longest (64-byte) contract
+name whatever name the contract is deployed under. Hash entries add their key
+to this prefix (see [Hashes](/smart-contracts/storage/hashes#key-rules)).
 
 ## When to Use
 

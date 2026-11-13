@@ -72,6 +72,7 @@ violations as `xian.lint.E0xx`.
 | invalid decorator arguments | `xian.lint.E021` | `@export` only supports `typecheck=True/False`; `@construct` takes no arguments |
 | `Variable`, `Hash` or `LogEvent` called anywhere except as the whole value of a module-level `name = X(...)` | `xian.lint.E022` | storage and events are declared once, at module level |
 | positional or `*args` arguments to `Variable`/`Hash`/`ForeignVariable`/`ForeignHash`, `**kwargs` to any of these or `LogEvent`, or a `ForeignVariable`/`ForeignHash` without `foreign_contract=` and `foreign_name=` or with `contract=`/`name=` | `xian.lint.E023` | declarations use explicit keyword arguments; `LogEvent` takes its event name and params positionally |
+| a `Variable` or `ForeignVariable` (`foreign_name=`) name longer than 446 bytes, or a `Hash` or `ForeignHash` name longer than 445 bytes | `xian.lint.E024` | under the longest (64-byte) contract name, the storage key `contract.name` (plus `:` for a hash) must fit the node's 511-byte limit |
 
 ## Allowed Builtins
 
