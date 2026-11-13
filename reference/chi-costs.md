@@ -1,7 +1,7 @@
 # Chi Cost Table
 
 These costs describe the native `xian_vm_v2` runtime with execution revision
-`xvm-execution-12` and gas schedule `xvm-gas-6`. Use readonly simulation
+`xvm-execution-13` and gas schedule `xvm-gas-6`. Use readonly simulation
 against the target node for a complete operation estimate. The V2 gas schedule includes the following arithmetic charges.
 
 ## Accounting

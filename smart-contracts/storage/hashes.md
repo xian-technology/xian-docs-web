@@ -67,7 +67,12 @@ updated independently.
 - keys are converted to strings
 - `.` and `:` are not allowed inside key parts
 - slices are not allowed
-- keys longer than `1024` characters are rejected
+- a hash key (the parts joined by `:`) longer than 511 bytes is rejected
+- a write whose whole storage key, `contract.hash:key` in UTF-8 bytes, is
+  longer than 511 bytes fails the transaction with
+  `Storage key is too long (N bytes). Max is 511.`, the largest key the node's
+  store (LMDB) holds; a read of such a key finds nothing. Non-ASCII text counts
+  by its UTF-8 bytes, so `é` uses two
 - `key in hash` is intentionally unsupported; read the key and compare against
   your chosen default / sentinel value instead
 
