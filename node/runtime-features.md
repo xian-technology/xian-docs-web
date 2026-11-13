@@ -15,8 +15,26 @@ is no supported operator switch to a second engine or gas schedule.
 Network manifests can enable consensus-relevant features such as `zk`.
 Every validator must have the matching native backend before joining a chain
 that enables one. A feature mismatch is a startup or consensus safety problem,
-not a node-local preference. Features are fixed in genesis as hashed
-`__runtime_features.*` state; governed state patches cannot change them.
+not a node-local preference. Features are hashed chain state
+(`__runtime_features.<feature>`, a JSON boolean) set in genesis.
+
+A [governed state patch](/node/protocol-governance#local-bundle) can
+switch a feature on or off on a live chain. The switch takes effect from the
+block after the activation block, on running and restarted nodes alike.
+
+For `zk`:
+
+- Before a patch enables it, every validator must install the native zk
+  verifier (`xian-tech-abci[zk]`). A node without it refuses to apply the patch
+  and halts at the activation block before computing that block's state root;
+  it resumes once the verifier is installed and the node restarted. Startup,
+  state-sync snapshot import and Commit refuse a zk-enabled state on such a
+  node the same way.
+- While it is off, every transaction that deploys or calls a contract using zk
+  host syscalls (directly or through an import) fails with an ordinary failed
+  receipt and is charged for the chi it used. The chain keeps producing blocks
+  and other transactions are unaffected. Simulation reports the same failure.
+  Shielded balances stay locked until zk is enabled again; they are not lost.
 
 ## Logging
 

@@ -100,7 +100,15 @@ code, patch `contract_name.__source__`; the runtime derives canonical
 
 The node also guards the chain settings it reads at startup:
 
-- `__execution_policy` and `__runtime_features.*` cannot be patched.
+- `__execution_policy` cannot be patched.
+- `__runtime_features.<feature>` can switch a supported feature (today `zk`)
+  on or off, but only to a JSON `true` or `false`, the value genesis writes.
+  Unknown features, other values and deletions are refused when the node loads
+  the bundle. A node that cannot run an enabled feature (for `zk`, one without
+  the native zk verifier) refuses to apply the patch and halts at the
+  activation block until the operator installs it. See
+  [Runtime Features](/node/runtime-features#chain-runtime-features) for what
+  switching `zk` off means for zk contracts.
 - `__fee_policy` can be patched to change the fee mode or the chi caps, but
   only to a policy node startup accepts: the canonical three-field object
   described in [Chain Chi Caps](/concepts/chi#chain-chi-caps). A bundle with an
@@ -110,6 +118,12 @@ The node also guards the chain settings it reads at startup:
   in that block still run under the old caps, and from the next block every
   node, running or restarted, admits, proposes, executes and simulates under
   the new one.
+
+Example zk switch:
+
+```json
+{"key": "__runtime_features.zk", "value": true}
+```
 
 Example fee-policy change:
 

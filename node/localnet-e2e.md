@@ -178,6 +178,14 @@ validator/delegator, implicit burn, foundation, and developer totals against
 the approved ratios. The test-specific split is deliberately different from
 the canonical 70/0/0/30 genesis default.
 
+The `15-zk-feature-toggle` phase switches the chain's `zk` runtime feature with
+governed state patches. It checks that a zk contract deploys and runs while zk
+is on, that zk calls, zk deploys and shielded-token calls fail with ordinary
+charged receipts while it is off (a plain call still succeeds and simulation
+reports the same reason), and that everything works again after a second patch
+turns it back on. Node-4 is stopped through each activation and must catch up
+with identical app hashes and block results.
+
 ## Recovery and Accounting Checks
 
 Recovery phases temporarily stop validators, disconnect Docker networks, and
