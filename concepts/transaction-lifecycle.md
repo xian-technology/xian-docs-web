@@ -40,9 +40,12 @@ receipt wait when the application needs finality.
 ## CheckTx
 
 Before mempool admission, the application checks payload shape, signature,
-chain ID, nonce, and fee policy. Paid mode requires enough native-token balance
-to cover the submitted chi limit. Free-metered mode enforces configured
-transaction and block chi caps.
+chain ID, nonce, and fee policy. Every fee mode rejects a `chi_supplied` above
+the chain's `max_tx_chi`. Paid mode also requires enough native-token balance to
+cover the submitted chi limit at the chi rate, and for a native
+`currency.transfer` the amount plus that fee reservation must fit the balance.
+Block proposals pack transactions only while the sum of their `chi_supplied`
+stays within `max_block_chi`. See [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
 A CheckTx rejection does not enter the mempool or change chain state.
 

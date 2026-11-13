@@ -45,8 +45,10 @@ discarding the network's persistent peers.
 ## Node Profiles
 
 Profiles are JSON files normally created under `nodes/` by `xian-cli`. They
-select local paths, keys, images, peers, pruning, block policy, fee mode,
-logging, simulation, parallel execution, and optional services.
+select local paths, keys, images, peers, pruning, block policy, logging,
+simulation, parallel execution, metrics publishing, and optional services. The
+fee policy is not a profile setting; it lives in the network manifest and
+genesis.
 
 See [Node Profiles](/node/profiles) for the profile contract. Prefer changing a
 manifest or profile and re-rendering over hand-editing generated files.
@@ -79,18 +81,17 @@ Top-level Xian settings cover:
 - pruning and retained block history
 - application metrics and logging
 - readonly simulation limits
-- transaction fee mode and free-metered chi caps
 - speculative parallel execution
 - pending nonce reservation
 
 The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
 and spool behavior. See [Runtime Features](/node/runtime-features).
 
-Not every setting stored in a node profile is a local optimization. Fee mode
-and free-metered chi caps affect transaction acceptance or state transitions
-and must agree across the network. Coordinate changes to those values with
-the validator set. Logging, query limits, and serial-equivalent parallel
-execution can vary by node.
+The transaction fee mode and the per-transaction and per-block chi caps are
+not `xian.toml` settings: they are the genesis fee policy `__fee_policy`,
+identical on every validator, and a `xian.toml` that sets them is rejected at
+startup. See [Chain Chi Caps](/concepts/chi#chain-chi-caps). Logging, query
+limits, and serial-equivalent parallel execution can vary by node.
 
 ## Stack Credentials
 
@@ -166,6 +167,12 @@ gate:
 | CometBFT RPC | `--public-rpc` | `XIAN_PUBLIC_RPC_ENABLED=1` |
 | dashboard/BDS/GraphQL | `--public-query` | `XIAN_PUBLIC_QUERY_ENABLED=1` |
 | metrics | `--public-metrics` | `XIAN_PUBLIC_METRICS_ENABLED=1` |
+
+The Xian application metrics port is published on `XIAN_APP_METRICS_HOST`
+(default `127.0.0.1`) and `XIAN_APP_METRICS_PORT` (default `9108`); profiles set
+them through `advanced.metrics.host` and `advanced.metrics.port`. The node
+listens on `0.0.0.0:9108` inside the container regardless. A non-loopback
+publish address requires the public-metrics gate.
 
 `--public-query` does not publish the live RPC or mempool. Put any published
 surface behind appropriate firewall, TLS, authentication, rate limits, and

@@ -19,7 +19,10 @@ The result is capped by the submitted chi limit. In `paid_metered` mode, the
 sender must be able to cover that limit during admission and at execution.
 Execution reserves the full supplied budget at the entry chi rate; contracts
 can spend only the remaining native balance. Unused chi is refunded, leaving
-the sender charged for `chi_used`. In `free_metered` mode, the transaction remains metered but the
+the sender charged for `chi_used`. For a native `currency.transfer`, CheckTx
+also requires the transferred amount plus that reservation
+(`chi_supplied / chi_rate`) to fit the sender's balance, so a transfer that
+would fail for its fee after reservation is not admitted. In `free_metered` mode, the transaction remains metered but the
 runtime creates no execution-fee debit or fee-derived rewards.
 
 A failed execution in paid mode still debits its consumed chi, but produces no
@@ -52,8 +55,9 @@ One budget covers the entire execution: the entry function, nested calls, host
 operations, and every deployed contract's module and constructor work. A factory
 that deploys several children cannot obtain a fresh budget for each child.
 Failed calls retain their measured cost even though their writes and events
-roll back. Execution also has a hard runtime ceiling; increasing the submitted
-limit cannot remove that ceiling.
+roll back. Execution also has hard ceilings: the chain's per-transaction cap
+(`max_tx_chi`, see below) and the VM's own limit of 1,000,000 chi for one V2
+transaction. Increasing the submitted limit cannot remove either.
 
 ## Sizing Transactions
 
@@ -80,22 +84,56 @@ target network instead of hard-coding that initial rate.
 
 The fee mode is a chain setting chosen at genesis, not node configuration.
 Genesis stores it as the consensus state value `__fee_policy`, which is part
-of the state hash, so every validator applies the same policy. A node whose
-`xian.toml` sets `tx_fee_mode`, `free_tx_max_chi` or `free_block_max_chi`
-refuses to start. Free-metered networks choose explicit caps when the network
-is created, for example:
+of the state hash, so every validator applies the same policy.
+
+## Chain Chi Caps
+
+`__fee_policy` has the same three fields in every fee mode:
+
+| Field | Meaning | Default |
+| --- | --- | ---: |
+| `tx_fee_mode` | `paid_metered` or `free_metered` | `paid_metered` |
+| `max_tx_chi` | largest `chi_supplied` one transaction may submit | 200,000 |
+| `max_block_chi` | largest sum of `chi_supplied` over one block's transactions | 500,000 |
+
+Chi is the only deterministic bound on execution time, and blocks execute
+serially, so these caps bound how long one transaction and one block can delay
+everything after them. A valid policy keeps
+`0 < max_tx_chi <= max_block_chi <= 10,000,000`, and `max_tx_chi` must not
+exceed the VM's per-transaction ceiling (`runtime_info()["max_tx_chi"]`,
+1,000,000 chi). Genesis building and node startup both refuse a policy that
+breaks these rules.
+
+The caps are enforced at every stage. CheckTx rejects a transaction whose
+`chi_supplied` exceeds `max_tx_chi`. PrepareProposal packs transactions only
+while the block's `chi_supplied` sum fits `max_block_chi`, and
+ProcessProposal and FinalizeBlock reject a block or transaction that breaks
+either cap. The rejection message names the cap.
+
+The block cap counts the chi each transaction **supplies**, the only amount
+known before execution, not the chi it uses. Oversupplying therefore shrinks
+how many transactions fit in a block even though unused chi is refunded:
+with the default 500,000 block cap, transactions that each supply 100,000 chi
+fill a block after five. Supply a simulated estimate plus a small margin
+rather than a large fixed budget.
+
+A node whose `xian.toml` sets `tx_fee_mode`, `max_tx_chi` or `max_block_chi`
+refuses to start, and node profiles that set them are rejected. Choose the
+policy when the network is created:
 
 ```bash
 xian network create <name> --tx-fee-mode free_metered \
-  --free-tx-max-chi 1000000 --free-block-max-chi 20000000
+  --max-tx-chi 200000 --max-block-chi 500000
 ```
 
-`xian setup node --mode local` accepts the same options. A bundle network records the policy as `fee_policy` in its manifest and every
+`xian setup node --mode local` accepts the same options, and each cap flag
+works in both fee modes; an omitted field takes the default above. A bundle
+network records the canonical policy as `fee_policy` in its manifest and every
 `xian node init` builds it into genesis; joining nodes cannot choose it.
+`xian-stack` takes the same genesis inputs as `XIAN_TX_FEE_MODE`,
+`XIAN_MAX_TX_CHI` and `XIAN_MAX_BLOCK_CHI`.
 
-The transaction cap limits one submitted budget. The block cap limits the sum
-of submitted budgets accepted into a proposal. Contract balances and
-application-level payment rules remain unchanged.
+Contract balances and application-level payment rules remain unchanged.
 
 ## Estimate Before Submission
 
@@ -107,7 +145,9 @@ SDK estimate helpers add configurable headroom. By default both xian-py and
 xian-js supply `estimate + max(ceil(estimate * 5%), 10)` chi when a transaction
 omits an explicit chi limit; unused chi is refunded. Estimates can fail when a node
 disables simulation, caps it below the target transaction, or has different
-state from the eventual execution block.
+state from the eventual execution block. The node never simulates with more
+than the chain's `max_tx_chi`, so a dry run cannot report success for work
+that no admitted transaction could pay for.
 
 Use simulation as an estimate, then provide a bounded margin. Do not copy
 historical benchmark values into a transaction policy.

@@ -1,7 +1,7 @@
 # Chi Cost Table
 
 These costs describe the native `xian_vm_v2` runtime with execution revision
-`xvm-execution-10` and gas schedule `xvm-gas-4`. Use readonly simulation
+`xvm-execution-12` and gas schedule `xvm-gas-6`. Use readonly simulation
 against the target node for a complete operation estimate. The V2 gas schedule includes the following arithmetic charges.
 
 ## Accounting
@@ -10,7 +10,10 @@ against the target node for a complete operation estimate. The V2 gas schedule i
 chi_used = (raw_meter_cost // 1000) + 5
 ```
 
-The result is capped by the transaction's submitted chi limit.
+The result is capped by the transaction's submitted chi limit. The chain's fee
+policy caps that limit at `max_tx_chi` (200,000 chi by default), and the VM
+never runs one V2 transaction past 1,000,000 chi; see
+[Resource Limits](#resource-limits).
 
 | Item | Raw cost |
 | --- | ---: |
@@ -21,7 +24,7 @@ The result is capped by the transaction's submitted chi limit.
 | cross-contract dispatch | 10,000 per call, plus called work |
 
 VM computation and host operations use deterministic policy constants, not
-measured execution time. The current runtime supports `xvm-gas-4`; it does not
+measured execution time. The current runtime supports `xvm-gas-6`; it does not
 offer an earlier schedule as an alternate execution mode. Validators must use matching
 runtime policies. See the [upgrade procedure](/node/upgrading).
 
@@ -39,23 +42,56 @@ discards the event and tentative writes.
 
 ## Element work
 
-`xvm-gas-4` charges work that grows with container size inside a single
-operation, in addition to the operation's own cost. Each unit costs 8 raw chi:
+V2 charges work that grows with the size of a value inside a single operation,
+in addition to the operation's own cost. Each unit of element work costs 24 raw
+chi:
 
 | Element work | Units |
 | --- | ---: |
-| value comparison, including each dictionary key probe and each comparison made by `in`, `index`, `count`, `==` and `<` | 1 per comparison |
+| value comparison, including each dictionary key comparison and each comparison made by `in`, `index`, `count`, `==` and `<`; identical members count too | 1 per comparison |
 | copying a container (list, tuple, set, dict) | 1 per member copied |
 | copying text or binary data | 1 per 64 bytes |
+| comparing text or bytes (`==`, `<`, sorting) | 1 per 128 compared bytes |
 | allocating a container | 1 per member |
+| a value crossing a contract boundary | 1 per traversed node |
+
+String operations count units by size: receiver, arguments and output.
+
+| String operation | Units |
+| --- | ---: |
+| searching or copying: `find`, `count`, `in`, `replace`, `split(sep)`, `join`, slicing, indexing, `decimal(text)` | 1 per 8 bytes |
+| per-character work: `upper`, `lower`, `isalpha`, `isdigit`, `islower`, `isalnum`, `split()`, `int(text)` | 1 per 2 bytes |
 
 Pending units are charged before the next expression or statement. One
 operation may accumulate at most 2^20 uncharged units; beyond that the
 transaction fails with `operation exceeds the element work limit`.
 
-Copies are therefore no longer free. `items += [x]` builds and copies a new
+Copies are therefore not free. `items += [x]` builds and copies a new
 list on every call, so growing a list that way in a loop costs chi quadratic in
-its length; use `items.append(x)`, which does not copy.
+its length; use `items.append(x)`, which does not copy. Calling string methods
+repeatedly on a long text costs chi in proportion to its length each time;
+split or slice it once and work on the pieces.
+
+### Dictionaries
+
+V2 dictionaries keep a hash index. A lookup, `in`, `get`, insert, overwrite,
+`setdefault`, each `update` entry, `pop` and `popitem` hashes the key (one unit
+per key node and per 8 hashed bytes), compares it only with entries that have
+the same hash (one unit each) and changes the dictionary in place. Their cost
+therefore does not grow with the size of the dictionary. Removing an entry also
+costs one unit per 16 later entries it moves up. Dictionary displays,
+comprehensions, `dict()`, `fromkeys()` and `|` build through the same index.
+
+Insertion order, iteration and errors are unchanged. Equal keys hash equally:
+integers by value (`True` and `1` are different keys in V2), text and bytes by
+content, tuples by their items and frozensets by their size. Each indexed
+entry also counts 40 more bytes toward the heap limit.
+
+### Whole-hash scans
+
+`Hash.all()`, `Hash.clear()` and `clone_from` charge 2,560 raw chi for each
+entry they visit, on top of the storage read bytes. Prefer keyed access and
+paginated designs over scanning a whole hash.
 
 ## V2 arithmetic
 
@@ -89,7 +125,14 @@ execution-fee debit or fee-derived reward.
 | submitted contract source | 128 KiB |
 | `range(...)` and bounded sequence repetition | 131,072 entries |
 | bounded binary allocation and string repetition | 128 KiB |
-| default node simulation chi budget | 1,000,000 |
+| chain per-transaction chi cap (`max_tx_chi`, default) | 200,000 |
+| chain per-block chi cap (`max_block_chi`, default) | 500,000 |
+| VM ceiling for one V2 transaction (`max_tx_chi` in `runtime_info()`) | 1,000,000 |
+| node simulation chi budget | `simulation_max_chi` (default 1,000,000), never above the chain's `max_tx_chi` |
+
+The chain caps are part of the genesis fee policy; see
+[Chi and Metering](/concepts/chi#chain-chi-caps). The block cap counts the chi
+each transaction supplies, not the chi it uses.
 
 Sequence entry counts and encoded byte counts are different units. A list of
 large values can cost much more than a list of the same length containing

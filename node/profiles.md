@@ -55,8 +55,18 @@ do not copy this abbreviated example over an existing profile.
 `xian_vm_v2` is fixed by the node runtime and is not a profile choice.
 
 The transaction fee policy is not a profile choice either: it is chain state
-chosen at genesis (see [Chi](/concepts/chi)), and profiles that set
-`tx_fee_mode`, `free_tx_max_chi` or `free_block_max_chi` are rejected.
+chosen at genesis (see [Chain Chi Caps](/concepts/chi#chain-chi-caps)), and
+profiles that set `tx_fee_mode`, `max_tx_chi` or `max_block_chi` are rejected.
+Set the policy with `xian network create` (or `xian setup node --mode local`)
+through `--tx-fee-mode`, `--max-tx-chi` and `--max-block-chi`; it is recorded
+as `fee_policy` in the network manifest.
+
+`advanced.metrics.host` and `advanced.metrics.port` are the host-side address
+and port on which the node's application metrics are published (default
+`127.0.0.1:9108`, local only). Inside the container the node always listens on
+`0.0.0.0:9108`, which is also the in-network Prometheus target. A non-loopback
+host needs the stack's public-metrics opt-in; see
+[Public Exposure](/node/configuration#public-exposure).
 
 Numeric polling intervals, metrics refresh intervals, nonce-expiry settings and
 parallel thresholds must be finite numbers. Profile validation rejects `NaN`,

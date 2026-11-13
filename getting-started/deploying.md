@@ -29,9 +29,13 @@ def balance_of(address: str) -> decimal:
 result = client.deploy_contract(
     name="con_example",
     source=source,
-    chi=500_000,
 )
 ```
+
+Without an explicit `chi`, the SDK simulates the deployment and supplies the
+estimate plus headroom. An explicit budget must stay within the chain's
+per-transaction cap (`max_tx_chi`, 200,000 chi by default); see
+[Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
 `deploy_contract` submits cleartext source. Validators lint and compile that
 source, then store the canonical source and VM IR. Prebuilt artifacts are useful

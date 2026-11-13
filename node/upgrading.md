@@ -8,7 +8,7 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-10`, gas schedule `xvm-gas-4`, bytecode `xvm-2` and set codec
+`xvm-execution-12`, gas schedule `xvm-gas-6`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
@@ -16,12 +16,22 @@ change this protected record. The comparison covers all four fields; matching
 gas and codec versions do not make a different execution revision compatible.
 
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
-literal handling and checked numeric ABI boundaries. Gas schedule 4 charges for
-numeric work and for element work inside container operations; see
-[Numbers, division and rounding](/smart-contracts/numbers) and the
-[chi cost table](/reference/chi-costs#element-work).
+literal handling and checked numeric ABI boundaries. Gas schedule 6 charges for
+numeric work and for element work that grows with the size of a value: container
+operations, text and byte scans and comparisons, values crossing a contract
+boundary and whole-hash scans. One element-work unit costs 24 raw chi.
+Dictionaries keep a hash index, so their lookups and updates cost the same at
+any size. One V2 transaction may use at most 1,000,000 chi, and the chain's fee
+policy sets a lower per-transaction cap. See
+[Numbers, division and rounding](/smart-contracts/numbers), the
+[chi cost table](/reference/chi-costs#element-work) and
+[Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
-In execution revision 10 a failed call's error category comes from structured
+Revision 11 repriced the size-dependent operation families and introduced
+the VM's per-transaction ceiling; revision 12 added the dictionary index. Each
+changes chi for the same transactions, so each requires a new chain.
+
+Since execution revision 10 a failed call's error category comes from structured
 exception data produced by the VM (type and arguments), including exceptions
 raised by a constructor during deployment and builtin exceptions raised by host
 calls. Failure text is never parsed, so contract data inside a message cannot
@@ -74,7 +84,8 @@ Use one accepted release bundle for the fleet. Record:
 
 The `xian_vm_v2` name alone is not a compatibility guarantee: two releases can
 use that name while differing in compiler output, VM behavior, or metering.
-Fee mode and free-metered transaction/block caps must also agree across nodes.
+The genesis fee policy (fee mode and the `max_tx_chi`/`max_block_chi` caps) is
+chain state and therefore identical on every node of one chain.
 Ed25519 signature acceptance is also consensus-sensitive: stricter rejection
 rules in transaction admission or contract `crypto.verify` require coordinated
 deployment, even though the signature algorithm and ordinary signing API stay

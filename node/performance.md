@@ -23,6 +23,22 @@ Production sizing also needs a longer run with representative state and
 network conditions. A short local transfer benchmark is not a capacity
 guarantee for a deployed network.
 
+## Block Chi Capacity
+
+The genesis fee policy caps each block at `max_block_chi` (500,000 by default),
+counted as the sum of the chi each transaction **supplies**, not the chi it
+uses. Block capacity therefore depends on how much chi clients supply: five
+transactions that each supply 100,000 chi fill a default block even if each
+uses a few thousand. Clients should supply a simulated estimate plus a small
+margin, which xian-py and xian-js do by default when a transaction omits its
+chi limit. See
+[Chain Chi Caps](/concepts/chi#chain-chi-caps).
+
+Serial execution cost per transaction does not grow with the block: the node
+undoes a transaction's tentative state changes in place instead of copying the
+block's pending writes, and reuses each contract's parsed and validated IR for
+byte-identical stored text. Neither changes chi, receipts or state.
+
 ## Find the Expensive Stage
 
 Inspect `/perf_status` through ABCI or the dashboard, and use the application

@@ -130,8 +130,8 @@ Choose a source that retains the missing block range before starting a
 rebuild. Pruned local history cannot reconstruct older indexed rows.
 
 The V2 index uses BDS database schema version 8. The database, recovery spool, snapshot, and RPC source must use the same execution
-policy as the node: execution revision `xvm-execution-10`, gas schedule
-`xvm-gas-4`, bytecode `xvm-2`, and set codec `xian-set-1`. BDS records this policy
+policy as the node: execution revision `xvm-execution-12`, gas schedule
+`xvm-gas-6`, bytecode `xvm-2`, and set codec `xian-set-1`. BDS records this policy
 in database metadata and checks the RPC source's protected committed
 `__execution_policy` value before backfill or a reset. The RPC `/genesis` response
 does not include Xian's custom application genesis fields. A

@@ -45,6 +45,11 @@ Simulation runs contract calls without committing state. Configure it with:
 - `simulation_timeout_ms`
 - `simulation_max_chi`
 
+The node simulates with `min(simulation_max_chi, max_tx_chi)`: the operator
+setting can only lower the budget below the chain's per-transaction cap, and a
+governed fee-policy change applies on commit. The profile default of
+`simulation_max_chi` is 1,000,000, so by default the chain cap decides.
+
 Simulation is useful for wallets and SDKs, but it is operator-funded compute.
 Bound and rate-limit it on any exposed endpoint.
 
@@ -55,13 +60,15 @@ Bound and rate-limit it on any exposed endpoint.
 | `paid_metered` | sender covers the submitted chi limit; used chi is charged and fee rewards are produced |
 | `free_metered` | execution remains metered, but no native-token execution fee or fee-derived reward is created |
 
-`free_metered` requires explicit `free_tx_max_chi` and
-`free_block_max_chi` caps. It does not make execution unlimited.
+Both modes carry the same hard chi caps: `max_tx_chi` (default 200,000) bounds
+one transaction's `chi_supplied` and `max_block_chi` (default 500,000) bounds
+the block's total. `free_metered` does not make execution unlimited.
 
 The mode and caps are fixed in genesis as the hashed consensus state value
 `__fee_policy`. They are not node settings: `xian.toml` fee keys are rejected
-at startup, and `configure_node` accepts the fee options only together with
-`--genesis-bundle`.
+at startup, and `configure_node` accepts `--tx-fee-mode`, `--max-tx-chi` and
+`--max-block-chi` only together with `--genesis-bundle`. See
+[Chain Chi Caps](/concepts/chi#chain-chi-caps) for the rules and enforcement.
 
 ## Parallel Execution
 
@@ -85,6 +92,11 @@ fall back to serial execution. See [Parallel Block Execution](/concepts/parallel
 Xian application metrics and CometBFT metrics are separate endpoints. App
 metrics include runtime timing and, when BDS is enabled, indexer lag, queue,
 pool, spool, and storage posture.
+
+Inside the container the node serves application metrics on `0.0.0.0:9108`.
+The profile's `advanced.metrics.host` and `advanced.metrics.port` only choose
+where that port is published on the host (`XIAN_APP_METRICS_HOST` and
+`XIAN_APP_METRICS_PORT` in `xian-stack`, default `127.0.0.1:9108`).
 
 Use:
 

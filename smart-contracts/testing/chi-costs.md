@@ -27,7 +27,7 @@ output = client.executor.execute(
     contract_name="con_counter",
     function_name="increment",
     kwargs={},
-    chi=1_000_000,
+    chi=100_000,
 )
 
 assert output["status_code"] == 0
@@ -35,7 +35,9 @@ assert output["chi_used"] < 10_000
 ```
 
 Keep local assertions broad enough to detect regressions without treating one
-development-machine measurement as a network fee quote.
+development-machine measurement as a network fee quote. The local client's
+default budget is 100,000 chi, below the default chain cap of 200,000 chi per
+transaction.
 
 ## Node Estimate
 
