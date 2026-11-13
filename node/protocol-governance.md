@@ -98,6 +98,25 @@ duplicate keys, and direct writes to derived VM artifacts. To replace contract
 code, patch `contract_name.__source__`; the runtime derives canonical
 `__xian_ir_v1__`.
 
+The node also guards the chain settings it reads at startup:
+
+- `__execution_policy` and `__runtime_features.*` cannot be patched.
+- `__fee_policy` can be patched to change the fee mode or the chi caps, but
+  only to a policy node startup accepts: the canonical three-field object
+  described in [Chain Chi Caps](/concepts/chi#chain-chi-caps). A bundle with an
+  invalid, non-canonical or deleted fee policy is refused when the node loads
+  it, so it never appears in the bundle inventory and is never applied. The
+  new policy takes effect at the Commit of the activation block: transactions
+  in that block still run under the old caps, and from the next block every
+  node, running or restarted, admits, proposes, executes and simulates under
+  the new one.
+
+Example fee-policy change:
+
+```json
+{"key": "__fee_policy", "value": {"tx_fee_mode": "paid_metered", "max_tx_chi": 300000, "max_block_chi": 1000000}}
+```
+
 ## Activation
 
 During `finalize_block` at the activation height, the runtime applies a patch

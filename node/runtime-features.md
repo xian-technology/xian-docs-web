@@ -15,7 +15,8 @@ is no supported operator switch to a second engine or gas schedule.
 Network manifests can enable consensus-relevant features such as `zk`.
 Every validator must have the matching native backend before joining a chain
 that enables one. A feature mismatch is a startup or consensus safety problem,
-not a node-local preference.
+not a node-local preference. Features are fixed in genesis as hashed
+`__runtime_features.*` state; governed state patches cannot change them.
 
 ## Logging
 

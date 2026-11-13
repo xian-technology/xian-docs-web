@@ -102,7 +102,9 @@ everything after them. A valid policy keeps
 `0 < max_tx_chi <= max_block_chi <= 10,000,000`, and `max_tx_chi` must not
 exceed the VM's per-transaction ceiling (`runtime_info()["max_tx_chi"]`,
 1,000,000 chi). Genesis building and node startup both refuse a policy that
-breaks these rules.
+breaks these rules. A running chain changes the policy only through a
+[governed state patch](/node/protocol-governance#local-bundle), and nodes
+refuse a patch bundle whose policy breaks them.
 
 The caps are enforced at every stage. CheckTx rejects a transaction whose
 `chi_supplied` exceeds `max_tx_chi`. PrepareProposal packs transactions only
