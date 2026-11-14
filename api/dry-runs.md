@@ -47,7 +47,10 @@ flowchart TD
 
 ## Payload Shape
 
-The payload is JSON, encoded to hex:
+The payload is JSON, encoded to hex. An optional `nonce` (the nonce the
+transaction will be signed with) sizes the estimated envelope exactly; without
+it the simulator uses the sender's next committed nonce, which can differ when
+the sender has transactions waiting in the mempool:
 
 ```json
 {

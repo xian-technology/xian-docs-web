@@ -15,7 +15,9 @@ If execution runs out of chi, its state and events roll back.
 chi_used = (raw_meter_cost // 1000) + 5
 ```
 
-The result is capped by the submitted chi limit. In `paid_metered` mode, the
+The 5-chi base counts against the submitted chi limit: execution runs out of
+chi as soon as `chi_used` would exceed it, so `chi_used` never exceeds the
+limit and a transaction must supply its full cost, base included. In `paid_metered` mode, the
 sender must be able to cover that limit during admission and at execution.
 Execution reserves the full supplied budget at the entry chi rate; contracts
 can spend only the remaining native balance. Unused chi is refunded, leaving
@@ -37,9 +39,20 @@ The [governed reward split](/node/staking#rewards-and-commission) applies to
 the fee of every paid execution, successful or failed. A failed call earns no
 developer reward: the developer share goes to the validators, as it does for a
 contract without a developer. A sender whose balance cannot cover the failure
-fee is charged the whole balance, and exactly that amount is paid out. The
-failed receipt lists these payouts in `rewards` and `reward_records`. The
-native-token supply only shrinks by the governed burn share.
+fee is charged the whole balance, and exactly that amount is paid out; a
+negative balance is left as it is and pays nothing. A sender whose balance is
+not a number cannot pay: the transaction fails with `Sender balance is not a
+number.`, is charged nothing and leaves the balance untouched. The failed
+receipt lists the payouts in `rewards` and `reward_records`.
+
+Rewards are paid in full or not at all. If a reward input has a type it may
+not hold (a split that is not four numbers, a foundation owner, validator,
+reward key or developer that is not a string, a validator term that is not a
+number), an amount cannot be represented, or a recipient's balance is not a
+number, the transaction pays no rewards and its fee is burned. The
+transaction itself is unaffected, so the governance transaction that repairs
+the configuration still runs. The native-token supply only shrinks by the
+governed burn share and by fees burned this way.
 
 ## VM Costs
 
@@ -146,10 +159,11 @@ Contract balances and application-level payment rules remain unchanged.
 ## Estimate Before Submission
 
 Readonly simulation returns the measured `chi_used` without committing state.
-It includes source/argument bytes and a standard signed transaction envelope.
-Because simulation happens before signing and nonce reservation, the final
-envelope size can differ by a few bytes, well under one chi.
+It includes source/argument bytes and the signed transaction envelope as it
+will be submitted: the payload's `nonce` when the request gives one (else the
+sender's next committed nonce), and the estimate itself as `chi_supplied`.
 For the same chain state, execution charges exactly the simulated `chi_used`,
+and supplying one chi less runs out of chi,
 so xian-py and xian-js supply exactly that value, with no headroom, when a
 transaction omits an explicit chi limit (`estimate_chi`/`estimateChi` return it
 as `estimated`). Estimates can fail when a node disables simulation, caps it

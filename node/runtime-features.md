@@ -32,8 +32,10 @@ For `zk`:
   state-sync snapshot import and Commit refuse a zk-enabled state on such a
   node the same way.
 - While it is off, every transaction that deploys or calls a contract using zk
-  host syscalls (directly or through an import) fails with an ordinary failed
-  receipt and is charged for the chi it used. The chain keeps producing blocks
+  host syscalls (directly, through an import, or through
+  `importlib.import_module`) fails with an ordinary failed receipt and is
+  charged for the chi it used: every zk syscall fails while the feature is
+  off. The chain keeps producing blocks
   and other transactions are unaffected. Simulation reports the same failure.
   Shielded balances stay locked until zk is enabled again; they are not lost.
 
