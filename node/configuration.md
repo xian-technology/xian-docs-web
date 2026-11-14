@@ -84,7 +84,15 @@ Top-level Xian settings cover:
 - pending nonce reservation
 
 The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
-and spool behavior. See [Runtime Features](/node/runtime-features).
+and spool behavior. It is the only source of BDS settings: the node does not
+read `XIAN_BDS_*` environment variables and refuses to start, naming them, when
+one is set. The database password is never a `xian.toml` value. `[bds]
+password_file` names the file the node reads it from when it connects; by
+default that is `/run/secrets/xian_bds_password`, the secret that `xian-stack`
+and `xian-deploy` mount from one owner-only file into both the node and
+Postgres (`POSTGRES_PASSWORD_FILE`). A `[bds] password` key, or a `dsn` that
+carries a password, is rejected at startup. See
+[Runtime Features](/node/runtime-features).
 
 The transaction fee mode and the per-transaction and per-block chi caps are
 not `xian.toml` settings: they are the genesis fee policy `__fee_policy`,
@@ -96,14 +104,20 @@ limits can vary by node. The settings of the removed parallel executor
 
 ## Stack Credentials
 
-`xian-stack` creates a private, Git-ignored `.stack-secrets.env` for
-`XIAN_BDS_PASSWORD` and `XIAN_POSTGRAPHILE_PASSWORD`.
-`XIAN_STACK_SECRETS_ENV` selects a different path.
+`xian-stack` keeps the BDS password in its own private, Git-ignored file,
+`.stack-bds-password` (mode `0600`; `XIAN_BDS_PASSWORD_FILE` selects a
+different path). It is created with a random value on first use and is the
+only copy: Compose mounts it as `/run/secrets/xian_bds_password` into Postgres,
+the node and the GraphQL role setup. The PostGraphile password stays in the
+private, Git-ignored `.stack-secrets.env` (`XIAN_STACK_SECRETS_ENV` selects a
+different path); a credentials file that still holds `XIAN_BDS_PASSWORD`, or
+`XIAN_BDS_PASSWORD` in the environment, is refused with a message naming the
+new file.
 
-The file is literal data. Its current format stores values as JSON-quoted
-strings; a shared reader decodes them for the supported stack workflows.
-Nonempty environment values for either password take precedence over the stored
-value.
+The credentials file is literal data. Its current format stores values as
+JSON-quoted strings; a shared reader decodes them for the supported stack
+workflows. A nonempty `XIAN_POSTGRAPHILE_PASSWORD` environment value takes
+precedence over the stored value.
 
 Use the supported `xian` node commands, or run
 `python3 ./scripts/backend.py ...` from the stack checkout. Do not source this

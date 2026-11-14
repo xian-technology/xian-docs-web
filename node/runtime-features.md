@@ -132,6 +132,10 @@ BDS is the optional Postgres-backed history index. Its settings cover:
 - contiguous-height catch-up and trusted RPC source
 - local recovery spool and disk warning thresholds
 
+These settings live only in the `[bds]` table of `xian.toml`; the password is
+read from the file named by `[bds] password_file`. See
+[Configuration](/node/configuration).
+
 BDS does not change consensus. Its results can lag finalized state. Use direct
 ABCI state queries for authoritative current values and BDS for history,
 events, portfolios, candles, shielded feeds, and projections.
