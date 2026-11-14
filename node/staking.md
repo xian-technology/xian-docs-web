@@ -47,7 +47,11 @@ as:
 | contract developers | 30% |
 
 The on-chain value is ordered as `[validators, burn, foundation, developers]`.
-Each ratio must be non-negative and the four ratios must sum to one. Active
+Each ratio must be non-negative and the four ratios must sum to one. The
+runtime pays no rewards (and burns the fee) for a split whose paid ratios are
+negative or exceed one in total, and never pays out more than the fee: shares
+are truncated and the dust is burned with the burn share
+([Chi](/concepts/chi)). Active
 validators can change the split through a `reward_change` governance vote, so a
 network may later enable burn or foundation funding without a runtime upgrade.
 

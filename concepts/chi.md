@@ -52,7 +52,18 @@ number), an amount cannot be represented, or a recipient's balance is not a
 number, the transaction pays no rewards and its fee is burned. The
 transaction itself is unaffected, so the governance transaction that repairs
 the configuration still runs. The native-token supply only shrinks by the
-governed burn share and by fees burned this way.
+governed burn share (with its rounding dust) and by fees burned this way.
+
+Fee and reward arithmetic uses the contract decimal type (30 fractional
+digits; products and quotients truncated toward zero). The fee is
+`chi_used / chi_rate`. Each share of it is computed from the paid chi
+(proportional shares as `amount × weight ÷ total weight` with one truncation,
+the last participant of a split taking what is left, the foundation share
+rounded down to 8 places) and divided by the chi rate. So the payouts never
+exceed the fee, none is negative, and what is not paid out (the governed burn
+share plus the truncation dust) is burned: paid out plus burned equals the fee
+exactly. A split whose validator, foundation and developer ratios are negative
+or sum to more than one pays no rewards (the fee is burned).
 
 ## VM Costs
 
