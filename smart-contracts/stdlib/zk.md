@@ -71,7 +71,8 @@ contracts instead of designing a new protocol from the helpers alone.
 ## Node Requirement
 
 A chain with the `zk` runtime feature requires the native verifier on every
-validator. `xian-abci` fails closed when the required backend is unavailable.
+validator. The VM (`xian-tech-vm-core`) links it, so every current node build
+has it; `xian-abci` fails closed when the backend is unavailable.
 `zk.is_available()` is useful for tests and tooling, not for treating verifier
 availability as optional during consensus.
 

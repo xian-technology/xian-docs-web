@@ -24,8 +24,9 @@ block after the activation block, on running and restarted nodes alike.
 
 For `zk`:
 
-- Before a patch enables it, every validator must install the native zk
-  verifier (`xian-tech-abci[zk]`). A node without it refuses to apply the patch
+- Before a patch enables it, every validator must run a VM
+  (`xian-tech-vm-core`) that links the native zk verifier; current builds
+  always do. A node without it refuses to apply the patch
   and halts at the activation block before computing that block's state root;
   it resumes once the verifier is installed and the node restarted. Startup,
   state-sync snapshot import and Commit refuse a zk-enabled state on such a
