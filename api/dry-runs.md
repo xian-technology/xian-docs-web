@@ -4,8 +4,11 @@ Xian supports dry runs through the `simulate_tx` ABCI query path. This executes
 contract logic against the node's committed application state and then drops
 the simulated writes.
 
-Operationally, the node handles dry runs through a bounded subprocess worker so
-free simulation does not run inside the main validator execution path.
+A dry run executes with the same Rust code a block uses: the node forks its
+pending state when the query arrives, runs the call on a worker thread without
+holding up block processing, and drops the fork. The chi budget bounds the
+work; the node's concurrency cap and timeout bound how many run and how long a
+query waits.
 
 ## Query Path
 
@@ -29,8 +32,8 @@ flowchart TD
   SDK["SDK or caller builds JSON payload"]
   Encode["Hex-encode simulate_tx payload"]
   Query["CometBFT abci_query"]
-  Worker["Bounded simulation subprocess"]
-  Runtime["xian_vm_v2 against committed application state"]
+  Worker["Fork of the node's pending state (worker thread)"]
+  Runtime["Rust block executor rules (xian_vm_v2), metered, no fee reservation"]
   Drop["Drop simulated writes"]
   Result["Return status, chi_used, result, and write preview"]
 
@@ -159,7 +162,9 @@ What these keys do:
 
 - `simulation_enabled`: turn the `simulate_tx` query path on or off
 - `simulation_max_concurrency`: maximum concurrent dry runs accepted by this node
-- `simulation_timeout_ms`: wall-clock timeout for one dry run worker
+- `simulation_timeout_ms`: how long a dry run query waits for its answer (the
+  run itself is bounded by its chi budget and keeps its concurrency slot until
+  it finishes)
 - `simulation_max_chi`: optional operator cap on the readonly chi budget
 
 By default the node simulates with `max_tx_chi`, the chain's
