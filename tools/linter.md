@@ -124,7 +124,7 @@ The standalone package supports three modes:
 |------|----------------|
 | `python` | V1 compiler diagnostics and PyFlakes warnings (compatibility mode) |
 | `xian_vm_v2` | default mode with V2 compiler diagnostics, PyFlakes warnings and native IR validation |
-| `xian_vm_v1` | historical compiler and VM profile for V1 sources |
+| `xian_vm_v1` | historical V1 compiler profile for V1 sources (current nodes do not execute V1) |
 
 The VM mode is linting only. It does not execute the contract or simulate
 storage, imports, environment values, or host syscalls. Use runtime tests or

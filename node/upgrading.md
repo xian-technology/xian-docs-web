@@ -60,9 +60,9 @@ message.
 Only exported functions are allowed as external V2 entrypoints.
 Constructors run through the trusted deployment path. Code-hash requests reject
 unsupported `kind` selectors instead of treating them as source-hash requests.
-These execution checks do not change the gas, bytecode or set-codec identifiers. Low-level native
-V1 retains revision 7 for historical verification and migration; it is not a
-current node execution policy.
+These execution checks do not change the gas, bytecode or set-codec identifiers. Current code
+does not execute V1; historical V1 execution (revision 7) uses the pinned older
+release.
 
 This revision starts a fresh local chain; it does not migrate an earlier
 database or activate a second VM at a block height. Preserve earlier state and

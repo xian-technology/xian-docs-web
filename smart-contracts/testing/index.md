@@ -12,8 +12,8 @@ state and transaction context for fee estimates.
 
 `ContractingClient` rejects an explicit V1 profile or an injected V1 driver with
 `ValueError`. Use fresh V2 storage for supported local tests.
-Low-level native V1 tooling is reserved for historical verification and
-migration; a V1 profile is not a local-client compatibility mode. Proxies expose
+Current code does not execute V1 contracts; a V1 profile is not a local-client
+compatibility mode. Proxies expose
 the same exported functions that a transaction can call. Test private helpers
 through an exported function.
 

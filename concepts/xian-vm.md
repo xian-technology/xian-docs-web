@@ -12,13 +12,13 @@ on the same native VM as the fresh chain; there is no current CPython contract
 executor.
 
 For offline compilation in Python, use `compile_contract_source` or
-`build_contract_artifacts` from `contracting.artifacts`. Low-level native V1
-compilation, encoding, storage and VM bindings remain available for historical
-verification and migration tools. They do not provide a V1 public local client.
-Historical Python comparisons use immutable observations captured with pinned
-archived packages.
+`build_contract_artifacts` from `contracting.artifacts`. V1 compilation, IR
+validation and encoding remain for migration and archival tooling; current code
+does not execute V1 contracts (historical V1 execution uses the pinned older
+release). Historical Python comparisons use immutable observations captured
+with pinned archived packages.
 
-Both native profiles use the IR envelope `xian_ir_v1`. The `vm_profile` field
+Both profiles use the IR envelope `xian_ir_v1`. The `vm_profile` field
 identifies the execution rules. Network SDKs default to V2 and retain explicit
 V1 encoding for historical signed-payload fixtures.
 
