@@ -81,7 +81,7 @@ The builtin allowlist is intentionally small:
 ```text
 Exception False None True abs all any ascii bin bool bytearray bytes chr
 decimal dict divmod filter format frozenset hex import int isinstance issubclass len
-list map max min mul_div_ceil mul_div_floor oct ord pow quantize range reversed set sqrt sorted str sum tuple zip
+list map max min mul_div_ceil mul_div_floor oct ord pow quantize range reversed round set sqrt sorted str sum tuple zip
 ```
 
 Everything else is treated as forbidden.

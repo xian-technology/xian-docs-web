@@ -25,6 +25,20 @@ random.choices(items, k=k)
 
 Call `random.seed()` before using the module in a transaction.
 
+`random.random()` returns a decimal in `[0, 1)` with 30 fractional digits:
+`randbelow(10**30) / 10**30`, drawn from the same deterministic stream as
+`random.randrange(10**30)`. Python's `random()` returns a 53-bit binary float;
+Xian has no floats, so its `random()` is an exact decimal you can store,
+compare, multiply or `round()` like any other decimal:
+
+```python
+random.seed()
+chance = random.random()            # e.g. 0.341585206632285841914278737654
+if chance < decimal("0.25"):
+    ...
+percent = round(chance * 100, 2)    # a decimal with 2 places
+```
+
 The base seed is derived from:
 
 - `chain_id`

@@ -23,8 +23,9 @@ integer −1. Exported `int` parameters require an integer. Exported `decimal`
 parameters accept a decimal or an integer that fits exactly. These numeric
 rules apply even without `@export(typecheck=True)`, including numeric members
 of annotated containers. Plain strings require explicit conversion. Boolean
-values are separate from numbers. Binary floats, Python's Decimal class, NaN
-and infinity are outside this profile.
+values are separate from numbers. Contracts have one number model, integers and
+decimals: there are no binary floats (`float()` is unavailable), no Python
+`Decimal` class, no NaN and no infinity.
 
 ## Operators and helpers
 
@@ -38,11 +39,16 @@ and infinity are outside this profile.
 | `mul_div_floor(a, b, d)`, `mul_div_ceil(a, b, d)` | Three integers with `d > 0`. Compute the full product before division. Return the floor or ceiling as an integer. |
 | `sqrt(x)` | Nonnegative integer or decimal. Return the greatest representable decimal whose square is at most `x`. |
 | `quantize(x, places, mode)` | Round an integer or decimal to `places` fractional places and return a decimal. `places` is an integer from 0 to 30 inclusive. |
+| `round(x)`, `round(x, n)` | Python's `round`, half to even. `round(decimal)` is an integer; `round(decimal, n)` a decimal with `n` places (`n` may be negative; more than 30 changes nothing); `round(integer)` the integer; `round(integer, n)` an integer (negative `n` rounds to tens, hundreds, ...). `n` is an integer or `None`; booleans are refused. |
 
 Use `"toward_zero"` to discard the remainder, `"floor"` for the lower
 multiple, `"ceil"` for the higher multiple and `"half_even"` for the nearest
 multiple with ties going to the even coefficient. Spell out the mode in
-contract code. There is no `round()` builtin. Decimal display formatting also truncates discarded digits toward zero. To display a price rounded half-even, use `f'{quantize(price, 2, "half_even"):.2f}'`.
+contract code. `round(x, n)` equals `quantize(x, n, "half_even")` for 0 to 30
+places and, like Python, also takes negative places and integers:
+`round(2.5)` is 2, `round(3.5)` is 4, `round(1.005, 2)` is 1,
+`round(125, -1)` is 120. A result outside the number ranges fails the call.
+Decimal display formatting also truncates discarded digits toward zero. To display a price rounded half-even, use `f'{quantize(price, 2, "half_even"):.2f}'`.
 
 `str(x)` of a decimal is plain fixed-point text: no exponent, no trailing
 fractional zeros, and `0` for zero. `str(decimal("1000.50"))` is `"1000.5"`
