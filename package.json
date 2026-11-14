@@ -11,7 +11,7 @@
     "build": "vitepress build",
     "preview": "vitepress preview"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "mermaid": "^12.3.0",
     "vitepress": "2.0.0-alpha.21"
