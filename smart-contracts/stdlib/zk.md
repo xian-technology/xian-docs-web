@@ -73,8 +73,11 @@ contracts instead of designing a new protocol from the helpers alone.
 A chain with the `zk` runtime feature requires the native verifier on every
 validator. The VM (`xian-tech-vm-core`) links it, so every current node build
 has it; `xian-abci` fails closed when the backend is unavailable.
-`zk.is_available()` is useful for tests and tooling, not for treating verifier
-availability as optional during consensus.
+`zk.is_available()` reports whether the chain's `zk` runtime feature is on:
+it returns `False` while governance has switched zk off, when every other zk
+call fails. A contract reached without zk preparation (through
+`importlib.import_module`) can use it to degrade gracefully; it is not a way
+to treat the verifier as optional on a chain that enables zk.
 
 ## Security Requirements
 
