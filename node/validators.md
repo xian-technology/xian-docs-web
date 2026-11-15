@@ -86,6 +86,47 @@ would select nobody is rejected, while epoch and evidence-triggered rebalances
 that would select nobody keep the current set. Evidence still slashes the last
 active validator but does not jail it.
 
+## Liveness and Activation Limits
+
+Two rules keep validators that never sign from halting the chain (CometBFT
+needs more than 2/3 of the voting power to commit a block).
+
+**Newcomer power cap.** In `auto_top_n` and `hybrid` mode a rebalance admits
+newcomers (into empty seats and as replacements, within
+`max_active_set_churn`) only while their combined power stays within
+`max_new_power_bps` of the new set's power. Even if every newcomer of a
+rebalance never comes online, the incumbents keep the rest of the power. With
+equal power and the 20% cap, a set of fewer than four validators therefore does
+not grow automatically; governance grows it with `add_member`, which the cap
+does not limit. While a set has fewer than four validators each newcomer holds
+a third or more of the power, so one that never signs halts the chain: approve
+only candidates whose node is already synced with the registered consensus
+key.
+
+**Downtime jailing.** Every block, FinalizeBlock reads the votes of the
+decided last commit (part of the agreed block, so every node sees the same
+votes). When an active validator's signature is absent, or a missed-block
+count is open, the unmetered system transaction
+`validators.record_liveness(absent)` counts consecutive misses per validator
+(a signature or a nil vote resets the count; `missed_blocks` in the
+validator record). At `downtime_jail_blocks` consecutive misses the validator
+is jailed through the evidence penalty path with infraction `DOWNTIME`,
+slashed by `downtime_slash_bps`, and its power drops at the next block. Nobody
+is jailed while more than a third of the active power is absent at once (a
+partition, not one validator's downtime), and never the last active
+validator.
+
+A validator jailed for downtime lifts the jail itself with `unjail()` once
+`downtime_unjail_cooldown_hours` have passed since the jail; other jails are
+lifted only by governance. After `unjail()` it is an approved candidate
+again: governance re-adds it with `add_member` in `manual` mode, and the
+capped rebalance re-selects it in `auto_top_n`/`hybrid` mode.
+
+If validators holding a third or more of the power stop at once, no block
+commits and no transaction can repair the set; the remaining operators
+restart the chain with a recovery genesis (see
+[Halt Recovery](/node/validator-operations-runbook#halt-recovery)).
+
 `add_member`, `remove_member` and `jail_member` proposals are re-checked when
 they finalize. A proposal whose target is no longer eligible (a jailed
 candidate, an already removed or jailed member, or the last active validator)
@@ -111,8 +152,13 @@ most 13 active validators, equal power, a minimum self bond of 100,000 XIAN
 and a minimum total bond of 500,000 XIAN (required for `add_member`), a
 720-block rebalance interval and a one-epoch activation delay for a later
 switch to automatic selection, and a churn limit of one newcomer per
-rebalance. These values remain launch inputs until an accepted operator
-manifest is published.
+rebalance. Newcomers add at most 20% of the power per rebalance
+(`max_new_power_bps` 2000), a validator is jailed after 500 consecutive
+missed blocks (`downtime_jail_blocks`; about 40 minutes at the idle 5 s block
+interval, less under load), downtime is not slashed (`downtime_slash_bps` 0)
+and a downtime jail can be lifted after 24 hours
+(`downtime_unjail_cooldown_hours`). These values remain launch inputs until
+an accepted operator manifest is published.
 
 ## Governance and Overrides
 
@@ -127,9 +173,10 @@ See [Protocol Governance](/node/protocol-governance) for the proposal model.
 ## Planned Exit
 
 `announce_leave()` starts the leave delay. `leave()` removes the validator,
-refunds the registration bond, and converts self-bond and delegations into
-pending unbonds. Stake becomes claimable only after the configured unbonding
-period.
+refunds the registration bond, and converts the self bond into a pending
+unbond. Delegations stay in the validator's pool (earning nothing) until each
+delegator undelegates; their unbonding clock starts at the exit. Stake becomes
+claimable only after the configured unbonding period.
 
 Use the [Validator Operations Runbook](/node/validator-operations-runbook) for
 the reviewed checklist and [Staking Mechanics](/node/staking) for value flows.

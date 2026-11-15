@@ -37,6 +37,10 @@ cannot register that consensus identity.
    profile metadata.
 6. Add self-bond/delegation required by policy.
 7. Complete manual approval or wait for hybrid/auto eligibility and rebalance.
+   Voters first confirm that the candidate's node is synced and runs the
+   registered consensus key: in a set of fewer than four validators one
+   newcomer that does not sign holds a third or more of the power and halts
+   the chain (see [Halt Recovery](#halt-recovery)).
 8. Confirm the account is in `get_active_validators()`, has the expected power,
    and participates in consensus.
 
@@ -68,6 +72,14 @@ After jail, confirm the flag, reason, zero active power, and removal from the
 active set. Unjail only clears the jail flag; activation still follows the
 network's selection policy.
 
+A validator absent from `downtime_jail_blocks` consecutive commits is jailed
+with reason `downtime` (infraction `DOWNTIME`, slashed by `downtime_slash_bps`)
+by the runtime, not by a vote. Once the node signs again and
+`downtime_unjail_cooldown_hours` have passed, the operator calls `unjail()`
+from the validator account; in `manual` mode governance then re-adds it with
+`add_member`. Check `missed_blocks` in the validator record to see an open
+count before it reaches the window.
+
 Runtime evidence supports `DUPLICATE_VOTE` and `LIGHT_CLIENT_ATTACK`.
 `apply_evidence_penalty` is runtime-owned. Record the evidence ID/type/height,
 policy rate, affected self-bond/delegations/pending unbonds, destination
@@ -98,18 +110,75 @@ buckets against its charged fee.
 ## Incident Boundary
 
 - If the chain finalizes consistently, prefer a governed forward patch.
-- If finalization stops or app hashes diverge, stop and coordinate a recovery
-  plan.
+- If finalization stops because validators holding a third or more of the
+  power are offline, follow [Halt Recovery](#halt-recovery).
+- If app hashes diverge, stop and coordinate a recovery plan.
 
 Preserve logs, heights, app hashes, runtime versions, snapshot checksums,
 proposal/vote data, and transaction hashes. Freeze unrelated governance until
 the incident is reconciled.
 
+## Halt Recovery
+
+When validators holding a third or more of the voting power stop signing at
+once, CometBFT commits no further block: downtime jailing and governance both
+need a committed block, so nothing on chain can repair the set. Signs: every
+online node stays at the same height, the consensus state shows rounds
+increasing with precommits below 2/3, and the app hashes of the last
+committed height agree (if they differ, this is not a halt from offline power;
+do not use this procedure).
+
+The online operators restart the chain from its last committed state with
+only the validators that still run. The recovery genesis keeps the chain id
+and the state; it starts two heights after the export, skipping the height
+the halted chain was voting on, so no height carries votes of both chains.
+
+1. **Agree off chain** on the validators to keep (the online ones, together
+   holding all the power of the new set), one genesis time in UTC later than
+   the last block, and the halted height. Every kept validator must take part.
+2. **Stop and back up.** Each kept operator stops its node and copies the whole
+   node home (`config/`, `data/`, the Xian state directory) aside.
+3. **Export.** Each runs `xian-export-state --output-path <home>/recovery`
+   against the stopped node's state. Compare the `hash` and `number` of every
+   `exported_state.json`: they must be identical (the root of the last
+   committed height). An operator whose node lags re-syncs first.
+4. **Build the genesis.** Each runs
+   `xian-recovery-genesis --exported-state <home>/recovery/exported_state.json
+   --chain-id <chain id> --genesis-time <agreed time> --keep <key> [--keep
+   <key> ...] --output <home>/recovery/genesis.json` and publishes the SHA-256
+   of the file; all digests must match. The tool refuses a tampered export, a
+   validator that is not active, and a genesis time before the last block. The
+   validators not kept become approved, jailed for downtime (power 0) at the
+   genesis time.
+5. **Install.** Each replaces `config/genesis.json` with the recovery genesis,
+   deletes everything in `data/` except `priv_validator_state.json` (keep it:
+   it is what prevents double signing), deletes the Xian state directory, and
+   starts the node.
+6. **Verify.** The first block is the export's height + 2, every node reports
+   the same height and app hash, the active set is the kept validators, and
+   the others are jailed with reason `downtime`.
+7. **Offline validators return** only after wiping the halted chain's data
+   (keeping their keys and `priv_validator_state.json`) and syncing the
+   recovery genesis; then they `unjail()` after the cooldown and are re-added
+   by governance in `manual` mode.
+
+A BDS indexer keeps its database: it continues with the recovered chain's
+first block (the skipped height has no block). The history before the halt
+lives in the BDS databases and the node-home backups, not in the recovered
+nodes' block stores.
+
+Rehearsed on a four-validator localnet: after one validator was jailed for
+downtime, a second one stopped and the chain halted at height 156; the two
+remaining operators built byte-identical recovery genesis files, kept their
+`priv_validator_state.json`, and the chain committed height 158 within seconds
+of the restart and went on with them. The stopped validator, restarted with
+its old data, stayed at 156 and caused no evidence or jail.
+
 ## Rehearsal
 
 Exercise onboarding, bond/delegation, unbond/claim, leave, jail/unjail,
-evidence idempotency, slashing, policy and reward-split changes, state patching,
-and snapshot recovery on the pinned
+downtime jailing, evidence idempotency, slashing, policy and reward-split
+changes, state patching, snapshot recovery, and halt recovery on the pinned
 [5-Validator Localnet E2E](/node/localnet-e2e) release state.
 
 Do not treat a single-node green test as a public-network rehearsal.
