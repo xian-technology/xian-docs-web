@@ -59,7 +59,7 @@ Use linter 0.4.3 with the [V2 compiler and VM checkout](/getting-started/dev-env
 ```bash
 git clone https://github.com/xian-technology/xian-linter.git
 cd xian-linter
-git checkout --detach 917149537bda442d9e3fd48a4dc4ab3d187ed2a5
+git checkout --detach 3617a3f131c25279f29fb0562826f957eb633cc0
 uv sync --frozen --extra server
 ```
 

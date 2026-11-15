@@ -98,7 +98,7 @@ and current native crates declare that minimum. The fresh-chain language ships i
 ```bash
 git clone https://github.com/xian-technology/xian-contracting.git
 cd xian-contracting
-git checkout --detach 4f354fd750c97e14fcd4ca2bb5a8816de63d326c
+git checkout --detach 12519e3d518dd055e60345777a61c507b5ea9d1f
 uv sync --frozen --group dev
 uv run --no-sync python -c 'from xian_compiler_core import compiler_version; assert compiler_version()["vm_profile"] == "xian_vm_v2"'
 ```
