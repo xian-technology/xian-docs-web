@@ -79,8 +79,10 @@ xian client tx submit-source ./contracts/con_counter.s.py \
   --mode commit
 ```
 
-`xian contract build-artifacts` is for offline inspection and CI. The node
-does not accept those artifacts as the executable deployment payload.
+`xian contract build-artifacts` is for offline inspection and CI. It calls the
+Rust compiler core directly, so its artifact is byte-identical to the one the
+IDE's WebAssembly compiler builds. The node does not accept those artifacts as
+the executable deployment payload.
 
 Prefer environment variables or protected key files over command-line private
 keys, which can leak through shell history and process listings.

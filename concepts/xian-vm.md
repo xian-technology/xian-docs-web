@@ -11,8 +11,12 @@ in Rust. The fresh-chain node and the Python `ContractingClient` require
 on the same native VM as the fresh chain; there is no current CPython contract
 executor.
 
-For offline compilation in Python, use `compile_contract_source` or
-`build_contract_artifacts` from `contracting.artifacts`. V1 compilation, IR
+For offline compilation in Python, use `compile_contract_artifact` or
+`compile_contract_source` from `xian_compiler_core` (package
+`xian-tech-compiler-core`); `contracting.artifacts` offers the same operations
+(`build_contract_artifacts`, `compile_contract_source`) for runtime code and
+delegates to it. The compiler's WebAssembly build returns byte-identical
+artifacts. V1 compilation, IR
 validation and encoding remain for migration and archival tooling; current code
 does not execute V1 contracts (historical V1 execution uses the pinned older
 release). Historical Python comparisons use immutable observations captured

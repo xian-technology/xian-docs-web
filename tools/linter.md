@@ -2,22 +2,27 @@
 
 Xian has two related linting surfaces:
 
-- the core contract linter in `xian-contracting`
-- the optional standalone `xian-linter` HTTP service
+- the Rust compiler core's diagnostics (`xian-tech-compiler-core`, also built
+  to WebAssembly as `@xian-tech/compiler` for the IDE and the playground)
+- the optional standalone `xian-linter` package and HTTP service
 
 Both use the Rust `xian-compiler-core` as the authoritative contract-language
-and diagnostic surface. The standalone package runs PyFlakes and validates the V2 IR in the native VM by default.
+and diagnostic surface. The standalone package calls it directly, adds PyFlakes
+warnings and validates the compiled V2 IR with the native VM's validator
+(`xian-tech-vm-core`) by default. It does not install the contract runtime
+package `xian-tech-contracting`.
 
 The published PyPI package name for the standalone service is
 `xian-tech-linter`. The import package and console command remain
 `xian_linter` and `xian-linter`.
 
-## Using The Core Linter
+## Using The Compiler Diagnostics
 
-Use `diagnose_contract_source` when you are already inside Python:
+Use `diagnose_contract` from the compiler package when you are already inside
+Python:
 
 ```python
-from contracting.artifacts import diagnose_contract_source
+from xian_compiler_core import diagnose_contract
 
 source = """
 balances = Hash(default_value=0)
@@ -29,16 +34,15 @@ def transfer(amount: decimal, to: str):
     balances[to] += amount
 """
 
-errors = diagnose_contract_source(
-    module_name="con_example",
-    source=source,
-)
+errors = diagnose_contract("con_example", source)
 
 for error in errors:
     print(error["code"], error.get("range"), error["message"])
 ```
 
-The compiler returns structured diagnostics with:
+`contracting.artifacts.diagnose_contract_source(module_name=..., source=...)`
+returns the same list for code that already uses the contract runtime. The
+compiler returns structured diagnostics with:
 
 - `code`
 - `message`
