@@ -22,6 +22,7 @@ never runs one V2 transaction past 1,000,000 chi; see
 | submitted transaction | 1 per byte |
 | returned value | 25 per encoded byte, as a write |
 | cross-contract dispatch | 10,000 per call, plus called work |
+| contract deployment | 15,000,000 plus 100 per submitted source byte, charged before compiling (a source that fails to compile pays it too) |
 
 VM computation and host operations use deterministic policy constants, not
 measured execution time. The current runtime supports `xvm-gas-6`; it does not

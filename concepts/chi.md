@@ -74,6 +74,7 @@ or sum to more than one pays no rewards (the fee is burned).
 | submitted transaction bytes | 1 raw unit per byte |
 | returned value bytes | 25 raw units per encoded byte (less than 128 KiB) |
 | base transaction cost | 5 chi |
+| contract deployment, charged before compiling | 15,000,000 raw units plus 100 per submitted source byte |
 | initial paid-mode conversion in the canonical bundles | 20 chi per native-token unit |
 
 The VM has a fixed compute and host-operation gas schedule. Cross-contract calls

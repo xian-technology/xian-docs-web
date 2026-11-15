@@ -39,7 +39,9 @@ the stored VM IR with the canonical Rust compiler and reject submitted
 - source is compiled by the authoritative Rust compiler on every validator
 - compiler admission allows at most 128 KiB source, 50,000 syntax nodes,
   nesting depth 64, 100,000 tokens total, and 4,096 tokens per logical line
-  (an f-string counts one token per character of its content)
+  (an f-string counts one token per character of its content); its
+  whole-program analyses take work linear in the source and stop at
+  1,000,000 work units
 - child deployments use the same submission surface
 
 ## Low-level Deployment Helpers
@@ -124,7 +126,10 @@ Deployment is metered too. The cost is not only the final state writes.
 
 Deployment accounting includes:
 
-- submission analysis, source normalization, and VM compilation work
+- submission analysis, source normalization, and VM compilation work:
+  15,000,000 raw units (15,000 chi) plus 100 per submitted source byte,
+  charged before the source is compiled, so a source that fails to compile
+  pays for its compilation too
 - stored source and VM IR size
 - metadata writes
 - constructor execution
