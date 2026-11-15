@@ -93,6 +93,11 @@ xian network join validator-1 \
 xian node init validator-1
 ```
 
+Before `xian node init`, set `advanced.cometbft.external_address` in the new
+profile (`nodes/validator-1.json`) to the public `host:26656` other nodes can
+dial, so peer exchange can spread this node's address; see
+[Node Profiles](/node/profiles). The bootstrap node needs it as well.
+
 Verify the manifest, genesis hash, image digests, peers, snapshot trust, chain
 ID, and operator contact process before starting. The current codebase has no
 active public testnet or mainnet; the checked-in mainnet manifest is a rehearsal

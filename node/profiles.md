@@ -73,6 +73,17 @@ and port on which the node's application metrics are published (default
 host needs the stack's public-metrics opt-in; see
 [Public Exposure](/node/configuration#public-exposure).
 
+`advanced.cometbft.external_address` is the `host:port` other nodes dial to
+reach this node (CometBFT `p2p.external_address`), for example
+`validator-1.example.org:26656`. Set it on every node that accepts inbound
+peers. Without it CometBFT advertises its listen address `0.0.0.0:26656`,
+which no peer's address book accepts, so peer exchange never spreads the node's
+address: nodes then know only the seeds and persistent peers they were given,
+and a network whose nodes all joined through one bootstrap seed depends on that
+node to stay connected. The value is re-rendered into `config.toml` on every
+`xian node init` and `xian-deploy` deploy, so set it in the profile rather than
+editing `config.toml`.
+
 Numeric polling intervals, metrics refresh intervals and nonce-expiry settings
 must be finite numbers. Profile validation rejects `NaN`,
 infinity and numbers too large to represent as finite runtime settings.
