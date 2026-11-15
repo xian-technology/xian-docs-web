@@ -59,10 +59,11 @@ def test_only_owner_can_reset(client):
         counter.reset(signer="alice")
 ```
 
-Run it:
+Run it from the checkout's environment, naming the file (a bare `pytest` there
+runs the checkout's own test suite):
 
 ```bash
-uv run pytest -q
+uv run --no-sync pytest -q test_counter.py
 ```
 
 `Variable` stores durable contract state. `@construct` runs once at deployment,
