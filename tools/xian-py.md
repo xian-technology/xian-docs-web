@@ -17,8 +17,10 @@ uv run --no-sync python -c 'from xian_py import XianClientConfig; print(XianClie
 
 Optional extras include `hd` for mnemonic/HD wallets, `eth` for
 Ethereum-style key helpers, `app` for application examples, and `compile` for
-offline compiler inspection. Contract deployment itself does not need the
-`compile` extra because validators compile submitted source.
+offline compiler inspection (it adds the Rust compiler core,
+`xian-tech-compiler-core`; use `xian_compiler_core.compile_contract_artifact`).
+Contract deployment itself does not need the `compile` extra because validators
+compile submitted source.
 
 ## Read and Submit
 
