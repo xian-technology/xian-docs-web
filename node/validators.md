@@ -129,7 +129,8 @@ validator stays jailed until it calls again in a later epoch. Without a free
 seat the jail is lifted and the validator waits as an approved candidate.
 Evidence and governance jails keep their path: governance lifts them, and the
 validator returns as an approved candidate (re-added by `add_member` in
-`manual` mode, re-selected by the next rebalance otherwise).
+`manual` mode, re-selected by the next rebalance otherwise). A governance `jail_member` cannot use the reason `downtime`, which marks a
+runtime downtime jail.
 
 With equal power and the 20% cap a validator re-enters directly only into a
 set of at least four active validators (its 10 of 50 power is the cap); in a
