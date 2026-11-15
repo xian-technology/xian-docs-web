@@ -34,7 +34,12 @@ changes chi for the same transactions, so each requires a new chain. Revision
 LMDB stores: a write with a longer key now fails its transaction instead of
 halting the chain when the block commits. It changes which transactions
 succeed, so it also requires a new chain. Revision 14 keeps the gas schedule
-and reads a `{"__delta__": ...}` transaction argument only as `[days, seconds]`,
+identifier `xvm-gas-6` but changes three charges: the 5-chi base now counts
+against the submitted chi limit (a transaction must supply its full cost, see
+[Chi accounting](/concepts/chi#accounting)), a builtin set method on a
+referenced set charges one copy of its members instead of two, and formatting a
+referenced value no longer charges a copy that is not made. It reads a
+`{"__delta__": ...}` transaction argument only as `[days, seconds]`,
 two integers, the form the encoder writes: the earlier decoder also accepted a
 two-character string or the two keys of an object. A transaction with an
 argument spelled that way is now rejected as not canonical. Revision 14 also
@@ -47,7 +52,11 @@ stored bytes instead of its receipt JSON, in which a datetime looked like its
 text and bytes like equal text, so different states could share an app hash.
 Revision 14 also pays out the fee of a failed paid transaction through the
 [governed reward split](/node/staking#rewards-and-commission) instead of
-debiting it without a recipient (see [Chi accounting](/concepts/chi#accounting)).
+debiting it without a recipient (see [Chi accounting](/concepts/chi#accounting)),
+returns [`random.random()`](/smart-contracts/stdlib/random) as an exact decimal
+with 30 fractional digits instead of failing on a binary float, and admits
+[`round()`](/smart-contracts/numbers#operators-and-helpers) on integers and
+decimals.
 These changes alter transaction outcomes and app hashes, so revision 14
 requires a new chain as well.
 
