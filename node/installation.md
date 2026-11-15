@@ -106,7 +106,11 @@ covers a fresh operator-managed testnet, a separate treasury funded through the
 standard genesis bundle, and a verified public handoff. Share the
 [participant guide](https://github.com/xian-technology/xian-ai-guides/blob/main/testnet-join-agent.md)
 with that handoff to join a full node and optionally request validator admission.
-These guides do not identify an already-live public network.
+These guides do not identify an already-live public network. Their worked pins
+are the archived V1 release (stack v0.3.3, `xian_vm_v1`) and its controller
+CLI; the current CLI and node build V2 genesis (`xvm-execution-14`) and reject
+the guides' V1 flags. For a network built from the current code, follow the
+commands on this page and record your own release pins.
 Both guides default to BDS/PostgreSQL, read-only GraphQL/GraphiQL, and the node
 dashboard, with private host bindings and serial transaction execution.
 The pinned Ansible runtime deploys BDS and the dashboard; the guides include
