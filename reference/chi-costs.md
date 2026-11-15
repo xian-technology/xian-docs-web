@@ -20,7 +20,7 @@ never runs one V2 transaction past 1,000,000 chi; see
 | storage read | 2 per encoded key/value byte |
 | storage write | 25 per encoded key/value byte |
 | submitted transaction | 1 per byte |
-| returned value | 1 per byte |
+| returned value | 25 per encoded byte, as a write |
 | cross-contract dispatch | 10,000 per call, plus called work |
 
 VM computation and host operations use deterministic policy constants, not
@@ -122,6 +122,7 @@ execution-fee debit or fee-derived reward.
 | Limit | Value |
 | --- | ---: |
 | metered storage-write byte budget | less than 128 KiB, including encoded keys and values |
+| returned value of the entry function | less than 128 KiB, encoded |
 | submitted contract source | 128 KiB |
 | `range(...)` and bounded sequence repetition | 131,072 entries |
 | bounded binary allocation and string repetition | 128 KiB |
@@ -136,9 +137,12 @@ each transaction supplies, not the chi it uses.
 
 Sequence entry counts and encoded byte counts are different units. A list of
 large values can cost much more than a list of the same length containing
-small integers. Return bytes are metered. Operation, heap and boundary traversal
-limits apply separately; the table does not promise a general 128 KiB return-size
-limit.
+small integers. A value that crosses the VM boundary (a return value, a stored
+value, a cross-contract argument) is copied in full, every reference to a shared
+object included, so its copy is bounded like the VM heap (128 MiB); a larger one
+fails with `VM value traversal limit exceeded`. The receipt carries the return
+value as it carries the state writes, so return bytes are priced like write
+bytes: no block's receipts outgrow what its chi pays for.
 
 ## Hashing and Signatures
 

@@ -72,7 +72,7 @@ or sum to more than one pays no rewards (the fee is burned).
 | storage read | 2 raw units per encoded byte |
 | storage write | 25 raw units per encoded byte |
 | submitted transaction bytes | 1 raw unit per byte |
-| returned value bytes | 1 raw unit per byte |
+| returned value bytes | 25 raw units per encoded byte (less than 128 KiB) |
 | base transaction cost | 5 chi |
 | initial paid-mode conversion in the canonical bundles | 20 chi per native-token unit |
 
