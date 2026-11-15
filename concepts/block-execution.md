@@ -10,21 +10,20 @@ order, so every validator reaches the same state, receipts, chi, events and
 ```mermaid
 flowchart TD
   Block["Ordered block"] --> Rust["Rust block executor"]
-  Rust --> Covered{"Covered by the Rust path?"}
-  Covered -->|yes| Next{"Transactions remain?"}
-  Covered -->|no| Python["Python execution path for this transaction"]
-  Python --> Next
-  Next -->|yes| Rust
+  Rust --> Tx["Execute the next transaction: receipt, chi, fee and rewards"]
+  Tx --> Next{"Transactions remain?"}
+  Next -->|yes| Tx
   Next -->|no| Commit["Commit the block state"]
 ```
 
 Validators run the per-transaction loop in Rust, inside the native VM package,
-without holding the Python interpreter lock. Storage reads, the block overlay,
-fee reservation and settlement, and reward deltas are handled in Rust. A
-transaction that uses a host feature the Rust path does not cover yet runs on
-the Python execution path at its own position in the block, and the Rust loop
-continues after it. Both paths produce byte-identical outcomes; differential
-tests compare them on every change.
+without holding the Python interpreter lock. The executor reads each
+transaction's call, arguments and context from its wire bytes and gives every
+transaction a receipt. Storage reads, the block overlay, fee reservation and
+settlement, and reward deltas are handled in Rust. There is no Python
+execution path: a transaction the VM cannot run fails with an ordinary
+receipt, and only a host fault (unreadable state, out of memory, operating
+system or storage errors) halts the node.
 
 ## No Parallel Execution
 
