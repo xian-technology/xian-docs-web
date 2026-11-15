@@ -39,6 +39,7 @@ the stored VM IR with the canonical Rust compiler and reject submitted
 - source is compiled by the authoritative Rust compiler on every validator
 - compiler admission allows at most 128 KiB source, 50,000 syntax nodes,
   nesting depth 64, 100,000 tokens total, and 4,096 tokens per logical line
+  (an f-string counts one token per character of its content)
 - child deployments use the same submission surface
 
 ## Low-level Deployment Helpers

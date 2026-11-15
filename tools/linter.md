@@ -203,7 +203,7 @@ these bounds:
 | syntax nodes | `50,000` | `xian.limit.syntax_nodes` |
 | syntax nesting depth | `64` | `xian.limit.syntax_depth` |
 | lexical tokens | `100,000` | `xian.limit.tokens` |
-| tokens on one logical line | `4,096` | `xian.limit.logical_line_tokens` |
+| tokens on one logical line (an f-string counts one per character of its content) | `4,096` | `xian.limit.logical_line_tokens` |
 
 ## Error Codes
 
