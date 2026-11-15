@@ -110,7 +110,7 @@ These additional raw units apply on top of ordinary VM evaluation and dispatch. 
 | Setting | Value |
 | --- | ---: |
 | base transaction cost | 5 chi |
-| unused-chi charge (paid mode) | 10% of `chi_supplied - used`, rounded down |
+| unused-chi charge (paid mode) | 50% of `chi_supplied - used`, rounded down |
 | initial paid-mode conversion in canonical bundles | 20 chi per XIAN |
 
 The effective conversion rate is on-chain at `chi_cost.S:value` and can be

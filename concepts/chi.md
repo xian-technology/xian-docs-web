@@ -21,7 +21,7 @@ limit and a transaction must supply its full cost, base included. In `paid_meter
 sender must be able to cover that limit during admission and at execution.
 Execution reserves the full supplied budget at the entry chi rate; contracts
 can spend only the remaining native balance. Unused chi is refunded except
-for the [unused-chi charge](#unused-chi-charge): a tenth of the supplied chi
+for the [unused-chi charge](#unused-chi-charge): half of the supplied chi
 the transaction did not use. The receipt's `chi_used` is the chi the sender is
 charged for, that charge included. For a native `currency.transfer`, CheckTx
 also requires the transferred amount plus that reservation
@@ -160,22 +160,22 @@ budget.
 
 Because capacity is counted by supplied chi, supplied chi that goes unused
 still kept other transactions out of the block. In paid mode a transaction is
-therefore charged a tenth of the chi it supplied but did not use, rounded
+therefore charged half of the chi it supplied but did not use, rounded
 down, on top of the chi it used:
 
 ```text
-chi_used (receipt) = used + (chi_supplied - used) // 10
+chi_used (receipt) = used + (chi_supplied - used) // 2
 ```
 
 `used` is the execution's chi (for a failure at least the 5-chi base; a
 transaction that runs out of chi used its whole limit and leaves nothing
 unused). The charge is burned: fee rewards are computed on `used` alone, so
 no validator, delegator or contract developer earns from wasted capacity.
-A margin of up to 9 chi costs nothing, so a transaction that supplies the
-simulated estimate plus the SDKs' 2-chi margin pays exactly its estimate.
+A 1-chi margin costs nothing, and a transaction that supplies the simulated
+estimate plus the SDKs' 2-chi margin pays one chi more than its estimate.
 Without the charge, three transactions of 166,666 supplied chi each filled a
 block for about 255 chi apiece and kept every other transaction out; now that
-costs about 50,000 chi per block, a tenth of filling the block with real work.
+costs about 250,000 chi per block, half of filling the block with real work.
 `free_metered` chains charge no fees, so they charge no unused chi either. A
 sender whose balance cannot cover its reservation when the transaction
 executes pays the failure charge from what is left, as any failure does.
@@ -223,9 +223,9 @@ built on them) supply the simulated chi plus a fixed margin of 2 chi
 cap of 200,000 chi; an estimate above that cap is refused before signing.
 `estimate_chi`/`estimateChi` return the simulated value as `estimated`, and
 `chi_to_supply(estimated)`/`chiToSupply(estimated)` apply the rule. The
-unused-chi charge rounds a margin under 10 chi down to nothing, so the margin
-costs nothing. An explicit chi limit is supplied unchanged; a generous one
-pays a tenth of what it leaves unused.
+unused-chi charge takes half of the margin, rounded down, so the margin costs
+one chi. An explicit chi limit is supplied unchanged; a generous one pays half
+of what it leaves unused.
 
 Estimates can fail when a node disables simulation, caps it below the target
 transaction, or has different state from the eventual execution block. If the
