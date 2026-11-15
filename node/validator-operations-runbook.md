@@ -76,8 +76,10 @@ A validator absent from `downtime_jail_blocks` consecutive commits is jailed
 with reason `downtime` (infraction `DOWNTIME`, slashed by `downtime_slash_bps`)
 by the runtime, not by a vote. Once the node signs again and
 `downtime_unjail_cooldown_hours` have passed, the operator calls `unjail()`
-from the validator account; in `manual` mode governance then re-adds it with
-`add_member`. Check `missed_blocks` in the validator record to see an open
+from the validator account and the validator re-enters the active set (also in
+`manual` mode) if it meets the minimum stake, a seat is free and the epoch's
+newcomer power cap allows it; otherwise `unjail()` says to retry next epoch.
+Check `missed_blocks` in the validator record to see an open
 count before it reaches the window.
 
 Runtime evidence supports `DUPLICATE_VOTE` and `LIGHT_CLIENT_ATTACK`.
@@ -159,8 +161,8 @@ the halted chain was voting on, so no height carries votes of both chains.
    the others are jailed with reason `downtime`.
 7. **Offline validators return** only after wiping the halted chain's data
    (keeping their keys and `priv_validator_state.json`) and syncing the
-   recovery genesis; then they `unjail()` after the cooldown and are re-added
-   by governance in `manual` mode.
+   recovery genesis; then they `unjail()` after the cooldown and re-enter the
+   active set within the newcomer power cap.
 
 A BDS indexer keeps its database: it continues with the recovered chain's
 first block (the skipped height has no block). The history before the halt
