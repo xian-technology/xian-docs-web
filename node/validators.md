@@ -106,9 +106,12 @@ CometBFT's `MaxTotalVotingPower` (`MaxInt64 / 8`), so no selection produces a
 validator update that consensus would reject.
 
 The checked-in local/dev/test bundles use manual selection and equal power. The
-draft `xian-mainnet-1` rehearsal bundle uses `auto_top_n`, at most 13 active
-validators, equal power, a 720-block rebalance interval, and a one-epoch
-activation delay. These values remain launch inputs until an accepted operator
+draft `xian-mainnet-1` rehearsal bundle starts in `manual` selection with at
+most 13 active validators, equal power, a minimum self bond of 100,000 XIAN
+and a minimum total bond of 500,000 XIAN (required for `add_member`), a
+720-block rebalance interval and a one-epoch activation delay for a later
+switch to automatic selection, and a churn limit of one newcomer per
+rebalance. These values remain launch inputs until an accepted operator
 manifest is published.
 
 ## Governance and Overrides

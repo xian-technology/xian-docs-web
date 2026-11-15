@@ -45,7 +45,9 @@ consensus key.
 
 ## Planned Exit
 
-1. Record live bond, delegators, registration bond, and pending unbonds.
+1. Record live bond, delegator count, registration bond, and pending unbonds.
+   Delegations stay in the validator's pool after the exit; delegators
+   undelegate (and claim pending rewards) themselves.
 2. Call `announce_leave()` and retain the deadline.
 3. Keep the node online while the validator remains active.
 4. After the leave delay, call `leave()` even if rebalance already made the

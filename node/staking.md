@@ -12,9 +12,16 @@ These are different balances:
 - the registration bond is escrowed in `holdings[validator]`
 - self-bond and delegations contribute to the validator's bonded stake
 
+Delegations form one pool per validator: `total_delegated` tokens owned by
+`total_shares` shares. A delegator holds shares; `get_delegation` reports
+their current value as `amount`. A slash lowers the pool's tokens, so every
+delegation loses the same fraction without any per-delegator work.
+
 On a clean leave, governed removal, or candidate withdrawal, the registration
-bond is refunded immediately. Self-bond and delegations become pending unbonds
-and wait for the configured unbonding period.
+bond is refunded immediately and the self-bond becomes a pending unbond.
+Delegations stay in the exited validator's pool, which earns nothing; each
+delegator undelegates when it chooses, and that unbond unlocks one unbonding
+period after the exit (at once if that has passed).
 
 ## Main Functions
 
@@ -25,9 +32,12 @@ and wait for the configured unbonding period.
 | `update_profile(...)` | update active/approved reward and metadata fields |
 | `bond_self(amount)` | add validator self-bond |
 | `unbond_self(amount)` | create a pending self-unbond |
-| `delegate(validator, amount, reward_key=None)` | delegate stake |
-| `undelegate(validator, amount)` | create a pending delegation unbond |
+| `delegate(validator, amount, reward_key=None)` | delegate stake (buys pool shares) |
+| `undelegate(validator, amount)` | burn the shares worth `amount` and create a pending delegation unbond |
+| `claim_rewards(validator)` | pay the pending delegator reward to the reward key |
 | `claim_unbond(id)` | claim an unlocked unbond |
+| `get_delegation(delegator, validator)` | value, shares, pending reward and reward key |
+| `get_pending_rewards(delegator, validator)` | what `claim_rewards` would pay |
 | `announce_leave()` / `leave()` | planned validator exit |
 | `unregister()` | withdraw an inactive candidate |
 
@@ -68,12 +78,25 @@ applies to the balance it was charged.
 The runtime first divides the validator reward bucket by active voting power.
 For each validator:
 
-1. commission is paid to the validator reward key
-2. the remainder is distributed pro rata across self-bond and active
-   delegations
-3. delegators receive rewards at their configured reward key or account
+1. commission (capped at the policy's `max_commission_bps`) goes to the
+   validator reward key
+2. of the remainder, the self-bond's part also goes to the reward key, and the
+   delegations' part to the validator's delegation pool
+3. the pool's tokens are credited to the `validators` contract
+   (`reward_pool[validator]`), and `reward_per_share[validator]` grows by
+   their amount per share
 
 If a validator has no bonded stake, its validator share goes to its reward key.
+
+Delegators are paid lazily: a delegation's pending reward is its shares times
+the growth of `reward_per_share` since its last change. `delegate`,
+`undelegate` and `claim_rewards` pay it out to the delegation's reward key
+(event `DelegatorRewardClaimed`). Each transaction's reward work and receipt
+grow with the number of active validators, never with the number of
+delegators: a receipt has one `validator_reward` and at most one
+`delegator_pool_reward` record per active validator. All amounts are rounded
+down at 30 decimal places, so the pool never owes more than it holds; the
+rounding dust stays in the pool.
 
 ## Unbonding
 
@@ -95,9 +118,12 @@ After leave, removal, or withdrawal, stake follows the normal unbonding clock.
 Governance can slash a validator. The runtime can also apply supported
 CometBFT evidence during block finalization.
 
-Slashable value can include self-bond, live delegations, and pending unbonds
-created after the infraction height. This prevents a validator or delegator
-from escaping a known earlier infraction by unbonding.
+Slashable value can include self-bond, the delegation pool, and pending
+unbonds created after the infraction height. This prevents a validator or
+delegator from escaping a known earlier infraction by unbonding. Rewards a
+delegator earned before a slash stay claimable; slashed stake stops earning at
+once. A fully slashed pool refuses new delegations; its holders leave with
+`undelegate(validator, 0)`.
 
 Checked-in development bundles apply these defaults:
 
@@ -125,6 +151,21 @@ Governance can update:
 - unbonding period
 - manual override posture
 - slash destination and evidence penalties
+
+The minimum self/total bond applies in every mode: an `add_member` proposal
+is refused (and an open one rejected) while the candidate is below it, and
+automatic selection skips such accounts. The churn limit counts every
+newcomer a rebalance admits, whether it fills an empty seat or replaces an
+incumbent.
+
+The mainnet bundle starts in `manual` mode with `min_self_bond = 100000` and
+`min_total_bond = 500000`. Moving to `hybrid` or `auto_top_n` is one
+`update_policy` vote; its finalization rebalances at once, so validators that
+should stay must meet the minimum bond first (a switch that would leave no
+active validator cannot finalize). Switch only with a full set of bonded
+validators: empty seats are filled one per rebalance without any stake
+comparison, while a full set only admits newcomers that outbond an incumbent
+by the replacement margin.
 
 Policy changes affect validator economics and membership safety. Rehearse them
 on a private network and verify the resulting active set and reward routing.

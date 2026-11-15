@@ -89,7 +89,7 @@ The decoded execution payload includes:
 | `result` | encoded function result or error |
 | `state` | committed writes, including fee effects where applicable |
 | `events` | committed contract events |
-| `rewards`, `reward_records` | fee payouts by recipient, also for a failed paid transaction |
+| `rewards`, `reward_records` | fee payouts by recipient, also for a failed paid transaction; delegators' rewards appear as one `delegator_pool_reward` per active validator (paid out later by `validators.claim_rewards`) |
 
 SDK receipts wrap this together with the original transaction, RPC metadata,
 and success/error helpers.
