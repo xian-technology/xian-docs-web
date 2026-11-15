@@ -85,7 +85,7 @@ The decoded execution payload includes:
 | --- | --- |
 | `hash` | Xian execution-result hash; distinct from the CometBFT RPC transaction hash |
 | `status` | `0` success, `1` failure |
-| `chi_used` | metered chi charged/reported |
+| `chi_used` | metered chi charged/reported (in paid mode including the [unused-chi charge](/concepts/chi#unused-chi-charge)) |
 | `result` | encoded function result or error |
 | `state` | committed writes, including fee effects where applicable |
 | `events` | committed contract events |

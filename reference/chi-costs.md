@@ -110,10 +110,13 @@ These additional raw units apply on top of ordinary VM evaluation and dispatch. 
 | Setting | Value |
 | --- | ---: |
 | base transaction cost | 5 chi |
+| unused-chi charge (paid mode) | 10% of `chi_supplied - used`, rounded down |
 | initial paid-mode conversion in canonical bundles | 20 chi per XIAN |
 
 The effective conversion rate is on-chain at `chi_cost.S:value` and can be
-changed by validator governance. Paid fees use `chi_used / chi_rate`.
+changed by validator governance. Paid fees use `chi_used / chi_rate`, where a
+paid receipt's `chi_used` includes the
+[unused-chi charge](/concepts/chi#unused-chi-charge) (burned, not rewarded).
 
 In `free_metered` mode the runtime reports the same chi usage but creates no
 execution-fee debit or fee-derived reward.
