@@ -58,7 +58,8 @@ control characters) is shown with each such character replaced by a
 bytes being signed. Message-signing approvals use the same rendering.
 
 The chi limit is estimated before the approval is shown and displayed with its
-XIAN cost; the wallet supplies exactly the simulated chi. If estimation fails,
+XIAN cost; the wallet supplies the simulated chi plus a fixed 2-chi margin. If
+estimation fails,
 the approval shows `Not estimated` as a warning. A transaction that runs out of
 chi because the chain state changed after the estimate is shown as a failure
 that says so; review it and try again.

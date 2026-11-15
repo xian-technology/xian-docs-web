@@ -146,8 +146,8 @@ The block cap counts the chi each transaction **supplies**, the only amount
 known before execution, not the chi it uses. Oversupplying therefore shrinks
 how many transactions fit in a block even though unused chi is refunded:
 with the default 500,000 block cap, transactions that each supply 100,000 chi
-fill a block after five. Supply the simulated estimate rather than a large
-fixed budget.
+fill a block after five. Supply the simulated estimate (plus the SDKs' 2-chi
+margin) rather than a large fixed budget.
 
 A node whose `xian.toml` sets `tx_fee_mode`, `max_tx_chi` or `max_block_chi`
 refuses to start, and node profiles that set them are rejected. Choose the
@@ -174,20 +174,29 @@ It includes source/argument bytes and the signed transaction envelope as it
 will be submitted: the payload's `nonce` when the request gives one (else the
 sender's next committed nonce), and the estimate itself as `chi_supplied`.
 For the same chain state, execution charges exactly the simulated `chi_used`,
-and supplying one chi less runs out of chi,
-so xian-py and xian-js supply exactly that value, with no headroom, when a
-transaction omits an explicit chi limit (`estimate_chi`/`estimateChi` return it
-as `estimated`). Estimates can fail when a node disables simulation, caps it
-below the target transaction, or has different state from the eventual
-execution block. If the state changes between the estimate and execution (a
-pool moved, a recipient was created), the transaction can run out of chi: it
-fails with `Out of chi.`, pays for the chi it used and changes nothing else.
-Wallets and apps report that as a state change; estimate again and resubmit. The node never simulates with more
-than the chain's `max_tx_chi`, so a dry run cannot report success for work
-that no admitted transaction could pay for.
+and supplying one chi less runs out of chi. A transaction that lands between
+the estimate and execution can change that state, though: a stored value can
+grow by a byte, and the call then costs one chi more. So when a transaction
+omits an explicit chi limit, xian-py and xian-js (and the wallets and apps
+built on them) supply the simulated chi plus a fixed margin of 2 chi
+(`CHI_ESTIMATE_MARGIN`), never more than the chain's default per-transaction
+cap of 200,000 chi; an estimate above that cap is refused before signing.
+`estimate_chi`/`estimateChi` return the simulated value as `estimated`, and
+`chi_to_supply(estimated)`/`chiToSupply(estimated)` apply the rule. Execution
+charges only the chi used, so the margin costs nothing. An explicit chi limit
+is supplied unchanged.
 
-Supply the simulated chi. Do not copy historical benchmark values into a
-transaction policy.
+Estimates can fail when a node disables simulation, caps it below the target
+transaction, or has different state from the eventual execution block. If the
+state changes more than the margin covers between the estimate and execution
+(a pool moved, a recipient was created), the transaction can run out of chi:
+it fails with `Out of chi.`, pays for the chi it used and changes nothing else.
+Wallets and apps report that as a state change; estimate again and resubmit.
+The node never simulates with more than the chain's `max_tx_chi`, so a dry run
+cannot report success for work that no admitted transaction could pay for.
+
+Supply the simulated chi plus the margin (or let the SDK do it). Do not copy
+historical benchmark values into a transaction policy.
 
 ## Contract Design
 

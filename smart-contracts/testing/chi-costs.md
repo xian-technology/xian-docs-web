@@ -54,8 +54,11 @@ chi_used = preview["chi_used"]
 ```
 
 Simulation does not commit state. For the same state, execution charges exactly
-the simulated `chi_used`, so clients supply that value. If the state changes
-before the transaction is included, the transaction can run out of chi; it
+the simulated `chi_used`; clients supply that value plus a fixed 2-chi margin
+(`chi_to_supply` in xian-py, `chiToSupply` in xian-js), which covers a
+transaction landing in between that grows a stored value by a byte. If the
+state changes more than that before the transaction is included, the
+transaction can run out of chi; it
 then fails, pays for the chi it used and changes nothing else, and can be
 estimated again and resubmitted.
 
