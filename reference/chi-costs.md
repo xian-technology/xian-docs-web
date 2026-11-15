@@ -189,6 +189,11 @@ See [Hashlib](/smart-contracts/stdlib/hashlib) and
 | registry-backed public input | 50,000 each |
 | registry-backed payload byte | 25 each |
 
+The registry-backed cost is charged on every call, whether or not the node
+has the key prepared or the result cached. `zk.warm_verified_proofs(requests)`
+charges every request as `zk.verify_groth16` charges the same key id, proof
+and inputs (a malformed request pays the base before it is refused).
+
 Shielded protocol helpers also have fixed host-operation costs. Proofs are
 limited to 4,096 hex characters, raw verifying keys to 8,192 hex characters,
 public inputs to 32, and verifying-key IDs to 128 characters.

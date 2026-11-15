@@ -15,13 +15,16 @@ zk.verify_groth16_bn254(vk_hex, proof_hex, public_inputs)
 ```
 
 `verify_groth16` is the preferred contract API. It loads an active verifying
-key from `zk_registry` and caches its prepared form by `(vk_id, vk_hash)`.
+key from `zk_registry` and caches its prepared form by the key's bytes, so a
+cached result is always the result of verifying against the registered bytes.
 
 `verify_groth16_bn254` is the lower-level raw-key form. It sends the full key
 through the call and therefore has a larger payload and metering cost.
 
 Both verification functions return `True` or `False` for well-formed inputs.
-Malformed encodings raise an assertion error.
+Malformed encodings raise an assertion error, and so does a statement whose
+number of public inputs differs from the verifying key's (the verifier never
+ignores extra inputs or reads missing ones as zero).
 
 ## Input Encoding
 
