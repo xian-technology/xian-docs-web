@@ -51,10 +51,11 @@ chi:
 | --- | ---: |
 | value comparison, including each dictionary key comparison and each comparison made by `in`, `index`, `count`, `==` and `<`; identical members count too | 1 per comparison |
 | copying a container (list, tuple, set, dict) | 1 per member copied |
-| copying text or binary data | 1 per 64 bytes |
+| copying text or binary data, including the key a set builds for each member | 1 per 64 bytes |
+| iterating text or bytes (`for`, `list()`, `bytes()`, `map`, `filter`, `''.join(text)`, ...) | 1 per character or byte yielded |
 | comparing text or bytes (`==`, `<`, sorting) | 1 per 128 compared bytes |
 | allocating a container | 1 per member |
-| a value crossing a contract boundary | 1 per traversed node |
+| a value crossing a contract boundary (storage writes, return values, events, cross-contract and host arguments) | 1 per member copied, 1 per 64 bytes of text or binary data |
 
 String operations count units by size: receiver, arguments and output.
 
@@ -65,7 +66,17 @@ String operations count units by size: receiver, arguments and output.
 
 Pending units are charged before the next expression or statement. One
 operation may accumulate at most 2^20 uncharged units; beyond that the
-transaction fails with `operation exceeds the element work limit`.
+transaction fails with `operation exceeds the element work limit`. Units are
+counted before the work they pay for: once the remaining chi cannot cover
+them, the transaction fails with `Out of chi.` before the copy or scan is
+made. A list holding many references to one large text is cheap to build,
+but every copy of it (a storage write, a return value, a set key, a joined
+text) pays for each reference in full.
+
+A function called by a builtin (`map`, `filter`, `sorted(key=...)`,
+`min`/`max(key=...)` and interface predicates) pays the 5,000 raw
+call-dispatch cost on every call, like the same call written in the
+contract.
 
 Copies are therefore not free. `items += [x]` builds and copies a new
 list on every call, so growing a list that way in a loop costs chi quadratic in
@@ -202,7 +213,9 @@ has the key prepared or the result cached. `zk.warm_verified_proofs(requests)`
 charges every request as `zk.verify_groth16` charges the same key id, proof
 and inputs (a malformed request pays the base before it is refused).
 
-Shielded protocol helpers also have fixed host-operation costs. Proofs are
+Shielded protocol helpers also have fixed host-operation costs.
+`zk.shielded_output_payload_hash` and `zk.shielded_output_payload_hashes`
+charge 1 raw per payload byte (each payload of the list). Proofs are
 limited to 4,096 hex characters, raw verifying keys to 8,192 hex characters,
 public inputs to 32, and verifying-key IDs to 128 characters.
 
