@@ -145,10 +145,14 @@ the halted chain was voting on, so no height carries votes of both chains.
    `exported_state.json`: they must be identical (the root of the last
    committed height). An operator whose node lags re-syncs first.
 4. **Build the genesis.** Each runs
-   `xian-recovery-genesis --exported-state <home>/recovery/exported_state.json
-   --chain-id <chain id> --genesis-time <agreed time> --keep <key> [--keep
-   <key> ...] --output <home>/recovery/genesis.json` and publishes the SHA-256
-   of the file; all digests must match. The tool refuses a tampered export, a
+
+   ```bash
+   xian-recovery-genesis --exported-state <home>/recovery/exported_state.json \
+     --chain-id <chain id> --genesis-time <agreed time> \
+     --keep <key> [--keep <key> ...] --output <home>/recovery/genesis.json
+   ```
+
+   and publishes the SHA-256 of the file; all digests must match. The tool refuses a tampered export, a
    validator that is not active, and a genesis time before the last block. The
    validators not kept become approved, jailed for downtime (power 0) at the
    genesis time.
