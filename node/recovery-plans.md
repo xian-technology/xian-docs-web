@@ -113,6 +113,12 @@ before restoring. Replay from genesis remains the alternative when no trusted
 full-store snapshot is available, provided the complete historical blocks can
 be obtained.
 
+Full replay also requires the public state-patch bundles used by that history.
+Provision and verify the bundles needed for replay or scheduled activations
+before starting the receiving node. Full-store export does not include the
+node's configuration files, so distribute these public operator assets
+separately from private node-home backups and identity keys.
+
 The normal entrypoints are `xian snapshot restore <node>` and
 `xian node init <node> --restore-snapshot`; remote operators use
 `playbooks/restore-network-snapshot.yml`. They use the selected profile's
