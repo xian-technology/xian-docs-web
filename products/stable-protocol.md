@@ -75,10 +75,11 @@ when none exists, and starts governance handoff by default. The operator
 wallet must match the configured initial governor during bootstrap.
 
 The bootstrap validates the complete bundle before connecting and retains the
-verified sources for deployment. `--bundle` selects its source paths, deployment
-order, and per-contract chi budgets. Product configuration supplies constructor
-arguments and target names. `XIAN_STABLE_DEPLOY_CHI` explicitly overrides the
-bundle budgets; when unset, each entry's `default_chi` applies. Sample collateral
+verified sources for deployment. `--bundle` selects its source paths and
+deployment order. Product configuration supplies constructor arguments and
+target names. Each deployment and configuration write supplies its simulated
+chi plus the SDK margin; `XIAN_STABLE_DEPLOY_CHI` and `XIAN_STABLE_TX_CHI` set
+explicit budgets only for profiles without readonly simulation. Sample collateral
 and reserve tokens reuse the validated stable-token source. The deploy dependency
 group includes the shared CLI validator and Python SDK.
 
