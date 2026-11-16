@@ -76,9 +76,12 @@ uv run xian recovery apply ./recovery-plan.json validator-1 --yes
 - verifies the archive `sha256` when the plan provides one
 - optionally starts the node again with `--start-node`
 
-Recovery plans use the explicit archive-hash model in the plan itself.
-Signed snapshot manifests are supported in the normal node bootstrap path, but
-they are not the recovery-plan artifact format.
+The recovery plan keeps its own artifact object. Its URI can name a raw
+full-store archive pinned by the plan's independently trusted SHA-256, including
+when the profile has publisher keys configured. A signed version-2 manifest URI
+uses those configured publisher keys; a plan SHA-256 then adds an archive pin.
+Both paths receive the same full-store verification. `--skip-stop` skips the
+automatic stop command, but does not bypass the stopped-node check.
 
 ## Full Node-Store Bootstrap
 
@@ -213,14 +216,20 @@ be ignored. Duplicate application-file entries and conflicting application paths
 fail before replacing local data. Restore also refuses symlinked application
 roots or protected paths within those roots.
 
-Publication rolls back filesystem failures where possible. If rollback itself
-fails, retained backups remain under `.snapshot-restore-*/backup` in the node
-home and further restores are blocked until an operator recovers that state.
-Keep those backups and inspect the reported paths before restarting. Replacement
-of both application roots is not a crash-atomic operation; an interrupted host
-still requires recovery review. These protections supplement archive hashes and
-the agreed recovery plan; they do not establish that a snapshot is the correct
-chain state.
+Publication rolls back filesystem failures where possible, but replacement of
+the two roots is not one filesystem transaction. Before replacing either root,
+the helper durably writes `.snapshot-restore-*/publication-started` in the node
+home. An interrupted publication marker or retained backup blocks node startup,
+snapshot export and another restore, including a first restore with no previous
+roots.
+
+Keep the node stopped and preserve the interrupted workspace. Recover the
+original directories from `.snapshot-restore-*/backup/` where available, then
+verify a coherent pair of stores and the local signing state. Only after that
+recovery should the interrupted workspace be removed. Deleting its marker or
+backup to bypass the guard is not a recovery procedure. These protections
+supplement the accepted publisher trust and recovery plan; they do not
+independently verify chain history from genesis.
 
 ## Example Workflow
 
