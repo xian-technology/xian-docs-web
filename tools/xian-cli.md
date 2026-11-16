@@ -30,7 +30,7 @@ sibling checkouts or through explicit directory flags.
 | `xian network join` | create a node profile from a manifest |
 | `xian node` | initialize, start, stop, inspect, and recover a node |
 | `xian doctor` | diagnose profiles, artifacts, services, and live endpoints |
-| `xian snapshot` / `xian recovery` | restore or apply explicit recovery plans |
+| `xian snapshot` / `xian recovery` | export/restore verified full node stores or apply explicit recovery plans |
 | `xian contract` | build offline artifacts and validate hash-pinned bundles |
 | `xian client` | wallet, query, call, simulation, and transaction automation |
 
@@ -96,6 +96,10 @@ keys, which can leak through shell history and process listings.
 - Product repositories own product bootstrap scripts. The CLI validates their
   contract bundles but does not install every product automatically.
 - Automation should consume JSON output rather than human status text.
+- Peer-to-peer application state sync is disabled. Bootstrap through genesis
+  replay or a verified full node-store snapshot. See
+  [Snapshot Publication and Restore](/node/recovery-plans#publish-and-restore-a-signed-snapshot)
+  for the export command, publisher trust and key-preserving restore flow.
 
 ## Related Pages
 

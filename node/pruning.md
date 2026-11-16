@@ -48,32 +48,25 @@ rows, but it affects recovery:
 
 Do not run a full reset/reindex until the historical source is confirmed.
 
-## Snapshots and State Sync
+## Bootstrap History
 
-Snapshots and state sync bootstrap recent application/consensus state. Pruning
-controls block retention after the node is running. A node bootstrapped near the
-head is not automatically an archival source.
+Peer-to-peer application state sync is disabled. A node bootstraps by replaying
+the complete block history from genesis, or by restoring a verified full
+node-store snapshot. Replay cannot recover blocks that every available source
+has already pruned. Maintain an archival source or a suitable full-store backup.
 
-The patched backend retains evidence proof prerequisites separately from block
-bodies. A state-synced node also stores its authenticated pre-checkpoint proof
-cache in `data/evidence.db`, with its required-history journal in
-`data/state.db`. These records support evidence verification and are not a
-full-block archive or a BDS rebuild source.
+A full node-store snapshot must contain coherent Xian application state and
+CometBFT state, block and evidence data. Retain the complete still-live evidence
+window at its checkpoint. Older block bodies may be pruned only when the
+required historical metadata remains available. A recent application-state
+export alone does not provide those consensus stores and is insufficient for
+node bootstrap.
 
-`GET /evidence_history?height=<height>` on the CometBFT RPC serves a historical
-header, canonical commit and validator set from native retained data or that
-cache, including available proofs below the block body pruning base. It accepts
-positive historical heights below the node's latest block height and returns
-an error when the proof is unavailable. Consumers must authenticate the response
-against trusted headers. Validator membership and voting power are proof inputs;
-the response does not establish current proposer priorities. Ordinary block
-and validator RPC retention semantics are unchanged.
-
-Keep at least one reachable source for the full live evidence window when
-offering snapshots to peers. A joining node refuses incomplete history rather
-than proceeding to catch-up. See
-[Verified Evidence History](/node/configuration#verified-evidence-history)
-for trust, resource limits and restart behavior.
+An existing pruned node is not automatically an archival source or a valid
+full-store snapshot publisher. Verify snapshot chain identity, genesis,
+checkpoint and trust material before offering it to other operators. See
+[Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots) and
+[Snapshot Restore Boundaries](/node/recovery-plans#snapshot-restore-boundaries).
 
 ## Before Enabling
 

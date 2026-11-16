@@ -131,16 +131,18 @@ period plus one day. Mainnet's 14-day unbonding therefore starts with at least
 Increasing the unbonding period automatically raises a committed retention
 target to cover the greatest required period observed, including successful
 intermediate policy changes within one block. The effective duration grows by
-at most the elapsed committed block time until it reaches that target. This keeps the historical expiry cutoff
-from moving backwards and covers new infractions during the increase.
+at most the elapsed committed block time until it reaches that target. This
+keeps the historical expiry cutoff from moving backwards and covers new
+infractions during the increase.
 Reducing the policy does not shrink the retained window or shorten existing
 unbonds. The block-count and evidence-byte limits remain unchanged.
 
 CometBFT expires evidence only after both its block age and its time age exceed
 their limits. A block-count pruning setting is therefore not a substitute for
-the committed time window. Nodes joining from a snapshot must authenticate the
-complete pre-checkpoint proof window before catch-up or voting; see
-[Verified Evidence History](/node/configuration#verified-evidence-history).
+the committed time window. A full node-store snapshot must preserve the
+historical consensus data needed for the complete live evidence window.
+Application state alone is insufficient; see
+[Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots).
 
 Slashable value can include self-bond, the delegation pool, and pending
 unbonds created at or after the infraction height. This prevents a validator or

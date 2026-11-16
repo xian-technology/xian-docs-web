@@ -80,6 +80,108 @@ Recovery plans use the explicit archive-hash model in the plan itself.
 Signed snapshot manifests are supported in the normal node bootstrap path, but
 they are not the recovery-plan artifact format.
 
+## Full Node-Store Bootstrap
+
+Use a coherent full node-store snapshot for node bootstrap. It includes Xian
+application state and the matching CometBFT state, block and evidence stores
+from one stopped or consistently captured checkpoint. An application-state
+export alone does not provide the consensus history needed to verify older
+evidence. Peer-to-peer application state sync is disabled.
+
+The accepted snapshot must bind the recipient's chain and genesis to its
+checkpoint height, block hash and application hash. Publish network snapshots
+through a signed full node-store manifest from a configured trusted publisher.
+The signature authenticates its checkpoint commitments and archive checksum.
+A checksum copied only from the same untrusted download does not establish
+publisher trust. The publisher is a trust anchor: consistency checks of its
+snapshot do not independently verify the entire chain from genesis.
+
+Capture the stores coherently and verify the archive before publishing it.
+Preserve the complete live evidence window at the checkpoint; a directory
+named `data/` is not by itself evidence that the required stores are present
+and consistent. Verify the supported runtime and genesis on the receiving node
+before restoring. Replay from genesis remains the alternative when no trusted
+full-store snapshot is available, provided the complete historical blocks can
+be obtained.
+
+The normal entrypoints are `xian snapshot restore <node>` and
+`xian node init <node> --restore-snapshot`; remote operators use
+`playbooks/restore-network-snapshot.yml`. They use the selected profile's
+`snapshot_url` and publisher trust settings. Stop the receiving node and retain
+its own keys and validator signing state, as described below. Do not publish
+private recovery-plan backups as network snapshot artifacts.
+
+### Publish and Restore a Signed Snapshot
+
+Stop the source node before export. Keep the publisher signing key in an
+owner-only file containing one 32-byte private key as 64 hexadecimal characters,
+and keep that key and both output paths outside the node home:
+
+```bash
+xian node stop archive-1
+mkdir -p ./published-snapshots
+xian snapshot export archive-1 \
+  --archive-output ./published-snapshots/node-store.tar.gz \
+  --manifest-output ./published-snapshots/node-store.json \
+  --snapshot-url https://example.invalid/node-store.tar.gz \
+  --signing-key-file /secure/snapshot-publisher.key
+```
+
+Export verifies the stores with the selected runtime before producing the
+archive and manifest. It does not upload them. Publish both files at the
+accepted locations and distribute the publisher's public key through the
+network's trusted channel. Configure that key in each recipient profile's
+`snapshot_signing_keys` before using the manifest URL:
+
+```bash
+xian node stop observer-1
+xian snapshot restore observer-1 \
+  --snapshot-url https://example.invalid/node-store.json
+xian node start observer-1
+xian node health observer-1
+```
+
+The version-2 signed manifest uses `manifest_version: 2` and
+`snapshot_kind: "full_node_store"`. Along with that version and kind, its
+signed fields bind `chain_id`, integer
+`height`, `genesis_sha256`, `app_hash`, `block_hash`, `snapshot_url`,
+`snapshot_sha256`, `snapshot_bytes`, `uncompressed_bytes` and
+`signing_public_key`; `signature` authenticates that canonical payload.
+`uncompressed_bytes` counts the complete uncompressed tar stream, including
+headers and padding. Resource limits are checked before publishing restored
+stores. Version-1 manifests and application-only archives are not supported
+through this bootstrap flow.
+
+The explicit backend `expected_sha256` API and a recovery plan's trusted
+archive SHA-256 can authorize a raw full-store archive. That hash must come
+from an independently trusted source, and the same full-store consistency and
+resource checks apply. An independently trusted hash and a trusted publisher's
+signature both authenticate selected bytes; neither replaces replay from
+genesis. A self-declared checksum from an untrusted archive is insufficient.
+
+### Verification and Resource Limits
+
+Verified full-store snapshots support the `goleveldb` backend. Export requires
+`db_dir = "data"`; restored database paths must remain inside the `data/` root.
+Before replacing the local stores, verification recomputes the application root, matches its
+committed height and exact time to the native checkpoint, checks the recipient's
+genesis and manifest commitments, and scans the complete live evidence window
+through the offline native inspector. Required historical metadata must be
+present even where older block bodies were pruned. Missing or inconsistent
+stores refuse restoration.
+
+Default transfer limits are 8 GiB of archive bytes, 32 GiB of uncompressed tar,
+100,000 archive members and a 256 MiB free-disk reserve. Staging also needs room
+for the downloaded archive, uncompressed tar and extracted stores at the same
+time. Signed manifest JSON is limited to 64 KiB. The backend
+`FullNodeStoreLimits` API permits explicit resource overrides;
+these are operator limits, not chain consensus settings.
+
+Offline native inspection defaults to 1,000,000 historical heights and 120
+seconds. `XIAN_NODE_STORE_INSPECT_MAX_HISTORY_HEIGHTS` and
+`XIAN_NODE_STORE_INSPECT_TIMEOUT_SECONDS` allow larger explicit budgets.
+Exhaustion fails verification; it does not accept a shorter evidence window.
+
 ## Snapshot Restore Boundaries
 
 Recovery-plan backups contain validator and node private keys. The CLI creates

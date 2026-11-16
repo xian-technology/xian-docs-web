@@ -172,7 +172,7 @@ node RPC simply to make a dashboard reachable.
 
 Use the page that owns the procedure:
 
-- [Recovery Plans](/node/recovery-plans) for snapshot, state-sync, and
+- [Recovery Plans](/node/recovery-plans) for snapshot restore and
   emergency recovery choices
 - [Pruning and Retention](/node/pruning) for history and disk policy
 - [Protocol Governance and State Patches](/node/protocol-governance) for

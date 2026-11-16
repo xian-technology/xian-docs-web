@@ -29,8 +29,8 @@ For `zk`:
   always do. A node without it refuses to apply the patch
   and halts at the activation block before computing that block's state root;
   it resumes once the verifier is installed and the node restarted. Startup,
-  state-sync snapshot import and Commit refuse a zk-enabled state on such a
-  node the same way.
+  offline application snapshot import and Commit refuse a zk-enabled state on
+  such a node the same way.
 - While it is off, every transaction that deploys or calls a contract using zk
   host syscalls (directly, through an import, or through
   `importlib.import_module`) fails with an ordinary failed receipt and is

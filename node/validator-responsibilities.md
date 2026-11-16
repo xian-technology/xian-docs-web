@@ -32,7 +32,7 @@ deterministic VM state machine.
 Good validator posture includes:
 
 - testing changes in localnet or smoke flows before rollout
-- keeping snapshots, state-sync inputs, and patch bundles organized
+- keeping full node-store snapshots, checkpoint trust material, and patch bundles organized
 - exposing only the ports your deployment model actually needs
 - separating validator duties from optional BDS and sidecar extras when necessary
 - watching for mismatches in execution, metrics, and indexed-service recovery

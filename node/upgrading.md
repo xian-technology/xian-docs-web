@@ -86,41 +86,42 @@ its immutable runtime image. Historical block corpora must be replayed with
 their matching earlier image, as described in
 [Localnet Replay](/node/localnet-e2e#replay-across-architectures).
 
-Application snapshots use format 2 and carry the execution policy. Import and
-peer state sync reject incompatible policy before replacing application state.
-The exported state includes the protected policy in its application-root
-commitment. An existing private network needs a separately agreed migration
-plan before adopting this revision.
+Application snapshots use format 2 and carry the execution policy. Import
+rejects incompatible policy before replacing application state. Peer-to-peer
+application state sync is disabled; bootstrap through replay or a verified
+full node-store snapshot. The exported state includes the protected policy in
+its application-root commitment. An existing private network needs a separately
+agreed migration plan before adopting this revision.
 
 ## Consensus Backend Compatibility
 
-Fresh chains use the stack's source-pinned CometBFT 0.40.0 build with Xian
-evidence-history revision 1 and its matching application. This is a fresh-chain
-target: do not swap it into an existing development or live chain. Its consensus
-behavior is not interchangeable with an earlier backend merely because both
-processes can speak ABCI.
+Use the unmodified upstream CometBFT version pinned by the accepted stack
+release and its matching Xian application. Keep the source archive hash and
+immutable image digest with that release's provenance. Expected CLI and
+deployment metadata describes the intended build; it is not attestation of an
+arbitrary installed binary.
 
-The schema-version-1 stack release manifest must include
-`build.cometbft_version`, `cometbft_source_url`, `cometbft_source_commit`,
-`cometbft_source_sha256`, `cometbft_patch_path`, `cometbft_patch_sha256` and
-`cometbft_history_revision`. Revision 1 requires version `0.40.0` and the
-official source commit `0880b4d378f347ab16e54ec677ff50d803f37d62`; the patch
-path and SHA-256 identify the reproducible stack-owned extension. Resolve
-the patch hash and immutable image digest from the accepted release.
+The schema-version-1 release manifest records `build.cometbft_version`,
+`cometbft_source_url`, `cometbft_source_commit` and
+`cometbft_source_sha256`. Built images carry the corresponding `version`,
+`source_url`, `source_commit` and `source_sha256` in
+`/usr/local/share/xian/cometbft-provenance.json`, with image labels
+`org.xian.cometbft.version` and `org.xian.cometbft.source.commit`.
 
-Built node images carry `/usr/local/share/xian/cometbft-provenance.json`, with
-`version`, `source_url`, `source_commit`, `source_sha256`, `patch_sha256` and
-`history_revision`. The image labels `org.xian.cometbft.version`,
-`org.xian.cometbft.source.commit`, `org.xian.cometbft.patch.sha256` and
-`org.xian.cometbft.history.revision` record the same selected version, source,
-patch and revision. Compare these records with the accepted manifest and record
-the resulting image digest in the operator bundle.
+The pinned official `v0.40.0` source is commit
+`0880b4d378f347ab16e54ec677ff50d803f37d62`, archive SHA-256
+`c421c1461494d4e1e922a334f1899aab2f638e990a465316ed6e2437a8d71a66`.
+That upstream source retains the core version string `0.39.0`; the unmodified
+build reports it together with the source commit. Record the source release,
+commit, archive checksum and actual binary version separately. A version
+string alone does not identify or authenticate a build.
 
-CLI and deployment validation check expected release metadata. That metadata
-describes the intended build; it is not attestation of an arbitrary installed
-binary. The application's per-offer compatibility check and the backend's
-authenticated history bootstrap enforce the runtime snapshot boundary. See
-[Verified Evidence History](/node/configuration#verified-evidence-history).
+A consensus-sensitive backend change requires a fresh chain or a separately
+reviewed network upgrade. Do not swap a different backend into an existing
+development or live chain merely because the processes speak ABCI. Peer-to-peer
+application state sync is disabled. See
+[Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots)
+for replay and full node-store restore requirements.
 
 ## Choose the Procedure
 

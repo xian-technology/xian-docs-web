@@ -51,20 +51,13 @@ Use the canonical node surfaces when correctness matters most:
 - CometBFT RPC for block/tx lifecycle work
 - ABCI query for current state and core Xian queries
 
-The patched CometBFT RPC also provides
-`GET /evidence_history?height=<height>` for historical header, commit and
-validator proof inputs. It can serve retained proof data below the block body
-pruning base; it is not a full-block history API. Authenticate responses against
-trusted headers. See [Pruning and History Retention](/node/pruning#snapshots-and-state-sync).
-
-The current-state ABCI path `/evidence_policy` returns schema version 1, the
+The current-state ABCI path `/evidence_policy` reports schema version 1, the
 committed `height`, `app_hash`, exact `last_block_nanos`, and the full evidence
 limits triple (`max_age_num_blocks`, `max_age_duration` in nanoseconds and
 `max_bytes`). Integer fields are decimal strings, except `schema_version`.
-It accepts no path arguments. A bootstrap client must match the height, hash
-and timestamp to its light-client checkpoint before trusting those limits;
-the query response alone is not an independent proof. See
-[Verified Evidence History](/node/configuration#verified-evidence-history).
+It accepts no path arguments. This reports committed application metadata;
+the query response alone is not an independent proof of a checkpoint. See
+[Slashing and Evidence](/node/staking#slashing-and-evidence).
 
 Use optional convenience surfaces when you want ergonomics:
 

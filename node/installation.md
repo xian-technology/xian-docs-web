@@ -69,9 +69,11 @@ the effective loopback URLs and `xian node health local-dev` to verify every
 enabled service. Five-second periodic blocks keep contract time moving while an
 interactive development node is idle.
 
-IntentKit, DEX automation, the shielded relayer, product contract deployment,
-and state sync remain explicit choices because they require extra repositories,
-credentials, product bootstrap, or a peer network.
+IntentKit, DEX automation, the shielded relayer and product contract deployment
+remain explicit choices because they require extra repositories, credentials
+or product bootstrap. Peer-to-peer application state sync is disabled; join
+through replay or a verified full node-store snapshot. See
+[Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots).
 
 Use `--plan` or `--dry-run` where supported to inspect paths and actions before
 writing files.

@@ -161,8 +161,7 @@ The layered harness covers:
   commit response, with transaction effects and nonces checked after recovery
 - real 4/1 and 3/2 network partitions, progress with quorum, a halt without
   quorum, reconvergence after healing, and a full-network restart
-- fresh non-validator catch-up from genesis and peer state sync interrupted
-  after the first snapshot chunk
+- fresh non-validator catch-up from genesis
 - nonce gaps, conflicting pending nonces, submission-node restart, replay
   rejection, and a queued transaction whose balance becomes insufficient
 - zero-chi admission rejection at every node without consuming the sender's nonce
@@ -210,8 +209,9 @@ E2E bootstrap assigns fixed container addresses within a Docker-selected local
 subnet so partition reconnects and process restarts preserve peer addresses.
 After reconnecting, all five nodes must agree on application hashes and block
 results. Fresh observers have newly generated keys and no validator voting
-power. They must catch up to the running network, including after an
-interrupted multi-chunk state sync.
+power. They must catch up to the running network. Peer-to-peer application
+state sync is disabled; full-store restore requires the separate bootstrap
+checks in [Snapshot Restore Boundaries](/node/recovery-plans#snapshot-restore-boundaries).
 
 The accounting phase compares contract state after each operation against a
 separate Python model, including zero, negative, and oversized amounts. It

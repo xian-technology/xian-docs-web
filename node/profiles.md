@@ -46,12 +46,16 @@ do not copy this abbreviated example over an existing profile.
 | `node_release_manifest` | build provenance copied from a network/release manifest |
 | `p2p` | seeds and persistent peers |
 | `genesis` | optional local genesis override |
-| `snapshot_url`, `snapshot_signing_keys` | bootstrap source and trust roots |
+| `snapshot_url`, `snapshot_signing_keys` | full node-store manifest URL and trusted publisher keys |
 | `block_policy_*` | idle-block behavior and interval |
 | `services` | BDS, dashboard, monitoring, and optional sidecars |
-| `advanced` | lower-level CometBFT, state-sync, metrics, and nonce settings |
+| `advanced` | lower-level CometBFT, metrics, and nonce settings |
 
 `xian_vm_v2` is fixed by the node runtime and is not a profile choice.
+
+Peer-to-peer application state sync is disabled in the maintained stack.
+Bootstrap uses replay from genesis or a verified full node-store snapshot;
+see [Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots).
 
 The transaction fee policy is not a profile choice either: it is chain state
 chosen at genesis (see [Chain Chi Caps](/concepts/chi#chain-chi-caps)), and
