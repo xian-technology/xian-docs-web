@@ -136,9 +136,9 @@ The `core` recipe deploys only the DEX contracts; `local-demo` also seeds a
 demo token and liquidity for local testing. For a stack-managed localnet, see
 [Local DEX Bootstrap](/node/local-dex-bootstrap).
 
-Both recipes use automatic simulation-based chi estimation by default. Use
-`--chi-budget-mode fixed` only when deliberately exercising the bundle's fixed
-deployment ceilings.
+Both recipes supply each transaction's simulated chi plus the SDK margin. The
+bundle's `default_chi` values are manifest information, not budgets: supplying
+them would pay half of the unused chi.
 
 ## Reading DEX State From SDKs
 

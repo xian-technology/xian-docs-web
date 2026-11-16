@@ -78,7 +78,9 @@ XIAN_DEX_BOOTSTRAP_RPC_URL=http://127.0.0.1:26657 make localnet-dex-bootstrap
 
 The script derives the local deployer key from
 `.cometbft/config/priv_validator_key.json`. For a different deployer wallet,
-set `XIAN_DEX_DEPLOYER_PRIVATE_KEY`.
+point `XIAN_DEX_DEPLOYER_KEY_FILE` (or `--deployer-key-file`) at a file holding
+the hex private key, or set `XIAN_DEX_DEPLOYER_PRIVATE_KEY`. A key is never
+accepted on the command line, where `ps` and shell history would show it.
 
 Machine-facing form:
 
@@ -114,22 +116,12 @@ make localnet-dex-bootstrap
 The bootstrap parses these numeric values as exact decimal contract values. Use
 plain decimal strings such as `0.1` or `2500.75` when overriding them.
 
-Bootstrap deployments and calls use xian-py's simulation-based automatic chi
-estimation by default. This submits a ceiling sized for the simulated work
-instead of requiring the deployer to cover every bundle maximum. To exercise
-the manifest and bootstrap ceilings directly in a diagnostic or release check,
-opt into fixed budgets:
-
-```bash
-XIAN_DEX_CHI_BUDGET_MODE=fixed make localnet-dex-bootstrap
-
-# Equivalent product-repo installer option:
-uv run python scripts/bootstrap_dex.py --recipe local-demo \
-  --chi-budget-mode fixed
-```
-
-The JSON summary reports `chi_budget_mode` and, for submitted transactions,
-both `chi_estimated` and `chi_supplied`.
+Every bootstrap deployment and call supplies xian-py's simulated chi plus its
+2-chi margin. There is no fixed-budget mode: a paid transaction pays half of
+the chi it supplies but leaves unused, so a bundle's `default_chi` ceiling
+would cost the deployer tens of thousands of chi per deployment. The JSON
+summary reports both `chi_estimated` and `chi_supplied` for submitted
+transactions.
 
 Use a different hash-pinned DEX bundle:
 
