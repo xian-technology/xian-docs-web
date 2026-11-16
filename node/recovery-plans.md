@@ -83,6 +83,12 @@ uses those configured publisher keys; a plan SHA-256 then adds an archive pin.
 Both paths receive the same full-store verification. `--skip-stop` skips the
 automatic stop command, but does not bypass the stopped-node check.
 
+The plan's `target_height`, `trusted_block_hash` and `trusted_app_hash` require
+manual confirmation. The CLI does not compare those fields with the restored
+checkpoint. Its full-store verifier checks the archive's own checkpoint,
+configured trust and genesis; `--yes` confirms the operator has reviewed the
+incident plan. Confirm the planned height and hashes before starting the node.
+
 ## Full Node-Store Bootstrap
 
 Use a coherent full node-store snapshot for node bootstrap. It includes Xian
