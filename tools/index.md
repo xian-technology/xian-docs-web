@@ -45,7 +45,7 @@ dropped.
 | Tool | Main use |
 |------|----------|
 | [Playgrounds](/tools/playground) | browser dapp example plus the dedicated contract playground |
-| [Contracting Hub](/tools/hub) | curated contract catalog, inspection, ratings, and deployment UI |
+| [Contracting Hub](/tools/hub) | curated contract catalog, inspection, ratings, and Playground links |
 | [Linter](/tools/linter) | static validation for contract source before deployment |
 | [MCP Server](/tools/mcp-server) | local AI-assistant bridge for wallets, reads, submissions, and DEX flows |
 

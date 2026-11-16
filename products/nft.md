@@ -89,8 +89,10 @@ uv run --group deploy python scripts/bootstrap_nft.py
 
 The bootstrap validates the entire bundle before connecting to the node and
 uses the verified source snapshot for deployment. `--bundle` selects a bundle;
-its entries determine source paths, deployment order, names, and default chi
-budgets. `--checker-contract`, `--collection-contract`, `--checker-chi`, and
+its entries determine source paths, deployment order, and names. Deployments
+use simulated chi plus the SDK margin by default; the bundle's `default_chi`
+values describe budgets rather than setting the submitted limit.
+`--checker-contract`, `--collection-contract`, `--checker-chi`, and
 `--collection-chi` are explicit overrides. `--dry-run` validates and prints the
 plan without broadcasting. The deploy dependency group includes the shared CLI
 validator and Python SDK.

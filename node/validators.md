@@ -75,6 +75,14 @@ Auto/hybrid selection excludes jailed and leaving validators, enforces bond and
 activation-delay gates, ranks by total bond, and applies configured churn and
 replacement-margin limits.
 
+The live selection pool holds at most 64 accounts in total, counting active
+validators and registered candidates together. Registration is refused while
+the pool is full; completing an exit or withdrawing a pending registration
+frees a slot. Jailing or moving an account between active and candidate status
+does not free a slot. The policy's `max_validators` cannot exceed 64. This bound
+keeps automatic selection and deciding governance votes within the default
+transaction chi limit.
+
 In `manual` mode an `add_member` proposal records the candidate's requested
 power when the proposal is created; activation uses that power even if the
 candidate edits its registration while the vote is open. Change it later with
@@ -131,6 +139,10 @@ Evidence and governance jails keep their path: governance lifts them, and the
 validator returns as an approved candidate (re-added by `add_member` in
 `manual` mode, re-selected by the next rebalance otherwise). A governance `jail_member` cannot use the reason `downtime`, which marks a
 runtime downtime jail.
+
+If the account has already withdrawn, left, or been removed, self-unjailing
+only clears its downtime jail. It must register again and escrow the
+registration bond before becoming a candidate or re-entering the active set.
 
 With equal power and the 20% cap a validator re-enters directly only into a
 set of at least four active validators (its 10 of 50 power is the cap); in a

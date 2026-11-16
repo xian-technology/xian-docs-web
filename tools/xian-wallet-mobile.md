@@ -90,6 +90,9 @@ only on a trusted local/private network; prefer HTTPS elsewhere.
   estimation fails)
 - a transaction that runs out of chi because the chain state changed after the
   estimate is reported as such, so you can review it and try again
+- an oversized chi limit shows the extra fee from charging half of unused chi
+  inside the app's review or approval dialog; a manually entered limit offers
+  **Use estimate**, while a dapp-supplied limit is preserved
 - auto-approval rules always carry a chi cap; none is offered for a request
   without a chi limit, and older stored rules without a cap are not applied
 - invisible and text-direction characters in signed text are shown as

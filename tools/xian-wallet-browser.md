@@ -64,6 +64,11 @@ the approval shows `Not estimated` as a warning. A transaction that runs out of
 chi because the chain state changed after the estimate is shown as a failure
 that says so; review it and try again.
 
+When a supplied limit substantially exceeds the estimate, the approval shows
+the extra fee from charging half of unused chi. For a limit you entered, the
+review screen offers **Use estimate**. A dapp-supplied limit is shown for review
+without changing the dapp's request.
+
 Temporary auto-approval rules can be scoped to a site, account, network,
 method, contract, function, and exact arguments. Broad function rules allow
 arguments to change and therefore require separate confirmation. Every rule

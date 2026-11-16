@@ -54,6 +54,11 @@ contract again and then restores its state, so a link cannot carry VM IR that
 differs from the source it shows. Workspaces too large for a link go through
 Export / Import.
 
+The [Contracting Hub](/tools/hub) uses this format for **Open in Playground**.
+Its link opens the selected catalog version's source in the editor. Review it
+and deploy it locally with the contract name and constructor arguments you
+choose.
+
 ### Metering and long-running code
 
 Calls are metered like the chain by default; without a chi budget the VM

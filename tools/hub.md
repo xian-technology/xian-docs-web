@@ -2,13 +2,14 @@
 
 The maintained contract hub is `xian-contracting-hub-web`.
 
-It is a curated contract catalog and deployment UI for the Xian ecosystem.
+It is a curated contract catalog with browser Playground links for the Xian
+ecosystem.
 
 Catalog source is checked using the V2 compiler and native IR validator. Contracts can use exact decimal parameters and the V2 arithmetic helpers. See [Numbers, division and rounding](/smart-contracts/numbers).
 
 ## What It Does
 
-The hub is meant for discovery and inspection, not only raw deployment.
+The hub supports contract discovery, inspection, and local experimentation.
 
 Maintained features include:
 
@@ -16,9 +17,22 @@ Maintained features include:
 - filtering by category, tag, and sort order
 - viewing syntax-highlighted source and version diffs
 - showing lint reports and related-contract navigation
-- developer interactions such as stars, ratings, and saved playground targets
-- deployment history and leaderboard-style activity views
+- developer interactions such as stars and ratings
+- opening a catalog version in the browser Playground through a workspace share link
 - admin workflows for creating, editing, publishing, and curating catalog items
+
+## Open in Playground
+
+Choose **Open in Playground** on a contract version to open its source in the
+Playground editor. The link carries the source in the URL fragment (`#w=...`);
+the Playground asks before replacing an existing workspace. Review the source,
+choose a contract name and constructor arguments, then deploy it locally in
+the browser.
+
+Opening a contract needs no saved deployment target or Playground account.
+Hub operators configure the Playground address with
+`CONTRACTING_HUB_PLAYGROUND_URL`; the local default is
+`http://127.0.0.1:3210`.
 
 ## Why It Exists
 

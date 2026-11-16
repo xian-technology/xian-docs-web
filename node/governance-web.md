@@ -58,6 +58,19 @@ The vote matrix requires these node query routes:
 /validators_vote_records/<proposal-id>
 ```
 
+### Retrying an Out-of-Chi Vote
+
+Each wallet submission estimates the call against the latest available state
+and adds the normal 2-chi margin. A deciding vote can execute more work than an
+ordinary vote, including validator selection in automatic modes. Another vote
+committed after estimation can therefore make the signed limit insufficient.
+
+When a confirmed vote fails because it ran out of chi, the console offers
+**Vote again** for the same choice. It reloads the proposal and voter eligibility,
+simulates the call again, and requests a fresh wallet approval. Review the
+updated estimate before signing. A failed paid transaction still incurs a fee;
+retrying is a separate transaction.
+
 ### Reward Split Votes
 
 A `reward_change` payload uses this order:
