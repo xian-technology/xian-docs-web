@@ -71,6 +71,11 @@ data/priv_validator_state.json
 settings. Genesis, validator state, and keys must not be changed casually on an
 existing network.
 
+Evidence time retention is derived from staking policy at genesis and grows
+automatically when longer unbonding is approved. Its committed target and
+effective duration are recorded in `__evidence_policy`; they are not local
+profile settings. See [Slashing and Evidence](/node/staking#slashing-and-evidence).
+
 `xian_vm_v2` is the only supported execution runtime. Execution mode, VM
 bytecode, and gas schedule are not operator-selectable configuration.
 
@@ -155,7 +160,8 @@ These are separate mechanisms:
 - `snapshot_url` restores a prepared node-home or Xian application-state
   archive. Signed manifests can pin the archive hash, chain ID, and signer.
 - CometBFT state sync uses trusted RPC servers, height, hash, and trust period
-  to join through the consensus protocol.
+  to join through the consensus protocol, followed by verified evidence-history
+  bootstrap before catch-up and voting.
 
 Application state sync checks the downloaded archive's height and application
 hash against the trusted offer before replacing durable state. State imports
@@ -181,6 +187,70 @@ size limits. Import parses the state into memory, so its RAM use can exceed
 the JSON file size. Managed profile reconfiguration regenerates `xian.toml`; reapply
 custom snapshot limits after that operation. The state-snapshot CLI uses the
 same settings; export/import commands also accept `--max-state-bytes` and `--max-archive-bytes` overrides.
+
+### Verified Evidence History
+
+Use the matching Xian application and the stack's patched CometBFT 0.40.0
+backend for a fresh chain. The two processes check their local pairing before
+each peer snapshot offer; an unsupported combination refuses the offer.
+Public snapshot bytes, advertised metadata and the offline application snapshot
+format are unchanged. This backend is consensus-sensitive and must not replace
+the backend of an existing development or live chain. See
+[Consensus Backend Compatibility](/node/upgrading#consensus-backend-compatibility).
+
+A recent application snapshot does not contain all historical consensus data
+needed to check an infraction from before its checkpoint. The backend fetches
+headers, commits and validator membership for the complete evidence window.
+It verifies them against the light client's trusted checkpoint and successor
+headers, including header links, validator hashes and commit signatures.
+The evidence limits come from the restored application's committed
+`/evidence_policy` query, bound to the same height, application hash and exact
+block timestamp. CometBFT's `ConsensusHash` alone does not authenticate those
+evidence limits.
+
+Choose a trusted light-client height/hash through an independent channel,
+respect its trust period, and configure independently operated RPC servers.
+Those trust assumptions remain part of state sync. Historical evidence
+verification does not authenticate the RPC's current proposer priorities.
+
+The node records a pending bootstrap in `data/state.db` before restoring the
+application. Verified proof data is stored in `data/evidence.db`; the node
+publishes its ready journal only after the complete window and consensus
+checkpoint are durable. Catch-up and voting wait for that publication. A
+restart resumes an interrupted bootstrap, including an application already
+restored while core consensus state is at height zero. Missing or corrupt
+required history refuses startup. Preserve both databases with the restored
+node home; deleting the journal or cache is not a recovery procedure.
+
+History uses the `[statesync]` RPC servers in `config/config.toml`. Providers
+must retain the required proof window: an archival source can supply standard
+`/commit` and `/validators` reads, and a patched source can serve
+`/evidence_history?height=<height>` from retained proofs even below its block
+body pruning base. This endpoint supplies no block bodies or current proposer
+state. See [Pruning and History Retention](/node/pruning).
+
+The default bootstrap budgets are 1,000,000 records and 2 GiB of canonical
+record payload. Each fetched record has an 8 MiB decoded-response budget and
+at most 10,000 validators; there are at most eight providers, two attempt
+rounds per record and a ten-second deadline per provider attempt, shared by
+its standard and dedicated RPC reads. The canonical-payload
+budget is not a total database disk-use limit. Larger live windows require an
+explicit operator budget:
+
+```toml
+[statesync]
+history_max_records = 0
+history_max_bytes = 0
+```
+
+Zero selects the defaults. Positive values may raise or lower the budgets,
+up to 10,000,000 records and 1 TiB. A missing record, failed verification or
+exhausted budget leaves bootstrap pending; it never accepts a shortened
+evidence window. Correct the provider or resource limit and restart. Full
+replay from genesis or an appropriately retained full node-home restore remain
+alternatives when the required proof history cannot be supplied.
+
+### Offline Restore
 
 Snapshot restore replaces only the `data/` and `xian/` application roots.
 Configuration and node identity are retained locally, including configured

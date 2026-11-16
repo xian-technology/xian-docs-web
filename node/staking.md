@@ -111,6 +111,9 @@ The checked-in local/dev/test bundles use a 7-day unbonding period. The draft
 mainnet rehearsal bundle uses 14 days. The policy active on the target chain is
 authoritative.
 
+`unbonding_period_days` must be an integer from 0 through 106750. The upper
+bound keeps the period plus one retention day within CometBFT's duration range.
+
 Active validators also have a fixed leave-announcement delay before `leave()`.
 An announcement preserves active eligibility during that delay; ordinary stake
 ranking, jail and minimum-bond rules can still remove a validator from selection.
@@ -120,6 +123,24 @@ After leave, removal, or withdrawal, stake follows the normal unbonding clock.
 
 Governance can slash a validator. The runtime can also apply supported
 CometBFT evidence during block finalization.
+
+Fresh genesis gives evidence a time window of at least the seeded unbonding
+period plus one day. Mainnet's 14-day unbonding therefore starts with at least
+15 days of evidence retention. Existing larger evidence settings are preserved.
+
+Increasing the unbonding period automatically raises a committed retention
+target to cover the greatest required period observed, including successful
+intermediate policy changes within one block. The effective duration grows by
+at most the elapsed committed block time until it reaches that target. This keeps the historical expiry cutoff
+from moving backwards and covers new infractions during the increase.
+Reducing the policy does not shrink the retained window or shorten existing
+unbonds. The block-count and evidence-byte limits remain unchanged.
+
+CometBFT expires evidence only after both its block age and its time age exceed
+their limits. A block-count pruning setting is therefore not a substitute for
+the committed time window. Nodes joining from a snapshot must authenticate the
+complete pre-checkpoint proof window before catch-up or voting; see
+[Verified Evidence History](/node/configuration#verified-evidence-history).
 
 Slashable value can include self-bond, the delegation pool, and pending
 unbonds created at or after the infraction height. This prevents a validator or

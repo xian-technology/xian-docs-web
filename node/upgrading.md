@@ -92,6 +92,36 @@ The exported state includes the protected policy in its application-root
 commitment. An existing private network needs a separately agreed migration
 plan before adopting this revision.
 
+## Consensus Backend Compatibility
+
+Fresh chains use the stack's source-pinned CometBFT 0.40.0 build with Xian
+evidence-history revision 1 and its matching application. This is a fresh-chain
+target: do not swap it into an existing development or live chain. Its consensus
+behavior is not interchangeable with an earlier backend merely because both
+processes can speak ABCI.
+
+The schema-version-1 stack release manifest must include
+`build.cometbft_version`, `cometbft_source_url`, `cometbft_source_commit`,
+`cometbft_source_sha256`, `cometbft_patch_path`, `cometbft_patch_sha256` and
+`cometbft_history_revision`. Revision 1 requires version `0.40.0` and the
+official source commit `0880b4d378f347ab16e54ec677ff50d803f37d62`; the patch
+path and SHA-256 identify the reproducible stack-owned extension. Resolve
+the patch hash and immutable image digest from the accepted release.
+
+Built node images carry `/usr/local/share/xian/cometbft-provenance.json`, with
+`version`, `source_url`, `source_commit`, `source_sha256`, `patch_sha256` and
+`history_revision`. The image labels `org.xian.cometbft.version`,
+`org.xian.cometbft.source.commit`, `org.xian.cometbft.patch.sha256` and
+`org.xian.cometbft.history.revision` record the same selected version, source,
+patch and revision. Compare these records with the accepted manifest and record
+the resulting image digest in the operator bundle.
+
+CLI and deployment validation check expected release metadata. That metadata
+describes the intended build; it is not attestation of an arbitrary installed
+binary. The application's per-offer compatibility check and the backend's
+authenticated history bootstrap enforce the runtime snapshot boundary. See
+[Verified Evidence History](/node/configuration#verified-evidence-history).
+
 ## Choose the Procedure
 
 | Change | Procedure |

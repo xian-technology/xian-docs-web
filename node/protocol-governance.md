@@ -101,6 +101,11 @@ code, patch `contract_name.__source__`; the runtime derives canonical
 The node also guards the chain settings it reads at startup:
 
 - `__execution_policy` cannot be patched.
+- `__evidence_policy` cannot be patched or deleted. The node maintains its
+  retention target, effective limits and time anchor. A patch to
+  `validators.config:unbonding_period_days` must use an integer from 0 through
+  106750 and participates in the same automatic retention growth as a policy
+  vote; it cannot reduce a previously required retention target.
 - `__runtime_features.<feature>` can switch a supported feature (today `zk`)
   on or off, but only to a JSON `true` or `false`, the value genesis writes.
   Unknown features, other values and deletions are refused when the node loads
