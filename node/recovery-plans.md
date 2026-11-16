@@ -175,8 +175,9 @@ Verified full-store snapshots support the `goleveldb` backend. Export requires
 Before replacing the local stores, verification recomputes the application root, matches its
 committed height and exact time to the native checkpoint, checks the recipient's
 genesis and manifest commitments, and scans the complete live evidence window
-through the offline native inspector. Required historical metadata must be
-present even where older block bodies were pruned. Missing or inconsistent
+through the offline native inspector. It also verifies every retained block
+body. Required historical metadata must be present even where older block
+bodies were pruned. Missing or inconsistent
 stores refuse restoration.
 
 Default transfer limits are 8 GiB of archive bytes, 32 GiB of uncompressed tar,
@@ -201,7 +202,9 @@ backups and store them as private custody material.
 Stop the node before restoring a snapshot. `xian snapshot restore` and
 `xian node init --restore-snapshot` check the node's runtime state first and
 refuse while its runtime containers are up, even if the node processes are
-crash-looping; stop it with `xian node stop <name>`. On remote hosts,
+crash-looping; stop it with `xian node stop <name>`. An active container with a
+writable mount overlapping the node home also blocks
+restoration, including containers under another Compose project. On remote hosts,
 `xian-deploy`'s `playbooks/restore-network-snapshot.yml` performs the stop,
 restore and start for you. Restore replaces only the `data/` and `xian/`
 roots. A full node-home archive may contain `config/` or other

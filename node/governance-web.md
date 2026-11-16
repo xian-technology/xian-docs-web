@@ -85,6 +85,17 @@ Zero-valued buckets are valid. The checked-in genesis default is
 After approval, verify the `rewards` value on multiple nodes and inspect a
 fee-paying transaction's actual reward recipients and amounts.
 
+## Validator Registry
+
+The console reads the registry count, then fetches validator records in bounded
+pages of 25. A refresh reads the captured number of entries; validators
+registered during that scan appear on a later refresh. A failed or incomplete
+scan displays an unavailable message instead of an empty registry. Previously
+loaded rows remain visible with a stale-data warning when a refresh fails.
+
+The combined server response and table still grow with the registry's lifetime
+history, including exited validators.
+
 ## Operator Safety
 
 The browser bundle verifier orders change keys by Unicode code point and
