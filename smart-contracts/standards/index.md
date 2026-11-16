@@ -14,6 +14,12 @@ payment primitives that other tools expect.
 Reference standards live in `xian-xips`. Canonical system contracts and
 product repositories implement the relevant interfaces where needed.
 
+Account arguments in the reference contracts use lowercase hexadecimal for
+64-character Ed25519 public keys. Mixed-case or uppercase spellings are
+rejected before changing balances, approvals, ownership, or authority. Named
+contract accounts remain exact, case-sensitive identifiers. Validate the
+intended recipient before signing; contracts do not rewrite account arguments.
+
 ## How To Use Them
 
 - implement the core function signatures exactly

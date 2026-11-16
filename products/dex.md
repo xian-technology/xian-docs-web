@@ -60,6 +60,9 @@ Behavior worth knowing before integrating:
   the pair exists. `createPair(tokenA, tokenB)` and router auto-creation during
   `addLiquidity` use the registered token; an optional `lpToken` argument is
   accepted only when it matches that registration.
+- LP transfers, approvals, and mint recipients require lowercase hexadecimal
+  public keys or exact named accounts. Mixed-case public-key spellings are
+  rejected before updating the LP ledger.
 - An account's LP balance and allowances live in that pair's bound
   `con_lp_token` instance — read `<lpToken>.balances` / `<lpToken>.approvals`,
   not `con_pairs`. To remove liquidity, approve the router (`con_dex`) on the LP

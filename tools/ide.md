@@ -7,6 +7,10 @@ and wallet before signing.
 
 The editor compiles and simulates for `xian_vm_v2`. Enter decimal arguments as decimal text. Integer, decimal and nested JSON argument fields preserve the digits you enter through simulation and wallet signing.
 
+The editor, language tooling, compiler WebAssembly, and editor worker are bundled
+with the static site. Loading the editor does not require third-party CDN
+scripts; contract execution still uses the selected RPC endpoint.
+
 ## Hosting the IDE
 
 Build with optional `VITE_XIAN_RPC_URL` and `VITE_XIAN_NETWORK_LABEL`

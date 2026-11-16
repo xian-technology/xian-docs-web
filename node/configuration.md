@@ -163,6 +163,25 @@ reject duplicate state or nonce keys, validate protected metadata first, and rep
 block marker in one database transaction. Exports read both from the same
 committed database snapshot.
 
+Local snapshot resource limits are top-level `config/xian.toml` settings:
+
+```toml
+snapshot_max_state_bytes = 268435456
+snapshot_max_archive_bytes = 268435456
+snapshot_max_metadata_bytes = 65536
+snapshot_min_free_disk_bytes = 16777216
+```
+
+State and archive limits default to 256 MiB each, metadata to 64 KiB, and the
+free-disk reserve to 16 MiB. Transfers, decompression and JSON input obey these
+limits before replacing state, and staging checks available disk space. Raise
+the limits consistently for a larger export after checking the machine's RAM
+and disk budget. They are operator resource settings, not chain consensus
+size limits. Import parses the state into memory, so its RAM use can exceed
+the JSON file size. Managed profile reconfiguration regenerates `xian.toml`; reapply
+custom snapshot limits after that operation. The state-snapshot CLI uses the
+same settings; export/import commands also accept `--max-state-bytes` and `--max-archive-bytes` overrides.
+
 Snapshot restore replaces only the `data/` and `xian/` application roots.
 Configuration and node identity are retained locally, including configured
 validator signing state and key paths. Stop the node before restoring; see

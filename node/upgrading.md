@@ -8,7 +8,7 @@ existing network running an earlier runtime is not automatically compatible.
 ## Current Local Execution Revision
 
 Fresh local genesis commits `__execution_policy` with execution revision
-`xvm-execution-14`, gas schedule `xvm-gas-6`, bytecode `xvm-2` and set codec
+`xvm-execution-15`, gas schedule `xvm-gas-7`, bytecode `xvm-2` and set codec
 `xian-set-1`. The node requires this exact policy in genesis, persisted state
 and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
@@ -16,7 +16,7 @@ change this protected record. The comparison covers all four fields; matching
 gas and codec versions do not make a different execution revision compatible.
 
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
-literal handling and checked numeric ABI boundaries. Gas schedule 6 charges for
+literal handling and checked numeric ABI boundaries. Gas schedule 7 charges for
 numeric work and for element work that grows with the size of a value: container
 operations, text and byte scans and comparisons, values crossing a contract
 boundary and whole-hash scans. One element-work unit costs 24 raw chi.
@@ -26,6 +26,13 @@ policy sets a lower per-transaction cap. See
 [Numbers, division and rounding](/smart-contracts/numbers), the
 [chi cost table](/reference/chi-costs#element-work) and
 [Chain Chi Caps](/concepts/chi#chain-chi-caps).
+
+Revision 15 charges canonical module IR reads before parsing or traversing
+imports, using the transaction's shared budget. The first load of each module
+pays the same charge on cold and warm nodes. Preparation includes dynamic
+imports and deployment constructors. This changes chi, fee balances and the
+point at which a small budget fails; it requires a fresh chain and matching
+native bindings. See [Module preparation](/reference/chi-costs#accounting).
 
 Revision 11 repriced the size-dependent operation families and introduced
 the VM's per-transaction ceiling; revision 12 added the dictionary index. Each

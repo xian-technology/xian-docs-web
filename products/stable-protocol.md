@@ -83,6 +83,12 @@ explicit budgets only for profiles without readonly simulation. Sample collatera
 and reserve tokens reuse the validated stable-token source. The deploy dependency
 group includes the shared CLI validator and Python SDK.
 
+PSM minting requires the reserve balance to increase by the quoted `reserve_in`.
+Vault creation and collateral deposits likewise require the exact requested
+collateral to arrive before crediting the position. Fee-on-transfer and no-op
+incoming assets revert atomically; quotes and collateral accounting remain
+based on exact amounts.
+
 ### Required Wiring
 
 The protocol is not correctly wired unless fee destinations are configured:

@@ -1,7 +1,7 @@
 # Chi Cost Table
 
 These costs describe the native `xian_vm_v2` runtime with execution revision
-`xvm-execution-14` and gas schedule `xvm-gas-6`. Use readonly simulation
+`xvm-execution-15` and gas schedule `xvm-gas-7`. Use readonly simulation
 against the target node for a complete operation estimate. The V2 gas schedule includes the following arithmetic charges.
 
 ## Accounting
@@ -18,6 +18,7 @@ never runs one V2 transaction past 1,000,000 chi; see
 | Item | Raw cost |
 | --- | ---: |
 | storage read | 2 per encoded key/value byte |
+| first module load in a transaction, before preparation | storage-read tariff for canonical IR bytes and encoded keys |
 | storage write | 25 per encoded key/value byte |
 | submitted transaction | 1 per byte |
 | returned value | 25 per encoded byte, as a write |
@@ -25,7 +26,7 @@ never runs one V2 transaction past 1,000,000 chi; see
 | contract deployment | 15,000,000 plus 100 per submitted source byte, charged before compiling (a source that fails to compile pays it too) |
 
 VM computation and host operations use deterministic policy constants, not
-measured execution time. The current runtime supports `xvm-gas-6`; it does not
+measured execution time. The current runtime supports `xvm-gas-7`; it does not
 offer an earlier schedule as an alternate execution mode. Validators must use matching
 runtime policies. See the [upgrade procedure](/node/upgrading).
 
@@ -35,6 +36,10 @@ inspection and imported callable lookup charge for the metadata they read;
 following imported function aliases is bounded. These costs apply
 even when a module's interface is inspected before any exported function is
 called. Simulation includes this initialization work.
+
+Module reads consume the transaction's shared budget before IR parsing or
+import traversal, including dynamic imports. A module is charged once per
+transaction, and a warm node cache does not change that charge or the result.
 
 Events charge for validating and copying their declaration schema and for
 validating each emitted payload, in addition to emission and encoded-value
@@ -139,6 +144,8 @@ execution-fee debit or fee-derived reward.
 | metered storage-write byte budget | less than 128 KiB, including encoded keys and values |
 | returned value of the entry function | less than 128 KiB, encoded |
 | submitted contract source | 128 KiB |
+| modules prepared by one transaction, including imports | 512 |
+| combined canonical IR prepared by one transaction | 16 MiB |
 | `range(...)` and bounded sequence repetition | 131,072 entries |
 | bounded binary allocation and string repetition | 128 KiB |
 | chain per-transaction chi cap (`max_tx_chi`, default) | 200,000 |
@@ -149,6 +156,10 @@ execution-fee debit or fee-derived reward.
 The chain caps are part of the genesis fee policy; see
 [Chi and Metering](/concepts/chi#chain-chi-caps). The block cap counts the chi
 each transaction supplies, not the chi it uses.
+
+The module-count and IR-byte limits also apply when metering is disabled.
+Block-local module caches retain at most 512 modules and 16 MiB of IR; cache
+eviction does not change transaction costs or behavior.
 
 Sequence entry counts and encoded byte counts are different units. A list of
 large values can cost much more than a list of the same length containing

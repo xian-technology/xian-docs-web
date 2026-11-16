@@ -34,6 +34,15 @@ Update those checkouts before running if you want to test current `main`.
 Local edits are included in the build. Setting `LOCALNET_E2E_BUILD=0` reuses
 an existing image, so its compiler and VM can differ from the host checkout.
 
+The full harness uses periodic block production at a one-second interval,
+including when throughput tuning is selected. Agreement and result-hash checks
+need subsequent proof blocks even when the mempool is empty. Set
+`XIAN_LOCALNET_BLOCK_POLICY_INTERVAL` to keep another periodic interval; an
+explicit `XIAN_LOCALNET_BLOCK_POLICY_MODE=on_demand` is rejected before
+bootstrap. This requirement belongs to the full E2E harness. An interactive
+localnet can use on-demand production and is expected to stop advancing while
+idle.
+
 For scheduled and manually dispatched **Localnet Safety** runs, the selected
 `xian-stack` revision determines the inputs. Its `release-manifest.json` pins
 the four node build repositories by commit. The shared checkout action in

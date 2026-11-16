@@ -44,6 +44,12 @@ Validator records include the consensus key, reward key, requested/active
 power, commission, profile metadata, registration bond, self-bond, delegation,
 pending unbonds, and jail/slash/evidence information.
 
+`pending_slash_count` reports unfinished penalty jobs. While it is positive,
+stake changes, registration, exit, unjailing and every unbond claim associated
+with that validator are held. Monitor the returned penalty `job_id` through
+`validator_penalties.get_pending_slash_job(job_id)` and reconcile its final
+payment when the job completes. See [Slashing and Evidence](./staking#slashing-and-evidence).
+
 The registering account becomes the consensus key. Registration requires
 `ctx.caller == ctx.signer`, so a wrapper contract cannot register on behalf of
 an account. Use the account corresponding to the node's validator key, and keep

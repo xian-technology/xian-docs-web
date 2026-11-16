@@ -141,8 +141,14 @@ print(result["state"])
   affordability or a balance-dependent result (the transaction itself would
   fail its reservation)
 - state can change between simulation and real submission
-- the node serializes queries with state transitions and keeps finalized,
-  uncommitted block writes separate from the query view
+- preparation captures the latest committed height H, timestamp and state;
+  it does not guess H+1 or use wall-clock time
+- all estimation rounds read the same committed snapshot and pending-state
+  fork, even when another block commits while the worker runs
+- preparation briefly uses the state-transition lock; execution releases it
+  so CheckTx, FinalizeBlock and Commit can proceed
+- a storage map resize can invalidate a prepared snapshot; retry the query
+  with a fresh snapshot instead of treating that result as a contract failure
 - block metadata is supplied by the simulator; values derived from time,
   height, or randomness are not a prediction of the eventual transaction block
 - `simulate_tx` is free compute, so operators should not expose it as an
@@ -166,7 +172,9 @@ simulation_timeout_ms = 3000
 What these keys do:
 
 - `simulation_enabled`: turn the `simulate_tx` query path on or off
-- `simulation_max_concurrency`: maximum concurrent dry runs accepted by this node
+- `simulation_max_concurrency`: maximum prepared or running dry runs accepted
+  by this node, also bounded by the storage reader capacity; abandoned
+  preparations and finished workers release their slots
 - `simulation_timeout_ms`: how long a dry run query waits for its answer (the
   run itself is bounded by its chi budget and keeps its concurrency slot until
   it finishes)

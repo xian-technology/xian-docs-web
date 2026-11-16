@@ -91,6 +91,21 @@ twice.
 Governed `slash_member` is a separate reviewed action. Reconcile its result
 before closing the incident.
 
+When a result queues a penalty, record its `job_id` and monitor
+`validator_penalties.get_pending_slash_job(job_id)` until `status` is
+`complete`. The validator record's `pending_slash_count` counts its unfinished
+jobs. The configured jail applies immediately unless it would remove the last
+active validator; collection and debits advance in bounded batches over later
+blocks. All unbond claims for that validator, stake changes, registration,
+exits and unjailing wait until its jobs finish. Existing earned rewards remain
+claimable.
+
+After a node restart, check that the stored phase/cursor continues and the final
+destination payment occurs once. Reconcile live principal, pending principal,
+allocated but unpaid slash escrow, and completed destination payments. A job's
+partially allocated amount is not a completed payment. Preserve the evidence
+ID when retrying evidence delivery so the contract deduplicates it.
+
 ## Governance Changes
 
 For membership, fee, reward, power, vote-type, or policy changes:

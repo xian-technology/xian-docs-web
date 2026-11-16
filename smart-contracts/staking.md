@@ -29,6 +29,11 @@ A stake is accepted only when the pool has enough unreserved deposited rewards
 to reserve that position's maximum reward. Early unstaking scales the reserved
 reward by elapsed time and applies the pool's configured principal penalty.
 
+Funding tokens must expose `balance_of(address)`, `transfer(amount, to)`, and
+`transfer_from(amount, to, main_account)`. Principal, reward deposits, and entry
+fees are credited only after custody increases by the exact requested amount.
+Fee-on-transfer or no-op incoming transfers revert without creating liabilities.
+
 ## Custody Liabilities
 
 For each token, the contract tracks three protected balances:
@@ -49,6 +54,10 @@ Even while paused, the contract owner cannot use
 `emergency_withdraw_token(...)` to take protected principal, reward deposits,
 or accrued creator funds. Emergency withdrawal is restricted to recoverable
 excess, such as unsolicited token transfers.
+
+Unstaking and creator-fee withdrawals settle their position, reservation,
+statistics, and liabilities before token payouts. A token callback cannot settle
+the same claim twice; a failed payout reverts the complete settlement.
 
 ## Integration Checks
 

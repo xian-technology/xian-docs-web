@@ -41,6 +41,11 @@ frames. Its marketplace accepts only the seeded chain `currency` contract for
 settlement; listings that name arbitrary interface-compatible contracts fail
 closed before any purchase can occur.
 
+Collection ownership, token recipients, approvals, and royalty recipients use
+lowercase hexadecimal public keys or exact named accounts. Mixed-case public
+keys are rejected before ownership or authority changes. A royalty recipient
+must be a valid nonempty account whenever royalties are enabled.
+
 ## PixelSnek Marketplace
 
 The marketplace (Vite + React + TypeScript + Tailwind + daisyUI) covers the

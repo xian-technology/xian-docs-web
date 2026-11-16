@@ -102,7 +102,10 @@ rounding dust stays in the pool.
 
 An unbond record stores owner, validator, amount, kind, creation block/time,
 unlock time, reason, and claimed state. Only its owner can claim it after
-`now >= unlock_at`.
+`now >= unlock_at`, once its validator has no pending penalty jobs. A pending
+penalty holds every unbond claim for that validator, including records whose
+creation height makes them ineligible for that penalty. Those earlier records
+keep their amounts.
 
 The checked-in local/dev/test bundles use a 7-day unbonding period. The draft
 mainnet rehearsal bundle uses 14 days. The policy active on the target chain is
@@ -119,10 +122,10 @@ Governance can slash a validator. The runtime can also apply supported
 CometBFT evidence during block finalization.
 
 Slashable value can include self-bond, the delegation pool, and pending
-unbonds created after the infraction height. This prevents a validator or
+unbonds created at or after the infraction height. This prevents a validator or
 delegator from escaping a known earlier infraction by unbonding. Rewards a
-delegator earned before a slash stay claimable; slashed stake stops earning at
-once. A fully slashed pool refuses new delegations; its holders leave with
+delegator already earned stay claimable. A fully slashed pool refuses new
+delegations; its holders leave with
 `undelegate(validator, 0)`.
 
 Checked-in development bundles apply these defaults:
@@ -134,6 +137,25 @@ Checked-in development bundles apply these defaults:
 
 Evidence IDs are deduplicated. Slashed value is sent to the configured
 `slash_destination`.
+
+Penalties that include pending unbonds progress across blocks through the
+canonical `validator_penalties` coordinator. The configured evidence jail
+takes effect immediately, except for the last active validator. Stake changes,
+registration, exits, unjailing, and unbond claims for the affected validator
+wait until its pending jobs finish; earned reward claims remain available.
+Live-only penalties complete synchronously.
+
+The runtime advances one shared maximum of 32 work units per block. Collection
+and debit passes each visit pending records in creation order. The live
+self-bond and delegation-pool debit commits as one work unit. Progress is part
+of chain state, so a restart resumes the stored cursor. Final payment and
+completion commit together, and later jobs compound the earlier results.
+
+An asynchronous penalty result identifies its `job_id`.
+`validator_penalties.get_pending_slash_job(job_id)` reports its phase, cursor,
+allocated slash escrow, and final `slash_amount`. A validator record exposes
+`pending_slash_count`. Operators should wait for a completed job before
+reconciling its final payment or retrying a held withdrawal.
 
 Slash debits use cumulative proportional rounding in deterministic participant
 order. Successive cumulative targets preserve the total slash without making

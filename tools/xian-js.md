@@ -162,6 +162,12 @@ events. The wallet remains responsible for approval policy and secret custody.
 
 ## Reads, Simulation, and Events
 
+Public-key account identifiers use 64 lowercase hexadecimal characters.
+`normalizeXianRecipient` from `@xian-tech/client` normalizes the case of a valid
+64-hex recipient while preserving named identifiers. Generic transaction
+arguments are serialized exactly; applications should normalize recipient
+fields before displaying the final review and requesting a signature.
+
 The client provides:
 
 - node, nonce, state, source, IR, and contract metadata reads

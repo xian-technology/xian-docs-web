@@ -32,6 +32,10 @@ characters that does not contain `|`. Replaying a key with the same body
 returns the same transfer while it is open; once it has finished the bridge
 answers `409`.
 
+Set `XIAN_CHAIN_ID` explicitly for the bridge's signing context, or let the
+service discover it from `/status` at the configured Xian RPC. Discovery uses
+`result.node_info.network` and does not require downloading the genesis file.
+
 A Xian payout counts as dropped only when its nonce was consumed by a committed
 block that does not contain it. The bridge proves this by reading the blocks
 between the last height where the nonce was still open and the first where it

@@ -80,6 +80,11 @@ only on a trusted local/private network; prefer HTTPS elsewhere.
   save cannot restore the unlocked state
 - WalletConnect approves required Xian scopes only and rechecks chain, method,
   and account on every request
+- simple sends normalize 64-hex public-key recipients before review; generic
+  contract arguments stay exact, and WalletConnect rejects conflicting inner
+  and session chain IDs
+- send, advanced-transaction, and trade reviews are bound to the account and
+  network/RPC that produced them; switching that context requires a fresh review
 - connect and request dialogs show WalletConnect's domain verification for the
   calling site: verified domain, unverified (WalletConnect could not confirm
   the site), domain mismatch (the request came from a different site than the

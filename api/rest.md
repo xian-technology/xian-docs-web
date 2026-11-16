@@ -63,6 +63,45 @@ with `set(value)` before persistence. See
 See [BDS Indexed Queries](/api/bds) for indexed block, transaction, event,
 state-history, token, candle, shielded, reward, and patch paths.
 
+## Bounded Archive Pages
+
+Use these ABCI paths for complete pagination over contract names, open
+validator proposals and pending unbonds:
+
+| Path | Items | Continuation |
+| --- | --- | --- |
+| `/contracts_page/limit=25/after=<namespace>` | `items`: name, submission time, developer and source availability | `next_after`: exclusive namespace cursor; names ascend |
+| `/validators_open_votes_page/limit=25/cursor=<id>` | `items`: pending proposals, including `proposal_id` | `next_cursor`: next proposal ID to inspect, inclusive; IDs descend |
+| `/validators_pending_unbonds_page/<owner>/limit=100/cursor=<id>` | `unbonds`, including `unbond_id` | `next_cursor`: next unbond ID to inspect, inclusive; creation order |
+
+Omit the cursor for the first page. Each route caps its item limit at 100;
+contract and proposal pages default to 25, and unbond pages default to 100.
+Follow the returned continuation until it is `null`. An empty page can still
+have a continuation: contract/proposal reads inspect at most 1,000 namespaces
+or proposal IDs per request. Do not stop pagination solely because an item
+array is empty. Treat namespace cursors as opaque UTF-8 strings, URL-encode
+them once, and reject repeated or non-progressing cursors in a client loop.
+
+For example, a proposal page can be:
+
+```json
+{"items":[],"next_cursor":2000,"limit":25}
+```
+
+The next request uses `/validators_open_votes_page/cursor=2000/limit=25`.
+A claimed unbond can invalidate its saved cursor; refresh the first page
+when the node reports a stale cursor. These pages describe the latest
+committed state at each request, rather than a multi-request historical
+snapshot.
+
+The compatibility `/contracts` route retains its date/name sort and offset
+shape only for archives of at most 100 contracts within one bounded scan.
+`/validators_open_votes` supports lifetime proposal counts up to 1,000.
+`/validators_pending_unbonds/<owner>` returns the complete list only when it
+fits in 100 entries. Larger archives return a nonzero ABCI code explaining
+which page route to use. Check that code and its log before decoding a value;
+an error is not an empty successful list.
+
 ## Contract and Transaction Responses
 
 `GET /api/contract/{name}` returns stored canonical source and VM metadata
@@ -92,12 +131,21 @@ Indexed address and event views require BDS. The explorer may support
 inspection of a connected peer, but the backend restricts targets to the
 configured node and known peers; it is not a general HTTP proxy.
 
+The contract explorer's `/api/contracts` endpoint returns bounded name-ascending
+pages selected by `after`; it does not reconstruct global date sorting or
+offsets. The validator dashboard keeps its `open_votes` and
+`local_pending_unbonds` arrays and exposes `open_votes_next_cursor` and
+`local_pending_unbonds_next_cursor`. Select subsequent pages with
+`open_votes_cursor` and `pending_unbonds_cursor`. Next/First controls retain
+the selected cursors across polling, including sparse empty pages.
+
 ## Consistency
 
 Direct `/get/...` queries read committed application state. BDS-backed routes
 are derived asynchronously from finalized blocks and may lag during catch-up.
 Check `/api/abci_query/bds_status` when an indexed read must include a recent
-transaction.
+transaction. Database waits run outside the consensus state lock, so an
+unavailable indexer does not hold transaction admission or block commits.
 
 Direct CometBFT `abci_query` requests accept `height=0` or the exact latest
 committed Xian height. Other heights and `prove=true` return a nonzero ABCI

@@ -48,6 +48,12 @@ Approval requests are bound to the displayed account, chain ID, network
 preset, and RPC endpoint. If that context changes before approval, the wallet
 rejects the request.
 
+Simple token sends normalize a 64-hex public-key recipient to lowercase before
+review. Named contract recipients remain unchanged. The reviewed account,
+network, chain, and RPC remain bound through asynchronous verification and
+signing; switching them requires a fresh review, including changes made in
+another wallet window. Generic contract-call arguments remain exact.
+
 Transaction approval previews preserve decimals, large integers and bytes using the SDK's `__fixed__`, `__big_int__` and `__bytes__` JSON wrappers. These let you inspect the
 exact values in nested arguments without rounding large integers.
 

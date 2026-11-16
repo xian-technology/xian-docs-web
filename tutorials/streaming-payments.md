@@ -26,8 +26,16 @@ The streamed token contract must expose:
 
 - `transfer(amount, to)`
 - `transfer_from(amount, to, main_account)`
+- `balance_of(address)`
 
 `con_stream_payments` validates that interface before using the token.
+Escrow funding must increase custody by the exact required amount before a
+deposit is credited. Fee-on-transfer and no-op funding revert, including when
+other streams already have escrow in the contract.
+
+Receivers that are public keys use 64 lowercase hexadecimal characters.
+Mixed- or uppercase keys are rejected; named contract receivers remain valid.
+Permit signatures are checked against the exact supplied receiver value.
 
 ## Core Flow
 
