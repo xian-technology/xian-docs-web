@@ -6,6 +6,13 @@ Xian node configuration has three layers:
 2. a node profile records operator-local intent
 3. `xian node init` renders the CometBFT home used at runtime
 
+Ordinary node settings share one baseline across the runtime and CLI. Templates
+and presets specify intentional overrides; explicit operator flags take priority.
+Creating a profile saves the resolved values. Existing values in a saved profile
+are preserved when it is loaded, while omitted fields receive the installed
+release's defaults. An explicit `"simulation_max_chi": null` keeps the chain's
+transaction cap in charge.
+
 ```mermaid
 flowchart TD
   Template["Reusable template"] --> Manifest["Network manifest"]
