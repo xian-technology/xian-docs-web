@@ -126,7 +126,8 @@ On an `on_demand` network:
 
 On a `periodic` network with `10s` empty blocks:
 
-- chain time advances roughly every 10 seconds
+- empty blocks are scheduled at a 10-second interval; consensus timing and
+  execution also affect when blocks finalize
 - deadlines can expire even if no user transactions are submitted
 
 That means contracts should treat time as a condition checked during execution,
@@ -135,7 +136,8 @@ not as a background scheduler.
 ## Notes
 
 - `now` comes from block context, not local wall-clock time
-- `now` is the finalized consensus block timestamp
+- `now` is the finalized consensus block timestamp converted to UTC microseconds;
+  submicrosecond nanoseconds are discarded without rounding
 - every transaction in the same block sees the same `now`
 - the exposed `Datetime` and `Timedelta` types are restricted runtime wrappers
 - these types are also valid for exported-function annotations

@@ -70,7 +70,7 @@ flowchart TD
 That separation is why Xian can evolve contract execution without replacing the
 consensus engine itself.
 
-See the [CometBFT ABCI lifecycle](https://github.com/cometbft/cometbft/blob/v0.39.3/spec/abci/abci%2B%2B_methods.md#finalizeblock)
+See the [CometBFT ABCI lifecycle](https://github.com/cometbft/cometbft/blob/v0.40.0/spec/abci/abci%2B%2B_methods.md#finalizeblock)
 for the consensus/application handoff.
 
 ## Query Surfaces

@@ -11,7 +11,16 @@ block timestamp agreed by consensus.
 - every transaction in the same block sees the same `now`
 - `now` is UTC-based chain time, not the machine time of the validator
 
-This is why time-based contract logic can be deterministic.
+Consensus stores the timestamp as integer seconds and nanoseconds. Xian converts
+it to a UTC contract datetime with microsecond precision, discarding the
+remaining submicrosecond digits without rounding. For example, a consensus
+fraction of `.123456789` seconds becomes `.123456` in contract `now`. This
+conversion uses integer arithmetic and does not depend on the validator's time
+zone.
+
+This is why time-based contract logic can be deterministic. A block timestamp
+is consensus time, not a promise that a deadline matches an external clock.
+The supported [CometBFT baseline](/concepts/consensus) does not implement PBTS.
 
 ## Supported Block Policies
 
@@ -60,6 +69,9 @@ Xian supports three block-production policies:
 ## What Changes Across Policies
 
 The execution model does not change. Only idle-time progression changes.
+The interval configures empty-block scheduling, not an exact finalized-block
+time target. Consensus timeouts, transaction execution, validator availability
+and network delays also affect observed cadence.
 
 | Policy | Idle empty blocks | Does chain time advance while idle? |
 | --- | --- | --- |

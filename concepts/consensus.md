@@ -1,6 +1,10 @@
 # Consensus & Finality
 
-Xian uses CometBFT for Byzantine Fault Tolerant consensus.
+Xian uses unmodified upstream CometBFT **v0.40.0** for Byzantine Fault
+Tolerant consensus. This is the supported source baseline; use the exact source
+commit and archive checksum pinned by the accepted stack release. See
+[Consensus Backend Compatibility](/node/upgrading#consensus-backend-compatibility)
+for build provenance and the upstream tag's displayed-version caveat.
 
 ## What CometBFT Does
 
@@ -26,12 +30,20 @@ reorg-style finality.
 ## Block Time
 
 Contract time comes from the finalized block timestamp agreed by consensus.
+The supported upstream v0.40.0 implementation does not implement
+proposer-based timestamps (PBTS); do not assume a proposer supplies a fresh
+wall-clock timestamp for each block.
 
 That means:
 
 - `now` in contracts is chain time, not a local validator clock
 - every transaction in the same block sees the same `now`
-- block policy only changes when new blocks appear during idle periods
+- consensus preserves nanosecond timestamps; contract `now` has UTC
+  microsecond precision
+- block policy controls when new blocks appear during idle periods
+
+See [Time & Block Policy](/concepts/time-and-blocks) for precision, scheduling
+and deadline rules.
 
 ## Version Discipline
 
