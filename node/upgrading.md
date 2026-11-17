@@ -95,11 +95,11 @@ agreed migration plan before adopting this revision.
 
 ## Consensus Backend Compatibility
 
-Use the unmodified upstream CometBFT version pinned by the accepted stack
-release and its matching Xian application. Keep the source archive hash and
-immutable image digest with that release's provenance. Expected CLI and
-deployment metadata describes the intended build; it is not attestation of an
-arbitrary installed binary.
+The supported source baseline is unmodified upstream **CometBFT v0.40.0**
+with its matching Xian application. Use the exact source pinned by the accepted
+stack release. Keep the source archive hash and immutable image digest with
+that release's provenance. Expected CLI and deployment metadata describes the
+intended build; it is not attestation of an arbitrary installed binary.
 
 The schema-version-1 release manifest records `build.cometbft_version`,
 `cometbft_source_url`, `cometbft_source_commit` and
@@ -115,6 +115,11 @@ That upstream source retains the core version string `0.39.0`; the unmodified
 build reports it together with the source commit. Record the source release,
 commit, archive checksum and actual binary version separately. A version
 string alone does not identify or authenticate a build.
+
+The application requires a version-2 `__evidence_policy` growth schedule.
+Version-1 evidence policies are rejected; this is a fresh-chain compatibility
+boundary, not an in-place state migration. Keep an earlier chain on its matching
+runtime until a separate upgrade is reviewed.
 
 A consensus-sensitive backend change requires a fresh chain or a separately
 reviewed network upgrade. Do not swap a different backend into an existing

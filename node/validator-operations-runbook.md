@@ -155,22 +155,38 @@ the halted chain was voting on, so no height carries votes of both chains.
    the last block, and the halted height. Every kept validator must take part.
 2. **Stop and back up.** Each kept operator stops its node and copies the whole
    node home (`config/`, `data/`, the Xian state directory) aside.
-3. **Export.** Each runs `xian-export-state --output-path <home>/recovery`
-   against the stopped node's state. Compare the `hash` and `number` of every
-   `exported_state.json`: they must be identical (the root of the last
-   committed height). An operator whose node lags re-syncs first.
+3. **Confirm the checkpoint and export.** Obtain checkpoint JSON independently
+   from a trusted node. For a stopped trusted node, use the
+   `xian-node-store-inspect` tool shipped with the matching node image against
+   its read-only mounted stores and accepted genesis; save its JSON output as
+   `<home>/recovery/trusted-checkpoint.json`. Alternatively, save the decoded
+   [`/evidence_policy` response](/api/#which-surface-to-use) from an independently
+   trusted node. Compare the canonical string fields `height`, `app_hash` and
+   exact `last_block_nanos` across the kept operators. A block H header's
+   `app_hash` belongs to the preceding state; use the reported checkpoint root
+   for state H, not that header field.
+
+   Each then runs `xian-export-state --output-path <home>/recovery` against the
+   stopped application state. Its `number`, `hash` and `nanos` must match the
+   independently trusted checkpoint. Do not create a checkpoint by copying
+   those fields from the same export: the state root alone does not authenticate
+   its height or timestamp. An operator whose node lags re-syncs first.
 4. **Build the genesis.** Each runs
 
    ```bash
    xian-recovery-genesis --exported-state <home>/recovery/exported_state.json \
+     --trusted-checkpoint <home>/recovery/trusted-checkpoint.json \
      --chain-id <chain id> --genesis-time <agreed time> \
      --keep <key> [--keep <key> ...] --output <home>/recovery/genesis.json
    ```
 
-   and publishes the SHA-256 of the file; all digests must match. The tool refuses a tampered export, a
-   validator that is not active, and a genesis time before the last block. The
-   validators not kept become approved, jailed for downtime (power 0) at the
-   genesis time.
+   and publishes the SHA-256 of the file; all digests must match. The tool
+   requires the independent checkpoint and refuses a mismatched export, a
+   validator that is not active, and a genesis time at or before the last block.
+   The validators not kept become approved, jailed for downtime (power 0) at the
+   genesis time. Evidence retention is evaluated at the exported checkpoint
+   before its growth schedule is anchored to the recovery genesis time; the
+   halted interval does not grant extra retention growth.
 5. **Install.** Each replaces `config/genesis.json` with the recovery genesis,
    deletes everything in `data/` except `priv_validator_state.json` (keep it:
    it is what prevents double signing), deletes the Xian state directory, and

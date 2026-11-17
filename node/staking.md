@@ -128,14 +128,27 @@ Fresh genesis gives evidence a time window of at least the seeded unbonding
 period plus one day. Mainnet's 14-day unbonding therefore starts with at least
 15 days of evidence retention. Existing larger evidence settings are preserved.
 
-Increasing the unbonding period automatically raises a committed retention
-target to cover the greatest required period observed, including successful
-intermediate policy changes within one block. The effective duration grows by
-at most the elapsed committed block time until it reaches that target. This
-keeps the historical expiry cutoff from moving backwards and covers new
-infractions during the increase.
-Reducing the policy does not shrink the retained window or shorten existing
-unbonds. The block-count and evidence-byte limits remain unchanged.
+Increasing the unbonding period raises a committed retention target to cover
+the greatest required period observed, including successful intermediate
+policy changes within one block. The authenticated schedule records a base
+duration, a growth-start timestamp and that target. At a finalized block
+timestamp, the effective duration is the smaller of the target and the base
+plus elapsed consensus time since growth started. This keeps the historical
+expiry cutoff from moving backwards and covers new infractions during the
+increase.
+
+A higher target first evaluates the existing schedule at that block's timestamp
+and starts the next schedule there. Time spent idle before the increase cannot
+be banked as immediate growth. Reducing the policy does not shrink the retained
+window or shorten existing unbonds. The block-count and evidence-byte limits
+remain unchanged.
+
+During normal block execution, the stored schedule changes only when its
+target increases.
+Deriving the effective limits at each block does not rewrite an application
+clock, so a pending increase does not itself force repeated proof blocks on an
+on-demand network. Block production follows the configured
+[block policy](/concepts/time-and-blocks); no timer executes in the background.
 
 CometBFT expires evidence only after both its block age and its time age exceed
 their limits. A block-count pruning setting is therefore not a substitute for

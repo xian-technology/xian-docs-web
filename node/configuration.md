@@ -72,9 +72,11 @@ settings. Genesis, validator state, and keys must not be changed casually on an
 existing network.
 
 Evidence time retention is derived from staking policy at genesis and grows
-automatically when longer unbonding is approved. Its committed target and
-effective duration are recorded in `__evidence_policy`; they are not local
-profile settings. See [Slashing and Evidence](/node/staking#slashing-and-evidence).
+automatically when longer unbonding is approved. The version-2
+`__evidence_policy` records the authenticated growth schedule; effective limits
+are derived from it at the finalized block timestamp. These are chain state,
+not local profile settings. See
+[Slashing and Evidence](/node/staking#slashing-and-evidence).
 
 `xian_vm_v2` is the only supported execution runtime. Execution mode, VM
 bytecode, and gas schedule are not operator-selectable configuration.
@@ -155,9 +157,11 @@ regenerate genesis for a running network as an operational update.
 
 ## Bootstrap and Snapshots
 
-The maintained stack uses unmodified upstream CometBFT. Peer-to-peer
-application state sync is disabled: a recent application snapshot alone does
-not supply the historical CometBFT data required to verify evidence from before
+The maintained stack uses unmodified upstream CometBFT v0.40.0. Ordinary
+peer-to-peer block sync remains supported: nodes receive historical blocks
+and replay them through the application. Peer-to-peer **application state
+sync** is disabled: a recent application snapshot alone does not supply the
+historical CometBFT data required to verify evidence from before
 its checkpoint. Xian refuses a CometBFT configuration with `[statesync]`
 `enable = true`, advertises no peer snapshots and aborts snapshot offers and
 chunk application. Set this option to `false` before starting the node.

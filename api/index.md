@@ -52,9 +52,10 @@ Use the canonical node surfaces when correctness matters most:
 - ABCI query for current state and core Xian queries
 
 The current-state ABCI path `/evidence_policy` reports schema version 1, the
-committed `height`, `app_hash`, exact `last_block_nanos`, and the full evidence
-limits triple (`max_age_num_blocks`, `max_age_duration` in nanoseconds and
-`max_bytes`). Integer fields are decimal strings, except `schema_version`.
+committed `height`, `app_hash`, exact `last_block_nanos`, and the full effective
+evidence limits triple (`max_age_num_blocks`, `max_age_duration` in nanoseconds and
+`max_bytes`) evaluated at that timestamp. Integer fields are decimal strings,
+except `schema_version`.
 It accepts no path arguments. This reports committed application metadata;
 the query response alone is not an independent proof of a checkpoint. See
 [Slashing and Evidence](/node/staking#slashing-and-evidence).
