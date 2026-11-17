@@ -59,7 +59,9 @@ consensus key.
 5. Confirm terminal status, removal from the active set, registration-bond
    refund, and complete pending-unbond records.
 6. Stop the node only after multiple observers confirm consensus health.
-7. Each recorded owner claims its own unbond after `unlock_at`.
+7. Wait for automatic time anchoring if a record's `unlock_at` is `null`. Each
+   recorded owner claims its own unbond only after its recorded unlock time;
+   do not infer that time from the request block or local wall clock.
 
 Reconcile starting stake against pending unbonds and any slashed value.
 

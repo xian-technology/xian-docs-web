@@ -102,6 +102,14 @@ fits in 100 entries. Larger archives return a nonzero ABCI code explaining
 which page route to use. Check that code and its log before decoding a value;
 an error is not an empty successful list.
 
+Pending-unbond records can have `unlock_at: null` while automatic processing
+waits for a later finalized block to anchor a positive unbonding period. Preserve
+that null value; it does not mean zero, the Unix epoch, or immediate claimability.
+A validator summary with `pending_unbond_count > 0` and
+`next_unbond_unlock_at: null` is waiting for an anchor. A dated next unlock is
+only the earliest dated record; other records can have later or pending unlocks.
+See [Unbonding](/node/staking#unbonding).
+
 ## Contract and Transaction Responses
 
 `GET /api/contract/{name}` returns stored canonical source and VM metadata

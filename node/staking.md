@@ -19,9 +19,11 @@ delegation loses the same fraction without any per-delegator work.
 
 On a clean leave, governed removal, or candidate withdrawal, the registration
 bond is refunded immediately and the self-bond becomes a pending unbond.
-Delegations stay in the exited validator's pool, which earns nothing; each
-delegator undelegates when it chooses, and that unbond unlocks one unbonding
-period after the exit (at once if that has passed).
+Delegations stay in the exited validator's pool, which earns nothing. Each
+delegator undelegates when it chooses. Once that exit's time anchor is finalized,
+a later withdrawal uses its recorded exit window, including time already served;
+it can be immediately claimable if that window has passed. The displayed
+`left_at` remains the exit execution timestamp, not this successor anchor.
 
 ## Main Functions
 
@@ -101,11 +103,24 @@ rounding dust stays in the pool.
 ## Unbonding
 
 An unbond record stores owner, validator, amount, kind, creation block/time,
-unlock time, reason, and claimed state. Only its owner can claim it after
-`now >= unlock_at`, once its validator has no pending penalty jobs. A pending
-penalty holds every unbond claim for that validator, including records whose
-creation height makes them ineligible for that penalty. Those earlier records
-keep their amounts.
+the captured unbonding period, unlock time, reason, and claimed state. Later
+policy changes do not shorten the captured period. A positive unbonding period starts from a time anchor set automatically in a later finalized
+block, rather than the request block's potentially stale post-idle timestamp.
+Until that anchor is set, `unlock_at` is `null` and `claim_unbond` fails with
+`Unbond time anchor pending.` Do not calculate a replacement unlock from
+`created_at` or a local clock. Automatic anchor processing is bounded, so queued
+records can require additional blocks before an unlock time appears. A zero-day
+policy intentionally makes the unbond immediately eligible at chain `now`.
+
+Only its owner can claim after an unlock time exists and `now >= unlock_at`,
+once its validator has no pending penalty jobs. A pending penalty holds every
+unbond claim for that validator, including records whose creation height makes
+them ineligible for that penalty. Those earlier records keep their amounts.
+
+`next_unbond_unlock_at` is also nullable: a positive `pending_unbond_count` with
+no next unlock means records are waiting for a time anchor. A non-null next
+unlock describes the earliest dated record, not every pending record. Check
+each record's own `unlock_at` before claiming.
 
 The checked-in local/dev/test bundles use a 7-day unbonding period. The draft
 mainnet rehearsal bundle uses 14 days. The policy active on the target chain is
