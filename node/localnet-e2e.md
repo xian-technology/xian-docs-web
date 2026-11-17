@@ -240,10 +240,31 @@ keys are excluded. A fresh application must re-execute the stored blocks;
 copying an existing state database cannot satisfy this test.
 
 The scheduled **Localnet Safety** workflow uses that same corpus on native
-ARM64 and x86-64 runners. Each runner builds the recorded source revisions and
-compares the application root and actual re-execution results for every
-block. A local E2E pass covers the host architecture; check both CI replay jobs
-before treating cross-architecture behavior as validated.
+ARM64 and x86-64 runners. Each runner builds the runtime from the five captured
+revisions: Stack, ABCI, contracting, Python SDK and configs. Reviewed replay
+harness code and hooks come from the workflow revision in a separate checkout,
+outside those captured runtime trees. The result records both
+`replay_harness_revision` and `runtime_stack_revision`.
+
+Native replay compares each height's transaction-result digest, including receipt
+fee data and events, and its post-block application root. The live five-node gate
+separately compares complete `block_results`, consensus updates and the next
+header's `LastResultsHash`. These checks do not independently assert equality of
+every field in the entire `FinalizeBlock` response envelope. A local E2E pass
+covers the host architecture; check both CI replay jobs before treating
+cross-architecture behavior as validated.
+
+Exported replay configuration and the disposable extracted configuration clear
+`persistent_peers`, `seeds` and `external_address`, and disable peer exchange. This removes
+source-network DNS and advertised-address dependencies without rewriting a
+retained archive, genesis or ledger data. An exited replay container fails
+promptly instead of waiting for the replay deadline; its local diagnostic log is
+written with private file permissions.
+
+Private replay jobs schedule cleanup of plaintext and raw diagnostics on success
+or failure. Cleanup-step success does not prove file absence: directory removal
+is best effort. Retain the replay proofs, then separately remove and verify the
+absence of temporary transport secrets, evidence refs and local key files.
 
 To check a retained corpus against a locally built node image:
 
