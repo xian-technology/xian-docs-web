@@ -141,14 +141,20 @@ the bootstrap script.
 
 ## Deployment Readiness
 
-This is a deployable reference implementation, not an automatically safe
-production stablecoin. A stronger oracle design must be reviewed before
-production: consensus-time freshness checks alone do not establish external
-price freshness across an idle gap. Successor anchors for debt and auctions do
-not provide that oracle guarantee. Before using it with material value, review
-oracle governance, collateral parameters, liquidation/auction behavior, fee
-routing, controller permissions, emergency actions, monitoring, and governance
-handoff.
+This is a deployable reference implementation. Production is gated on accepting,
+implementing and validating a stronger oracle protocol. The
+[Oracle Authorization V2 acceptance gates](https://github.com/xian-technology/xian-meta/blob/main/docs/ORACLE_AUTHORIZATION_V2.md#acceptance-gates)
+are proposed design requirements; the protocol is not implemented, enabled or
+approved for production. They include an explicit decision about freshness at
+authorization versus settlement after an arbitrary delay, source/clock trust
+and bounded financial exposure. Current baseline tests do not validate that
+proposal.
+
+Consensus-time freshness checks alone do not establish external price freshness
+across an idle gap. Successor anchors for debt and auctions do not provide that
+oracle guarantee. Before using the protocol with material value, review oracle
+governance, collateral parameters, liquidation/auction behavior, fee routing,
+controller permissions, emergency actions, monitoring, and governance handoff.
 
 ## Related Pages
 
