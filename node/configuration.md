@@ -73,8 +73,9 @@ existing network.
 
 Evidence time retention is derived from staking policy at genesis and grows
 automatically when longer unbonding is approved. The version-2
-`__evidence_policy` records the authenticated growth schedule; effective limits
-are derived from it at the finalized block timestamp. These are chain state,
+`__evidence_policy` records the authenticated duration-growth schedule and
+security checkpoints; effective limits are derived from the finalized height
+and timestamp. These are chain state,
 not local profile settings. See
 [Slashing and Evidence](/node/staking#slashing-and-evidence).
 

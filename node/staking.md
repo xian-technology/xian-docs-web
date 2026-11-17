@@ -154,22 +154,34 @@ increase.
 
 A higher target first evaluates the existing schedule at that block's timestamp
 and starts the next schedule there. Time spent idle before the increase cannot
-be banked as immediate growth. Reducing the policy does not shrink the retained
-window or shorten existing unbonds. The block-count and evidence-byte limits
-remain unchanged.
+be banked as immediate growth. Reducing the policy does not lower the time
+retention target or shorten existing unbonds. The configured base block-age limit and
+evidence-byte cap stay fixed.
 
-During normal block execution, the stored schedule changes only when its
-target increases.
-Deriving the effective limits at each block does not rewrite an application
-clock, so a pending increase does not itself force repeated proof blocks on an
-on-demand network. Block production follows the configured
+The committed policy also records `security_checkpoint_height`,
+`security_checkpoint_nanos` and nullable `previous_security_checkpoint_height`.
+A previous height of zero is valid; it is distinct from no previous checkpoint.
+At height `H`, the effective block-age limit is the greater of the configured
+base and `H` minus the oldest protected checkpoint height. This keeps
+still-live pre-jump infractions inside the height window while their fresh
+challenge horizon is served. The effective block-age limit can grow or decrease as an old floor
+is safely retired; it is not a change to the configured base.
+
+A checkpoint rotates at most once per finalized block, only after actual
+consensus time since the current checkpoint reaches the retention target.
+Target increases are applied first. A long idle gap does not synthesize missed
+rotations and discard the protected floor. The duration-growth fields change
+when their target increases; checkpoint fields change at these actual-time
+rotations. Neither mechanism writes an application clock on every block, so a
+pending increase does not itself force a repeated idle proof-block loop.
+Block production follows the configured
 [block policy](/concepts/time-and-blocks); no timer executes in the background.
 
 CometBFT expires evidence only after both its block age and its time age exceed
 their limits. A block-count pruning setting is therefore not a substitute for
 the committed time window. A full node-store snapshot must preserve the
-historical consensus data needed for the complete live evidence window.
-Application state alone is insufficient; see
+historical consensus data needed for the complete live evidence window,
+including its security checkpoints. Application state alone is insufficient; see
 [Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots).
 
 Slashable value can include self-bond, the delegation pool, and pending

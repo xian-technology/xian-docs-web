@@ -62,6 +62,12 @@ required historical metadata remains available. A recent application-state
 export alone does not provide those consensus stores and is insufficient for
 node bootstrap.
 
+Retiring an application security-checkpoint floor does not promise physical
+deletion after an exact number of epochs. Stock CometBFT can retain older
+header, commit, validator and evidence metadata below the block-store body
+`Base`. Measure actual store use when planning disk capacity; a body-pruning
+window is not a complete proof-metadata garbage-collection schedule.
+
 An existing pruned node is not automatically an archival source or a valid
 full-store snapshot publisher. Verify snapshot chain identity, genesis,
 checkpoint and trust material before offering it to other operators. See

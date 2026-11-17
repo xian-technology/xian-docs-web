@@ -152,6 +152,15 @@ only the validators that still run. The recovery genesis keeps the chain id
 and the state; it starts two heights after the export, skipping the height
 the halted chain was voting on, so no height carries votes of both chains.
 
+This explicit application-export recovery starts a new consensus history.
+It does not carry the old native evidence stores or guarantee that pre-genesis
+faults remain provable. Retaining the configured block-age limit cannot restore
+that history. Before building the recovery genesis, operators must agree and
+record how outstanding pre-genesis unbonds, slashable stake and other obligations
+will be handled, and preserve the verified old stores and evidence separately.
+Use ordinary replay or a verified full node-store restore when retaining the
+existing consensus history is required.
+
 1. **Agree off chain** on the validators to keep (the online ones, together
    holding all the power of the new set), one genesis time in UTC later than
    the last block, and the halted height. Every kept validator must take part.
@@ -188,7 +197,10 @@ the halted chain was voting on, so no height carries votes of both chains.
    The validators not kept become approved, jailed for downtime (power 0) at the
    genesis time. Evidence retention is evaluated at the exported checkpoint
    before its growth schedule is anchored to the recovery genesis time; the
-   halted interval does not grant extra retention growth.
+   halted interval does not grant extra retention growth. Its security
+   checkpoint anchor is reset to the exported height and recovery time,
+   and its previous checkpoint is cleared. This preserves the configured base limit,
+   not the old native proof history.
 5. **Install.** Each replaces `config/genesis.json` with the recovery genesis,
    deletes everything in `data/` except `priv_validator_state.json` (keep it:
    it is what prevents double signing), deletes the Xian state directory, and

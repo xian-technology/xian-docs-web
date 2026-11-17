@@ -102,7 +102,7 @@ The node also guards the chain settings it reads at startup:
 
 - `__execution_policy` cannot be patched.
 - `__evidence_policy` cannot be patched or deleted. The node maintains its
-  retention target, base duration and growth-start timestamp. A patch to
+  retention target, duration-growth schedule and security checkpoints. A patch to
   `validators.config:unbonding_period_days` must use an integer from 0 through
   106750 and participates in the same automatic retention growth as a policy
   vote; it cannot reduce a previously required retention target.
