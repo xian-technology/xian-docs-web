@@ -78,6 +78,11 @@ are derived from it at the finalized block timestamp. These are chain state,
 not local profile settings. See
 [Slashing and Evidence](/node/staking#slashing-and-evidence).
 
+The supported upstream CometBFT integration uses Ed25519 validator keys and the
+`flood` mempool (`type = "flood"` under `[mempool]` in `config.toml`). A missing
+mempool type uses that default. The `app`, `nop` and unknown mempool types are rejected
+at startup; changing the node profile does not enable those modes.
+
 `xian_vm_v2` is the only supported execution runtime. Execution mode, VM
 bytecode, and gas schedule are not operator-selectable configuration.
 
