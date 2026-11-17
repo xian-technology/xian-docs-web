@@ -103,16 +103,14 @@ instead of wrapping.
 ## Example
 
 ```python
-unlock_at = Variable()
-
-@construct
-def seed():
-    unlock_at.set(now + datetime.DAYS * 7)
-
 @export
-def withdraw():
-    assert now >= unlock_at.get(), "Too early"
+def has_passed(deadline: datetime.datetime):
+    return now >= deadline
 ```
+
+This read-only condition checks a caller-supplied deadline. A minimum custody
+period uses a captured successor anchor; see
+[Financial Timer Anchors](/concepts/time-and-blocks#financial-timer-anchors).
 
 ## Policy Examples
 

@@ -68,6 +68,11 @@ uv run --project ../xian-cli xian contract bundle validate contract-bundle.json
 uv run --group deploy python scripts/bootstrap_protocol.py --skip-sample-tokens
 ```
 
+The vaults require the canonical `time_checkpoints` protocol-1 service and a
+matching fresh-chain node keeper. Bootstrap checks service readiness before
+deployment; it does not install that platform service. An offline contract test
+must supply the real service and explicit keeper/checkpoint transitions.
+
 The bootstrap deploys any missing protocol contracts, enables `con_vaults`
 and `con_psm` as stable-token controllers, configures oracle reporters and an
 initial price feed, sets fee-routing addresses, seeds a default vault type
@@ -88,6 +93,27 @@ Vault creation and collateral deposits likewise require the exact requested
 collateral to arrive before crediting the position. Fee-on-transfer and no-op
 incoming assets revert atomically; quotes and collateral accounting remain
 based on exact amounts.
+
+### Financial Clock Views
+
+New debt and fee changes use immutable successor anchors from
+`time_checkpoints`. New principal is owed immediately, including while its
+anchor is pending; the pending state delays fee accrual rather than cancelling
+the debt. Read `get_vault` and `get_vault_type` for the resolved debt, rate and
+effective `stability_fee_bps`. A pending fee change remains visible through
+`pending_stability_fee_bps` and `pending_fee_height`; raw stored values can lag
+the getter's resolved projection after the anchor is ready.
+
+Auction opening, restart and near-end extensions also wait for successor
+anchors. `get_auction` can return `None` for `auction_opened_at` or
+`auction_end_time` while that work is pending. Preserve those nulls and disable
+settlement until an end time is available. Once ready, the getter resolves the
+recorded anchor without an extra activation transaction. Do not substitute local
+time or the request block timestamp.
+
+Use direct contract/RPC views for these clocks. BDS indexing height or zero lag
+does not attest to keeper state; see [BDS Consistency](/api/bds#consistency) and
+[Financial Timer Anchors](/concepts/time-and-blocks#financial-timer-anchors).
 
 ### Required Wiring
 
@@ -116,9 +142,13 @@ the bootstrap script.
 ## Deployment Readiness
 
 This is a deployable reference implementation, not an automatically safe
-production stablecoin. Before using it with material value, review oracle
-governance, collateral parameters, liquidation/auction behavior, fee routing,
-controller permissions, emergency actions, monitoring, and governance handoff.
+production stablecoin. A stronger oracle design must be reviewed before
+production: consensus-time freshness checks alone do not establish external
+price freshness across an idle gap. Successor anchors for debt and auctions do
+not provide that oracle guarantee. Before using it with material value, review
+oracle governance, collateral parameters, liquidation/auction behavior, fee
+routing, controller permissions, emergency actions, monitoring, and governance
+handoff.
 
 ## Related Pages
 

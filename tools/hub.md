@@ -29,6 +29,12 @@ the Playground asks before replacing an existing workspace. Review the source,
 choose a contract name and constructor arguments, then deploy it locally in
 the browser.
 
+Check the selected version's release notes for declared platform dependencies.
+The source-only share link does not install services or run a node keeper.
+Contracts that depend on automatic node work need a matching node, or an
+explicit service/checkpoint fixture for an offline test. See
+[Curated Multi-Token Staking](/smart-contracts/staking).
+
 Opening a contract needs no saved deployment target or Playground account.
 Hub operators configure the Playground address with
 `CONTRACTING_HUB_PLAYGROUND_URL`; the local default is

@@ -39,6 +39,16 @@ High-signal `/bds_status` fields include:
 For read-after-write behavior, wait for the indexed height to reach the
 transaction's block or poll the indexed transaction path.
 
+The state projection is built from transaction receipts and configured state
+patches. System-only keeper, penalty and liveness writes are outside that
+projection. An indexed height equal to the node height, zero reported lag, or a
+completed reindex therefore does not make those system-derived fields current.
+This is the indexing boundary even when BDS is healthy.
+
+Use direct ABCI contract/state reads for checkpoint readiness, resolved position
+start times, pending-unbond anchors and claim maturity. Use BDS for the supported
+indexed history; reindexing does not add transitions absent from its inputs.
+
 ## Query Families
 
 ```text
