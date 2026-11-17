@@ -35,6 +35,22 @@ Contracts that depend on automatic node work need a matching node, or an
 explicit service/checkpoint fixture for an offline test. See
 [Curated Multi-Token Staking](/smart-contracts/staking).
 
+Hub operators can use the supported single-port production server behind an
+HTTPS reverse proxy with WebSocket forwarding:
+
+```bash
+uv run reflex run --env prod --single-port --frontend-port 8001 --backend-port 8001
+```
+
+Its app adapter preserves successful document status for declared dynamic page
+links and error status for unknown routes or missing assets.
+The successful shell status does not attest that a contract or developer exists;
+an unknown identifier on a declared page route renders the client not-found view.
+A raw static export needs equivalent route-aware HTML fallback and
+backend/WebSocket configuration; Reflex's plain static-file server can render a
+dynamic page in the browser while returning HTTP 404 for its initial document.
+Avoid a blanket HTTP-200 fallback.
+
 Opening a contract needs no saved deployment target or Playground account.
 Hub operators configure the Playground address with
 `CONTRACTING_HUB_PLAYGROUND_URL`; the local default is
