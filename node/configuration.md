@@ -122,6 +122,43 @@ limits can vary by node. The settings of the removed parallel executor
 (`parallel_execution_*`) are rejected at startup as well; see
 [Block Execution](/concepts/block-execution#no-parallel-execution).
 
+## PostgreSQL Version and Storage
+
+Current stack and deployment defaults, localnet databases, and database CI use
+PostgreSQL **18.7**. The official Docker image stores the cluster at
+`/var/lib/postgresql/18/docker`. Mount the persistent directory at
+`/var/lib/postgresql`, so the `18/docker` subdirectory stays on persistent
+storage. Select the single-node image with `XIAN_POSTGRES_IMAGE`, or the remote
+deployment image with `xian_postgres_image`; production image references must
+include a verified digest.
+
+Upgrading an existing PostgreSQL 17 BDS database requires a database migration;
+changing the image tag does not upgrade its files. Plan downtime for the node's
+BDS writer and query services:
+
+1. Stop the node and query services while leaving PostgreSQL 17 available for
+   backup. Record the indexed height and take a logical dump with `pg_dump`
+   plus a roles backup with `pg_dumpall --roles-only`. Keep backups private:
+   role backups can contain password hashes.
+2. Stop PostgreSQL 17 and retain its data directory and original image/config
+   for rollback. Select a fresh persistent directory for PostgreSQL 18.7;
+   do not reuse or erase the PostgreSQL 17 directory.
+3. Start PostgreSQL 18.7 with the parent-directory mount above. Restore the
+   required roles and database dump, accounting for the bootstrap owner role
+   already created by the image. Restore the read-only GraphQL role and grants.
+4. Verify the restored database, indexed height, and read-only GraphQL queries.
+   Resume the node and confirm BDS catch-up and healthy query services before
+   accepting the migration. Rollback after writes resume requires preserving
+   those writes; the retained PostgreSQL 17 database is only the pre-upgrade
+   checkpoint.
+
+Do not move PostgreSQL 17 files into `18/docker`. The image rejects an old
+cluster at the volume root rather than initializing a replacement over it.
+See the [PostgreSQL major-version upgrade documentation](https://www.postgresql.org/docs/18/upgrading.html)
+and [official Docker image storage guidance](https://hub.docker.com/_/postgres).
+Archived guides pinned to earlier Xian releases retain their original database
+recipes; use the defaults above with the current codebase.
+
 ## Stack Credentials
 
 `xian-stack` keeps the BDS password in its own private, Git-ignored file,
