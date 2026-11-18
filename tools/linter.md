@@ -117,22 +117,11 @@ All endpoints default to `xian_vm_v2`. A request can also name the profile expli
 POST /lint?mode=xian_vm_v2
 ```
 
-The alias `lint_mode=xian_vm_v2` is also accepted for integrations that already
-use `mode` for their own routing.
+## Validation
 
-## Lint Modes
-
-The standalone package supports three modes:
-
-| Mode | What it checks |
-|------|----------------|
-| `python` | V1 compiler diagnostics and PyFlakes warnings (compatibility mode) |
-| `xian_vm_v2` | default mode with V2 compiler diagnostics, PyFlakes warnings and native IR validation |
-| `xian_vm_v1` | historical V1 compiler profile for V1 sources (current nodes do not execute V1) |
-
-The VM mode is linting only. It does not execute the contract or simulate
-storage, imports, environment values, or host syscalls. Use runtime tests or
-node preflight flows for execution behavior.
+The `xian_vm_v2` mode checks compiler diagnostics, PyFlakes warnings and native
+IR validity. Use runtime tests or node preflight flows to check execution,
+storage, imports and host calls.
 
 Inline usage:
 
@@ -192,7 +181,7 @@ The HTTP service returns:
 `xian-linter` may also include PyFlakes warnings with code `W001`. Processing
 errors from the wrapper itself are returned as `E000`; native VM IR validation
 failures are returned as `XVM002`. Compiler diagnostics use stable `xian.*`
-codes in both modes.
+codes across the compiler and standalone service.
 
 Compiler admission is deterministic and rejects inputs that exceed any of
 these bounds:

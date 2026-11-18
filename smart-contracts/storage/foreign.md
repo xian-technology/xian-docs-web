@@ -39,8 +39,8 @@ For behavior changes, use exported functions and explicit cross-contract calls.
 ## Snapshot Copy Pattern
 
 ```python
-legacy_balances = ForeignHash(
-    foreign_contract="con_legacy_token",
+source_balances = ForeignHash(
+    foreign_contract="con_source_token",
     foreign_name="balances",
 )
 
@@ -48,7 +48,7 @@ balances = Hash(default_value=0)
 
 @construct
 def seed():
-    balances.clone_from(legacy_balances)
+    balances.clone_from(source_balances)
 ```
 
 This copies the current stored entries into `balances`. Subsequent writes to the

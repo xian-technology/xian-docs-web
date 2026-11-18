@@ -94,8 +94,8 @@ when the node reports a stale cursor. These pages describe the latest
 committed state at each request, rather than a multi-request historical
 snapshot.
 
-The compatibility `/contracts` route retains its date/name sort and offset
-shape only for archives of at most 100 contracts within one bounded scan.
+The `/contracts` route supports date/name sorting and offset pagination
+for archives of at most 100 contracts within one bounded scan.
 `/validators_open_votes` supports lifetime proposal counts up to 1,000.
 `/validators_pending_unbonds/<owner>` returns the complete list only when it
 fits in 100 entries. Larger archives return a nonzero ABCI code explaining

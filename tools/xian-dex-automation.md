@@ -106,8 +106,7 @@ an unknown execution into a failed one.
 Restore the original RPC and its transaction history when recovery is blocked.
 Do not delete pending records or start with a fresh database to resume trading:
 the original swap may already have executed. Expiry alone does not prove failure;
-pruned receipts can require operator investigation. Submissions made before the
-execution journal existed cannot be recovered automatically.
+pruned receipts can require operator investigation.
 
 Use one database path on a local filesystem on Linux or macOS, and a dedicated
 signer. Different database copies, remote filesystems, and transactions submitted

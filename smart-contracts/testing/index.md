@@ -6,16 +6,12 @@ It lets you submit contracts, call exported functions, inspect state, and
 exercise contract interactions without running a full node.
 
 The client compiles and executes contracts under `xian_vm_v2`, the same numeric
-and language rules used by the fresh chain. Each test can pass its own temporary
+and language rules used by the node. Each test can pass its own temporary
 `storage_home` to start with clean state. Node simulation uses the target chain’s
 state and transaction context for fee estimates.
 
-`ContractingClient` rejects an explicit V1 profile or an injected V1 driver with
-`ValueError`. Use fresh V2 storage for supported local tests.
-Current code does not execute V1 contracts; a V1 profile is not a local-client
-compatibility mode. Proxies expose
-the same exported functions that a transaction can call. Test private helpers
-through an exported function.
+Proxies expose the same exported functions that a transaction can call. Test
+private helpers through an exported function.
 
 ## What It Gives You
 

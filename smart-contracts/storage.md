@@ -54,7 +54,7 @@ boundaries and rollback behavior.
 ## Persistent sets
 
 Deterministic `set()` and `frozenset()` values can be stored under the current
-[execution revision](/node/upgrading#current-local-execution-revision).
+[execution revision](/node/upgrading#execution-policy).
 Their `xian-set-1` encoding preserves member types, including tuples, nested
 frozen sets, bounded integers and exact fixed-point decimals.
 View-produced builtin sets must first be converted to a deterministic wrapper;

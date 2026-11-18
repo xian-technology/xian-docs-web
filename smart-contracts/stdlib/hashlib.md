@@ -30,10 +30,10 @@ byte_hash = hashlib.sha3_hex("68656c6c6f")
 `hashlib.sha3_text("68656c6c6f")` hashes those ten text characters.
 `hashlib.sha3_hex("68656c6c6f")` decodes the hex first and hashes `hello`.
 
-## Historical Aliases
+## Automatic Input Detection
 
-`hashlib.sha256(hex_str)` and `hashlib.sha3(hex_str)` preserve the historical
-hexadecimal-first behavior. Valid hex is decoded before hashing; ASCII whitespace
+`hashlib.sha256(hex_str)` and `hashlib.sha3(hex_str)` detect hexadecimal input
+before hashing. Valid hex is decoded before hashing; ASCII whitespace
 is allowed between complete bytes. Input that cannot be decoded is hashed as
 UTF-8 text. Both accept `hex_str` as a keyword argument.
 
@@ -50,9 +50,9 @@ for example, `"é"` occupies two UTF-8 bytes.
 | --- | ---: |
 | `_text` | 1 MiB |
 | `_hex` | 2 MiB encoded input, representing at most 1 MiB decoded bytes |
-| historical alias, before hex detection | 2 MiB raw input, including whitespace |
-| historical alias, valid hex branch | 1 MiB decoded bytes |
-| historical alias, fallback text branch | 1 MiB UTF-8 text |
+| automatic input detection, before hex detection | 2 MiB raw input, including whitespace |
+| automatic input detection, valid hex branch | 1 MiB decoded bytes |
+| automatic input detection, fallback text branch | 1 MiB UTF-8 text |
 
 An oversized input raises a resource-limit error. These limits apply to native
 execution, including local V2 tests and unmetered calls.
@@ -61,7 +61,7 @@ concatenation, or another contract. They are limits on hashing, not a general
 128 KiB string-size restriction.
 
 Native execution charges by supplied input bytes before copying, hex detection,
-decoding or hashing. Historical aliases charge for the entire raw input,
+decoding or hashing. The automatic helpers charge for the entire raw input,
 including whitespace and a failed hex-detection pass. A fallback text input
 larger than 1 MiB therefore fails after the charged detection step. Direct
 calls, stored function aliases, and iterator callbacks use the same per-call

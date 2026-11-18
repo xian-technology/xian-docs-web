@@ -145,9 +145,8 @@ policy as the node: execution revision `xvm-execution-15`, gas schedule
 in database metadata and checks the RPC source's protected committed
 `__execution_policy` value before backfill or a reset. The RPC `/genesis` response
 does not include Xian's custom application genesis fields. A
-missing or different policy is rejected; do not relabel historical data with the
-current policy. Use a fresh current-chain index or a compatible snapshot. Keep
-historical replay in its pinned previous runtime image.
+missing or different policy is rejected. Initialize the index from the target
+chain or restore a snapshot with its matching execution policy.
 
 Run maintenance commands in the matching node runtime, with the intended
 node home mounted at `~/.cometbft` and its BDS connection settings available.
@@ -165,8 +164,7 @@ latest height. `--start-height` and `--end-height` select an explicit range.
 `--reset` deletes the BDS schema and local spool before rebuilding; reserve it
 for a deliberate full rebuild with the required history available.
 
-BDS spool and snapshot format version 2 carry the execution policy. Version 1
-artifacts are rejected. Spool replay and compaction check all pending records
+BDS spool and snapshot format version 2 carry the execution policy. Spool replay and compaction check all pending records
 before enqueueing or deleting files. Snapshot import checks policy, table files,
 row counts, and encoded runtime values before resetting the target schema;
 export refuses incompatible database metadata.

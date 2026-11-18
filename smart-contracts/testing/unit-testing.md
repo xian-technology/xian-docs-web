@@ -2,8 +2,7 @@
 
 `ContractingClient` compiles and executes contracts locally on the native V2 VM
 without a node. Use it to call exports, change signers, inspect state, and test
-rollback. It accepts only `xian_vm_v2`; an explicit V1 profile or an injected V1
-driver raises `ValueError`.
+rollback under `xian_vm_v2`.
 
 ## Setup
 

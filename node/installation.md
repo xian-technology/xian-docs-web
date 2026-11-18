@@ -33,10 +33,10 @@ cd ../xian-stack
 make validate
 ```
 
-Use the CLI from the same workspace for fresh-chain management. Run
+Use the CLI from the same workspace for node management. Run
 `uv run --project ~/xian/xian-cli xian --help` to check the installation.
 
-Node lifecycle still requires access to compatible `xian-stack` and
+Node lifecycle requires access to compatible `xian-stack` and
 `xian-configs` assets.
 
 ## Create a Local Node
@@ -107,23 +107,6 @@ asset.
 
 ## Image Mode
 
-For agent-assisted setup, the
-[first-node guide](https://github.com/xian-technology/xian-ai-guides/blob/main/testnet-first-node-agent.md)
-covers a fresh operator-managed testnet, a separate treasury funded through the
-standard genesis bundle, and a verified public handoff. Share the
-[participant guide](https://github.com/xian-technology/xian-ai-guides/blob/main/testnet-join-agent.md)
-with that handoff to join a full node and optionally request validator admission.
-These guides do not identify an already-live public network. Their worked pins
-are the archived V1 release (stack v0.3.3, `xian_vm_v1`) and its controller
-CLI; the current CLI and node build V2 genesis (`xvm-execution-15`) and reject
-the guides' V1 flags. For a network built from the current code, follow the
-commands on this page and record your own release pins.
-Both guides default to BDS/PostgreSQL, read-only GraphQL/GraphiQL, and the node
-dashboard, with private host bindings and serial transaction execution.
-The pinned Ansible runtime deploys BDS and the dashboard; the guides include
-an explicit PostGraphile companion because enabling BDS there does not itself
-deploy a GraphQL server. Prometheus/Grafana remain optional.
-
 - `registry` uses immutable image references supplied by a manifest/profile.
 - `local_build` builds from sibling source checkouts and is intended for local
   development or unreleased testing.
@@ -151,7 +134,6 @@ ansible-playbook playbooks/health.yml
 
 Remote configuration runs with a Python entrypoint override so the integrated
 image's supervisor and validator services start only with the Compose runtime.
-Use a deployment revision that includes this override.
 
 `deploy.yml` rewrites node configuration but never restores a snapshot, even
 when the node profile carries `snapshot_url`; a profile-only change reaches a

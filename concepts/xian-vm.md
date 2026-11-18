@@ -3,28 +3,20 @@
 The Xian VM is the execution layer that lets Xian keep Python as the contract
 authoring language without making CPython bytecode the consensus format.
 
-## Execution profiles
+## Execution runtime
 
 Validators compile cleartext contract source into canonical IR and execute it
-in Rust. The fresh-chain node and the Python `ContractingClient` require
-`xian_vm_v2`. Local tests execute contract code
-on the same native VM as the fresh chain; there is no current CPython contract
-executor.
+in Rust using `xian_vm_v2`. The Python `ContractingClient` runs local
+contract tests on the same native VM as the node.
 
 For offline compilation in Python, use `compile_contract_artifact` or
 `compile_contract_source` from `xian_compiler_core` (package
 `xian-tech-compiler-core`); `contracting.artifacts` offers the same operations
 (`build_contract_artifacts`, `compile_contract_source`) for runtime code and
 delegates to it. The compiler's WebAssembly build returns byte-identical
-artifacts. V1 compilation, IR
-validation and encoding remain for migration and archival tooling; current code
-does not execute V1 contracts (historical V1 execution uses the pinned older
-release). Historical Python comparisons use immutable observations captured
-with pinned archived packages.
+artifacts.
 
-Both profiles use the IR envelope `xian_ir_v1`. The `vm_profile` field
-identifies the execution rules. Network SDKs default to V2 and retain explicit
-V1 encoding for historical signed-payload fixtures.
+The IR envelope is `xian_ir_v1`; its `vm_profile` field is `xian_vm_v2`.
 
 V2 uses bounded integers and exact fixed-point decimals. Source literals preserve their digits, division produces a decimal and the rounding helpers take explicit inputs. See [Numbers, division and rounding](/smart-contracts/numbers).
 
@@ -65,7 +57,7 @@ items. Duplicate keyword arguments fail during argument merging.
 `dict.update` consumes iterable pairs incrementally, `setdefault` preserves the
 supplied object's identity, and `list.reverse` mutates the existing list.
 `bytes.fromhex` accepts a string with ASCII whitespace between complete byte
-pairs and limits decoded output to 128 KiB. Integer string parsing supports Unicode 15.0 digits. The V2 decimal parser accepts ASCII digits. Same-size dictionary key replacement follows historical insertion
+pairs and limits decoded output to 128 KiB. Integer string parsing supports Unicode 15.0 digits. The V2 decimal parser accepts ASCII digits. Same-size dictionary key replacement follows insertion
 slots and cursor behavior; replacing a visited key can still raise a mutation
 error. Prefer completing an iteration before changing its keys.
 
@@ -125,9 +117,9 @@ flowchart TD
 
 VM-native execution is the fixed node execution runtime.
 
-On the supported branch:
+The execution policy defines these rules:
 
-- fresh genesis selects the V2 numeric profile and the node checks it on startup
+- genesis selects the V2 numeric profile and the node checks it on startup
 - bytecode, gas schedule, and authority are internal VM constants
 - submitted contracts must provide source code
 
@@ -152,7 +144,7 @@ That host boundary includes things such as:
 Those operations are deterministic runtime calls, not arbitrary operating-system
 syscalls.
 
-## What Stays The Same For Contract Authors
+## Contract Authoring Model
 
 Contract authors work with the familiar Xian model:
 
@@ -165,10 +157,10 @@ Contract authors work with the familiar Xian model:
 
 The Xian VM gives the platform an explicit machine contract:
 
-- execution semantics become Xian-defined instead of CPython-bytecode-defined
-- metering can be attached directly to VM operations and host calls
-- submitted source can be validated and compiled into canonical IR
-- replay and parity testing become easier to reason about
+- execution follows Xian-defined semantics
+- VM operations and host calls are metered
+- submitted source is validated and compiled into canonical IR
+- block replay checks state roots and transaction results
 
 ## Scope
 

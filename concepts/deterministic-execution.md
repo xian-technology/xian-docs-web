@@ -139,12 +139,11 @@ zones, locale, Decimal context, import warmup, allocator, case order and storage
 reopening. Optimized Python interpreters are checked for rejection rather than
 used for contract execution.
 
-The historical V1 corpus includes binary-float and raw Decimal cases. The V2 conformance vectors check exact digits, magnitude and precision bounds, signed division, rounding, helper results and the wire representation.
+Numeric conformance vectors check exact digits, magnitude and precision bounds,
+signed division, rounding, helper results and wire representation.
 
-These checks complement five-node block replay and golden-fixture tests that
-hold the Rust block executor to the outputs recorded from the retired Python
-execution path.
-They provide evidence for the tested programs and environments, not a proof for
+These checks complement five-node block replay and expected-output fixtures
+for the Rust block executor. They provide evidence for the tested programs and environments, not a proof for
 every possible contract. Determinism and correctness are separate requirements:
 a consistently wrong result must also fail a semantic test.
 

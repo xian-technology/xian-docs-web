@@ -38,7 +38,7 @@ Fee-on-transfer or no-op incoming transfers revert without creating liabilities.
 
 The local bundle's `0.3.0` lifecycle depends on the canonical
 `time_checkpoints` service and the node's automatic successor checkpoint work.
-Use it on a matching fresh chain. A missing service must fail closed; do not
+Use it with a matching node runtime. A missing service must fail closed; do not
 replace it with local time or an application-owned clock.
 
 `stake(pool_id)` transfers principal, applies entry fees, captures the pool terms
@@ -74,8 +74,8 @@ checkpoint fixture. Use a matching node for the integrated workflow.
 
 The hub keeps source versions immutable. Import the accepted owner bundle as a
 new version and select that version when opening source in the playground. Its
-source-only handoff does not install runtime dependencies. An older deployed
-source does not gain this lifecycle merely because a client updated.
+source-only handoff does not install runtime dependencies. Pin the deployed
+source version and its matching runtime dependencies.
 
 ## Custody Liabilities
 

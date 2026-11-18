@@ -12,3 +12,4 @@ Maintenance records:
 
 - [Toolchain upgrade log](TOOLCHAIN_UPGRADE_LOG.md)
 
+- [Current-state documentation and configuration audit](CURRENT_STATE_AUDIT_2026-11-19.md)

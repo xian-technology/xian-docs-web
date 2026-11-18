@@ -110,7 +110,7 @@ IR for the node’s `xian_vm_v2` profile. Client-supplied deployment artifacts a
 
 ## Numeric inputs and results
 
-The synchronous and asynchronous clients and offline `create_tx` use `xian_vm_v2` by default. To reproduce a V1 fixture, pass `config=XianClientConfig(vm_profile="xian_vm_v1")` to the client or `vm_profile="xian_vm_v1"` to `create_tx`. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`.
+The synchronous and asynchronous clients and offline `create_tx` use `xian_vm_v2` by default. Generic arguments accept Python integers and `Decimal("1.25")` from Python's off-chain `decimal` module. Token helpers also accept decimal strings. The encoder checks precision and magnitude before signing or simulation. Successful contract calls decode exact decimals to `ContractingDecimal`.
 
 ## Main Client Surfaces
 

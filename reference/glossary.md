@@ -32,7 +32,7 @@ per XIAN in the canonical bundles. In `free_metered` mode, chi
 meter execution without charging a native-token execution fee.
 
 ### CometBFT
-The Byzantine Fault Tolerant consensus engine used by Xian (formerly known as Tendermint). Handles peer-to-peer networking, block proposal, and validator voting.
+The Byzantine Fault Tolerant consensus engine used by Xian. Handles peer-to-peer networking, block proposal, and validator voting.
 
 ### Construct
 The `@construct` decorator marks a function that runs once when a contract is deployed. It initializes state and is never callable again after deployment.

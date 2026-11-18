@@ -17,7 +17,10 @@
 - `.meta/`: internal architecture and backlog notes for this repo itself
 
 ## Workflow
-- Keep public docs aligned with the current code, not old architecture.
+- Describe the supported code and workflows directly. Do not publish inventories of
+  deleted settings, retired runtimes, or migration recipes for unreleased revisions.
+  Keep implementation history and design proposals in internal notes. Retain
+  constraints and recovery guidance that apply to supported workflows.
 - Treat section `index.md` files as the public equivalent of folder READMEs for this repo.
 - Keep internal maintenance notes in `.meta/`, not mixed into public docs content.
 

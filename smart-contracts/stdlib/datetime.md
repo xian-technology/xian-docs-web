@@ -78,11 +78,10 @@ Multiply a duration by an integer to scale it:
 delay = datetime.DAYS * 7
 ```
 
-Duration-by-duration multiplication preserves the historical Xian wrapper rule.
-Each operand is normalized into whole days and a nonnegative remainder below
+For duration-by-duration multiplication, each operand is normalized into whole days and a nonnegative remainder below
 86,400 seconds. The day components are multiplied together, and the remainder
 components are multiplied together; the resulting components form a duration.
-This is an unusual compatibility rule, not ordinary dimensional time arithmetic.
+Use integer scaling when you want to multiply a duration by a count.
 
 ```python
 a = datetime.timedelta(days=2)

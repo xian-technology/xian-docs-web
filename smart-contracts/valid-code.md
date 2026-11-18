@@ -101,9 +101,8 @@ See [Value Methods](/smart-contracts/value-methods) for callable method values,
 keyword signatures, collection views, text/binary operations and their limits.
 
 String predicates, whitespace handling and case mappings use pinned
-Unicode 15.0 semantics from the historical Python 3.12 runtime, including
-contextual Greek final sigma. A newer host Python's Unicode database is not the
-consensus definition. `isdigit()` includes Unicode digits, not every numeric
+Unicode 15.0 semantics, including contextual Greek final sigma. These rules
+are independent of the host Python's Unicode database. `isdigit()` includes Unicode digits, not every numeric
 character; `isalpha()` tests letters, and `islower()` ignores uncased characters
 while requiring at least one cased character. Native strings contain Unicode
 scalar values; isolated surrogate code points are unsupported.

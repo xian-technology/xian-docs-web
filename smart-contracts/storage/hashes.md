@@ -46,8 +46,8 @@ Use `clone_from(...)` when you want a one-time snapshot of another `Hash` or
 `ForeignHash`:
 
 ```python
-legacy_balances = ForeignHash(
-    foreign_contract="con_legacy_token",
+source_balances = ForeignHash(
+    foreign_contract="con_source_token",
     foreign_name="balances",
 )
 
@@ -55,7 +55,7 @@ balances = Hash(default_value=0)
 
 @construct
 def seed():
-    balances.clone_from(legacy_balances)
+    balances.clone_from(source_balances)
 ```
 
 `clone_from(...)` snapshots the source (including pending writes), clears the

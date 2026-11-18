@@ -164,8 +164,7 @@ signed fields bind `chain_id`, integer
 `signing_public_key`; `signature` authenticates that canonical payload.
 `uncompressed_bytes` counts the complete uncompressed tar stream, including
 headers and padding. Resource limits are checked before publishing restored
-stores. Version-1 manifests and application-only archives are not supported
-through this bootstrap flow.
+stores. This bootstrap flow requires a complete full-node-store archive.
 
 The explicit backend `expected_sha256` API and a recovery plan's trusted
 archive SHA-256 can authorize a raw full-store archive. That hash must come

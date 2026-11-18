@@ -2,18 +2,17 @@
 
 Choose the upgrade procedure with the network's operators before changing a
 validator. A compatible runtime update and a hardfork require different
-coordination. This documentation describes the `xian_vm_v2` codebase; an
-existing network running an earlier runtime is not automatically compatible.
+coordination.
 
-## Current Local Execution Revision
+## Execution Policy
 
-Fresh local genesis commits `__execution_policy` with execution revision
+Genesis commits `__execution_policy` with execution revision
 `xvm-execution-15`, gas schedule `xvm-gas-7`, bytecode `xvm-2` and set codec
-`xian-set-1`. The node requires this exact policy in genesis, persisted state
-and its native runtime. Missing or mismatched policy fails before contract
+`xian-set-1`, plus compiler admission revision `xian-admission-3` and transaction
+admission revision `xian-fastpath-admission-3`. The node requires this exact
+policy in genesis, persisted state and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
-change this protected record. The comparison covers all four fields; matching
-gas and codec versions do not make a different execution revision compatible.
+change this protected record. Every field must match the selected runtime.
 
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
 literal handling and checked numeric ABI boundaries. Gas schedule 7 charges for
@@ -27,12 +26,10 @@ policy sets a lower per-transaction cap. See
 [chi cost table](/reference/chi-costs#element-work) and
 [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
-Revision 15 charges canonical module IR reads before parsing or traversing
+The VM charges canonical module IR reads before parsing or traversing
 imports, using the transaction's shared budget. The first load of each module
 pays the same charge on cold and warm nodes. Preparation includes dynamic
-imports and deployment constructors. This changes chi, fee balances and the
-point at which a small budget fails; it requires a fresh chain and matching
-native bindings. See [Module preparation](/reference/chi-costs#accounting).
+imports and deployment constructors. See [Module preparation](/reference/chi-costs#accounting).
 
 The current runtime uses structured VM exception types and arguments for failure
 categories, never parsed message text. Only exported functions are external
@@ -40,21 +37,11 @@ entrypoints; constructors run through deployment. State roots commit exact
 stored value bytes (`xian-state-root-v3`). These rules, numeric semantics and
 metering all affect replay compatibility.
 
-Current code does not execute V1. Preserve historical state and its matching
-immutable runtime rather than replaying it with current semantics.
-
-This revision starts a fresh local chain; it does not migrate an earlier
-database or activate a second VM at a block height. Preserve earlier state and
-its immutable runtime image. Historical block corpora must be replayed with
-their matching earlier image, as described in
-[Localnet Replay](/node/localnet-e2e#replay-across-architectures).
-
 Application snapshots use format 2 and carry the execution policy. Import
 rejects incompatible policy before replacing application state. Peer-to-peer
 application state sync is disabled; bootstrap through replay or a verified
 full node-store snapshot. The exported state includes the protected policy in
-its application-root commitment. An existing private network needs a separately
-agreed migration plan before adopting this revision.
+its application-root commitment.
 
 ## Consensus Backend Compatibility
 
@@ -79,10 +66,8 @@ build reports it together with the source commit. Record the source release,
 commit, archive checksum and actual binary version separately. A version
 string alone does not identify or authenticate a build.
 
-The application requires a version-2 `__evidence_policy` growth schedule.
-Version-1 evidence policies are rejected; this is a fresh-chain compatibility
-boundary, not an in-place state migration. Keep an earlier chain on its matching
-runtime until a separate upgrade is reviewed.
+The application uses a version-2 `__evidence_policy` growth schedule to track
+evidence retention and security checkpoints.
 
 A consensus-sensitive backend change requires a fresh chain or a separately
 reviewed network upgrade. Do not swap a different backend into an existing
@@ -97,14 +82,13 @@ for replay and full node-store restore requirements.
 | --- | --- |
 | Compatible image or operational update | Validate first, then restart nodes in the agreed maintenance order |
 | Compiler, execution, metering, state format, or consensus-rule change | Coordinated network upgrade with an agreed activation boundary |
-| Move an earlier network to `xian_vm_v2` | Rehearse contract and state migration before scheduling the cutover |
 
 The `xian-deploy` upgrade playbook rolls hosts one at a time. After each host
 it waits until CometBFT RPC reports `catching_up: false` and stops the rollout
 when that does not happen within `xian_upgrade_health_timeout_seconds` (default
 600, polled every `xian_upgrade_health_poll_seconds`). Set
 `xian_upgrade_rpc_status_url` when RPC is not reachable on
-`127.0.0.1:<rpc port>` from the host. Use that flow only when the old and
+`127.0.0.1:<rpc port>` from the host. Use that flow only when the deployed and
 target versions can participate in the same network during the rollout. It
 does not coordinate a hardfork activation height.
 
@@ -152,7 +136,7 @@ flowchart TD
   Target["Select and validate an exact release"]
   Kind{"Compatible during a rolling update?"}
   Rolling["Stop, update, and verify one node at a time"]
-  Rehearse["Rehearse migration and agree activation boundary"]
+  Rehearse["Validate network upgrade and agree activation boundary"]
   Cutover["Coordinate stop, state preparation, and restart"]
   Verify["Verify matching app hashes and application behavior"]
 
@@ -170,59 +154,6 @@ xian node start validator-1
 xian node status validator-1
 xian node health validator-1
 ```
-
-## Migrating an Earlier Network
-
-`xian_vm_v2` executes persisted canonical IR in `__xian_ir_v1__`. Stored source
-alone is not an executable contract on this runtime, and startup does not
-compile an earlier network's source-only contracts automatically.
-
-Offline migration analysis and rehearsal tooling lives in the optional
-[xian-migration repository](https://github.com/xian-technology/xian-migration).
-Its checked-in dependencies target an archived V1 runtime for offline
-rehearsal; it does not convert legacy state directly to the current V2 policy.
-Migration implementation is not part of the `xian-abci` node package or normal
-node startup. Follow that repo's instructions
-for pinned dependencies and explicit network and contract-source inputs.
-Its historical execution corpus checks recovered source through migrated native
-artifacts, including state preservation without rerunning constructors, returns,
-writes, events, failed-call rollback and subsequent calls. Successful compilation
-alone does not establish execution equivalence. For actual applications, compare
-representative calls against the old runtime and review every mismatch, source
-override or exclusion together with affected callers.
-
-Active legacy streams and their backing balances need an explicit migration
-decision because the target currency contract lacks the legacy stream
-operations. Contracts that read allowances through `currency.balances` also
-need review: migrated allowances live in `currency.approvals`. Generated reports
-or candidate state do not settle these compatibility decisions or authorize a
-network cutover. Resolve them in the accepted migration plan and validate the
-resulting application behavior before scheduling a transition.
-
-Before scheduling a migration:
-
-1. Inventory deployed contracts and their dependencies from a representative
-   export of the existing network.
-2. Compile every contract with the target compiler. Resolve unsupported syntax
-   and check expected contract behavior on the target VM.
-3. Prepare a deterministic state conversion that preserves the agreed balances,
-   nonces, ownership, contract storage, validator state, and pending governance
-   actions. Populate the target contract artifacts as part of that conversion.
-4. Compare independent migration outputs and record the expected application
-   hash. Re-run the conversion from the same input to verify repeatability.
-5. Start a multi-validator rehearsal from the converted state. Exercise actual
-   application flows, restart, snapshot restore, and indexed-history recovery.
-6. Agree the stop boundary, which state is authoritative, and the conditions for
-   restarting or aborting before executing the production procedure.
-
-Do not redeploy all contracts through ordinary submission as a substitute for
-state migration: submission runs constructors and initializes contract state.
-The generic snapshot/import helpers restore their supported data formats;
-they do not decide how an earlier runtime's contract state should be converted.
-
-The draft mainnet manifest is a launch/rehearsal asset. It is not a migration
-plan for an existing network. The network's accepted plan must explicitly
-resolve chain identity, retained history, and the transition height.
 
 ## Backups and Recovery
 

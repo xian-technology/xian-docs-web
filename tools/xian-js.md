@@ -65,7 +65,7 @@ minimum output, adds an approval only when allowance is insufficient, selects
 the supporting fee-on-transfer entrypoint for flagged source/destination
 tokens, and rejects flagged intermediate tokens.
 
-Supply reserve balances, allowance and input amounts as exact strings. Fill each pair's `precision0` and `precision1` from token metadata where declared. The V2 adapter applies the router's settlement precision. The V1 adapter remains available for earlier integration fixtures. Other DEXes
+Supply reserve balances, allowance and input amounts as exact strings. Fill each pair's `precision0` and `precision1` from token metadata where declared. The V2 adapter applies the router's settlement precision. Other DEXes
 can use `selectBestExactInRoute` with their own pool/quote adapter and the
 generic execution planner with their own approval and swap-call builders.
 
@@ -109,7 +109,7 @@ Key and signature length checks alone do not establish a valid signature.
 
 ## Exact numeric arguments
 
-The default client uses `xian_vm_v2`. To reproduce a V1 fixture, pass `vmProfile: "xian_vm_v1"` when constructing `XianClient`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
+The default client uses `xian_vm_v2`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
 
 ```ts
 import { fixed, parseContractJson } from "@xian-tech/client";

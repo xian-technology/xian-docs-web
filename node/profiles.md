@@ -64,12 +64,6 @@ Set the policy with `xian network create` (or `xian setup node --mode local`)
 through `--tx-fee-mode`, `--max-tx-chi` and `--max-block-chi`; it is recorded
 as `fee_policy` in the network manifest.
 
-Profiles and network templates that still carry the settings of the removed
-parallel executor (`parallel_execution_enabled`, `parallel_execution_workers`,
-`parallel_execution_min_transactions` or `advanced.parallel_execution`) are
-rejected as unknown fields. Delete those fields; blocks always execute serially
-(see [Block Execution](/concepts/block-execution)).
-
 `advanced.metrics.host` and `advanced.metrics.port` are the host-side address
 and port on which the node's application metrics are published (default
 `127.0.0.1:9108`, local only). Inside the container the node always listens on

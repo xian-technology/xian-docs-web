@@ -174,8 +174,7 @@ Variadic parameters are excluded from this comparison, while a Python-defined
 bound method's metadata includes its `self` or `cls` parameter. Many builtins and
 constructor classes have no matching Python function metadata; inspecting them
 with `Func.is_of` raises an error. This catalog follows the current guarded
-wrappers, so historical host Python implementations can expose different names
-or no metadata at all. It does not provide general Python reflection.
+wrappers. It does not provide general Python reflection.
 
 Direct `Func.is_of` checks and `enforce_interface` also classify values
 differently: enforcement invokes function matching for ordinary Python-defined
@@ -220,9 +219,9 @@ storage declaration. See [Storage Overview](/smart-contracts/storage#declaration
 
 ## Checking an interface safely
 
-Interface checks do not grant permissions or replace access control. For
-compatibility with the Python interface API, an existing non-`None` attribute
-that is neither a function nor storage can satisfy a name check. Checks use
+Interface checks do not grant permissions or replace access control. An
+existing non-`None` attribute that is neither a function nor storage can satisfy
+a name check. Checks use
 initialized module values, including computed values. Circular module
 initialization is rejected. If you will call an
 exported function dynamically, check `importlib.has_export(contract_name,

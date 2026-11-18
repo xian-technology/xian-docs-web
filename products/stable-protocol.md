@@ -69,7 +69,7 @@ uv run --group deploy python scripts/bootstrap_protocol.py --skip-sample-tokens
 ```
 
 The vaults require the canonical `time_checkpoints` protocol-1 service and a
-matching fresh-chain node keeper. Bootstrap checks service readiness before
+matching node keeper. Bootstrap checks service readiness before
 deployment; it does not install that platform service. An offline contract test
 must supply the real service and explicit keeper/checkpoint transitions.
 
@@ -141,14 +141,10 @@ the bootstrap script.
 
 ## Deployment Readiness
 
-This is a deployable reference implementation. Production is gated on accepting,
-implementing and validating a stronger oracle protocol. The
-[Oracle Authorization V2 acceptance gates](https://github.com/xian-technology/xian-meta/blob/main/docs/ORACLE_AUTHORIZATION_V2.md#acceptance-gates)
-are proposed design requirements; the protocol is not implemented, enabled or
-approved for production. They include an explicit decision about freshness at
-authorization versus settlement after an arbitrary delay, source/clock trust
-and bounded financial exposure. Current baseline tests do not validate that
-proposal.
+This is a deployable reference implementation. Production use requires an
+oracle design that establishes external price freshness, defines source and
+clock trust, and bounds financial exposure. Validate authorization and
+settlement behavior across arbitrary delays before using it with material value.
 
 Consensus-time freshness checks alone do not establish external price freshness
 across an idle gap. Successor anchors for debt and auctions do not provide that

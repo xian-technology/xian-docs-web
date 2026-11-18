@@ -96,7 +96,8 @@ bytecode, and gas schedule are not operator-selectable configuration.
 
 ## Runtime Settings
 
-Top-level Xian settings cover:
+`config/xian.toml` accepts supported runtime fields and rejects unknown keys,
+including in its `[bds]` table. Top-level Xian settings cover:
 
 - pruning and retained block history
 - application metrics and logging
@@ -104,23 +105,17 @@ Top-level Xian settings cover:
 - pending nonce reservation
 
 The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
-and spool behavior. It is the only source of BDS settings: the node does not
-read `XIAN_BDS_*` environment variables and refuses to start, naming them, when
-one is set. The database password is never a `xian.toml` value. `[bds]
-password_file` names the file the node reads it from when it connects; by
-default that is `/run/secrets/xian_bds_password`, the secret that `xian-stack`
+and spool behavior. `[bds] password_file` names the file the node reads the
+database password from when it connects; by default that is `/run/secrets/xian_bds_password`, the secret that `xian-stack`
 and `xian-deploy` mount from one owner-only file into both the node and
-Postgres (`POSTGRES_PASSWORD_FILE`). A `[bds] password` key, or a `dsn` that
-carries a password, is rejected at startup. See
+Postgres (`POSTGRES_PASSWORD_FILE`). Keep passwords out of the DSN. See
 [Runtime Features](/node/runtime-features).
 
 The transaction fee mode and the per-transaction and per-block chi caps are
 not `xian.toml` settings: they are the genesis fee policy `__fee_policy`,
 identical on every validator, and a `xian.toml` that sets them is rejected at
 startup. See [Chain Chi Caps](/concepts/chi#chain-chi-caps). Logging and query
-limits can vary by node. The settings of the removed parallel executor
-(`parallel_execution_*`) are rejected at startup as well; see
-[Block Execution](/concepts/block-execution#no-parallel-execution).
+limits can vary by node.
 
 ## PostgreSQL Version and Storage
 
@@ -132,33 +127,6 @@ storage. Select the single-node image with `XIAN_POSTGRES_IMAGE`, or the remote
 deployment image with `xian_postgres_image`; production image references must
 include a verified digest.
 
-Upgrading an existing PostgreSQL 17 BDS database requires a database migration;
-changing the image tag does not upgrade its files. Plan downtime for the node's
-BDS writer and query services:
-
-1. Stop the node and query services while leaving PostgreSQL 17 available for
-   backup. Record the indexed height and take a logical dump with `pg_dump`
-   plus a roles backup with `pg_dumpall --roles-only`. Keep backups private:
-   role backups can contain password hashes.
-2. Stop PostgreSQL 17 and retain its data directory and original image/config
-   for rollback. Select a fresh persistent directory for PostgreSQL 18.7;
-   do not reuse or erase the PostgreSQL 17 directory.
-3. Start PostgreSQL 18.7 with the parent-directory mount above. Restore the
-   required roles and database dump, accounting for the bootstrap owner role
-   already created by the image. Restore the read-only GraphQL role and grants.
-4. Verify the restored database, indexed height, and read-only GraphQL queries.
-   Resume the node and confirm BDS catch-up and healthy query services before
-   accepting the migration. Rollback after writes resume requires preserving
-   those writes; the retained PostgreSQL 17 database is only the pre-upgrade
-   checkpoint.
-
-Do not move PostgreSQL 17 files into `18/docker`. The image rejects an old
-cluster at the volume root rather than initializing a replacement over it.
-See the [PostgreSQL major-version upgrade documentation](https://www.postgresql.org/docs/18/upgrading.html)
-and [official Docker image storage guidance](https://hub.docker.com/_/postgres).
-Archived guides pinned to earlier Xian releases retain their original database
-recipes; use the defaults above with the current codebase.
-
 ## Stack Credentials
 
 `xian-stack` keeps the BDS password in its own private, Git-ignored file,
@@ -167,9 +135,7 @@ different path). It is created with a random value on first use and is the
 only copy: Compose mounts it as `/run/secrets/xian_bds_password` into Postgres,
 the node and the GraphQL role setup. The PostGraphile password stays in the
 private, Git-ignored `.stack-secrets.env` (`XIAN_STACK_SECRETS_ENV` selects a
-different path); a credentials file that still holds `XIAN_BDS_PASSWORD`, or
-`XIAN_BDS_PASSWORD` in the environment, is refused with a message naming the
-new file.
+different path).
 
 The credentials file is literal data. Its current format stores values as
 JSON-quoted strings; a shared reader decodes them for the supported stack

@@ -46,10 +46,8 @@ language, compiler, storage model, metering, and standard-library bridges.
 network is running. The current codebase has no active public testnet or
 mainnet.
 
-An existing network running an earlier codebase has its own runtime and
-operating instructions. Moving it to this runtime requires a coordinated
-[upgrade and migration](/node/upgrading), including contract and state
-compatibility checks.
+Operators pin the compiler, VM and consensus backend for each network. See
+[Upgrading](/node/upgrading) for release validation and coordinated updates.
 
 ## Contract Execution
 

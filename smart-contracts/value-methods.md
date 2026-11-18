@@ -285,12 +285,12 @@ surrounding expression restrictions.
 
 ## Deliberate Exclusions
 
-The language follows a reviewed historical surface, rather than automatically
-adopting APIs from a newer host Python. `float.from_number`, `Decimal.from_number`
+The contract language has an explicit API surface independent of the host
+Python version. `float.from_number`, `Decimal.from_number`
 and `bytearray.resize` are outside this surface. Exceptions expose their argument
 payload through `args`; `add_note` and traceback access are not supported.
 
 Test both successful and failing paths against the native runtime. Method-name
 coverage is not proof for all input combinations, aliases or resource bounds;
-the shared inventory and native/historical regression suites provide the detailed
+the shared inventory and native regression suites provide the detailed
 evidence for each supported operation.

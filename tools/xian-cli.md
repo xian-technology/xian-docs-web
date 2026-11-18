@@ -6,7 +6,7 @@ transaction commands.
 
 ## Install
 
-For the fresh-chain tools, use the sibling source checkouts described in
+For the CLI, use the sibling source checkouts described in
 [Development environment](/getting-started/dev-environment). From the workspace root:
 
 ```bash

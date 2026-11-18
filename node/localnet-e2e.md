@@ -289,19 +289,7 @@ independently built images with the same policy, so ARM64 and x86-64 can be
 compared. The recorded source image ID remains provenance, not a requirement
 that both architectures share the same image bytes.
 
-Unversioned historical corpora require their retained previous image and its
-exact immutable image ID. The current VM cannot silently substitute its
-semantics or gas schedule for an earlier revision:
-
-```bash
-uv run python scripts/localnet_replay_corpus.py \
-  --corpus /path/to/legacy/replay-corpus \
-  --image <retained-previous-image> \
-  --legacy-image-id sha256:<full-retained-image-id> \
-  --output .artifacts/legacy-replay-check
-```
-
-Keep the historical corpus and its expected hashes unchanged. A Git revision
+Keep the captured corpus and its expected hashes unchanged. A Git revision
 alone cannot reproduce a run made from uncommitted sources; retain the exact
 image or a verified source/build bundle for that run.
 

@@ -32,19 +32,6 @@ pending penalties and epoch selection, applies approved patches, and stages
 the evidence policy and state root. These system effects also contribute to
 `app_hash`; they are not ordinary user transactions in BDS history.
 
-## No Parallel Execution
-
-A node refuses to start when its `config/xian.toml` still sets one of the
-removed keys (`parallel_execution_enabled`, `parallel_execution_workers`,
-`parallel_execution_min_transactions`, `parallel_execution_max_speculative_waves`,
-`parallel_execution_min_wave_acceptance_ratio`,
-`parallel_execution_low_acceptance_min_wave_size`,
-`parallel_execution_warm_workers`, `parallel_execution_access_estimates_enabled`).
-The error names the keys to delete. Re-rendering the home with
-`xian-configure-node` or `xian node init` writes a configuration without them.
-Node profiles and network templates that still carry `parallel_execution_*`
-fields or `advanced.parallel_execution` are rejected as unknown fields.
-
 ## Related Pages
 
 - [Transaction Lifecycle](/concepts/transaction-lifecycle)

@@ -106,8 +106,6 @@ The compiler, local contract tests, and Python and JavaScript SDKs use `xian_vm_
 Pass a Python `int` or `decimal.Decimal("1.25")` from your off-chain application.
 In JavaScript, pass a safe integer, a `bigint`, or `fixed("1.25")`.
 Use `parseContractJson(text)` to preserve numeric digits in handwritten JSON arguments.
-To reproduce V1 signing fixtures, set `vm_profile="xian_vm_v1"` in the Python
-client configuration or `vmProfile: "xian_vm_v1"` in JavaScript.
 
 See [Python SDK](/tools/xian-py), [JavaScript SDK](/tools/xian-js) and
 [Local contract testing](/smart-contracts/testing/).

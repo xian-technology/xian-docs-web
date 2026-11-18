@@ -79,9 +79,7 @@ Temporary auto-approval rules can be scoped to a site, account, network,
 method, contract, function, and exact arguments. Broad function rules allow
 arguments to change and therefore require separate confirmation. Every rule
 carries a chi cap taken from the approved transaction; a rule cannot be created
-without one, and stored rules from older versions that have no cap are not
-applied, so those requests prompt again. Review and revoke saved rules from the
-connected-apps view.
+without one. Review and revoke saved rules from the connected-apps view.
 
 Each site may have at most one pending connect request and three other pending
 approvals at a time. Further requests fail immediately with provider error
@@ -140,13 +138,10 @@ PBKDF2-HMAC-SHA256 at 600,000 iterations. Imports accept work factors from
 250,000 through 2,000,000 and validate the 16-byte salt, 12-byte nonce, and
 minimum authenticated ciphertext size before deriving a key.
 
-Password unlock reads 250,000-iteration vaults, including vaults without an
-explicit work-factor field, and re-encrypts all stored secrets at the current
-work factor. The wallet prepares every encrypted account key, mnemonic, and
-shielded snapshot before saving one replacement state record. A wrong password
-or unreadable stored secret aborts migration without replacing the record.
-If the stored wallet changes during unlock, the wallet refuses to overwrite it
-and asks you to retry.
+Password unlock verifies the encrypted account keys, mnemonic and shielded
+snapshots before saving a replacement wallet state. A wrong password or
+unreadable stored secret leaves the record intact. If the stored wallet changes
+during unlock, the wallet refuses to overwrite it and asks you to retry.
 
 Use a strong, unique wallet password. Exported backup files retain their
 original parameters until another backup is exported; encrypted backups remain
@@ -178,11 +173,9 @@ failed. Wallet integrations using a custom persistent store should implement
 `claimApprovalExecution` atomically and use one controller authority for that
 store.
 
-Custom `WalletController` stores must also implement optional
-`replaceState(expected, next)` as an atomic comparison and replacement to enable
-password-work-factor migration. Stores without that capability can unlock
-existing wallets, but leave their encryption parameters unchanged. The official
-extension store implements this operation.
+Custom `WalletController` stores can implement
+`replaceState(expected, next)` for atomic comparison and replacement.
+The official extension store implements this operation.
 
 Provider requests and result polling are bound to the browser-reported page
 origin. Wallet management and approval controls are accepted only from the

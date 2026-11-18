@@ -26,9 +26,8 @@ never runs one V2 transaction past 1,000,000 chi; see
 | contract deployment | 15,000,000 plus 100 per submitted source byte, charged before compiling (a source that fails to compile pays it too) |
 
 VM computation and host operations use deterministic policy constants, not
-measured execution time. The current runtime supports `xvm-gas-7`; it does not
-offer an earlier schedule as an alternate execution mode. Validators must use matching
-runtime policies. See the [upgrade procedure](/node/upgrading).
+measured execution time. The runtime uses `xvm-gas-7`. Validators must use
+matching runtime policies. See the [upgrade procedure](/node/upgrading).
 
 Module initialization also charges for building interface metadata and the
 public callable catalog from binding names and function signatures. Interface
@@ -197,7 +196,7 @@ back tentative writes and events.
 
 Text hashing and verification messages are capped at 1 MiB of UTF-8 bytes.
 Explicit hex hashing accepts at most 2 MiB of encoded input (1 MiB decoded).
-Historical aliases accept at most 2 MiB of raw input, then either 1 MiB decoded
+`hashlib.sha256` and `hashlib.sha3` accept at most 2 MiB of raw input, then either 1 MiB decoded
 hex or 1 MiB fallback text. Their charge includes raw whitespace and failed hex
 classification. Verification keys and signatures are capped at 64 and 128
 encoded bytes. These admission limits also apply when metering is disabled,

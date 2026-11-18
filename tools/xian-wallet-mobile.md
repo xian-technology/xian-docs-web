@@ -99,7 +99,7 @@ only on a trusted local/private network; prefer HTTPS elsewhere.
   inside the app's review or approval dialog; a manually entered limit offers
   **Use estimate**, while a dapp-supplied limit is preserved
 - auto-approval rules always carry a chi cap; none is offered for a request
-  without a chi limit, and older stored rules without a cap are not applied
+  without a chi limit
 - invisible and text-direction characters in signed text are shown as
   `[U+XXXX]` markers with a warning
 - external message signatures use a chain- and account-bound envelope
@@ -124,15 +124,14 @@ PBKDF2-HMAC-SHA256 at 600,000 iterations. Imports accept work factors from
 250,000 through 2,000,000 and validate the 16-byte salt, 12-byte nonce, and
 minimum authenticated ciphertext size before deriving a key.
 
-Password unlock reads 250,000-iteration vaults and re-encrypts all stored
-account keys, the mnemonic, and shielded snapshots at the current work factor
-before saving one replacement state record. A wrong password or unreadable
-stored secret aborts migration without replacing the record.
-If the stored wallet changes during unlock, the wallet refuses to overwrite it
-and asks you to retry.
+Password unlock verifies the encrypted account keys, mnemonic and shielded
+snapshots before saving a replacement wallet state. A wrong password or
+unreadable stored secret leaves the record intact. If the stored wallet changes
+during unlock, the wallet refuses to overwrite it and asks you to retry.
 
 Biometric unlock cannot perform password-based re-encryption. After a password
-unlock migrates the vault, re-enable biometric unlock in Settings. Use a strong,
+unlock replaces the encrypted vault, re-enable biometric unlock in Settings.
+Use a strong,
 unique wallet password. Exported backups retain their original parameters until
 another backup is exported; encrypted backups remain version 2.
 

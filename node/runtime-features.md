@@ -94,9 +94,7 @@ at startup, and `configure_node` accepts `--tx-fee-mode`, `--max-tx-chi` and
 ## Block Execution
 
 Blocks always execute serially, in canonical order, in the Rust block
-executor. The settings of the removed parallel executor
-(`parallel_execution_*`) are not accepted: a `xian.toml` that sets any of them
-is rejected at startup with an error naming the keys to delete. See
+executor. See
 [Block Execution](/concepts/block-execution).
 
 ## Metrics and Health
