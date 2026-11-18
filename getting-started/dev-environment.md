@@ -73,6 +73,11 @@ cd ../xian-stack
 make smoke-cli
 ```
 
+`make smoke` and `make smoke-cli` build private images and use temporary node
+homes, credentials, Compose projects and loopback ports. They ignore inherited
+runtime overrides and clean up their own resources when they finish; existing
+local node homes and image tags are not reused.
+
 ## Local Multi-Node Testing
 
 Use `xian-stack` when you need a realistic local validator environment:
