@@ -7,7 +7,27 @@ It is available only when the stack runs BDS and the GraphQL sidecar.
 
 ## What It Runs On
 
-The maintained stack uses PostGraphile v5 over the BDS database.
+The maintained stack uses PostGraphile v5's standard Amber preset over the BDS
+database, with connection filtering and aggregates. Configuration uses v5
+behaviors and server settings directly.
+
+The generated API follows v5 conventions:
+
+- `id` is the global GraphQL object identifier; a database column named `id`
+  appears as `rowId`. For example, event pagination uses `ROW_ID_ASC` and
+  `filter: {rowId: {greaterThan: $afterId}}`, with `$afterId: BigInt!`.
+- JSONB fields return native JSON values. Tagged decimals and large integers
+  inside them retain the V2 `__fixed__` and `__big_int__` representations.
+- Available filters, ordering and reverse relations follow database privileges
+  and indexes. Inspect the generated schema for the fields exposed by a node.
+
+The BDS schema explicitly enables native v5 filtering on the GIN-indexed
+`events.data_indexed` column. For example,
+`filter: {dataIndexed: {contains: {to: "some_address"}}}` selects matching
+event JSON. Token-catalog filtering uses the indexed `contracts.xsc001` flag.
+
+The Python SDK keeps its public numeric `IndexedEvent.id`; its GraphQL queries
+alias `rowId` to that response name and pass bigint cursors as strings.
 
 That means GraphQL is:
 
