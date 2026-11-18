@@ -30,7 +30,8 @@ It lets users:
   `submission.submit_contract` does on chain
 - call exported functions through a typed form built from the contract's
   signature, or with raw JSON arguments
-- see each result: return value, error, chi used, state writes and events
+- see call return values in Execute, and errors, chi, writes and events in
+  the activity log
 - set the signer and block environment (time, height, hash, chain id, random
   seed) and switch metering on or off
 - browse and edit contract state, inspect source and VM IR
@@ -61,10 +62,12 @@ choose.
 
 ### Metering and long-running code
 
-Calls are metered like the chain by default; without a chi budget the VM
+Calls use the chain's VM metering by default; without a chi budget the VM
 ceiling applies, so a runaway loop ends with an out-of-chi failure. With
-metering off, the VM runs in a Web Worker that the page stops after 10
-seconds, restoring the chain to its state before the call.
+metering off, deterministic VM allocation and preparation limits remain.
+Every deployment or call also has a 10-second worker timeout; a timeout or VM
+crash restarts the worker from its saved chain snapshot. The playground does
+not run consensus, real transaction admission, fee settlement or node keepers.
 
 ### Hosting
 

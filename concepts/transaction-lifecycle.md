@@ -109,7 +109,7 @@ until the results arrive or the configured timeout expires.
 | Failure | State/effects |
 | --- | --- |
 | CheckTx rejection | no mempool entry, no state, no fee |
-| assertion or runtime error | application writes/events roll back; paid mode charges consumed chi and pays that fee out (no developer share) |
+| assertion or runtime error | application writes/events roll back; paid mode charges execution plus half of unused chi; only the execution portion funds rewards, with no developer share |
 | out of chi | application writes/events roll back; failed execution reports a bounded cost up to the submitted limit |
 
 ## Indexing

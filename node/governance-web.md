@@ -103,14 +103,15 @@ serializes strings with the node's ASCII escaping rules. Numeric-looking object
 keys retain lexicographic ordering. Both bundle paste flows preserve original
 numeric tokens for verifying the patch bundle's exact content. Contract amounts in V2 transaction arguments use canonical numeric wrappers. Explicit null fields are preserved.
 The verifier rejects duplicate change keys and direct generated-artifact patches.
-It accepts standard JSON with finite numbers, up to 1 MiB of text and128 nesting
+It accepts standard JSON with finite numbers, up to 1 MiB of text and 128 nesting
 levels; use the original bundle file when verifying numeric values.
 
 - Confirm the wallet, RPC response, manifest, and console all show the same
   chain ID.
 - Review the exact proposal target, function, payload, voter snapshot, and
   threshold before signing.
-- Keep validator consensus keys out of the browser wallet and console.
+- Signed governance actions require the validator account. Use a secured
+  signing wallet; the console receives approved signatures, never private keys.
 - Treat state-patch approval and patch distribution as separate steps. Every
   validator needs the exact approved bundle before activation.
 - Use a linked off-chain venue for discussion; the console is not a comment

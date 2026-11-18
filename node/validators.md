@@ -77,9 +77,10 @@ or snapshot restore.
 | `auto_top_n` | eligible candidates are ranked and selected by total bonded stake |
 | `hybrid` | governance approval is required before stake-ranked selection |
 
-Auto/hybrid selection excludes jailed and leaving validators, enforces bond and
+Auto/hybrid selection excludes jailed validators, enforces bond and
 activation-delay gates, ranks by total bond, and applies configured churn and
-replacement-margin limits.
+replacement-margin limits. An active validator that announces leave remains
+eligible during its leave delay; the announcement does not guarantee its seat.
 
 The live selection pool holds at most 64 accounts in total, counting active
 validators and registered candidates together. Registration is refused while

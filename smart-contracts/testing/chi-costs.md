@@ -53,10 +53,12 @@ preview = client.simulate(
 chi_used = preview["chi_used"]
 ```
 
-Simulation does not commit state. For the same state, execution charges exactly
-the simulated `chi_used`; clients supply that value plus a fixed 2-chi margin
-(`chi_to_supply` in xian-py, `chiToSupply` in xian-js), which covers a
-transaction landing in between that grows a stored value by a byte. If the
+Simulation does not commit state. The SDKs supply the simulated estimate plus a fixed 2-chi margin
+(`chi_to_supply` in xian-py, `chiToSupply` in xian-js). Paid receipts include
+half of unused supplied chi, rounded down, so an unused 2-chi margin adds one
+charged chi. Balance-reservation rounding can also make measured execution use
+slightly less than the smallest sufficient supply. See
+[Estimate Before Submission](/concepts/chi#estimate-before-submission). If the
 state changes more than that before the transaction is included, the
 transaction can run out of chi; it
 then fails, pays for the chi it used and changes nothing else, and can be

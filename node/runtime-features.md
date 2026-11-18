@@ -31,14 +31,11 @@ For `zk`:
   it resumes once the verifier is installed and the node restarted. Startup,
   offline application snapshot import and Commit refuse a zk-enabled state on
   such a node the same way.
-- While it is off, every transaction that deploys or calls a contract using zk
-  host syscalls (directly, through an import, or through
-  `importlib.import_module`) fails with an ordinary failed receipt and is
-  charged for the chi it used: `zk.is_available()` returns `False` (the
-  probe a contract uses to degrade gracefully) and every other zk syscall
-  fails while the feature is off. The chain keeps producing blocks
-  and other transactions are unaffected. Simulation reports the same failure.
-  Shielded balances stay locked until zk is enabled again; they are not lost.
+- While it is off, `zk.is_available()` returns `False`, allowing contracts to
+  degrade gracefully. Other zk syscalls fail with an ordinary failed receipt,
+  whether called directly or through static/dynamic imports. Paid mode applies
+  its normal fee policy, including unused chi. Other transactions continue,
+  and simulation reports the same syscall failure.
 
 ## Logging
 
@@ -81,7 +78,7 @@ Bound and rate-limit it on any exposed endpoint.
 
 | Mode | Behavior |
 | --- | --- |
-| `paid_metered` | sender covers the submitted chi limit; used chi is charged and fee rewards are produced |
+| `paid_metered` | reserves the supplied budget; charges execution plus half of unused chi (rounded down); rewards use execution chi only |
 | `free_metered` | execution remains metered, but no native-token execution fee or fee-derived reward is created |
 
 Both modes carry the same hard chi caps: `max_tx_chi` (default 200,000) bounds

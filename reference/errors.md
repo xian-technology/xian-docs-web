@@ -53,17 +53,22 @@ These happen during contract execution:
 - out-of-chi
 - runtime exceptions
 
-Execution outputs also classify these failures under `error_class`:
+Local `ContractingClient` full outputs classify failures under `error_class`:
 
 - `contract_assertion`: a contract `assert` failed
 - `contract_error`: another contract-level exception escaped
 - `chi_exceeded`: execution ran out of chi budget
 - `call_limit_exceeded`: the deterministic instruction/call cap was hit
 
+Network execution receipts expose `status` and `result`, not this local
+`error_class` field. Check the SDK receipt's success/error helpers before
+using its result.
+
 Effects:
 
 - state changes for that transaction are rolled back
-- consumed chi are recorded; paid-fee networks charge the matching execution fee
+- consumed chi are recorded; paid mode also charges half of unused supplied
+  chi, rounded down, under the [fee policy](/concepts/chi#unused-chi-charge)
 - emitted events from that transaction are discarded
 
 ## Query/Service Errors

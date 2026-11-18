@@ -19,7 +19,7 @@ flowchart LR
   DocsGate --> Content["Published content tree"]
   Content --> VitePress["VitePress build"]
   VitePress --> Site["Public docs site"]
-  Internal[".meta internal notes"] -. hidden .-> VitePress
+  Internal[".meta internal notes"] -. excluded by srcExclude .-> Excluded["Not published"]
   Repos["Xian implementation repos"] --> Changes
 ```
 
@@ -86,8 +86,9 @@ npm audit --audit-level=high --omit=dev
 npm run build
 ```
 
-`npm run build` is the docs-site smoke gate — broken links, missing
-sidebar entries, and VitePress build errors all surface here.
+`npm run build` checks page generation and unresolved page links. Review
+sidebar coverage and render Mermaid diagrams separately; the build does not
+validate navigation completeness or browser-side diagram rendering.
 
 ## Related Docs
 

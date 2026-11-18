@@ -134,8 +134,8 @@ changed by validator governance. Paid fees use `chi_used / chi_rate`, where a
 paid receipt's `chi_used` includes the
 [unused-chi charge](/concepts/chi#unused-chi-charge) (burned, not rewarded).
 
-In `free_metered` mode the runtime reports the same chi usage but creates no
-execution-fee debit or fee-derived reward.
+In `free_metered` mode the runtime reports execution chi without the unused-chi
+charge and creates no execution-fee debit or fee-derived reward.
 
 ## Resource Limits
 

@@ -21,10 +21,10 @@ xian node health validator-1
 ```
 
 The signing wallet, governance console, node status, and reviewed manifest must
-show the same chain ID. Keep validator consensus keys out of general-purpose
-wallets and governance UIs. Registration requires a controlled signing workflow
-for the validator account itself; a separate reward account or wrapper contract
-cannot register that consensus identity.
+show the same chain ID. Use a controlled signing workflow for the validator
+account itself; registration and validator votes use that account, not a separate
+reward key. A wrapper contract cannot register that consensus identity. Keep
+private keys out of console inputs and unrelated dapps.
 
 ## Onboard
 
@@ -71,16 +71,18 @@ Before a jail or slash vote, verify the target, evidence/incident reference,
 active-set impact, replacement capacity, and quorum.
 
 After jail, confirm the flag, reason, zero active power, and removal from the
-active set. Unjail only clears the jail flag; activation still follows the
-network's selection policy.
+active set. Governance unjailing returns an eligible account to approved
+candidate status; activation follows the network's selection policy.
 
 A validator absent from `downtime_jail_blocks` consecutive commits is jailed
 with reason `downtime` (infraction `DOWNTIME`, slashed by `downtime_slash_bps`)
-by the runtime, not by a vote. Once the node signs again and
+by the runtime, not by a vote. Once the node is healthy and synced and
 `downtime_unjail_cooldown_hours` have passed, the operator calls `unjail()`
 from the validator account and the validator re-enters the active set (also in
 `manual` mode) if it meets the minimum stake, a seat is free and the epoch's
-newcomer power cap allows it; otherwise `unjail()` says to retry next epoch.
+newcomer power cap allows it. If the cap would be exceeded, the call fails
+and the jail remains; retry in a later epoch. Without a free seat, a successful
+unjail leaves the validator as an approved candidate.
 Check `missed_blocks` in the validator record to see an open
 count before it reaches the window.
 

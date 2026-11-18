@@ -143,6 +143,13 @@ Both recipes supply each transaction's simulated chi plus the SDK margin. The
 bundle's `default_chi` values are manifest information, not budgets: supplying
 them would pay half of the unused chi.
 
+## Machine-Readable Interface
+
+The repo's `dex-interface.json` describes exported signatures, defaults,
+read/write roles, events, errors and transaction safety policies. It is checked
+against the sources and hash-pinned bundle by `scripts/validate_contracts.py`.
+Use it to discover calls; retain independent simulation, review and signing.
+
 ## Reading DEX State From SDKs
 
 For reusable TypeScript route enumeration, quotes, price impact, slippage,
@@ -157,7 +164,7 @@ from xian_py import Xian
 
 with Xian("http://127.0.0.1:26657") as client:
     pair = client.contract("con_pairs").call(
-        "pairFor", tokenA="currency", tokenB="demo_token",
+        "pairFor", tokenA="currency", tokenB="con_dex_demo_token",
     )
     quote = client.contract("con_dex").call(
         "getAmountsOut", amountIn=10, src="currency", path=[pair],
@@ -170,7 +177,7 @@ import { XianClient } from "@xian-tech/client";
 const client = new XianClient({ rpcUrl: "http://127.0.0.1:26657" });
 const pair = await client.contract("con_pairs").call("pairFor", {
   tokenA: "currency",
-  tokenB: "demo_token",
+  tokenB: "con_dex_demo_token",
 });
 ```
 

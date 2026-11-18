@@ -29,6 +29,7 @@ def seed(name: str = "Example Token", symbol: str = "EXT"):
     metadata["token_name"] = name
     metadata["token_symbol"] = symbol
     metadata["token_logo_url"] = ""
+    metadata["token_logo_svg"] = ""
     metadata["token_website"] = ""
     metadata["total_supply"] = 1_000_000
     metadata["operator"] = ctx.caller
@@ -40,6 +41,7 @@ def change_metadata(key: str, value: Any):
         "token_name",
         "token_symbol",
         "token_logo_url",
+        "token_logo_svg",
         "token_website",
     ], "Metadata key is not editable"
     metadata[key] = value
@@ -63,6 +65,8 @@ def approve(amount: decimal, to: str):
 @export
 def transfer_from(amount: decimal, to: str, main_account: str):
     assert amount > 0, "Amount must be positive"
+    assert to != "", "Recipient is required"
+    assert main_account != "", "Owner is required"
     assert approvals[main_account, ctx.caller] >= amount, "Insufficient allowance"
     assert balances[main_account] >= amount, "Insufficient balance"
     approvals[main_account, ctx.caller] -= amount

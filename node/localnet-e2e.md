@@ -161,7 +161,11 @@ The layered harness covers:
   commit response, with transaction effects and nonces checked after recovery
 - real 4/1 and 3/2 network partitions, progress with quorum, a halt without
   quorum, reconvergence after healing, and a full-network restart
-- fresh non-validator catch-up from genesis
+- fresh non-validator catch-up from genesis, followed by signed full-store
+  export/restore, pre-checkpoint evidence verification, rejected tampered or
+  incomplete archives, and restart convergence
+- stale-time preflight, idle block-policy checks, successor unbond anchors and
+  evidence-retention growth across restore/restart
 - nonce gaps, conflicting pending nonces, submission-node restart, replay
   rejection, and a queued transaction whose balance becomes insufficient
 - zero-chi admission rejection at every node without consuming the sender's nonce

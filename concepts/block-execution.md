@@ -9,11 +9,12 @@ order, so every validator reaches the same state, receipts, chi, events and
 
 ```mermaid
 flowchart TD
-  Block["Ordered block"] --> Rust["Rust block executor"]
-  Rust --> Tx["Execute the next transaction: receipt, chi, fee and rewards"]
-  Tx --> Next{"Transactions remain?"}
-  Next -->|yes| Tx
-  Next -->|no| Commit["Commit the block state"]
+  Block["Decided block and agreed timestamp"] --> Pre["Evidence and liveness; bounded successor time keepers"]
+  Pre --> Rust["Rust block executor: transactions in canonical order"]
+  Rust --> Post["Bounded pending penalties and epoch rebalance"]
+  Post --> Patches["Approved state patches and evidence-retention policy"]
+  Patches --> Root["FinalizeBlock returns results, updates and app_hash"]
+  Root --> Commit["Commit persists application state"]
 ```
 
 Validators run the per-transaction loop in Rust, inside the native VM package,
@@ -25,12 +26,13 @@ execution path: a transaction the VM cannot run fails with an ordinary
 receipt, and only a host fault (unreadable state, out of memory, operating
 system or storage errors) halts the node.
 
-## No Parallel Execution
+Before the paid loop, the node applies agreed evidence/liveness and advances
+bounded time-checkpoint and staking-anchor work. After it, the node advances
+pending penalties and epoch selection, applies approved patches, and stages
+the evidence policy and state root. These system effects also contribute to
+`app_hash`; they are not ordinary user transactions in BDS history.
 
-Transactions are not executed in parallel. Xian previously shipped an optional
-speculative executor that ran transactions in worker processes. Serial
-execution in Rust became faster than that executor, so it was removed together
-with its settings.
+## No Parallel Execution
 
 A node refuses to start when its `config/xian.toml` still sets one of the
 removed keys (`parallel_execution_enabled`, `parallel_execution_workers`,
@@ -42,10 +44,6 @@ The error names the keys to delete. Re-rendering the home with
 `xian-configure-node` or `xian node init` writes a configuration without them.
 Node profiles and network templates that still carry `parallel_execution_*`
 fields or `advanced.parallel_execution` are rejected as unknown fields.
-
-A future parallel design (Block-STM-style execution in Rust) is a deferred
-plan, not a feature. Any such design must keep results identical to serial
-block order.
 
 ## Related Pages
 

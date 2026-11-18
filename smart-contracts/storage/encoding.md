@@ -9,8 +9,12 @@ The encoder has explicit markers for:
 - contract `decimal`
 - `datetime.datetime` / contract `Datetime`
 - `datetime.timedelta` / contract `Timedelta`
-- `bytes`
+- `bytes` and `bytearray`
 - very large integers
+- deterministic `set()` and `frozenset()` wrappers
+
+See [Persistent sets](/smart-contracts/storage#persistent-sets) for the tagged
+set codec and its limits.
 
 ## Why This Matters
 

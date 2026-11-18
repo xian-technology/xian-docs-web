@@ -146,6 +146,13 @@ backups, exported incident evidence and E2E artifacts have separate retention.
 Dashboard, GraphQL, and BDS are outside consensus. BDS can lag the finalized
 head while it catches up.
 
+The shipped Prometheus rules cover stalled blocks, peers, the local validator's
+signing/missed blocks, disk pressure and BDS health. The default integrated
+Prometheus configuration loads no alert rules. Select the shared-network rules
+explicitly and configure Alertmanager receivers to deliver notifications;
+starting Grafana alone does neither. See the
+[monitoring setup](https://github.com/xian-technology/xian-stack/blob/main/monitoring/README.md#alerts).
+
 ## Local Backend Debugging
 
 From `xian-stack`:

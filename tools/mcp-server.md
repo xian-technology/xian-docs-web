@@ -15,9 +15,9 @@ uv sync --frozen
 uv run --frozen xian-mcp-server
 ```
 
-The lockfile pins Git revisions of the V2-compatible Python SDK and runtime
-types. Both the standalone checkout and the Dockerfile’s `pypi` target use
-these dependencies:
+The lockfile pins published Python SDK, accounts and runtime-types packages.
+No sibling checkout is required for the standalone install or the Dockerfile’s
+`pypi` target:
 
 ```bash
 docker build --target pypi -t xian-mcp-server:latest .

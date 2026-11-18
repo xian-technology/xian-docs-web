@@ -188,7 +188,11 @@ custody:
 ```
 
 Recipient overrides are forbidden in this mode. The local config is an
-operator guardrail; the deployed contract is the final custody boundary.
+operator guardrail; the deployed contract is the final custody boundary. Its
+price check uses the pool's execution-time quote, not an independent oracle.
+A compromised keeper can trade against manipulated reserves within the spend
+caps; the honest service additionally signs an off-chain quote/slippage bound.
+See the [vault risk model](https://github.com/xian-technology/xian-dex-automation/blob/main/contracts/README.md#security-accepted-risk-of-the-in-transaction-price-check).
 
 Keeper deadlines use the node's latest block timestamp and reserve five
 seconds of headroom below the configured on-chain maximum. Short deadline
@@ -202,7 +206,9 @@ routes, owner rotation, or cumulative-budget increases.
 
 ## Stack-Managed Setup
 
-The target network must already contain the DEX contracts and a usable pair.
+The target network must contain the DEX contracts, a usable pair and BDS-backed
+`con_pairs.Sync` history for the event worker's persisted cursor. Manual
+evaluation and transaction recovery use direct RPC reads.
 For local testing:
 
 ```bash
@@ -211,8 +217,8 @@ uv run python scripts/bootstrap_dex.py --recipe local-demo
 
 cd ../xian-stack
 export XIAN_DEX_AUTOMATION_ADMIN_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
-python3 ./scripts/backend.py start --no-bds-enabled --dex-automation
-python3 ./scripts/backend.py endpoints --no-bds-enabled --dex-automation
+python3 ./scripts/backend.py start --bds-enabled --dex-automation
+python3 ./scripts/backend.py endpoints --bds-enabled --dex-automation
 ```
 
 The stack-managed admin UI/API defaults to `http://127.0.0.1:38280`. When creating

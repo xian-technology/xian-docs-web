@@ -78,8 +78,10 @@ def transfer_from(amount: decimal, to: str, main_account: str):
 
 For multiple roles, store an explicit boolean or role value per account and
 check it in every privileged export. For high-impact changes, store the exact
-pending action and an unlock time based on `now`, then authorize and validate
-again at execution.
+pending action and authorize and validate it again at execution. If a minimum
+challenge period is required, derive its unlock time from a
+[successor anchor](/concepts/time-and-blocks#financial-timer-anchors); the
+request block's `now` can be stale after an idle gap.
 
 Multi-signature and governance designs require more than counting approvals:
 freeze the eligible signer set and threshold for each proposal, prevent repeat

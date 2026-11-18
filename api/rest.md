@@ -4,7 +4,7 @@ The REST API belongs to the optional Xian dashboard service. It proxies selected
 CometBFT calls and adds explorer-oriented convenience routes. It is not the
 node's consensus RPC.
 
-Stack-managed default:
+Dashboard backend default (`single-node-dev` publishes port `18080` instead):
 
 ```text
 http://127.0.0.1:8080

@@ -173,9 +173,6 @@ unused). The charge is burned: fee rewards are computed on `used` alone, so
 no validator, delegator or contract developer earns from wasted capacity.
 A 1-chi margin costs nothing, and a transaction that supplies the simulated
 estimate plus the SDKs' 2-chi margin pays one chi more than its estimate.
-Without the charge, three transactions of 166,666 supplied chi each filled a
-block for about 255 chi apiece and kept every other transaction out; now that
-costs about 250,000 chi per block, half of filling the block with real work.
 `free_metered` chains charge no fees, so they charge no unused chi either. A
 sender whose balance cannot cover its reservation when the transaction
 executes pays the failure charge from what is left, as any failure does.

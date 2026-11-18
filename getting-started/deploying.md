@@ -29,7 +29,10 @@ def balance_of(address: str) -> decimal:
 result = client.deploy_contract(
     name="con_example",
     source=source,
+    mode="checktx",
+    wait_for_tx=True,
 )
+assert result.receipt is not None and result.receipt.success
 ```
 
 Without an explicit `chi`, the SDK simulates the deployment and supplies the

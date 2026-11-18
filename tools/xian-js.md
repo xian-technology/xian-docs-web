@@ -18,7 +18,7 @@ The source revision below defaults to V2 and includes the DEX adapter. From the 
 ```bash
 git clone https://github.com/xian-technology/xian-js.git
 cd xian-js
-git checkout --detach 05441d87e18318a56d966a83d79aec88a1d54b7e
+git checkout --detach 79d02e36bf02e9857f79d13d20dc0b5c33aef427
 npm ci
 npm run build:compiler
 npm run build

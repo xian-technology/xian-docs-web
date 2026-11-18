@@ -107,7 +107,9 @@ Keep this split clear:
 
 ## Examples
 
-Assuming a stack-managed local node with default template ports:
+The backend defaults below use dashboard port `8080`; the `single-node-dev`
+template publishes it on `18080`. Use `xian node endpoints <name>` for the
+selected profile:
 
 ```text
 GET http://localhost:26657/status

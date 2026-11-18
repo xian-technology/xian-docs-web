@@ -34,51 +34,14 @@ imports and deployment constructors. This changes chi, fee balances and the
 point at which a small budget fails; it requires a fresh chain and matching
 native bindings. See [Module preparation](/reference/chi-costs#accounting).
 
-Revision 11 repriced the size-dependent operation families and introduced
-the VM's per-transaction ceiling; revision 12 added the dictionary index. Each
-changes chi for the same transactions, so each requires a new chain. Revision
-13 keeps the gas schedule and bounds storage keys at 511 bytes, the largest key
-LMDB stores: a write with a longer key now fails its transaction instead of
-halting the chain when the block commits. It changes which transactions
-succeed, so it also requires a new chain. Revision 14 keeps the gas schedule
-identifier `xvm-gas-6` but changes three charges: the 5-chi base now counts
-against the submitted chi limit (a transaction must supply its full cost, see
-[Chi accounting](/concepts/chi#accounting)), a builtin set method on a
-referenced set charges one copy of its members instead of two, and formatting a
-referenced value no longer charges a copy that is not made. It reads a
-`{"__delta__": ...}` transaction argument only as `[days, seconds]`,
-two integers, the form the encoder writes: the earlier decoder also accepted a
-two-character string or the two keys of an object. A transaction with an
-argument spelled that way is now rejected as not canonical. Revision 14 also
-lets a contract store, return and emit a `datetime.timedelta` or a `bytearray`:
-before it, such a write or event failed the transaction because receipts and
-the state root had no JSON form for these types; they now use
-`{"__delta__":[days,seconds]}` and `{"__bytearray__":"hex"}`. Revision 14 also
-changes the state root (`xian-state-root-v3`): a leaf now hashes a value's
-stored bytes instead of its receipt JSON, in which a datetime looked like its
-text and bytes like equal text, so different states could share an app hash.
-Revision 14 also pays out the fee of a failed paid transaction through the
-[governed reward split](/node/staking#rewards-and-commission) instead of
-debiting it without a recipient (see [Chi accounting](/concepts/chi#accounting)),
-returns [`random.random()`](/smart-contracts/stdlib/random) as an exact decimal
-with 30 fractional digits instead of failing on a binary float, and admits
-[`round()`](/smart-contracts/numbers#operators-and-helpers) on integers and
-decimals.
-These changes alter transaction outcomes and app hashes, so revision 14
-requires a new chain as well.
+The current runtime uses structured VM exception types and arguments for failure
+categories, never parsed message text. Only exported functions are external
+entrypoints; constructors run through deployment. State roots commit exact
+stored value bytes (`xian-state-root-v3`). These rules, numeric semantics and
+metering all affect replay compatibility.
 
-Since execution revision 10 a failed call's error category comes from structured
-exception data produced by the VM (type and arguments), including exceptions
-raised by a constructor during deployment and builtin exceptions raised by host
-calls. Failure text is never parsed, so contract data inside a message cannot
-select an exception type; a failure without structured data stays an opaque
-message.
-Only exported functions are allowed as external V2 entrypoints.
-Constructors run through the trusted deployment path. Code-hash requests reject
-unsupported `kind` selectors instead of treating them as source-hash requests.
-These execution checks do not change the gas, bytecode or set-codec identifiers. Current code
-does not execute V1; historical V1 execution (revision 7) uses the pinned older
-release.
+Current code does not execute V1. Preserve historical state and its matching
+immutable runtime rather than replaying it with current semantics.
 
 This revision starts a fresh local chain; it does not migrate an earlier
 database or activate a second VM at a block height. Preserve earlier state and
@@ -216,8 +179,10 @@ compile an earlier network's source-only contracts automatically.
 
 Offline migration analysis and rehearsal tooling lives in the optional
 [xian-migration repository](https://github.com/xian-technology/xian-migration).
-It consumes node/runtime tooling; migration implementation is not part of the
-`xian-abci` node package or normal node startup. Follow that repo's instructions
+Its checked-in dependencies target an archived V1 runtime for offline
+rehearsal; it does not convert legacy state directly to the current V2 policy.
+Migration implementation is not part of the `xian-abci` node package or normal
+node startup. Follow that repo's instructions
 for pinned dependencies and explicit network and contract-source inputs.
 Its historical execution corpus checks recovered source through migrated native
 artifacts, including state preservation without rerunning constructors, returns,
