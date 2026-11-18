@@ -121,3 +121,20 @@ The SDK estimates the deployment's chi through simulation and supplies that
 estimate plus a fixed 2-chi margin; an explicit `chi` must stay within the chain's per-transaction cap. Validators
 compile the submitted source. See
 [XSC-0001](/smart-contracts/standards/xsc-0001) before adding extensions.
+
+## Reflection Tokens
+
+The [reflection-token package](https://github.com/xian-technology/xian-contracts/tree/main/contracts/reflection-token)
+provides a candidate fee-on-transfer implementation. Transfers involving a
+configured fee target burn 2% and distribute 3% to reward-eligible holders.
+Exclude DEX pool addresses from rewards and use the DEX supporting-fee swap path.
+
+Keep a reward-eligible balance when depositing initial liquidity. A transfer
+with a nonzero reflection fee fails if it would leave no eligible balance or
+make the reflection rate unrepresentable. The failed call preserves balances,
+supply, and allowances. Including an excluded holder preserves holder balances
+subject to decimal rounding.
+
+The minimum transferable amount depends on the reflection rate: transfers whose
+reflected debit truncates to zero are rejected. Check the package README and
+tests before integrating this extension.
