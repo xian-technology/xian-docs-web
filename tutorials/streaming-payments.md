@@ -32,9 +32,14 @@ The streamed token contract must expose:
 Escrow funding must increase custody by the exact required amount before a
 deposit is credited. Fee-on-transfer and no-op funding revert, including when
 other streams already have escrow in the contract.
+Claims and refunds also require exact transfers. The escrow must lose the
+settlement amount and the recipient must receive the same amount. If either
+balance does not match, the call rolls back and the amount remains unsettled.
+Choose a token that makes exact transfers on both legs.
 
 Receivers that are public keys use 64 lowercase hexadecimal characters.
 Mixed- or uppercase keys are rejected; named contract receivers remain valid.
+The stream escrow contract cannot be its own receiver.
 Permit signatures are checked against the exact supplied receiver value.
 
 ## Core Flow
