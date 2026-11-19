@@ -73,20 +73,25 @@ Behavior worth knowing before integrating:
   `set_fee_on_transfer_token(...)`; plain swap routes reject flagged tokens
   and require the supporting-fee router path instead.
 - Tokens exposing `get_metadata().precision` route with precision-aware
-  amount normalization.
+  settlement. The router compares actual swap and liquidity receipts against
+  signed minimums without rounding the minimums down. Swaps return the amount
+  credited to the recipient.
 - `con_dex_helper` requires an explicit absolute `deadline` value and a price
   bound signed by the caller, derived off-chain from a fresh quote plus the
   caller's slippage tolerance (a bound computed inside the transaction would
   follow a manipulated price):
-  - `buy(buy_token, sell_token, amount, max_input, deadline)` receives exactly
-    `amount`, reverts with `Required input … exceeds max_input …` when the
-    needed input is larger, and pulls only that input. Approve `max_input` of
-    `sell_token` to `con_dex_helper`.
+  - `buy(buy_token, sell_token, amount, max_input, deadline)` quotes and pulls
+    the minimum input for at least `amount` of pool output. It reverts if the
+    input exceeds `max_input` or the pool output falls short. A transfer fee on
+    the output token can reduce the recipient's receipt. Approve `max_input`
+    of `sell_token` to `con_dex_helper`.
   - `sell(sell_token, buy_token, amount, min_out, deadline)` reverts with
     `SNAKX: INSUFFICIENT_OUTPUT_AMOUNT` when the recipient would receive less
     than `min_out`. Approve `amount` of `sell_token` to `con_dex_helper`.
   - Both bounds must be positive; both functions return
-    `(input_spent, output_received)`.
+    `(input_spent, output_received)`. The helper forwards only the input it
+    received for the current call. Use a supporting-fee router swap directly
+    to avoid the extra helper transfer when the input token charges a fee.
 
 ## SnakX Web Frontend
 
