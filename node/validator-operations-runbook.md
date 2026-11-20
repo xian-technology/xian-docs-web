@@ -127,6 +127,9 @@ candidate and checking active-set behavior.
 For a reward-split change, verify `[validators, burn, foundation, developers]`
 on multiple nodes, then inspect a fee-paying transaction and reconcile all four
 buckets against its charged fee.
+For a foundation owner rotation, verify that the destination is nonempty,
+fits the currency account key limit, and uses lowercase for a 64-hex public
+key. Confirm that the receiving account is under the intended custody.
 
 ## Incident Boundary
 

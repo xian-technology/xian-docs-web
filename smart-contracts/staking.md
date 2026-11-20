@@ -99,8 +99,9 @@ or accrued creator funds. Emergency withdrawal is restricted to recoverable
 excess, such as unsolicited token transfers.
 
 Unstaking and creator-fee withdrawals settle their position, reservation,
-statistics, and liabilities before token payouts. A token callback cannot settle
-the same claim twice; a failed payout reverts the complete settlement.
+statistics, and liabilities before token payouts. Each outgoing payment,
+including excess recovery, must debit escrow and credit the recipient by the
+exact amount. A short or excess transfer reverts the complete settlement.
 
 ## Integration Checks
 
