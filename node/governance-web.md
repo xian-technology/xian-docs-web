@@ -47,6 +47,8 @@ RPC endpoint does not create voting authority.
 - Eligible voters, voting weights, and the threshold are snapshotted when a
   proposal opens.
 - A validator added later cannot vote on that proposal.
+- The console compares proposal creation and expiry times with microsecond
+  precision. Contract timestamps without an explicit offset represent UTC.
 - Delegators do not vote directly. Delegation affects later validator power
   only on networks whose policy uses stake-weighted power or stake-ranked
   membership.

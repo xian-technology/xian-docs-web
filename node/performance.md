@@ -118,11 +118,14 @@ application hashes. A failed transaction or lost submission fails the run.
 The primary regression measurement is successful workload transactions divided
 by client wall time from first submission through receipt resolution. Setup is
 excluded. One warm-up per workload/mode/size is discarded; three measured
-repeats produce median, minimum and maximum TPS. Chain-time TPS, submission
-elapsed time and application-stage timings provide additional diagnostics.
-Small block windows and receipt polling can distort these values; use larger
-operation counts for capacity investigations. Five validators on one host
-measure that host and configuration, not a geographically distributed network.
+repeats produce median, minimum and maximum TPS. The committed-window diagnostic
+counts transactions in blocks after the starting height through the ending height.
+Its duration runs from the starting block's timestamp through the ending block's
+timestamp, including the interval for the first counted block. The report labels
+that basis `chain_time`. It uses `elapsed_time` when there is no preceding block
+or the chain timestamps do not advance. Use larger operation counts for capacity
+investigations and compare runs from the same runner class and topology.
+Five validators on one host measure that host and configuration.
 
 Compare against an accepted report from the same configuration and runner class:
 

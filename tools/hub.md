@@ -21,6 +21,9 @@ Maintained features include:
 - opening a catalog version in the browser Playground through a workspace share link
 - admin workflows for creating, editing, publishing, and curating catalog items
 
+Apply your catalog or developer leaderboard filters to save the selection in
+the page URL. Share that URL to open the same filtered view.
+
 ## Open in Playground
 
 Choose **Open in Playground** on a contract version to open its source in the

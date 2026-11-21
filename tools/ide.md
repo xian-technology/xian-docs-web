@@ -26,8 +26,8 @@ are public and must never contain credentials. Users must select the same
 network in their wallet before signing transactions.
 
 Build from the `xian-ide-web` checkout with compatible sibling `xian-js` and
-`xian-contracting` checkouts installed. The build needs Rust 1.98 or newer,
-`wasm-pack`, and the `wasm32-unknown-unknown` target:
+`xian-contracting` checkouts installed. Put Rust 1.98 or newer and `wasm-pack`
+on `PATH` and install the `wasm32-unknown-unknown` target for that toolchain.
 
 ```bash
 npm ci
