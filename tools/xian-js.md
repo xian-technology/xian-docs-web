@@ -109,7 +109,14 @@ Key and signature length checks alone do not establish a valid signature.
 
 ## Exact numeric arguments
 
-The default client uses `xian_vm_v2`. Pass a safe integer or `bigint` for an integer, and `fixed("1.000000000000000000000000000001")` from `@xian-tech/client` for a decimal. Token helpers also accept decimal strings. For a generic contract call a plain string stays a string. The client decodes decimal results to canonical strings and wide integers to `bigint`.
+The default client uses `xian_vm_v2`. Pass a safe integer or `bigint` for an
+integer, and `fixed("1.000000000000000000000000000001")` from
+`@xian-tech/client` for a decimal. Token helpers also accept decimal strings.
+Contract calls, state reads, and receipt execution results expose decimals as
+`{ __fixed__: "1.25" }`, wide integers as `bigint`, and plain strings as strings.
+Pass a returned decimal directly into another contract call or use
+`fixedValueText(value)` to display its exact text. The signed transaction
+attached to a receipt retains its original wire tags.
 
 ```ts
 import { fixed, parseContractJson } from "@xian-tech/client";
