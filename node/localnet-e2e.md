@@ -304,19 +304,6 @@ validation, the full E2E, a node capability report, and protocol-safety
 coverage. Use it before tagging changes to execution, genesis, networking,
 governance, validator behavior, or localnet plumbing.
 
-## Topology Matrix
-
-Exercise both integrated and fidelity topology when the change can affect
-process boundaries:
-
-```bash
-XIAN_LOCALNET_TOPOLOGY=fidelity \
-make localnet-e2e
-```
-
-The default harness remains the baseline. Overrides should answer a specific
-validation question and be recorded with the run artifacts.
-
 ## Operational Notes
 
 - Generated validator keys and proving material are disposable local test

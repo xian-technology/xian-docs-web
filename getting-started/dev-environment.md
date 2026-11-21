@@ -84,7 +84,7 @@ Use `xian-stack` when you need a realistic local validator environment:
 
 ```bash
 cd ~/xian/xian-stack
-python3 ./scripts/backend.py localnet-init --nodes 4 --topology integrated --clean
+python3 ./scripts/backend.py localnet-init --nodes 4 --clean
 python3 ./scripts/backend.py localnet-up --wait-for-health
 python3 ./scripts/backend.py localnet-status
 ```

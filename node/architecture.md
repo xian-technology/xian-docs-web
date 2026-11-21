@@ -15,11 +15,9 @@ deterministic core, operator UX, and runtime backend stay cleanly separated.
 | `xian-deploy` | remote Linux deployment of prepared homes and released images |
 | `xian-py` | external SDK for apps, wallets, and transaction helpers |
 
-## Runtime Shapes
+## Runtime Shape
 
-### Integrated
-
-The default runtime is a single node container:
+The node runs as a single container:
 
 ```mermaid
 flowchart TD
@@ -38,32 +36,9 @@ flowchart TD
   Comet <--> ABCI
 ```
 
-This is the preferred operational default because it is simpler to run and
-upgrade, while using immutable images and proper container-native
-supervision.
-
-### Fidelity
-
-The optional fidelity profile splits the node:
-
-```mermaid
-flowchart TD
-  Operator["Operator"]
-  CLI["xian-cli"]
-  Stack["xian-stack backend"]
-  ABCIContainer["abci-app container"]
-  CometContainer["cometbft container"]
-  Dashboard["Optional dashboard container"]
-
-  Operator --> CLI --> Stack
-  Stack --> ABCIContainer
-  Stack --> CometContainer
-  Stack --> Dashboard
-  CometContainer <--> ABCIContainer
-```
-
-Use this when you want process isolation that more closely resembles an
-orchestrated deployment.
+One container is simple to run and upgrade, uses an immutable image, and
+supervises both processes natively. The dashboard runs from the same image as
+a separate container.
 
 ## Optional Services
 

@@ -41,8 +41,7 @@ language, compiler, storage model, metering, and standard-library bridges.
 | `xian-stack` | Docker images, Compose topology, localnet, monitoring, optional services |
 | `xian-deploy` | remote Linux deployment playbooks |
 
-`xian-configs` contains checked-in `local`, `devnet`, `testnet`, and draft
-`mainnet` manifests. These are configuration assets, not evidence that a public
+`xian-configs` contains checked-in `local` and draft `mainnet` manifests. These are configuration assets, not evidence that a public
 network is running. The current codebase has no active public testnet or
 mainnet.
 

@@ -42,7 +42,7 @@ do not copy this abbreviated example over an existing profile.
 | `validator_key_ref` | validator key-info or private-validator key reference |
 | `stack_dir` | `xian-stack` checkout used by the backend |
 | `node_image_mode` | `registry` for pinned images or `local_build` for workspace builds |
-| `node_integrated_image`, `node_split_image` | immutable image references in registry mode |
+| `node_integrated_image` | immutable node image reference in registry mode |
 | `node_release_manifest` | build provenance copied from a network/release manifest |
 | `p2p` | seeds and persistent peers |
 | `genesis` | optional local genesis override |

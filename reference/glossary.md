@@ -49,7 +49,7 @@ them before deployment. See [Config Taxonomy](/node/config-taxonomy).
 
 ### Deploy Binding
 A host-specific deployment value used by `xian-deploy`, such as a remote path,
-published port, database credential, memory limit, or `xian_deploy_topology`.
+published port, database credential, or memory limit.
 Deploy bindings do not define node runtime posture; the node profile does.
 See [Config Taxonomy](/node/config-taxonomy).
 

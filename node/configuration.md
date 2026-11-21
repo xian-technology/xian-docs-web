@@ -38,12 +38,14 @@ Manifests may define:
 - pinned node images and release provenance
 - runtime features and privacy artifact policy
 
-The checked-in `local`, `devnet`, and `testnet` manifests are development or
-rehearsal assets. The `xian-mainnet-1` manifest is a draft launch asset. None
-of them implies that a public endpoint is live.
+The checked-in `local` manifest is a development asset. The `xian-mainnet-1`
+manifest is a draft launch asset. Neither implies that a public endpoint is
+live.
 
 Templates under `xian-configs/templates/` are reusable starting points, not
-networks.
+networks: `single-node-dev` for a full local development node and `validator`
+for a lean shared-network node (the node plus monitoring, every port on
+loopback).
 
 Node initialization combines manifest seeds and persistent peers with the
 profile's peer lists, in that order. A profile can add local peers without

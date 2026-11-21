@@ -88,7 +88,7 @@ xian keys validator generate --out-dir ./keys/validator-1
 xian network join validator-1 \
   --network private-net \
   --network-manifest /path/to/network/manifest.json \
-  --template single-node-indexed \
+  --template validator \
   --validator-key-ref ./keys/validator-1/validator_key_info.json \
   --stack-dir ../xian-stack
 

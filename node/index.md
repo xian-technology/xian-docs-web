@@ -44,10 +44,9 @@ xian setup node --mode join --name validator-1 \
 Verify genesis, chain ID, peers, snapshot trust, image digests, and release
 provenance before starting.
 
-## Runtime Topologies
+## Runtime Shape
 
-- `integrated`: CometBFT and `xian-abci` supervised in one node container
-- `fidelity`: separate CometBFT and application containers
+CometBFT and `xian-abci` run supervised in one node container.
 
 Dashboard, BDS, GraphQL, monitoring, and other sidecars do not participate in
 consensus. The local development template enables the self-contained core set;
