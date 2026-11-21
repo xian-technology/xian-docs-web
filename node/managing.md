@@ -147,11 +147,12 @@ Dashboard, GraphQL, and BDS are outside consensus. BDS can lag the finalized
 head while it catches up.
 
 The shipped Prometheus rules cover stalled blocks, peers, the local validator's
-signing/missed blocks, disk pressure and BDS health. The default integrated
-Prometheus configuration loads no alert rules. Select the shared-network rules
-explicitly and configure Alertmanager receivers to deliver notifications;
-starting Grafana alone does neither. See the
-[monitoring setup](https://github.com/xian-technology/xian-stack/blob/main/monitoring/README.md#alerts).
+signing and missed blocks, disk pressure, and BDS health. Ansible deployments
+with monitoring enabled use a SHA-256-pinned Stack monitoring bundle. They
+load shared-network rules for `shared_network` profiles and add the CometBFT
+committed-height stall alert for `idle_interval` and `periodic`. Configure
+Alertmanager receivers to deliver notifications. See the
+[Stack monitoring guide](https://github.com/xian-technology/xian-stack/blob/main/monitoring/README.md#alerts).
 
 ## Local Backend Debugging
 

@@ -180,9 +180,9 @@ peer-to-peer block sync remains supported: nodes receive historical blocks
 and replay them through the application. Peer-to-peer **application state
 sync** is disabled: a recent application snapshot alone does not supply the
 historical CometBFT data required to verify evidence from before
-its checkpoint. Xian refuses a CometBFT configuration with `[statesync]`
-`enable = true`, advertises no peer snapshots and aborts snapshot offers and
-chunk application. Set this option to `false` before starting the node.
+its checkpoint. Managed configs set `[statesync].enable = false`. If you edit
+`config.toml` by hand, leave `enable` set to `false`. Xian rejects `true` and
+malformed values when validating the configuration.
 
 Supported node bootstrap uses one of these paths:
 
@@ -221,9 +221,9 @@ snapshot_min_free_disk_bytes = 16777216
 ```
 
 State and archive limits default to 256 MiB each, metadata to 64 KiB, and the
-free-disk reserve to 16 MiB. Transfers, decompression and JSON input obey these
-limits before replacing application state, and staging checks available disk
-space. They are operator resource settings, not chain consensus size limits.
+free-disk reserve to 16 MiB. Import checks archive, decompression, JSON and
+available disk space limits before replacing application state. These settings
+control local resource use.
 Import parses the state into memory, so RAM use can exceed the JSON file size.
 Managed profile reconfiguration regenerates `xian.toml`; reapply custom limits
 after that operation. The state-snapshot CLI uses the same settings;

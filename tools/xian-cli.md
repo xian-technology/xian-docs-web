@@ -93,6 +93,9 @@ keys, which can leak through shell history and process listings.
   a node.
 - Use `xian node status`, `health`, and `endpoints` instead of scraping Docker
   output.
+- `xian node health` and `xian doctor <name>` report validation of the node
+  profile under `profile_config` and the installed CometBFT configuration
+  under `cometbft_config`.
 - Product repositories own product bootstrap scripts. The CLI validates their
   contract bundles but does not install every product automatically.
 - Automation should consume JSON output rather than human status text.

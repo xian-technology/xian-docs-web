@@ -132,6 +132,20 @@ ansible-playbook playbooks/deploy.yml
 ansible-playbook playbooks/health.yml
 ```
 
+If the node profile enables monitoring, pin `xian-monitoring.tar` from a
+versioned `xian-stack` release in `xian_monitoring_bundle_source` and put
+its verified SHA-256 in `xian_monitoring_bundle_sha256`. The source can be an
+HTTPS asset URL or an absolute path on the Ansible controller. The monitoring
+bundle and the node image have independent pins. See the
+[monitoring setup](https://github.com/xian-technology/xian-deploy/blob/main/docs/OPERATIONS.md#monitoring-and-alerts).
+
+Run `xian node init` on the control machine and set `xian_node_home_archive`
+to an archive of the resulting home contents. The archive must contain
+`config/genesis.json`. Set `xian_network_manifest` to the manifest used for
+initialization to check the chain ID and any `genesis_sha256` pin against the
+genesis file bytes. The upload playbook checks the staged archive before changing
+the current home. Deploy checks the installed file before configuration.
+
 Remote configuration runs with a Python entrypoint override so the integrated
 image's supervisor and validator services start only with the Compose runtime.
 
@@ -146,12 +160,6 @@ requires `xian_public_rpc_enabled: true`. Docker inserts its own iptables rules
 ahead of UFW, so a port published on `0.0.0.0` is reachable even when UFW does
 not allow it: the bind address, not the firewall, controls exposure. Verify
 exposure from outside the host.
-
-When deploy builds a bundle genesis, set `xian_network_manifest` to the network
-manifest used by `xian node init`. Deploy takes `chain_id`, `genesis_time` and
-`runtime_features` from it with the same profile-over-manifest precedence, so
-deploy-built and CLI-built genesis are byte-identical. A bundle genesis without
-a fixed `genesis_time` is rejected.
 
 Store inventory secrets in Ansible Vault, SOPS, CI secrets, or another secret
 manager. Do not commit validator keys, database passwords, or rendered secret
