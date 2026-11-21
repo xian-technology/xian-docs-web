@@ -98,11 +98,11 @@ Use the CometBFT transaction hash returned by broadcast for RPC receipt lookup
 and BDS queries. The embedded execution-result hash uses a separate Xian hash
 calculation and is not interchangeable with that lookup identifier.
 
-When the transaction index is unavailable, the Python SDK can recover a receipt
-from recent blocks. A visible block alone does not establish execution success:
-the SDK waits for that block's execution results and reports their actual status.
-If those results lag behind the block, receipt polling retries the same block
-until the results arrive or the configured timeout expires.
+When the transaction index is unavailable, the Python and JavaScript SDKs
+can recover a receipt from recent blocks. Both wait for the matching block's
+execution results and report their actual status. If those results lag behind
+the block, receipt polling retries the same block until the results arrive or
+the configured timeout expires.
 
 ## Failure Boundaries
 
