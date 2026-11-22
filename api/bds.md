@@ -100,10 +100,12 @@ The SDKs preserve fractional seconds in Python `datetime` and JavaScript
 
 Use the response's `next_before` as the next request's `end` to walk back
 through the market's history. Keep the same pair, interval and optional
-`start`, and use offset zero. A null cursor ends the scan. The response
-also includes `indexed_height`. The Python SDK exposes the page through
+`start`. Omit `offset` or pass `offset=0`. A nonzero offset returns an
+error. Continue until the cursor is null, including after a short page.
+The response also includes `indexed_height`. The Python SDK exposes the page through
 `get_dex_candle_page` and JavaScript through `getDexCandlePage`. Existing
 `list_dex_candles` and `listDexCandles` return the items for one page.
+Both SDKs expose prices and volumes as exact decimal strings.
 
 Transaction hashes are named `tx_hash` in raw/Python rows, `txHash` in
 `xian-js`, and `hash` in the generated GraphQL transaction type.
