@@ -49,6 +49,9 @@ compiler returns structured diagnostics with:
 - `severity`
 - an optional `range` containing start/end line and column values
 
+Line numbers start at 1. Columns count Unicode code points from 0 in both
+compiler diagnostics and PyFlakes warnings.
+
 ## Using The Standalone HTTP Service
 
 Install the base package for inline use, or the server extra for the HTTP
@@ -103,13 +106,17 @@ and base64 endpoints stop reading once the cap is exceeded, regardless of
 Content-Length. `/lint_gzip`
 also enforces the same cap after decompression and rejects extreme gzip
 compression ratios. Compiler admission is stricter: contract source may not
-exceed `131,072` UTF-8 bytes. All endpoints also accept an optional comma-separated
-`whitelist_patterns` query parameter when a controlled integration needs to
-allow additional PyFlakes names:
+exceed `131,072` UTF-8 bytes. All endpoints accept an optional
+`whitelist_patterns` query parameter. A non-empty comma-separated list of
+exact names replaces the default list of names suppressed by PyFlakes:
 
 ```text
-POST /lint?whitelist_patterns=my_helper,con_*
+POST /lint?whitelist_patterns=my_helper,con_example
 ```
+
+Omitting the parameter or supplying an empty HTTP value uses the defaults.
+In Python, pass `whitelist_patterns=[]` to `lint_code_inline` to disable
+name suppression.
 
 All endpoints default to `xian_vm_v2`. A request can also name the profile explicitly.
 

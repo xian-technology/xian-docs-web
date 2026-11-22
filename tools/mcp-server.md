@@ -219,9 +219,15 @@ submission is not an execution result; confirm execution with
 result with an error field.
 
 Results are encoded explicitly: JSON scalars, exact decimals as plain text,
-integers beyond JavaScript's safe range as `{"__big_int__": ...}`, contract
-times, dataclasses, mappings and sequences. A result of any other type is
-reported as a tool error instead of being converted with `str()`.
+integers beyond JavaScript's safe range as `{"__big_int__": ...}`, and binary
+values as hex in `{"__bytes__":"00ff"}` or `{"__bytearray__":"00ff"}`. The same
+binary tags apply to nested values and can be passed in generic contract
+arguments. Contract sets use the `xian-set-1` envelope under `__set__` or
+`__frozenset__`. Results can also contain contract times, dataclasses,
+mappings and sequences. Unsupported result types produce a tool error.
+Contract-return, state, and event data preserve fields named `raw`, including
+nested fields. Raw SDK metadata is hidden by default. Set `XIAN_INCLUDE_RAW=1`
+to include that metadata.
 
 ## Exact numeric arguments
 

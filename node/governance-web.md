@@ -87,6 +87,13 @@ Zero-valued buckets are valid. The checked-in genesis default is
 After approval, verify the `rewards` value on multiple nodes and inspect a
 fee-paying transaction's actual reward recipients and amounts.
 
+### Validator Policy Proposals
+
+In **Create → Validator Governance → Update policy**, you can set the maximum
+new voting power, the consecutive missed-block threshold for jailing a validator,
+the downtime slash, and the downtime unjail cooldown. If preflight simulation
+rejects a proposal or vote, the console displays the contract error.
+
 ## Validator Registry
 
 The console reads the registry count, then fetches validator records in bounded

@@ -41,8 +41,10 @@ GET /api/abci_query/perf_status
 
 For a scalar `/get/<key>` query, inspect `response.info`. A decimal uses `"decimal"` and an integer uses `"int"`. The base64-decoded ABCI `response.value` is canonical numeric text, including for a wide integer. Nested numbers inside a structured value use the V2 wire tags. This scalar query format is separate from the JSON simulation envelope.
 
-For key scans, follow the returned `next_after` cursor instead of loading an
-unbounded prefix.
+For key scans, send the returned `next_after_hex` as `after_hex` on the next
+request, with the same prefix. It encodes the full UTF-8 storage key and works
+for keys containing `/` or `%`. Stop when `next_after_hex` is `null`. Existing
+clients can still send literal, path-safe `next_after` values as `after`.
 
 Persisted `set()` and `frozenset()` wrappers use tagged JSON for both top-level
 and nested query values. A top-level wrapper has ABCI `info="dict"`; for example,

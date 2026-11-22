@@ -52,6 +52,10 @@ Named profiles accept loopback RPCs and HTTPS RPCs. The node must be synced and
 serve block 1. Use the global `--network NAME` option to select a profile for a
 single command.
 
+Once you add a profile, the wallet requires at least one saved profile. To
+replace the active profile, use `network use NAME` to select another, then
+remove the old profile with `network remove NAME`.
+
 ## Send and track a transfer
 
 Fund the account on the selected network. Set `RECIPIENT` to the recipient's

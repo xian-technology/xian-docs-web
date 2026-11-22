@@ -8,11 +8,13 @@ coordination.
 
 Genesis commits `__execution_policy` with execution revision
 `xvm-execution-15`, gas schedule `xvm-gas-7`, bytecode `xvm-2` and set codec
-`xian-set-1`, plus compiler admission revision `xian-admission-3` and transaction
+`xian-set-1`, plus compiler admission revision `xian-admission-4` and transaction
 admission revision `xian-fastpath-admission-3`. The node requires this exact
 policy in genesis, persisted state and its native runtime. Missing or mismatched policy fails before contract
 bootstrap or state replacement. Contracts and governed state patches cannot
 change this protected record. Every field must match the selected runtime.
+Startup checks the compiler revision in both the standalone compiler and the
+compiler linked into the VM.
 
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
 literal handling and checked numeric ABI boundaries. Gas schedule 7 charges for

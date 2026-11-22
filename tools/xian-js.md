@@ -185,6 +185,10 @@ The client provides:
 - CometBFT and dashboard WebSocket subscriptions
 - shielded relayer clients
 
+RPC calls work without a WebSocket. Dashboard watchers use the global
+`WebSocket` or the client's `webSocketFactory` option. Unsubscribing also
+stops callbacks queued for that subscription.
+
 Indexed event `dataIndexed` and `data` are separate records: identifiers such as
 NFT token IDs can be in `dataIndexed`, while values such as prices can be in
 `data`. Both fields, and indexed transaction `payload`, accept the node's JSON

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   code: string
@@ -10,6 +10,7 @@ const svg = ref('')
 const error = ref('')
 const scale = ref(1)
 const expanded = ref(false)
+const dialog = ref<HTMLDialogElement | null>(null)
 const viewport = ref<HTMLElement | null>(null)
 const intrinsicWidth = ref(0)
 let renderGeneration = 0
@@ -77,13 +78,31 @@ function resetZoom() {
   setScale(1)
 }
 
-function closeExpanded() {
-  expanded.value = false
+async function openExpanded() {
+  expanded.value = true
+  await nextTick()
+  dialog.value?.showModal()
+  await restoreViewportCenter()
 }
 
-function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    closeExpanded()
+function closeExpanded() {
+  dialog.value?.close()
+  expanded.value = false
+  void restoreViewportCenter()
+}
+
+function wrapDialogFocus(event: KeyboardEvent) {
+  if (event.key !== 'Tab') return
+  const buttons = dialog.value?.querySelectorAll('button:not(:disabled)')
+  if (!buttons?.length) return
+
+  const first = buttons[0]
+  const last = buttons[buttons.length - 1]
+  const boundary = event.shiftKey ? first : last
+  if (document.activeElement === boundary) {
+    event.preventDefault()
+    const next = event.shiftKey ? last : first
+    next.focus()
   }
 }
 
@@ -135,17 +154,8 @@ async function renderDiagram() {
   }
 }
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
-  renderDiagram()
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleKeydown)
-})
+onMounted(renderDiagram)
 watch(source, renderDiagram)
-watch(expanded, () => {
-  void restoreViewportCenter()
-})
 </script>
 
 <template>
@@ -164,7 +174,7 @@ watch(expanded, () => {
         type="button"
         class="mermaid-diagram__button"
         aria-label="Open fullscreen diagram"
-        @click="expanded = true"
+        @click="openExpanded"
       >
         Fullscreen
       </button>
@@ -174,8 +184,16 @@ watch(expanded, () => {
     </div>
     <pre v-else-if="error" class="mermaid-diagram__error">{{ error }}</pre>
     <Teleport to="body">
-      <div v-if="expanded" class="mermaid-diagram__overlay" @click.self="closeExpanded">
-        <div class="mermaid-diagram__panel" role="dialog" aria-modal="true" aria-label="Fullscreen diagram">
+      <dialog
+        v-if="expanded"
+        ref="dialog"
+        class="mermaid-diagram__overlay"
+        aria-label="Fullscreen diagram"
+        @cancel.prevent="closeExpanded"
+        @click.self="closeExpanded"
+        @keydown="wrapDialogFocus"
+      >
+        <div class="mermaid-diagram__panel">
           <div class="mermaid-diagram__toolbar mermaid-diagram__toolbar--overlay">
             <button type="button" class="mermaid-diagram__button" aria-label="Zoom out" @click="zoomOut">
               -
@@ -194,7 +212,7 @@ watch(expanded, () => {
             <div class="mermaid-diagram__svg" :style="diagramStyle" v-html="svg"></div>
           </div>
         </div>
-      </div>
+      </dialog>
     </Teleport>
   </figure>
 </template>

@@ -13,7 +13,7 @@ The hub supports contract discovery, inspection, and local experimentation.
 
 Maintained features include:
 
-- browsing and full-text searching curated Xian contracts
+- browsing and full-text searching curated Xian contracts, including by current author name
 - filtering by category, tag, and sort order
 - viewing syntax-highlighted source and version diffs
 - showing lint reports and related-contract navigation

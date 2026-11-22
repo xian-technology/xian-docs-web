@@ -29,9 +29,10 @@ locks in a fee and exchange ratio. The service calculates
 token’s smallest unit. A request must pay out at least one unit. Send the
 amount as a plain decimal string when constructing JSON with JavaScript.
 Every transfer request needs an `Idempotency-Key` header of at most 128
-characters that does not contain `|`. Replaying a key with the same body
-returns the same transfer while it is open; once it has finished the bridge
-answers `409`.
+characters that does not contain `|`. A retry with the same token, exact amount,
+recipient, and original refund address returns the same transfer while it is
+open. A changed request or a finished transfer returns `409`. An omitted or
+`null` refund address means no address was supplied.
 
 Set `XIAN_CHAIN_ID` explicitly for the bridge's signing context, or let the
 service discover it from `/status` at the configured Xian RPC. Discovery uses

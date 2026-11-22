@@ -71,6 +71,8 @@ Encode `begins`, `closes`, permit deadlines, and close-time updates as
 
 - `change_close_time(...)` supports shortening or immediate close, not arbitrary
   extension in place
+- `close_balance_finalize(...)` settles an already-ended stream through its
+  existing close time
 - `create_stream_from_permit(...)` authorizes the stream parameters, but the
   token-side approval needed for escrow funding has to exist
 

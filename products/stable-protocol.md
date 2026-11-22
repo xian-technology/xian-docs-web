@@ -82,7 +82,10 @@ wallet must match the configured initial governor during bootstrap.
 The bootstrap validates the complete bundle before connecting and retains the
 verified sources for deployment. `--bundle` selects its source paths and
 deployment order. Product configuration supplies constructor arguments and
-target names. Each deployment and configuration write supplies its simulated
+target names. The five protocol contracts and any sample tokens must use
+distinct names. Their names must also differ from the chain's governance and
+membership contracts and from collateral or reserve tokens supplied with
+`--skip-sample-tokens`. Each deployment and configuration write supplies its simulated
 chi plus the SDK margin; `XIAN_STABLE_DEPLOY_CHI` and `XIAN_STABLE_TX_CHI` set
 explicit budgets only for profiles without readonly simulation. Sample collateral
 and reserve tokens reuse the validated stable-token source. The deploy dependency

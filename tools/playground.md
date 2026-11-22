@@ -34,7 +34,8 @@ It lets users:
   the activity log
 - set the signer and block environment (time, height, hash, chain id, random
   seed) and switch metering on or off
-- browse and edit contract state, inspect source and VM IR
+- browse and edit contract state, inspect source and VM IR; if any state edit
+  entry fails validation, the whole edit is rejected
 - share a workspace as a link or export and import it as a JSON file
 
 Contract values stay exact end to end: decimals travel as `{"__fixed__": ...}`
@@ -49,11 +50,16 @@ blocks site storage, the workspace lasts until the tab is closed.
 
 A share link carries the workspace in the URL fragment (`#w=...`,
 deflate-compressed), so it never reaches a server. Opening one asks before it
-replaces the current workspace. Shared and imported workspaces contain contract
-**source** and public state only: the playground compiles and deploys every
-contract again and then restores its state, so a link cannot carry VM IR that
-differs from the source it shows. Workspaces too large for a link go through
-Export / Import.
+replaces the current workspace. Shared and exported workspaces carry contract
+**source**, public state, and deployment history in workspace format v2. The playground recompiles
+each contract and restores the public state that existed when its constructor
+originally ran, using the saved constructor arguments, signer, block environment,
+and metering settings. It applies the workspace's final public state after replay.
+History can include source and earlier state for contracts later removed.
+
+Version 1 files replay from the state and deployment settings they contain.
+Future deployments begin collecting history once the file opens. Use Export /
+Import when a workspace exceeds the share-link size limit.
 
 The [Contracting Hub](/tools/hub) uses this format for **Open in Playground**.
 Its link opens the selected catalog version's source in the editor. Review it

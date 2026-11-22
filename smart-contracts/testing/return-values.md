@@ -49,6 +49,11 @@ result = contract.set_value(key="name", value="test")
 assert result is None
 ```
 
+If an export declares a keyword such as `signer`, `environment`, or `metering`,
+the proxy passes that keyword to the contract. Set the transaction defaults on
+`ContractingClient` separately, or call `client.executor.execute` with the
+contract arguments in `kwargs` and the transaction sender in `sender`.
+
 ## Checking Events
 
 When a contract emits events via `LogEvent`, you can inspect them through the execution output. Pass `return_full_output=True` to get the complete result dictionary instead of just the return value:

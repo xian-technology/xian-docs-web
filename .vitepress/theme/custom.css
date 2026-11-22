@@ -181,8 +181,18 @@
 .mermaid-diagram__overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
   padding: 24px;
+  border: 0;
+  color: var(--vp-c-text-1);
+  background: transparent;
+}
+
+.mermaid-diagram__overlay::backdrop {
   background: rgba(15, 23, 42, 0.78);
 }
 

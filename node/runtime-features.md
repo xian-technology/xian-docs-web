@@ -131,6 +131,11 @@ These settings live only in the `[bds]` table of `xian.toml`; the password is
 read from the file named by `[bds] password_file`. See
 [Configuration](/node/configuration).
 
+The pending queue keeps one slot available for the next contiguous block if
+that height is missing. On shutdown, BDS waits up to one second for queued
+and in-flight writes. Blocks left in the local spool are replayed when BDS
+restarts.
+
 BDS does not change consensus. Its results can lag finalized state. Use direct
 ABCI state queries for authoritative current values and BDS for history,
 events, portfolios, candles, shielded feeds, and projections.
