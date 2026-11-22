@@ -95,6 +95,8 @@ time. Prices are token1 per token0. `start` is inclusive and `end` is
 exclusive. Each query aggregates a limited window around the latest fill
 before `end`. A page can contain fewer candles than the requested limit
 even when older history exists.
+The SDKs preserve fractional seconds in Python `datetime` and JavaScript
+`Date` bounds to their respective microsecond and millisecond precision.
 
 Use the response's `next_before` as the next request's `end` to walk back
 through the market's history. Keep the same pair, interval and optional
