@@ -24,8 +24,9 @@ npm run android   # connected device or emulator
 npm run ios       # macOS with Xcode
 ```
 
-Use Java 17 and an Android SDK for Android builds. iOS builds require macOS,
-Xcode, and an installed simulator runtime.
+Use Java 17 and an Android SDK for Android builds. The iOS app requires
+iOS 16.4 or later. To build it locally, use macOS with Xcode and an installed
+simulator runtime.
 
 For the V2 chain, build the wallet from current source with the
 [V2 JavaScript SDK](/tools/xian-js#packages). Check the SDK revision when using a release build.
