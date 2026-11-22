@@ -1,60 +1,78 @@
 # Xian Wallet CLI
 
-`xian-wallet` prepares, reviews, signs, and relays native XIAN transfers on
-a localnet. The sender's spending key stays on the wallet owner's machine or
-with their trusted signer. An agent can submit and track an approved transfer
-using the proposal and its signed approval.
+`xian-wallet` is a terminal wallet for people and agents. It supports encrypted
+accounts, native and fungible-token sends, typed contract calls, transaction
+review, and persistent receipts. The owner can approve from the terminal or
+Telegram. An agent can submit an approved transfer without the spending key.
 
 ## Install
 
-From the `xian-wallet-cli` source checkout, use Python 3.14 and uv.
+From the source checkout on macOS or Linux with Python 3.14 and uv:
 
 ```sh
 uv sync
 uv run xian-wallet --help
 ```
 
-Use `uv run xian-wallet` in the checkout, or install the checkout with
-`uv tool install .` to use `xian-wallet` directly. The CLI takes a synced,
-loopback RPC that can serve block 1. The default is
-`http://127.0.0.1:26657`. Override it with `XIAN_WALLET_RPC` or the global
-`--rpc` option.
+Use `uv run xian-wallet` in the checkout or install with `uv tool install .`.
+The default RPC is `http://127.0.0.1:26657`. Pin an explicit network with
+`network add NAME URL --chain-id ID --first-block-hash HASH` and select it with
+`--network NAME` or `network use NAME`. A pinned profile can use an HTTPS
+RPC. Use a synced node that serves block 1.
 
-## Prepare and review
-
-```sh
-xian-wallet generate --out owner.key
-xian-wallet --json prepare --from "$SENDER" --to "$RECIPIENT" \
-  --amount 1.25 --out proposal.json
-xian-wallet ui proposal.json
-```
-
-Use the public address printed by `generate` as `SENDER`. Fund it on
-localnet before preparing. Use a plain decimal amount. Preparation is
-read-only and checks the transfer through simulation. The review shows the
-network, exact amount, sender, recipient, estimated and maximum chi, expiry,
-and proposal ID.
-
-The wallet owner signs with
-`xian-wallet approve proposal.json --key-file owner.key --out approval.json --textual`.
-For remote approval, a trusted messaging integration displays those same
-fields, authenticates the user, and matches their approval to the exact
-proposal ID. It can then run `xian-wallet --json approve` with the same
-proposal, key and output options and use `--yes` in place of `--textual`.
-It returns the approval file to the agent. Transfer that file privately;
-it can relay the approved transaction. The CLI checks proposal expiry.
-On-chain replay protection uses the signed nonce and chain ID.
-
-## Submit and recover
+## Accounts and transactions
 
 ```sh
-xian-wallet --json submit proposal.json --approval approval.json
-xian-wallet --json receipt "$TX_HASH"
+xian-wallet account create primary
+xian-wallet account backup primary --out primary.backup.json
+xian-wallet receive primary --qr
+xian-wallet ui
 ```
 
-Both commands run without a prompt or key file. The result includes a
-transaction hash and a status. `completed` is a successful finalized receipt.
-`failed` reports an execution failure, `rejected` reports admission rejection,
-and `pending` means the final outcome is unknown. After a timeout or lost
-response, use the hash stored in the approval file. A retry with the same
-proposal and approval uses the same transaction bytes and nonce.
+Restore the browser or mobile wallet's indexed recovery phrase with
+`account restore NAME --mnemonic-file FILE --index INDEX`. Use `account watch`
+for a public address, `portfolio ACCOUNT` for balances, `activity --refresh`
+for local receipts, and `incoming ACCOUNT` for an indexed transfer page.
+The vault unlocks on demand for sensitive operations.
+
+```sh
+xian-wallet prepare --from primary --to "$RECIPIENT" --amount 1.25 --out proposal.json
+xian-wallet approve proposal.json --account primary --out approval.json --textual
+xian-wallet submit proposal.json --approval approval.json
+```
+
+Use `--token CONTRACT` for a fungible token. Use `prepare-call` for an exact
+typed contract call. Amounts retain their decimal precision. Include the
+sender, recipient, network, exact arguments, chi ceiling, and expiry when
+presenting a proposal for review.
+
+## Agent approval
+
+Run `agent serve` on the trusted signer's machine under a separate OS identity
+from the agent. The owner reviews requests in Textual or enables the
+Telegram bot with a dedicated user ID and owner-only credentials. The agent
+uses `agent request` and `agent fetch` on the signer socket and receives only
+the signed approval. It owns submission and receipt recovery.
+
+Use `grant create` to preauthorize recurring transfers from a specific
+account and network to a recipient, within explicit amount and chi limits.
+The vault checks those limits when issuing an approval. Agents use
+`agent authorize` with the grant credential. `grant revoke` stops future
+signing. Released approvals remain relayable for their signed transaction.
+
+Put `--json` before the command. `completed` means final success. `pending`
+means the final outcome is unknown. Recover by `receipt TX_HASH` or retry
+the same signed proposal. Use the receipt or nonce status before preparing
+a replacement.
+
+## Advanced workflows
+
+- `dex quote`, `dex allowance`, and `dex prepare` cover direct swaps with
+  a minimum output and an explicit spend allowance.
+- `nft inspect` and `nft transfer` cover XSC-0005 ownership and transfers.
+- `message sign` and `message verify` use the chain-bound Xian envelope.
+- `x402 quote`, `x402 approve`, and `x402 submit` cover exact GET payments.
+- `walletconnect setup` and `walletconnect pair` run the optional dapp
+  transport with the owner's Reown project configuration.
+- `shielded create`, `shielded sync`, and `shielded prepare` use the
+  optional shielded SDK, BDS note history and a matching proving bundle.
