@@ -86,6 +86,9 @@ In the maintained `xian-stack` runtime:
   has a statement timeout
 - startup waits for the core BDS read-model tables before GraphQL begins
   serving the generated schema
+- public query mode requires `first` or `last` on connections and bounds page
+  sizes, offsets, depth and operation cost. Grouped aggregates are available
+  on private endpoints.
 
 ## What It Is Good For
 
@@ -129,6 +132,52 @@ block during catch-up or recovery.
   endpoints
 
 ## Common Queries
+
+### Find a DEX market and read its history
+
+Pass the two token contracts in either order. Use `allDexMarkets(first: 20)`
+to discover markets, or `dexMarketByPairId` if you know the pair ID.
+
+```graphql
+query MarketHistory($a: String!, $b: String!, $after: Cursor, $before: Datetime) {
+  dexMarket(tokenA: $a, tokenB: $b) {
+    pairId
+    token0
+    token1
+    indexedHeight
+    latestReserves { reserve0 reserve1 blockHeight blockTime }
+    stats24H { asOf tradeCount volumeToken0 volumeToken1 }
+    trades(first: 25, after: $after) {
+      nodes {
+        eventId txHash eventIndex blockHeight blockTime
+        amount0In amount1In amount0Out amount1Out
+      }
+      pageInfo { hasNextPage endCursor }
+    }
+    candles(intervalSeconds: 300, pageSize: 100, before: $before) {
+      indexedHeight
+      nextBefore
+      items { bucketStart bucketEnd open high low close volumeToken0 volumeToken1 tradeCount }
+    }
+  }
+}
+```
+
+Set `a` and `b` to token contract names on the queried chain. Omit `after` and
+`before` on the first request. Each fill is one pool execution. A routed
+transaction may produce multiple fills with the same transaction hash and
+distinct event IDs. Exact decimal amounts and GraphQL `BigInt` values travel
+as strings. Use `startTime` and `endTime` to filter fills by an inclusive
+start and exclusive end.
+
+Trades are newest first. Pass `pageInfo.endCursor` to `after` while
+`hasNextPage` is true. Candles are chronological and include buckets with
+fills. Pass `nextBefore` to `before` to fetch older candles. Candle prices
+are token1 per token0. `stats24H` ends at the indexed tip's chain time, and
+the latest reserves include the height of their source event. Use direct
+contract reads for live quotes and execution decisions.
+
+### Transactions and blocks
 
 Transaction rows use the generated PostGraphile field name `hash`. The direct
 ABCI BDS and SDK surfaces expose the same value as `tx_hash` or `txHash`.

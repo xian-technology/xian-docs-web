@@ -86,6 +86,21 @@ indexed history; reindexing does not add transitions absent from its inputs.
 Use `after_id` for resumable event consumption and `after_note_index` for
 shielded wallet recovery. Offset pagination is intended for browsing.
 
+### Candle pages
+
+`/dex_candles` returns chronological, nonempty OHLCV buckets using chain
+time. Prices are token1 per token0. `start` is inclusive and `end` is
+exclusive. Each query aggregates a limited window around the latest fill
+before `end`. A page can contain fewer candles than the requested limit
+even when older history exists.
+
+Use the response's `next_before` as the next request's `end` to walk back
+through the market's history. Keep the same pair, interval and optional
+`start`, and use offset zero. A null cursor ends the scan. The response
+also includes `indexed_height`. The Python SDK exposes the page through
+`get_dex_candle_page` and JavaScript through `getDexCandlePage`. Existing
+`list_dex_candles` and `listDexCandles` return the items for one page.
+
 Transaction hashes are named `tx_hash` in raw/Python rows, `txHash` in
 `xian-js`, and `hash` in the generated GraphQL transaction type.
 
@@ -117,6 +132,12 @@ with Xian("http://127.0.0.1:26657") as client:
     tx = client.get_indexed_tx("<tx_hash>")
     events = client.list_events("currency", "Transfer", after_id=0)
 ```
+
+For a separate GraphQL sidecar, set
+`XianClientConfig(graphql_url="http://127.0.0.1:5000/graphql")` in the same
+client. `get_dex_market_history(token_a, token_b)` then resolves the pair,
+trades and candles in one request. Event browsing returns newest-first
+results. Supplying `after_id` switches to ascending replay.
 
 ```ts
 const status = await client.getBdsStatus();
