@@ -33,6 +33,8 @@ the network manifest or the generated CometBFT home.
 
 The actual schema contains additional validated defaults and advanced sections;
 do not copy this abbreviated example over an existing profile.
+Set `schema_version` to the JSON integer `1` in profiles, network manifests
+and templates.
 
 ## Important Fields
 

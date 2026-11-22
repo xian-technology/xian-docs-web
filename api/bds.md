@@ -85,6 +85,8 @@ indexed history; reindexing does not add transitions absent from its inputs.
 
 Use `after_id` for resumable event consumption and `after_note_index` for
 shielded wallet recovery. Offset pagination is intended for browsing.
+For `/token_contracts` and `/token_balances`, `total` counts all matching
+entries before pagination, including when the requested page is empty.
 
 ### Candle pages
 
