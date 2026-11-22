@@ -108,6 +108,12 @@ injected browser wallet provider for writes:
 | `/liquidity` | add/remove liquidity, new-pair creation, router and LP-token approvals |
 | `/portfolio` | all token balances plus every LP position |
 
+On a pair page, pan left or choose **Load older candles** to load more trade
+history while keeping your place on the chart. Candles show executed trade
+prices and volume. Blank slots mark periods with no trades, with one slot
+per idle period. The last trade time comes from its indexed block. If a
+refresh fails, the chart keeps the last loaded data and shows a status message.
+
 ```bash
 cd xian-dex/web
 npm install
