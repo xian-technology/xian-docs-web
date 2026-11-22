@@ -12,6 +12,7 @@ Xian ships tooling for three distinct jobs:
 |------|----------|
 | [xian-cli](/tools/xian-cli) | operator CLI plus JSON-first wallet, query, and transaction automation |
 | [xian-js](/tools/xian-js) | TypeScript client, provider contract, relayer clients, and browser integration |
+| [xian-wallet-cli](/tools/xian-wallet-cli) | terminal wallet with transaction review and headless localnet transfers |
 | [xian-wallet-browser](/tools/xian-wallet-browser) | browser wallet extension and injected provider |
 | [xian-wallet-mobile](/tools/xian-wallet-mobile) | mobile wallet application |
 | [xian-py](/tools/xian-py) | Python client, watchers, indexed reads, and relayer clients |
