@@ -1,26 +1,29 @@
 # Xian Wallet CLI
 
-`xian-wallet` is a terminal wallet for people and agents. It supports encrypted
-accounts, native and fungible-token sends, typed contract calls, transaction
-review, and persistent receipts. The owner can approve from the terminal or
-Telegram. An agent can submit an approved transfer without the spending key.
+`xian-wallet` is a terminal wallet for people and agents. It manages encrypted
+accounts, prepares and reviews transactions, and tracks receipts. An owner can
+approve a transaction in the terminal or through a configured Telegram bot.
+An agent can submit the signed transaction without access to the spending key.
 
 ## Install
 
-From the source checkout on macOS or Linux with Python 3.14 and uv:
+Use Python 3.14 and uv on macOS or Linux.
 
 ```sh
-uv sync
-uv run xian-wallet --help
+git clone https://github.com/xian-technology/xian-wallet-cli.git
+cd xian-wallet-cli
+uv tool install .
+xian-wallet --help
 ```
 
-Use `uv run xian-wallet` in the checkout or install with `uv tool install .`.
-The default RPC is `http://127.0.0.1:26657`. Pin an explicit network with
-`network add NAME URL --chain-id ID --first-block-hash HASH` and select it with
-`--network NAME` or `network use NAME`. A pinned profile can use an HTTPS
-RPC. Use a synced node that serves block 1.
+If uv reports that its executable directory is outside `PATH`, run
+`uv tool update-shell` and open a fresh terminal.
 
-## Accounts and transactions
+The wallet uses `$XDG_STATE_HOME/xian-wallet` or `~/.local/state/xian-wallet`
+for local state. Set `XIAN_WALLET_HOME` or pass `--home PATH` before the
+subcommand to select a different wallet home.
+
+## Accounts and networks
 
 ```sh
 xian-wallet account create primary
@@ -29,11 +32,32 @@ xian-wallet receive primary --qr
 xian-wallet ui
 ```
 
-Restore the browser or mobile wallet's indexed recovery phrase with
-`account restore NAME --mnemonic-file FILE --index INDEX`. Use `account watch`
-for a public address, `portfolio ACCOUNT` for balances, `activity --refresh`
-for local receipts, and `incoming ACCOUNT` for an indexed transfer page.
-The vault unlocks on demand for sensitive operations.
+The vault asks for a password when an operation needs the signing key.
+Keep encrypted backups in a separate location. Use `account restore-backup
+FILE` to verify and restore a backup. Use `account restore NAME
+--mnemonic-file FILE --index INDEX` with an owner-only recovery phrase file
+and the matching account index from the browser or mobile wallet.
+`account watch NAME ADDRESS` adds a public address for balance checks and
+transaction preparation.
+
+The default node RPC is `http://127.0.0.1:26657`. Use the [node CLI](/tools/xian-cli)
+to start a local network. To save a different RPC, obtain the chain ID and
+first-block hash from a trusted source and add a network profile.
+
+```sh
+xian-wallet network add dev "$RPC_URL" --chain-id "$CHAIN_ID" --first-block-hash "$FIRST_BLOCK_HASH"
+xian-wallet --network dev network check
+xian-wallet network use dev
+```
+
+Named profiles accept loopback RPCs and HTTPS RPCs. The node must be synced and
+serve block 1. Use the global `--network NAME` option to select a profile for a
+single command.
+
+## Send and track a transfer
+
+Fund the account on the selected network. Set `RECIPIENT` to the recipient's
+public address or a saved contact.
 
 ```sh
 xian-wallet prepare --from primary --to "$RECIPIENT" --amount 1.25 --out proposal.json
@@ -41,38 +65,80 @@ xian-wallet approve proposal.json --account primary --out approval.json --textua
 xian-wallet submit proposal.json --approval approval.json
 ```
 
-Use `--token CONTRACT` for a fungible token. Use `prepare-call` for an exact
-typed contract call. Amounts retain their decimal precision. Include the
-sender, recipient, network, exact arguments, chi ceiling, and expiry when
-presenting a proposal for review.
+Preparation simulates the transfer. Review the exact amount, sender, recipient,
+network, chi limit, and expiry before signing. Use `--token CONTRACT` with
+`prepare` for a fungible-token transfer, or `prepare-call` for a typed contract
+call. Use a plain decimal string for transfer amounts and
+`{"__fixed__":"1.25"}` for fractional values in generic contract arguments.
 
-## Agent approval
+`portfolio ACCOUNT` shows native and watched-token balances. Use
+`activity --refresh` to check locally tracked approvals and receipts against
+the selected node. `incoming ACCOUNT --token CONTRACT` reads a page of
+BDS-indexed transfers. Use the returned `next_offset` to continue scanning.
 
-Run `agent serve` on the trusted signer's machine under a separate OS identity
-from the agent. The owner reviews requests in Textual or enables the
-Telegram bot with a dedicated user ID and owner-only credentials. The agent
-uses `agent request` and `agent fetch` on the signer socket and receives only
-the signed approval. It owns submission and receipt recovery.
+If submission is interrupted or reports `pending`, use `receipt TX_HASH`
+with the hash in the approval file. Retrying with the same proposal and
+approval uses the same signed transaction. Resolve the original outcome
+before preparing a replacement.
 
-Use `grant create` to preauthorize recurring transfers from a specific
-account and network to a recipient, within explicit amount and chi limits.
-The vault checks those limits when issuing an approval. Agents use
-`agent authorize` with the grant credential. `grant revoke` stops future
-signing. Released approvals remain relayable for their signed transaction.
+## Approve a transfer for an agent
 
-Put `--json` before the command. `completed` means final success. `pending`
-means the final outcome is unknown. Recover by `receipt TX_HASH` or retry
-the same signed proposal. Use the receipt or nonce status before preparing
-a replacement.
+Run the signer under a separate OS identity or on a separate host. Give the
+agent a copy of the request token. Keep the account, vault password, and
+signer configuration with the owner. Use a random request token of at least
+32 ASCII letters or digits, stored in an owner-only file.
+
+On the signer host, start the service with a Unix socket in an
+owner-controlled directory.
+
+```sh
+xian-wallet agent serve --socket "$SIGNER_SOCKET" --request-token-file request.token
+```
+
+Review requests in the **Approvals** tab of `xian-wallet ui`. For Telegram
+review, configure a dedicated bot with `--telegram-token-file`,
+`--telegram-owner-id`, `--telegram-account`, and `--password-file` on
+`agent serve`. The configured owner opens the bot's private chat and approves
+or declines the exact proposal from that chat.
+
+The agent prepares a proposal on the same network and connects to the signer
+socket. Use an SSH-forwarded socket when the agent runs under a different
+identity or on a different host.
+
+```sh
+xian-wallet --json agent request proposal.json --socket "$SIGNER_SOCKET" --token-file request.token
+xian-wallet --json agent fetch "$PROPOSAL_ID" --socket "$SIGNER_SOCKET" --token-file request.token --out approval.json
+xian-wallet --json submit proposal.json --approval approval.json
+```
+
+Use the full proposal ID from the preparation result. Poll `fetch` until the
+owner approves or declines, or the proposal expires. `fetch` writes an approval
+file when a signed approval is available.
+
+For recurring transfers, the owner can use `grant create` to authorize a
+specific account, network, token, and recipient with per-transfer and total
+amount and chi limits plus an expiry. Enable grant signing by starting
+`agent serve` with `--password-file`. The agent uses `agent authorize` with
+the grant credential. `grant revoke` stops future signing. Previously issued
+approvals remain relayable for their signed transactions.
+
+With the global `--json` flag, command results use the
+`xian-wallet-cli/v1` schema and contain either `data` or `error`.
+A `completed` submission reports a successful finalized transaction.
 
 ## Advanced workflows
 
-- `dex quote`, `dex allowance`, and `dex prepare` cover direct swaps with
-  a minimum output and an explicit spend allowance.
-- `nft inspect` and `nft transfer` cover XSC-0005 ownership and transfers.
-- `message sign` and `message verify` use the chain-bound Xian envelope.
-- `x402 quote`, `x402 approve`, and `x402 submit` cover exact GET payments.
-- `walletconnect setup` and `walletconnect pair` run the optional dapp
-  transport with the owner's Reown project configuration.
-- `shielded create`, `shielded sync`, and `shielded prepare` use the
-  optional shielded SDK, BDS note history and a matching proving bundle.
+- Use `dex quote`, `dex allowance`, and `dex prepare` for a direct swap with
+  an explicit spend allowance and minimum output. Use `nft inspect` and
+  `nft transfer` for XSC-0005 ownership and transfers.
+- Use `message sign` and `message verify` with the chain-bound Xian message
+  envelope. WalletConnect requires Node.js 22 or later, `walletconnect setup`,
+  and a Reown project ID.
+- Use `x402 quote`, `x402 approve`, and `x402 submit` for exact GET payments.
+- Shielded notes require the optional shielded SDK, a deployed shielded-note
+  contract, BDS history, and the matching registered proving bundle. From
+  the source checkout, install the optional dependency with
+  `uv tool install '.[shielded]'`.
+
+See the [wallet workflows guide](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/WALLET.md)
+for command examples and integration requirements.

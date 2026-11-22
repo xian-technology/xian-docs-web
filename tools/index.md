@@ -64,7 +64,9 @@ Python application SDK:
 
 See the [Python SDK source installation](/tools/xian-py#install).
 
-For CLI automation and operator tools, use the [CLI source installation](/tools/xian-cli#install).
+For node operations and scriptable chain queries, use [xian-cli](/tools/xian-cli#install).
+For account custody, transaction review, and agent approvals, install the
+[Xian Wallet CLI](/tools/xian-wallet-cli#install).
 
 Local contract runtime and testing:
 
