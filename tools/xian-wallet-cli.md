@@ -10,9 +10,7 @@ An agent can submit the signed transaction without access to the spending key.
 Use Python 3.14 and uv on macOS or Linux.
 
 ```sh
-git clone https://github.com/xian-technology/xian-wallet-cli.git
-cd xian-wallet-cli
-uv tool install .
+uv tool install xian-tech-wallet-cli
 xian-wallet --help
 ```
 
@@ -136,9 +134,8 @@ A `completed` submission reports a successful finalized transaction.
   and a Reown project ID.
 - Use `x402 quote`, `x402 approve`, and `x402 submit` for exact GET payments.
 - Shielded notes require the optional shielded SDK, a deployed shielded-note
-  contract, BDS history, and the matching registered proving bundle. From
-  the source checkout, install the optional dependency with
-  `uv tool install '.[shielded]'`.
+  contract, BDS history, and the matching registered proving bundle. Install
+  the optional dependency with `uv tool install 'xian-tech-wallet-cli[shielded]'`.
 
 See the [wallet workflows guide](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/WALLET.md)
 for command examples and integration requirements.
