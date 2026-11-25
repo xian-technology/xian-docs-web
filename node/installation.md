@@ -118,8 +118,11 @@ Pin the controller's CLI commit and resolved dependencies alongside the node
 release. A CLI package version can remain unchanged while its dependency lock
 is refreshed; an older tag's frozen lock may not match the selected runtime.
 Verify native VM/compiler builds and the controller's SDK separately from the
-server image. Execution-changing runtime fixes require coordinated upgrade
-and replay validation for an existing network, without regenerating genesis.
+server image. ABCI requires the native VM's transaction receipt methods at
+startup. For source builds, use the Contracting revision pinned by the ABCI
+release so those methods are available. Execution-changing runtime fixes require
+coordinated upgrade and replay validation for an existing network, without
+regenerating genesis.
 
 ## Remote Hosts
 
