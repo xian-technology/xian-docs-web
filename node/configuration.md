@@ -80,6 +80,12 @@ data/priv_validator_state.json
 settings. Genesis, validator state, and keys must not be changed casually on an
 existing network.
 
+Xian renders `timeout_propose = "2s"` in `[consensus]`. This sets the
+round-zero deadline for receiving a proposal. To adopt the setting on an
+existing node, update `config.toml` and restart CometBFT. Stack localnets
+inherit the same default and accept `XIAN_LOCALNET_CONSENSUS_TIMEOUT_PROPOSE`
+when generating a localnet with an explicit override.
+
 Evidence time retention is derived from staking policy at genesis and grows
 automatically when longer unbonding is approved. The version-2
 `__evidence_policy` records the authenticated duration-growth schedule and
