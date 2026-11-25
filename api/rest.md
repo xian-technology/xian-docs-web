@@ -137,9 +137,17 @@ The dashboard includes:
 /explorer/events
 ```
 
-Indexed address and event views require BDS. The explorer may support
-inspection of a connected peer, but the backend restricts targets to the
-configured node and known peers; it is not a general HTTP proxy.
+Open a transaction from its block to see its execution result and any fee
+rewards recorded in the receipt. The Rewards table shows the amount in XIAN,
+the recipient, and the source contract or validator when the receipt includes
+it. A delegation pool credit goes to the `validators` contract for the
+validator shown on that row. A failed transaction can also include fee rewards.
+
+Block and transaction details, receipt rewards, and contract source are
+available without BDS. Indexed address and event history and reward summaries
+require BDS. The explorer may support inspection of a connected peer, but the
+backend restricts targets to the configured node and known peers; it is not a
+general HTTP proxy.
 
 The contract explorer's `/api/contracts` endpoint returns bounded name-ascending
 pages selected by `after`; it does not reconstruct global date sorting or
