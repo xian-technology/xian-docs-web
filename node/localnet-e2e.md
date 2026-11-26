@@ -8,7 +8,12 @@ machine with five validators, the fixed Xian VM, and optional indexed services.
 | Goal | Command |
 | --- | --- |
 | disposable five-node network | `LOCALNET_NODES=5 make localnet-init && make localnet-up` |
-| broad whole-stack E2E | `make localnet-e2e` |
+| core chain E2E | `make localnet-e2e` |
+| broad whole-stack E2E | `make localnet-e2e LOCALNET_E2E_SUITE=full` |
+| DEX and automation recovery | `make localnet-e2e LOCALNET_E2E_SUITE=dex` |
+| x402 settlement | `make localnet-e2e LOCALNET_E2E_SUITE=x402` |
+| load and soak | `make localnet-e2e LOCALNET_E2E_SUITE=load` |
+| installed proposal and logging smoke | `make smoke` |
 | validator/governance safety | `make localnet-protocol-safety` |
 | release-grade gate | `make release-safety` |
 
@@ -34,12 +39,12 @@ Update those checkouts before running if you want to test current `main`.
 Local edits are included in the build. Setting `LOCALNET_E2E_BUILD=0` reuses
 an existing image, so its compiler and VM can differ from the host checkout.
 
-The full harness uses periodic block production at a one-second interval,
+The E2E harness uses periodic block production at a one-second interval,
 including when throughput tuning is selected. Agreement and result-hash checks
 need subsequent proof blocks even when the mempool is empty. Set
 `XIAN_LOCALNET_BLOCK_POLICY_INTERVAL` to keep another periodic interval; an
 explicit `XIAN_LOCALNET_BLOCK_POLICY_MODE=on_demand` is rejected before
-bootstrap. This requirement belongs to the full E2E harness. An interactive
+bootstrap. This requirement applies to each E2E suite. An interactive
 localnet can use on-demand production and is expected to stop advancing while
 idle.
 
@@ -50,22 +55,20 @@ the four node build repositories by commit. The shared checkout action in
 suite, the contract catalog, DEX and DEX recovery worker.
 To reproduce a hosted run locally, check out those same commits before building.
 
-The Make target uses the locked `xian-stack` Python environment, including
+The Make target uses the frozen `xian-stack` Python lockfile, which includes
 the native ZK binding that generates shielded proofs. A fresh host needs a
 Rust toolchain (1.98 or newer) and C compiler to build the native
 dependencies. To require
 shielded coverage explicitly:
 
 ```bash
-make localnet-e2e LOCALNET_E2E_REQUIRE_SHIELDED=1
+make localnet-e2e LOCALNET_E2E_SUITE=full LOCALNET_E2E_REQUIRE_SHIELDED=1
 ```
 
 `make release-safety` always enables this requirement: a missing native binding
 fails before network setup, and a skipped shielded phase fails the run.
-Ordinary developer runs allow missing native ZK support and record the phase
-as skipped, so check the summary before treating a run as full coverage.
-The focused IntentKit suite does not contain the shielded phase and rejects
-this requirement; use the full suite for shielded coverage.
+Standalone full runs allow missing native ZK support and record the phase
+as skipped. The shielded requirement applies to the full suite.
 Resuming after a required phase also requires its saved successful, non-skipped
 result. An earlier optional skip cannot be promoted into required coverage.
 
@@ -76,7 +79,8 @@ Artifacts are written under:
 ```
 
 Successful runs contain `summary.json`, per-phase JSON, and the generated
-network description. A failed phase writes its error to its phase JSON and
+network description. Each phase records a `passed`, `skipped`, or `failed`
+status in its report. The summary includes skipped phases and their reasons. A failed phase writes its error to its phase JSON and
 captures bounded RPC, peer, container-state, and container-log diagnostics in
 `<phase>-failure/nodes.json` before release-gate cleanup removes the containers.
 Unavailable probes are recorded as errors without replacing the original
@@ -84,12 +88,32 @@ failure. The protocol safety harness captures the same diagnostics in its
 own artifact directory.
 
 A failed run can resume from a supported phase with the
-backend's `--start-phase` and `--resume-dir` options. Resume at a phase that
+backend's `--start-phase` and `--resume-dir` options. Select the original
+suite with `--suite`. Resume at a phase that
 has not begun. Use a fresh run when repeating a partially executed recovery,
 nonce, accounting, or replay scenario: those checks retain stateful fixtures
 and refuse to reuse existing observer or replay directories.
 
 ## Coverage
+
+### Core Suite
+
+The default five-validator suite checks:
+
+- The configured chain ID, peer identities, voting power, and committed application
+  roots and block results at common heights.
+- Live RPC version, source admission, deployment, and reads. Ledger, escrow, and
+  payment router calls prove successful settlement, rollback of nested writes and
+  events, and fee and nonce accounting after a failed call.
+- Consensus progress during a PostgreSQL outage and recovery of the indexed
+  transaction and its typed state after PostgreSQL restarts.
+- A governed fee-split change and distribution of fees from a subsequent transaction.
+- Concurrent writers, nonce ordering, crash recovery, and quorum behavior. During the
+  4/1 split, a signed transfer commits on the quorum side and appears exactly once on
+  every validator after healing. A transfer submitted through the previously isolated
+  side confirms that transaction service resumes after the 3/2 halt.
+- Catch-up from genesis on a fresh non-voting observer and recovery from queued and
+  conflicting nonces.
 
 ### IntentKit Payment Integration
 
@@ -100,8 +124,8 @@ Run the focused five-validator payment suite from `xian-stack` with a sibling
 make localnet-e2e LOCALNET_E2E_SUITE=intentkit-x402 LOCALNET_E2E_INTENTKIT_X402=1
 ```
 
-This runs bootstrap, health, core x402 settlement and the IntentKit x402 buyer
-phase. All four are required; a skipped phase fails this suite. The separate
+This runs bootstrap, health, live ABCI consistency, x402 settlement, and the
+IntentKit x402 buyer phase. A skipped phase fails this suite. The separate
 `IntentKit x402 Integration` GitHub workflow pins sibling revisions, runs weekly
 and on relevant pull requests, and supports manual dispatch. Core node CI does
 not require IntentKit.
@@ -124,8 +148,6 @@ The layered harness covers:
 - rejection of forged and noncanonical Ed25519 transactions at each node,
   plus committed contract verification of valid and adversarial signatures
 - genesis contract timestamps matching the genesis header across all five nodes
-- proposal byte-budget and nonce-selection checks in isolated processes using
-  each node image's installed runtime and fee configuration
 - real deployment at the 64-character contract-name limit, with constructor
   state checked through RPC on all five validators
 - `xian-py` reads, simulation, source deployment, and transactions
@@ -228,7 +250,7 @@ The default accounting workload is 48 operations:
 ```bash
 LOCALNET_E2E_INVARIANT_ROUNDS=120 \
 LOCALNET_E2E_SEED=accounting-review-1 \
-make localnet-e2e
+make localnet-e2e LOCALNET_E2E_SUITE=full
 ```
 
 The seed and operation trace are recorded with the phase results. A seed
@@ -236,7 +258,7 @@ reproduces the generated choices; network timing and block grouping can vary.
 
 ## Replay Across Architectures
 
-A successful E2E run exports `replay-corpus/` and performs a local replay. The
+A successful full E2E run exports `replay-corpus/` and performs a local replay. The
 corpus contains public configuration, CometBFT block databases, expected
 result digests, source revisions, execution policy and the source image ID.
 Application state and validator private
