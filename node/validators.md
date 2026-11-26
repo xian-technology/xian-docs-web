@@ -48,7 +48,7 @@ pending unbonds, and jail/slash/evidence information.
 stake changes, registration, exit, unjailing and every unbond claim associated
 with that validator are held. Monitor the returned penalty `job_id` through
 `validator_penalties.get_pending_slash_job(job_id)` and reconcile its final
-payment when the job completes. See [Slashing and Evidence](./staking#slashing-and-evidence).
+payment when the job completes. See [Slashing and Evidence](/node/staking#slashing-and-evidence).
 
 The registering account becomes the consensus key. Registration requires
 `ctx.caller == ctx.signer`, so a wrapper contract cannot register on behalf of

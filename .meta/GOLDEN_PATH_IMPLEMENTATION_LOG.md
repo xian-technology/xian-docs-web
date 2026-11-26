@@ -1,9 +1,8 @@
 # Golden Path Implementation Log
 
-## Purpose
-
-Track the docs work that lands alongside the cross-repo golden-path roadmap so
-the docs do not drift behind implementation.
+Historical record of the documentation shipped alongside the original
+golden-path rollout. For supported workflows, use the published guides linked
+from [the docs home](../index.md).
 
 ## Completed
 
