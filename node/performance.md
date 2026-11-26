@@ -13,15 +13,18 @@ the same workload and initial state when comparing configurations.
 Observe:
 
 - submitted, included, successful, and failed transaction counts separately
-- block execution and commit duration, including slower blocks
+- time spent on proposal and voting, execution, and persistence
+- how often heights commit in a later consensus round
 - receipt latency and mempool backlog
 - CPU use, resident memory, disk latency, and free space
 - BDS indexed height and spool growth when indexing is enabled
 
 The [localnet harness](/node/localnet-e2e) records integration evidence.
-Production sizing also needs a longer run with representative state and
-network conditions. A short local transfer benchmark is not a capacity
-guarantee for a deployed network.
+For deployment sizing, run a sustained workload across the intended validator
+topology with representative state and indexing. Compare offered and
+committed rates over the hold and check that backlog stays bounded and
+confirmation latency meets the deployment target. After a burst, measure how
+long the backlog takes to drain.
 
 ## Block Chi Capacity
 
@@ -34,30 +37,33 @@ margin, which xian-py and xian-js do by default when a transaction omits its
 chi limit. See
 [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
-Serial execution cost per transaction does not grow with the block: the node
-undoes a transaction's tentative state changes in place instead of copying the
-block's pending writes, and reuses each contract's parsed and validated IR for
-byte-identical stored text. Neither changes chi, receipts or state.
+The Rust VM applies transactions in block order, stages their effects in a
+block overlay, and reuses parsed contract IR for byte-identical stored text.
+See [Block Execution](/concepts/block-execution).
 
 ## Find the Expensive Stage
 
-Inspect `/perf_status` through ABCI or the dashboard, and use the application
-metrics endpoint for trends. Useful timing scopes include:
+Set `XIAN_PERF_ENABLED=true` on the ABCI process to collect timing data.
+Read `/perf_status` through ABCI or the dashboard. The process also writes the
+snapshot to `xian-perf.json` in its CometBFT home by default.
+Use the application metrics endpoint for trends.
 
 | Scope | What it helps investigate |
 | --- | --- |
-| `finalize_decode` | transaction decoding and admission work |
-| `finalize_execute` | block transaction execution |
-| `tx_process_output` | result shaping and reward effects |
-| `finalize_result_assembly` | transaction result and event serialization |
+| `check_tx_static_admission`, `check_tx_live_admission` | signed transaction validation and checks against current state |
+| `finalize_decode` | validation of the block's transaction sequence |
+| `tx_native_prepare`, `tx_native_execute` | preparation of VM inputs, followed by contract execution and fee settlement |
+| `tx_native_receipt_encoding`, `tx_native_to_python`, `tx_receipt_conversion` | successful receipt encoding and conversion of execution results into node data |
+| `finalize_result_assembly` | staging nonces and assembling ABCI results and events |
 | `finalize_state_root` | application-hash preparation |
 | `finalize_bds_enqueue` | preparing the local indexing handoff |
 
-Some scopes contain other scopes. Do not add all timings together as if they
-were independent parts of block latency.
-
-Blocks execute serially; there is no parallel-execution setting to tune. See
-[Block Execution](/concepts/block-execution).
+Some scopes contain other scopes. Compare each stage with the elapsed time
+between commits. If that interval grows while execution stays steady, inspect
+the mempool backlog, proposal preparation, and consensus rounds. With
+rechecking enabled, a larger mempool increases the number of transactions
+CometBFT sends through `CheckTx` after each commit. The node also logs a
+per-proposal summary of skipped candidates when a proposal leaves some out.
 
 ## Include Optional Services
 

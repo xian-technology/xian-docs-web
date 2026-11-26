@@ -33,9 +33,11 @@ The signed payload includes:
 The chain ID prevents cross-network replay. The nonce orders transactions from
 one sender and prevents reuse on the same chain.
 
-SDKs support `async`, `checktx`, and `commit` broadcast modes. `checktx`
-returns mempool admission; it does not prove final execution success. Use a
-receipt wait when the application needs finality.
+SDKs support `async`, `checktx`, and `commit` broadcast modes. An `async`
+acknowledgment confirms submission without waiting for admission. The
+`checktx` response reports admission. A committed receipt reports execution
+success or failure. Use a receipt wait when the application needs the execution
+result.
 
 ## CheckTx
 
@@ -44,16 +46,29 @@ chain ID, nonce, and fee policy. Every fee mode rejects a `chi_supplied` above
 the chain's `max_tx_chi`. Paid mode also requires enough native-token balance to
 cover the submitted chi limit at the chi rate, and for a native
 `currency.transfer` the amount plus that fee reservation must fit the balance.
-Block proposals pack transactions only while the sum of their `chi_supplied`
-stays within `max_block_chi`. See [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
-A CheckTx rejection does not enter the mempool or change chain state.
+Successful admission reserves the submitted nonce on that node. Submit consecutive
+nonces from one sender to the same RPC node in order and use
+`/get_next_nonce/<address>` to read that node's next available nonce. The
+answer reflects its pending reservations. See
+[Pending Nonces](/node/configuration#pending-nonces).
+
+With mempool rechecking enabled, CometBFT sends queued transactions through
+`CheckTx` again after a block commits. The node can reuse static validation for
+identical signed bytes and checks the applicable fee, balance, and nonce rules
+against the current state.
 
 ## Consensus and Execution
 
-CometBFT fixes transaction order and the block timestamp. During
-`FinalizeBlock`, every validator executes the same ordered calls through
-`xian_vm_v2`.
+Proposers select transactions within the block's byte budget and the
+`max_block_chi` sum of supplied chi. Nonces in each proposal must be consecutive
+per sender, starting from committed state. Other validators check the proposed
+sequence before voting. See [The ABCI Layer](/concepts/abci#transaction-path-across-the-boundary)
+and [Chain Chi Caps](/concepts/chi#chain-chi-caps).
+
+CometBFT agrees on the transaction order and the block timestamp.
+`FinalizeBlock` executes the calls in that order through `xian_vm_v2`, with
+the same block timestamp for every transaction.
 
 For each transaction, the runtime:
 
@@ -79,7 +94,9 @@ repairable convenience copy.
 
 ## Results
 
-The decoded execution payload includes:
+The native VM encodes the receipt for each executed transaction.
+CometBFT carries the encoded receipt in `tx_result.data`. The decoded payload
+includes the following fields.
 
 | Field | Meaning |
 | --- | --- |
@@ -104,13 +121,17 @@ execution results and report their actual status. If those results lag behind
 the block, receipt polling retries the same block until the results arrive or
 the configured timeout expires.
 
+In the Python SDK, `get_tx` raises `TxNotFoundError` when the queried node
+cannot find the transaction in committed blocks. For a submission that may
+still be pending, use `wait_for_tx` with the original hash.
+
 ## Failure Boundaries
 
 | Failure | State/effects |
 | --- | --- |
 | CheckTx rejection | no mempool entry, no state, no fee |
-| assertion or runtime error | application writes/events roll back; paid mode charges execution plus half of unused chi; only the execution portion funds rewards, with no developer share |
-| out of chi | application writes/events roll back; failed execution reports a bounded cost up to the submitted limit |
+| assertion or runtime error | application writes and events roll back and the committed call consumes its nonce. Paid mode charges execution plus half of unused chi. Only the execution portion funds rewards, with no developer share. |
+| out of chi | application writes and events roll back and the committed call consumes its nonce. Failed execution reports a bounded cost up to the supplied limit. |
 
 ## Indexing
 

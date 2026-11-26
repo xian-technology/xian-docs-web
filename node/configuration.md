@@ -81,10 +81,15 @@ settings. Genesis, validator state, and keys must not be changed casually on an
 existing network.
 
 Xian renders `timeout_propose = "2s"` in `[consensus]`. This sets the
-round-zero deadline for receiving a proposal. To adopt the setting on an
-existing node, update `config.toml` and restart CometBFT. Stack localnets
-inherit the same default and accept `XIAN_LOCALNET_CONSENSUS_TIMEOUT_PROPOSE`
-when generating a localnet with an explicit override.
+wait for a proposal block in round zero. The wait grows by
+`timeout_propose_delta` for each later round at the same height. To set the
+proposal wait on a running node, edit `config.toml` and restart CometBFT.
+Stack localnets use the two-second round-zero default. Set
+`XIAN_LOCALNET_CONSENSUS_TIMEOUT_PROPOSE` or
+`XIAN_LOCALNET_CONSENSUS_TIMEOUT_PROPOSE_DELTA` when generating a localnet with
+explicit values. The `default` profile adds `500ms` per round, and the
+`throughput` profile adds `100ms`. See the
+[CometBFT timeout calculation](https://github.com/cometbft/cometbft/blob/v0.40.0/config/config.go#L1229-L1234).
 
 Evidence time retention is derived from staking policy at genesis and grows
 automatically when longer unbonding is approved. The version-2
@@ -94,10 +99,9 @@ and timestamp. These are chain state,
 not local profile settings. See
 [Slashing and Evidence](/node/staking#slashing-and-evidence).
 
-The supported upstream CometBFT integration uses Ed25519 validator keys and the
-`flood` mempool (`type = "flood"` under `[mempool]` in `config.toml`). A missing
-mempool type uses that default. The `app`, `nop` and unknown mempool types are rejected
-at startup; changing the node profile does not enable those modes.
+Xian uses Ed25519 validator keys and the CometBFT flood mempool. Set
+`type = "flood"` under `[mempool]` in `config.toml`, or omit the type to
+use the default. Xian renders `recheck = true` in that section.
 
 `xian_vm_v2` is the only supported execution runtime. Execution mode, VM
 bytecode, and gas schedule are not operator-selectable configuration.
@@ -124,6 +128,20 @@ not `xian.toml` settings: they are the genesis fee policy `__fee_policy`,
 identical on every validator, and a `xian.toml` that sets them is rejected at
 startup. See [Chain Chi Caps](/concepts/chi#chain-chi-caps). Logging and query
 limits can vary by node.
+
+### Pending Nonces
+
+These top-level `xian.toml` settings govern local reservations made by
+`CheckTx`.
+
+| Setting | Default | Behavior |
+| --- | ---: | --- |
+| `max_pending_nonces_per_sender` | `128` | Maximum reserved nonces for one sender on this node. |
+| `pending_nonce_reservation_ttl_seconds` | `60` | Reservation lifetime in seconds. Set to `0` to disable time-based expiry. A successful recheck of the same transaction refreshes the reservation. |
+
+Commit clears reservations covered by the sender's committed nonce. These
+settings govern admission on the selected node. Validators check proposal
+nonces using the committed state and the proposed transaction sequence.
 
 ## PostgreSQL Version and Storage
 

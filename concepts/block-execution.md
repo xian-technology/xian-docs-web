@@ -17,14 +17,13 @@ flowchart TD
   Root --> Commit["Commit persists application state"]
 ```
 
-Validators run the per-transaction loop in Rust, inside the native VM package,
-without holding the Python interpreter lock. The executor reads each
-transaction's call, arguments and context from its wire bytes and gives every
-transaction a receipt. Storage reads, the block overlay, fee reservation and
-settlement, and reward deltas are handled in Rust. There is no Python
-execution path: a transaction the VM cannot run fails with an ordinary
-receipt, and only a host fault (unreadable state, out of memory, operating
-system or storage errors) halts the node.
+The Rust block executor reads call inputs from the validated wire bytes and
+uses the decided block metadata for execution context. It reads and stages
+state through a block overlay, reserves and settles fees, and computes
+rewards. The native VM encodes the receipt with the result or error, writes,
+events, chi, and any fee payouts. Contract failures produce receipts and
+roll back application writes and events. A host fault such as unreadable
+state or a storage error halts the node.
 
 Before the paid loop, the node applies agreed evidence/liveness and advances
 bounded time-checkpoint and staking-anchor work. After it, the node advances

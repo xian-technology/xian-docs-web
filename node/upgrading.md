@@ -16,6 +16,12 @@ change this protected record. Every field must match the selected runtime.
 Startup checks the compiler revision in both the standalone compiler and the
 compiler linked into the VM.
 
+Use the native `xian-tech-vm-core` build from the accepted release. The ABCI
+package requires `xian-tech-vm-core>=0.1.4,<0.2`. At startup the node verifies
+that the native block executor can produce finalized transaction receipts
+with and without profiling. A missing receipt API stops startup. Install
+the matching VM package and restart the application if that check fails.
+
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
 literal handling and checked numeric ABI boundaries. Gas schedule 7 charges for
 numeric work and for element work that grows with the size of a value: container
@@ -40,10 +46,9 @@ stored value bytes (`xian-state-root-v3`). These rules, numeric semantics and
 metering all affect replay compatibility.
 
 Application snapshots use format 2 and carry the execution policy. Import
-rejects incompatible policy before replacing application state. Peer-to-peer
-application state sync is disabled; bootstrap through replay or a verified
-full node-store snapshot. The exported state includes the protected policy in
-its application-root commitment.
+checks the policy before replacing application state. Bootstrap a node through
+replay or a verified full node-store snapshot. The exported state includes
+the protected policy in its application-root commitment.
 
 ## Consensus Backend Compatibility
 
@@ -63,18 +68,16 @@ The schema-version-1 release manifest records `build.cometbft_version`,
 The pinned official `v0.40.0` source is commit
 `0880b4d378f347ab16e54ec677ff50d803f37d62`, archive SHA-256
 `c421c1461494d4e1e922a334f1899aab2f638e990a465316ed6e2437a8d71a66`.
-That upstream source retains the core version string `0.39.0`; the unmodified
-build reports it together with the source commit. Record the source release,
-commit, archive checksum and actual binary version separately. A version
-string alone does not identify or authenticate a build.
+The unmodified binary reports `0.39.0` together with the source commit.
+Record the source release, commit, archive checksum and actual binary version
+separately. A version string alone does not identify or authenticate a build.
 
 The application uses a version-2 `__evidence_policy` growth schedule to track
 evidence retention and security checkpoints.
 
 A consensus-sensitive backend change requires a fresh chain or a separately
 reviewed network upgrade. Do not swap a different backend into an existing
-development or live chain merely because the processes speak ABCI. Peer-to-peer
-application state sync is disabled. See
+development or live chain merely because the processes speak ABCI. See
 [Bootstrap and Snapshots](/node/configuration#bootstrap-and-snapshots)
 for replay and full node-store restore requirements.
 

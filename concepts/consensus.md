@@ -27,16 +27,22 @@ Xian provides the deterministic application behind that consensus engine:
 Once a block is committed, it is final. Xian does not use probabilistic
 reorg-style finality.
 
+Consensus starts at round zero for each height. Validators can move to a later
+round at the same height when they cannot agree on a proposal. The proposal
+timeout controls how long a validator waits in that round for the proposal
+block before voting nil. See
+[CometBFT configuration](/node/configuration#rendered-home).
+
 ## Block Time
 
-Contract time comes from the finalized block timestamp agreed by consensus.
-The supported upstream v0.40.0 implementation does not implement
-proposer-based timestamps (PBTS); do not assume a proposer supplies a fresh
-wall-clock timestamp for each block.
+Contract time comes from the finalized block timestamp. CometBFT uses the
+genesis time for the first block. For subsequent blocks, it takes the
+voting-power-weighted median of timestamps in the previous block's commit
+votes. See [CometBFT block construction](https://github.com/cometbft/cometbft/blob/v0.40.0/state/state.go#L216-L275).
 
 That means:
 
-- `now` in contracts is chain time, not a local validator clock
+- `now` in contracts uses chain time
 - every transaction in the same block sees the same `now`
 - consensus preserves nanosecond timestamps; contract `now` has UTC
   microsecond precision

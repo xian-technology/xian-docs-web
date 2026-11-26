@@ -43,8 +43,8 @@ For a scalar `/get/<key>` query, inspect `response.info`. A decimal uses `"decim
 
 For key scans, send the returned `next_after_hex` as `after_hex` on the next
 request, with the same prefix. It encodes the full UTF-8 storage key and works
-for keys containing `/` or `%`. Stop when `next_after_hex` is `null`. Existing
-clients can still send literal, path-safe `next_after` values as `after`.
+for keys containing `/` or `%`. Stop when `next_after_hex` is `null`. For a
+path-safe `next_after` cursor, use the `after` parameter.
 
 Persisted `set()` and `frozenset()` wrappers use tagged JSON for both top-level
 and nested query values. A top-level wrapper has ABCI `info="dict"`; for example,
@@ -118,23 +118,33 @@ See [Unbonding](/node/staking#unbonding).
 through the node query layer. The stored IR is available through
 `contract_ir/<name>`.
 
-For transaction lookups:
+Look up a transaction by its CometBFT transaction hash with `GET /api/tx/{hash}`.
+The dashboard returns the transaction object at the top level.
 
-- `result.tx` is the submitted transaction
-- `result.tx_result.data` contains Xian's encoded execution output
+- `tx` is the base64-encoded submitted transaction.
+- `tx_result.data` is the base64-encoded execution receipt.
+- `tx_decoded` and `tx_result.data_decoded` give the corresponding decoded
+  values when the dashboard can decode them.
 
 SDKs should normally decode these shapes instead of duplicating dashboard
 response handling.
 
 ## Explorer
 
-The dashboard includes:
+Open **Block explorer** and choose **Blocks**, **Contracts**, **Addresses**,
+or **Events**. Search accepts block heights, CometBFT transaction hashes,
+addresses, contract names, and state keys. Use the detail URLs to share a block,
+transaction, contract, or address.
 
 ```text
 /explorer
 /explorer/contracts
 /explorer/addresses
 /explorer/events
+/explorer/block/<height>
+/explorer/tx/<hash>
+/explorer/contract/<name>
+/explorer/address/<address>
 ```
 
 Open a transaction from its block to see its execution result and any fee
@@ -143,11 +153,13 @@ the recipient, and the source contract or validator when the receipt includes
 it. A delegation pool credit goes to the `validators` contract for the
 validator shown on that row. A failed transaction can also include fee rewards.
 
-Block and transaction details, receipt rewards, and contract source are
-available without BDS. Indexed address and event history and reward summaries
-require BDS. The explorer may support inspection of a connected peer, but the
-backend restricts targets to the configured node and known peers; it is not a
-general HTTP proxy.
+The explorer labels indexed rows sourced from genesis as **Chain genesis**.
+That label identifies the chain's initial state.
+
+Block details and stored contract source come from the node. Transaction
+lookups and receipt rewards use its CometBFT transaction index. Indexed address
+and event history and reward summaries use BDS. The backend restricts
+explorer targets to the configured node and known peers.
 
 The contract explorer's `/api/contracts` endpoint returns bounded name-ascending
 pages selected by `after`; it does not reconstruct global date sorting or

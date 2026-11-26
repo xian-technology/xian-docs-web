@@ -39,15 +39,20 @@ It also wires the fixed `xian_vm_v2` execution runtime.
 At a high level, one transaction moves through these stages:
 
 1. CometBFT receives the signed payload and calls `CheckTx`. Accepted
-   transactions enter the local mempool and can be gossiped to peers.
+   transactions enter the local mempool and can be gossiped to peers. With
+   rechecking enabled, CometBFT checks the remaining mempool transactions
+   against the application state after each commit.
 2. `PrepareProposal` selects transactions within CometBFT's total transaction
    byte budget and the configured chi policy. A transaction that does not fit
    is skipped without consuming its sender's proposal nonce; smaller valid
-   transactions can still be selected. `ProcessProposal` checks the proposed
-   transaction sequence before validators vote.
+   transactions can still be selected. Selection stops when the byte or chi
+   budget is full. `ProcessProposal` validates the proposed transactions and
+   their chi total. Both callbacks check each sender's nonce sequence from
+   committed state.
 3. CometBFT reaches a consensus decision on the ordered block.
-4. `FinalizeBlock` executes that decided block and returns transaction results,
-   validator updates, and `app_hash`. Application writes remain buffered.
+4. `FinalizeBlock` executes that decided block and returns transaction results
+   with their VM-encoded receipts, validator updates, and `app_hash`.
+   Application writes remain buffered.
 5. `Commit` persists the application transition. CometBFT can then advance to
    the next height, whose header carries the preceding block's `app_hash`.
 

@@ -25,7 +25,10 @@ GET /api/abci_query/simulate_tx/<hex_encoded_payload>
 ```
 
 The SDK usually talks to the underlying CometBFT RPC `abci_query` endpoint
-directly.
+directly. When a transaction omits its chi limit, the Python and JavaScript
+SDKs simulate the call with the nonce they will sign. A successful estimate
+supplies the estimated chi plus the SDK's 2-chi margin. A failed simulation
+stops automatic submission.
 
 ```mermaid
 flowchart TD

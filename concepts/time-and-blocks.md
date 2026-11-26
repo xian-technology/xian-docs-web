@@ -19,8 +19,8 @@ conversion uses integer arithmetic and does not depend on the validator's time
 zone.
 
 This is why time-based contract logic can be deterministic. A block timestamp
-is consensus time, not a promise that a deadline matches an external clock.
-The supported [CometBFT baseline](/concepts/consensus) does not implement PBTS.
+tracks consensus time and can lag the external clock. See
+[Block Time](/concepts/consensus#block-time) for its source.
 
 ## Supported Block Policies
 
