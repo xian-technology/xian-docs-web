@@ -64,3 +64,7 @@ salt and resets the sequence for that execution.
 - hidden lotteries
 - cryptographic secrets
 - anything that depends on unpredictability
+
+For escrowed draws, the [catalog lottery entropy contract](https://github.com/xian-technology/xian-contracts/tree/main/contracts/lottery-entropy)
+uses two independent commitments before entries open. The contracts verify
+reveals after close and provide a deadline for refunds when a reveal is missing.

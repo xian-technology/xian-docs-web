@@ -53,6 +53,7 @@ flowchart TD
 
 Contract calls execute through
 `importlib.call(target_contract, target_function, kwargs)`.
+Pass JSON booleans for `vote.support` and `propose_state_patch.emergency`.
 
 ## State Patch Proposal
 

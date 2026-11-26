@@ -129,7 +129,10 @@ on multiple nodes, then inspect a fee-paying transaction and reconcile all four
 buckets against its charged fee.
 For a foundation owner rotation, verify that the destination is nonempty,
 fits the currency account key limit, and uses lowercase for a 64-hex public
-key. Confirm that the receiving account is under the intended custody.
+key. The current owner calls `change_owner` to nominate it. Confirm the
+proposal with `get_pending_owner`, then call `accept_ownership` from the
+receiving account. The current owner can call `cancel_ownership_transfer`
+before acceptance and retains withdrawal authority until acceptance succeeds.
 
 ## Incident Boundary
 

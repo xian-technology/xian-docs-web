@@ -98,6 +98,14 @@ Even while paused, the contract owner cannot use
 or accrued creator funds. Emergency withdrawal is restricted to recoverable
 excess, such as unsolicited token transfers.
 
+The staking owner nominates a successor with `transfer_ownership`. The
+successor must call `accept_ownership` before gaining emergency controls. The
+current owner can cancel the nomination with `cancel_ownership_transfer`.
+
+Before accepting funding, staking checks the token's `transfer_from`,
+`transfer`, and `balance_of` signatures. Funding must increase escrow by the
+exact amount credited to the pool.
+
 Unstaking and creator-fee withdrawals settle their position, reservation,
 statistics, and liabilities before token payouts. Each outgoing payment,
 including excess recovery, must debit escrow and credit the recipient by the
