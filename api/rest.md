@@ -39,6 +39,9 @@ GET /api/abci_query/simulate_tx/<hex_payload>
 GET /api/abci_query/perf_status
 ```
 
+`get_next_nonce` returns the sender's committed nonce plus one, or zero when
+the sender has no committed nonce. Pending submissions leave it unchanged.
+
 For a scalar `/get/<key>` query, inspect `response.info`. A decimal uses `"decimal"` and an integer uses `"int"`. The base64-decoded ABCI `response.value` is canonical numeric text, including for a wide integer. Nested numbers inside a structured value use the V2 wire tags. This scalar query format is separate from the JSON simulation envelope.
 
 For key scans, send the returned `next_after_hex` as `after_hex` on the next

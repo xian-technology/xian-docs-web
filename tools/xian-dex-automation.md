@@ -82,7 +82,7 @@ Inspect `GET /runs` for `pending` status, the transaction hash, and
 cooldown atomically; cooldown starts when success is reconciled. Confirmed
 failure or a definitive first-attempt rejection does not advance rule state.
 When the receipt is missing, recovery checks the saved signer's committed nonce
-on the original chain. Mempool next-nonce reservations do not count. If the nonce
+on the original chain. If the nonce
 is consumed, the run becomes `outcome_unknown` with reason
 `nonce_consumed_receipt_missing`. The signed transaction is retained without
 rebroadcasting, and the shared queue is released. Independent rules can trade

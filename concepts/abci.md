@@ -47,8 +47,8 @@ At a high level, one transaction moves through these stages:
    is skipped without consuming its sender's proposal nonce; smaller valid
    transactions can still be selected. Selection stops when the byte or chi
    budget is full. `ProcessProposal` validates the proposed transactions and
-   their chi total. Both callbacks check each sender's nonce sequence from
-   committed state.
+   their chi total. Both callbacks require each sender's nonces to increase
+   from the committed nonce in proposal order.
 3. CometBFT reaches a consensus decision on the ordered block.
 4. `FinalizeBlock` executes that decided block and returns transaction results
    with their VM-encoded receipts, validator updates, and `app_hash`.

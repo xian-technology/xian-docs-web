@@ -204,8 +204,9 @@ A lost broadcast response or finality timeout leaves the nonce unresolved.
 Structured errors include `details["tx_hash"]` and `details["nonce"]` when the
 transaction was prepared. Query that hash before creating another transfer.
 The SDK raises `NonceReservationError` if a subsequent automatic send sees the
-same network nonce. It resumes once the network nonce advances;
-`refresh_nonce()` does not clear unresolved reservations by itself.
+same network nonce. It resumes once the committed nonce reaches or passes the unresolved nonce.
+Check the transaction hash to determine whether the original call executed.
+`refresh_nonce()` preserves nonces already allocated by this client.
 
 An explicit `nonce=` bypasses automatic coordination and is the caller's
 responsibility. Client instances do not share reservations. Persist signed
