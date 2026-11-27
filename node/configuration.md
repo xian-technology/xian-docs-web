@@ -101,7 +101,9 @@ not local profile settings. See
 
 Xian uses Ed25519 validator keys and the CometBFT flood mempool. Set
 `type = "flood"` under `[mempool]` in `config.toml`, or omit the type to
-use the default. Xian renders `recheck = true` in that section.
+use the default. Keep `recheck = true` so the flood mempool removes pending
+transactions invalidated by a committed nonce, a balance change, or a fee
+policy change.
 
 `xian_vm_v2` is the only supported execution runtime. Execution mode, VM
 bytecode, and gas schedule are not operator-selectable configuration.
@@ -114,7 +116,6 @@ including in its `[bds]` table. Top-level Xian settings cover:
 - pruning and retained block history
 - application metrics and logging
 - readonly simulation limits
-- pending nonce reservation
 
 The `[bds]` section configures the optional Postgres indexer, pool, catch-up,
 and spool behavior. `[bds] password_file` names the file the node reads the
@@ -128,20 +129,6 @@ not `xian.toml` settings: they are the genesis fee policy `__fee_policy`,
 identical on every validator, and a `xian.toml` that sets them is rejected at
 startup. See [Chain Chi Caps](/concepts/chi#chain-chi-caps). Logging and query
 limits can vary by node.
-
-### Pending Nonces
-
-These top-level `xian.toml` settings govern local reservations made by
-`CheckTx`.
-
-| Setting | Default | Behavior |
-| --- | ---: | --- |
-| `max_pending_nonces_per_sender` | `128` | Maximum reserved nonces for one sender on this node. |
-| `pending_nonce_reservation_ttl_seconds` | `60` | Reservation lifetime in seconds. Set to `0` to disable time-based expiry. A successful recheck of the same transaction refreshes the reservation. |
-
-Commit clears reservations covered by the sender's committed nonce. These
-settings govern admission on the selected node. Validators check proposal
-nonces using the committed state and the proposed transaction sequence.
 
 ## PostgreSQL Version and Storage
 

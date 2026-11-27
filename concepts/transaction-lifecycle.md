@@ -30,8 +30,11 @@ The signed payload includes:
 - keyword arguments
 - submitted chi limit
 
-The chain ID prevents cross-network replay. The nonce orders transactions from
-one sender and prevents reuse on the same chain.
+The chain ID prevents cross-network replay. The nonce protects each sender
+against replay on the same chain. A transaction can use any nonce greater
+than the sender's latest committed nonce. The first transaction can use
+any nonce from zero through 9,007,199,254,740,991. Committing the maximum
+exhausts that sender's nonce space.
 
 SDKs support `async`, `checktx`, and `commit` broadcast modes. An `async`
 acknowledgment confirms submission without waiting for admission. The
@@ -47,11 +50,11 @@ the chain's `max_tx_chi`. Paid mode also requires enough native-token balance to
 cover the submitted chi limit at the chi rate, and for a native
 `currency.transfer` the amount plus that fee reservation must fit the balance.
 
-Successful admission reserves the submitted nonce on that node. Submit consecutive
-nonces from one sender to the same RPC node in order and use
-`/get_next_nonce/<address>` to read that node's next available nonce. The
-answer reflects its pending reservations. See
-[Pending Nonces](/node/configuration#pending-nonces).
+Admission leaves the sender's committed nonce unchanged. Two pending
+transactions from the same sender can use the same nonce. If one commits,
+the other becomes invalid. `/get_next_nonce/<address>` returns the latest
+committed nonce plus one, or zero when no transaction has committed for that
+sender.
 
 With mempool rechecking enabled, CometBFT sends queued transactions through
 `CheckTx` again after a block commits. The node can reuse static validation for
@@ -61,9 +64,16 @@ against the current state.
 ## Consensus and Execution
 
 Proposers select transactions within the block's byte budget and the
-`max_block_chi` sum of supplied chi. Nonces in each proposal must be consecutive
-per sender, starting from committed state. Other validators check the proposed
-sequence before voting. See [The ABCI Layer](/concepts/abci#transaction-path-across-the-boundary)
+`max_block_chi` sum of supplied chi. Within the proposed order, each transaction
+from a sender must have a nonce greater than that sender's committed nonce
+and every earlier included transaction from that sender. Other validators
+check the proposed sequence before voting.
+
+Committing a transaction with nonce 13 makes every lower nonce unusable
+for that sender, even if some transactions are still pending. A committed
+call that fails also consumes its nonce. If one call depends on the outcome
+of another, wait for the first call's successful receipt before submitting
+the second. See [The ABCI Layer](/concepts/abci#transaction-path-across-the-boundary)
 and [Chain Chi Caps](/concepts/chi#chain-chi-caps).
 
 CometBFT agrees on the transaction order and the block timestamp.

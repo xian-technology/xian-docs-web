@@ -112,8 +112,8 @@ The default five-validator suite checks:
   4/1 split, a signed transfer commits on the quorum side and appears exactly once on
   every validator after healing. A transfer submitted through the previously isolated
   side confirms that transaction service resumes after the 3/2 halt.
-- Catch-up from genesis on a fresh non-voting observer and recovery from queued and
-  conflicting nonces.
+- Catch-up from genesis on a fresh non-voting observer. Nonce gaps, cancellation
+  of lower pending nonces, replay rejection, and queue cleanup after commit.
 
 ### IntentKit Payment Integration
 
@@ -188,8 +188,8 @@ The layered harness covers:
   incomplete archives, and restart convergence
 - stale-time preflight, idle block-policy checks, successor unbond anchors and
   evidence-retention growth across restore/restart
-- nonce gaps, conflicting pending nonces, submission-node restart, replay
-  rejection, and a queued transaction whose balance becomes insufficient
+- admission across nonce gaps, rejection of superseded nonces, nonce consumption
+  on failed execution, and eviction of stale mempool entries
 - zero-chi admission rejection at every node without consuming the sender's nonce
 - a seeded accounting model covering transfers, minting, burning, staking,
   unstaking, failed-call rollback, native fees, rewards, and a network restart
