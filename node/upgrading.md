@@ -16,11 +16,11 @@ change this protected record. Every field must match the selected runtime.
 Startup checks the compiler revision in both the standalone compiler and the
 compiler linked into the VM.
 
-Use the native `xian-tech-vm-core` build from the accepted release. The ABCI
-package requires `xian-tech-vm-core>=0.1.4,<0.2`. At startup the node verifies
-that the native block executor can produce finalized transaction receipts
-with and without profiling. A missing receipt API stops startup. Install
-the matching VM package and restart the application if that check fails.
+Use the native `xian-tech-vm-core` build required by the ABCI package in the
+accepted release. At startup the node verifies the native interfaces it needs
+for transaction admission and finalized receipts. A missing required
+interface stops startup. Install the matching VM package and restart the
+application if that check fails.
 
 V2 uses bounded integers and exact fixed-point decimals, with source-digit
 literal handling and checked numeric ABI boundaries. Gas schedule 7 charges for

@@ -50,7 +50,8 @@ Use the application metrics endpoint for trends.
 
 | Scope | What it helps investigate |
 | --- | --- |
-| `check_tx_static_admission`, `check_tx_live_admission` | signed transaction validation and checks against current state |
+| `check_tx_native_admission` | signed transaction validation or cache lookup, and native checks against committed state |
+| `check_tx_live_admission` | application-side checks for requests that require the Python state view |
 | `finalize_decode` | validation of the block's transaction sequence |
 | `tx_native_prepare`, `tx_native_execute` | preparation of VM inputs, followed by contract execution and fee settlement |
 | `tx_native_receipt_encoding`, `tx_native_to_python`, `tx_receipt_conversion` | successful receipt encoding and conversion of execution results into node data |
@@ -64,6 +65,11 @@ the mempool backlog, proposal preparation, and consensus rounds. With
 rechecking enabled, a larger mempool increases the number of transactions
 CometBFT sends through `CheckTx` after each commit. The node also logs a
 per-proposal summary of skipped candidates when a proposal leaves some out.
+
+The native admission cache reuses validation of identical signed transaction
+bytes. Each ABCI process keeps up to 32,768 entries within a 128 MiB accounted
+cache budget. Rechecks validate the current nonce and fee requirements against
+committed state.
 
 ## Include Optional Services
 
